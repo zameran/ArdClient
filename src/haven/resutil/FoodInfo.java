@@ -26,173 +26,201 @@
 
 package haven.resutil;
 
-import haven.*;
+
+import haven.CharWnd;
+import haven.CharacterInfo;
+import haven.Coord;
+import haven.GItem;
+import haven.ItemData;
+import haven.ItemInfo;
+import haven.OwnerContext;
+import haven.Pair;
+import haven.QualityList;
+import haven.Resource;
+import haven.RichText;
+import haven.Session;
+import haven.TexI;
+import haven.Text;
+import haven.Utils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 
-import java.awt.*;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import static haven.CharWnd.Constipations.*;
-import static haven.PUtils.*;
-import static haven.QualityList.SingleType.*;
+import static haven.CharWnd.Constipations.tflt;
+import static haven.CharWnd.Constipations.color;
+import static haven.PUtils.convolvedown;
+import static haven.QualityList.SingleType.Quality;
 
 public class FoodInfo extends ItemInfo.Tip {
-    public final double end, glut;
+    public final double end, glut, cons;
     public final Event[] evs;
     public final Effect[] efs;
     public final int[] types;
-	public static boolean showbaseq;
+    public static boolean showbaseq;
     private final CharacterInfo.Constipation constipation;
-	private final static DecimalFormat basefepfmt = new DecimalFormat("0.##");
+    private final static DecimalFormat basefepfmt = new DecimalFormat("0.##");
+
+    public FoodInfo(Owner owner, double end, double glut, double cons, Event[] evs, Effect[] efs, int[] types) {
+        super(owner);
+        this.end = end;
+        this.glut = glut;
+        this.cons = cons;
+        this.evs = evs;
+        this.efs = efs;
+        this.types = types;
+
+        CharacterInfo.Constipation constipation = null;
+        try {
+            constipation = owner.context(Session.class).character.constipation;
+            if (!constipation.hasRenderer(FoodInfo.class)) {
+                constipation.addRenderer(FoodInfo.class, FoodInfo::renderConstipation);
+            }
+        } catch (NullPointerException | OwnerContext.NoContext ignore) {
+        }
+        this.constipation = constipation;
+    }
 
     public FoodInfo(Owner owner, double end, double glut, Event[] evs, Effect[] efs, int[] types) {
-	super(owner);
-	this.end = end;
-	this.glut = glut;
-	this.evs = evs;
-	this.efs = efs;
-	this.types = types;
-
-	CharacterInfo.Constipation constipation = null;
-	try {
-	    constipation = owner.context(Session.class).character.constipation;
-	    if(!constipation.hasRenderer(FoodInfo.class)) {
-		constipation.addRenderer(FoodInfo.class, FoodInfo::renderConstipation);
+        this(owner, end, glut, 0, evs, efs, types);
     }
-	} catch (NullPointerException | OwnerContext.NoContext ignore) {}
-	this.constipation = constipation;
-    }
-
 
     public static class Event {
-	public final CharWnd.FoodMeter.Event ev;
-	public final BufferedImage img;
-	public final double a;
-	private final String res;
+        public final CharWnd.FoodMeter.Event ev;
+        public final BufferedImage img;
+        public final double a;
+        private final String res;
 
-	public Event(Resource res, double a) {
-	    this.ev = res.layer(CharWnd.FoodMeter.Event.class);
-	    this.img = res.layer(Resource.imgc).img;
-	    this.a = a;
-	    this.res = res.name;
-	}
+        public Event(Resource res, double a) {
+            this.ev = res.layer(CharWnd.FoodMeter.Event.class);
+            this.img = res.layer(Resource.imgc).img;
+            this.a = a;
+            this.res = res.name;
+        }
     }
 
     public static class Effect {
-	public final List<ItemInfo> info;
-	public final double p;
+        public final List<ItemInfo> info;
+        public final double p;
 
-	public Effect(List<ItemInfo> info, double p) {this.info = info; this.p = p;}
+        public Effect(List<ItemInfo> info, double p) {
+            this.info = info;
+            this.p = p;
+        }
     }
 
     public BufferedImage tipimg() {
-		BufferedImage base = RichText.render(String.format("Energy: $col[128,128,255]{%s%%}, Hunger: $col[255,192,128]{%s%%}", Utils.odformat2(end * 100, 2), Utils.odformat2(glut * 100, 2)), 0).img;
-		Collection<BufferedImage> imgs = new LinkedList<BufferedImage>();
-		imgs.add(base);
-	    double totalFeps = 0;
-	    for(int i = 0; i < evs.length; i++) {
-		    totalFeps += evs[i].a;
-	    }
-		for(int i = 0; i < evs.length; i++) {
-	        Color col = Utils.blendcol(evs[i].ev.col, Color.WHITE, 0.5);
-          	String str;
+        String head = String.format("Energy: $col[128,128,255]{%s%%}, Hunger: $col[255,192,128]{%s%%}", Utils.odformat2(end * 100, 2), Utils.odformat2(glut * 100, 2));
+        if (cons != 0)
+            head += String.format(", Satiation: $col[192,192,128]{%s%%}", Utils.odformat2(cons * 100, 2));
+        BufferedImage base = RichText.render(head, 0).img;
+        Collection<BufferedImage> imgs = new LinkedList<BufferedImage>();
+        imgs.add(base);
+        double totalFeps = 0;
+        for (int i = 0; i < evs.length; i++) {
+            totalFeps += evs[i].a;
+        }
+        for (int i = 0; i < evs.length; i++) {
+            Color col = Utils.blendcol(evs[i].ev.col, Color.WHITE, 0.5);
+            String str;
             if (showbaseq && owner instanceof GItem) {
                 QBuff q = ((GItem) owner).quality();
-	            str = String.format("%s: $col[%d,%d,%d]{%s}  $col[%d,%d,%d]{(%s - %s)}",
-			            evs[i].ev.nm,
-			            col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2),
-			            col.getRed(), col.getGreen(), col.getBlue(), q != null ? basefepfmt.format(evs[i].a / Math.sqrt(q.q / 10)) : "???",
-			            Utils.odformat2(evs[i].a/(totalFeps/100.0), 2) + "%");
+                str = String.format("%s: $col[%d,%d,%d]{%s}  $col[%d,%d,%d]{(%s - %s)}",
+                        evs[i].ev.nm,
+                        col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2),
+                        col.getRed(), col.getGreen(), col.getBlue(), q != null ? basefepfmt.format(evs[i].a / Math.sqrt(q.q / 10)) : "???",
+                        Utils.odformat2(evs[i].a / (totalFeps / 100.0), 2) + "%");
 
             } else {
-	            str = String.format("%s: $col[%d,%d,%d]{%s - %s}", evs[i].ev.nm, col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2), Utils.odformat2(evs[i].a/(totalFeps/100.0), 2) + "%");
+                str = String.format("%s: $col[%d,%d,%d]{%s - %s}", evs[i].ev.nm, col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2), Utils.odformat2(evs[i].a / (totalFeps / 100.0), 2) + "%");
             }
             imgs.add(catimgsh(5, evs[i].img, RichText.render(str, 0).img));
-		}
-	    imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps/(glut*100), 2)), 0).img);
-	for(int i = 0; i < efs.length; i++) {
-	    BufferedImage efi = ItemInfo.longtip(efs[i].info);
-	    if(efs[i].p != 1)
-		efi = catimgsh(5, efi, RichText.render(String.format("$i{($col[192,192,255]{%d%%} chance)}", (int)Math.round(efs[i].p * 100)), 0).img);
-	    imgs.add(efi);
-	}
-	if(types.length > 0 && constipation != null) {
-	    imgs.add(Text.render("Categories:").img);
-	    double total = 1;
-	    for (int type : types) {
-		CharacterInfo.Constipation.Data c = constipation.get(type);
-		if(c!=null) {
-		    imgs.add(constipation.render(FoodInfo.class, c));
-		    total *= c.value;
-		}
-	    }
-	    Color col = color(total);
-	    imgs.add(RichText.render(String.format("Total: $col[%d,%d,%d]{%s%%}", col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(100 * total, 2)), 0).img);
-	}
-	return(catimgs(0, imgs.toArray(new BufferedImage[0])));
+        }
+        imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2)), 0).img);
+        for (int i = 0; i < efs.length; i++) {
+            BufferedImage efi = ItemInfo.longtip(efs[i].info);
+            if (efs[i].p != 1)
+                efi = catimgsh(5, efi, RichText.render(String.format("$i{($col[192,192,255]{%d%%} chance)}", (int) Math.round(efs[i].p * 100)), 0).img);
+            imgs.add(efi);
+        }
+        if (types.length > 0 && constipation != null) {
+            imgs.add(Text.render("Categories:").img);
+            double total = 1;
+            for (int type : types) {
+                CharacterInfo.Constipation.Data c = constipation.get(type);
+                if (c != null) {
+                    imgs.add(constipation.render(FoodInfo.class, c));
+                    total *= c.value;
+                }
+            }
+            Color col = color(total);
+            imgs.add(RichText.render(String.format("Total: $col[%d,%d,%d]{%s%%}", col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(100 * total, 2)), 0).img);
+        }
+        return (catimgs(0, imgs.toArray(new BufferedImage[0])));
     }
 
     private static BufferedImage renderConstipation(CharacterInfo.Constipation.Data data) {
-	int h = 14;
-	BufferedImage img = data.res.res.get().layer(Resource.imgc).img;
-	String nm = data.res.res.get().layer(Resource.tooltip).t;
-	Color col = color(data.value);
-	Text rnm = RichText.render(String.format("%s: $col[%d,%d,%d]{%d%%}", nm, col.getRed(), col.getGreen(), col.getBlue(), (int) (100 * data.value)), 0);
-	BufferedImage tip = TexI.mkbuf(new Coord(h + 5 + rnm.sz().x, h));
-	Graphics g = tip.getGraphics();
-	g.drawImage(convolvedown(img, new Coord(h, h), tflt), 0, 0, null);
-	g.drawImage(rnm.img, h + 5, ((h - rnm.sz().y) / 2) + 1, null);
-	g.dispose();
+        int h = 14;
+        BufferedImage img = data.res.res.get().layer(Resource.imgc).img;
+        String nm = data.res.res.get().layer(Resource.tooltip).t;
+        Color col = color(data.value);
+        Text rnm = RichText.render(String.format("%s: $col[%d,%d,%d]{%d%%}", nm, col.getRed(), col.getGreen(), col.getBlue(), (int) (100 * data.value)), 0);
+        BufferedImage tip = TexI.mkbuf(new Coord(h + 5 + rnm.sz().x, h));
+        Graphics g = tip.getGraphics();
+        g.drawImage(convolvedown(img, new Coord(h, h), tflt), 0, 0, null);
+        g.drawImage(rnm.img, h + 5, ((h - rnm.sz().y) / 2) + 1, null);
+        g.dispose();
 
-	return tip;
+        return tip;
     }
 
     public static class Data implements ItemData.ITipData {
-	private final double end;
-	private final double glut;
-	private final List<Pair<String, Double>> fep;
-	private final int[] types;
+        private final double end;
+        private final double glut;
+        private final List<Pair<String, Double>> fep;
+        private final int[] types;
 
-	public Data(FoodInfo info, QualityList q) {
-	    end = info.end;
-	    glut = info.glut;
-	    QualityList.Quality single = q.single(Quality);
-	    if(single == null) {
-		single = QualityList.DEFAULT;
-	    }
-	    double multiplier = single.multiplier;
-	    fep = new ArrayList<>(info.evs.length);
-	    for (int i = 0; i < info.evs.length; i++) {
-		fep.add(new Pair<>(info.evs[i].res, Utils.round(info.evs[i].a / multiplier, 2)));
-	    }
-	    types  = info.types;
-	}
+        public Data(FoodInfo info, QualityList q) {
+            end = info.end;
+            glut = info.glut;
+            QualityList.Quality single = q.single(Quality);
+            if (single == null) {
+                single = QualityList.DEFAULT;
+            }
+            double multiplier = single.multiplier;
+            fep = new ArrayList<>(info.evs.length);
+            for (int i = 0; i < info.evs.length; i++) {
+                fep.add(new Pair<>(info.evs[i].res, Utils.round(info.evs[i].a / multiplier, 2)));
+            }
+            types = info.types;
+        }
 
-	@Override
-	public ItemInfo create(Session sess) {
-	    Event[] evs;
-	    if (fep == null) {
-		evs = new Event[0];
-	    } else {
-		evs = new Event[fep.size()];
-		for (int i = 0; i < fep.size(); i++) {
-		    Pair<String, Double> tmp = fep.get(i);
-		    evs[i] = new Event(Resource.remote().loadwait(tmp.a), tmp.b);
-		}
-	    }
-	    int[] t;
-	    if (types == null) {
-		t = new int[0];
-	    } else {
-		t = types;
-	    }
+        @Override
+        public ItemInfo create(Session sess) {
+            Event[] evs;
+            if (fep == null) {
+                evs = new Event[0];
+            } else {
+                evs = new Event[fep.size()];
+                for (int i = 0; i < fep.size(); i++) {
+                    Pair<String, Double> tmp = fep.get(i);
+                    evs[i] = new Event(Resource.remote().loadwait(tmp.a), tmp.b);
+                }
+            }
+            int[] t;
+            if (types == null) {
+                t = new int[0];
+            } else {
+                t = types;
+            }
 
-	    return new FoodInfo(null, end, glut, evs, new Effect[0], t);
-	}
+            return new FoodInfo(null, end, glut, evs, new Effect[0], t);
+        }
     }
 }

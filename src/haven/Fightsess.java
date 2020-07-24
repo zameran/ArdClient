@@ -28,9 +28,10 @@ package haven;
 
 
 import haven.purus.pbot.PBotAPI;
-import haven.purus.pbot.PBotUtils;
+import haven.render.Environment;
+import haven.render.Render;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class Fightsess extends Widget {
     public static Double delta, expected, lastactopened;
     public final Action[] actions;
     public int use = -1, useb = -1;
-    public Coord pcc,pcc2;
+    public Coord pcc, pcc2;
     public int pho;
     private double lastuse, now = 0;
     private Fightview fv;
@@ -62,7 +63,7 @@ public class Fightsess extends Widget {
     private final Tex[] keysfftex = new Tex[10];
 
     private static final Map<String, Color> openings = new HashMap<String, Color>(4) {{
-        put("paginae/atk/dizzy",new Color(8, 103, 136));
+        put("paginae/atk/dizzy", new Color(8, 103, 136));
         put("paginae/atk/offbalance", new Color(8, 103, 1));
         put("paginae/atk/cornered", new Color(221, 28, 26));
         put("paginae/atk/reeling", new Color(203, 168, 6));
@@ -82,10 +83,10 @@ public class Fightsess extends Widget {
     @RName("fsess")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
-            int nact = (Integer)args[0];
-            if(!Config.attackedsfx.equals("None"))
+            int nact = (Integer) args[0];
+            if (!Config.attackedsfx.equals("None"))
                 Audio.play(Resource.local().loadwait(Config.attackedsfx), Config.attackedvol);
-            return(new Fightsess(nact));
+            return (new Fightsess(nact));
         }
     }
 
@@ -94,7 +95,7 @@ public class Fightsess extends Widget {
         pho = -40;
         this.actions = new Action[nact];
 
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             keystex[i] = Text.renderstroked(FightWnd.keys[i], Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
             if (i < 5)
                 keysftex[i] = keystex[i];
@@ -130,23 +131,21 @@ public class Fightsess extends Widget {
     private void fxon(long gobid, Resource fx) {
         MapView map = getparent(GameUI.class).map;
         Gob gob = ui.sess.glob.oc.getgob(gobid);
-        if((map == null) || (gob == null))
+        if ((map == null) || (gob == null))
             return;
         Pair<Long, Resource> id = new Pair<Long, Resource>(gobid, fx);
         Sprite spr = cfx.get(id);
-        if(spr == null)
+        if (spr == null)
             cfx.put(id, spr = Sprite.create(null, fx, Message.nil));
-        map.drawadd(gob.loc.apply(spr));
+        // map.drawadd(gob.loc.apply(spr)); XXXRENDER
         curfx.add(spr);
     }
 
     public void tick(double dt) {
-        for(Sprite spr : curfx)
-            spr.tick((int)(dt * 1000));
+        for (Sprite spr : curfx)
+            spr.tick((int) (dt * 1000));
         curfx.clear();
     }
-
-
 
     private static final Text.Furnace ipf = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(128, 128, 255)).aa(true), 1, 1, new Color(48, 48, 96));
     private static final Text.Furnace ipf2 = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(255, 0, 0)).aa(true), 1, 1, new Color(48, 48, 96));
@@ -159,7 +158,6 @@ public class Fightsess extends Widget {
         public Integer value() {
             return (fv.current.ip);
         }
-
     };
     private final Text.UText<?> oip = new Text.UText<Integer>(ipf) {
         public String text(Integer v) {
@@ -178,7 +176,7 @@ public class Fightsess extends Widget {
         if (Config.combatkeys == 1)
             row ^= 1;
 
-        return(new Coord((actpitch * (i % rl)) - (((rl - 1) * actpitch) / 2), 125 + (row * actpitch)));
+        return (new Coord((actpitch * (i % rl)) - (((rl - 1) * actpitch) / 2), 125 + (row * actpitch)));
     }
 
     private static final Coord cmc = new Coord(0, 67);
@@ -187,18 +185,18 @@ public class Fightsess extends Widget {
     private Indir<Resource> lastact1 = null, lastact2 = null;
     private Text lastacttip1 = null, lastacttip2 = null;
 
-
     public void draw(GOut g) {
         updatepos();
         try {
             if (parent.lchild != this) {
                 raise();
-                if(Config.forcefightfocusharsh)
+                if (Config.forcefightfocusharsh)
                     parent.setfocus(this);
-                else if(!PBotAPI.gui.chat.hasfocus && Config.forcefightfocus)
+                else if (!PBotAPI.gui.chat.hasfocus && Config.forcefightfocus)
                     parent.setfocus(this);
             }
-        }catch(Exception e){}
+        } catch (Exception e) {
+        }
         double now = Utils.rtime();
         GameUI gui = gameui();
         int gcx = gui.sz.x / 2;
@@ -207,6 +205,8 @@ public class Fightsess extends Widget {
             drawOpening(g, buff, bc);
         }
 
+        for (Buff buff : fv.buffs.children(Buff.class))
+            buff.draw(g.reclip(pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y), buff.sz));
         if (fv.current != null) {
             for (Buff buff : fv.current.buffs.children(Buff.class)) {
                 Coord bc = Config.altfightui ? new Coord(gcx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
@@ -218,21 +218,21 @@ public class Fightsess extends Widget {
 
             if (fv.lsrel.size() > 1) {
                 fxon(fv.current.gobid, tgtfx);
-                if(Config.showothercombatinfo) {
+                if (Config.showothercombatinfo) {
                     for (int i = 0; i < fv.lsrel.size(); i++) {
                         if (fv.current != fv.lsrel.get(i)) {
                             try {
                                 Coord buffcoord = null;
                                 for (Buff buff : fv.lsrel.get(i).buffs.children(Buff.class)) {
-                                 pcc2 = this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
-                               //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
-                                 Coord cc = this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                 Coord finalcc = new Coord(cc.x,cc.y-60);
-                                 if (buffcoord == null)
-                                     buffcoord = finalcc;
-                                 else
-                                     finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
-                                 drawOpeningofftarget(g, buff, finalcc, 24);
+                                    pcc2 = this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
+                                    //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
+                                    Coord cc = this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
+                                    Coord finalcc = new Coord(cc.x, cc.y - 60);
+                                    if (buffcoord == null)
+                                        buffcoord = finalcc;
+                                    else
+                                        finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
+                                    drawOpeningofftarget(g, buff, finalcc, 24);
                                 }
                                 int itransfer = i;
                                 Text.UText<?> oip2 = new Text.UText<Integer>(ipf2) {
@@ -254,7 +254,7 @@ public class Fightsess extends Widget {
                                     }
                                 };
                                 Coord cc = this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.gameui().map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                Coord finalcc = new Coord(cc.x,cc.y-50);
+                                Coord finalcc = new Coord(cc.x, cc.y - 50);
                                 g.aimage(ip2.get().tex(), finalcc.add(-5, 0), 1, .5);
                                 g.aimage(oip2.get().tex(), finalcc.add(-5, 20), 1, .5);
                             } catch (Exception idk) {
@@ -277,7 +277,6 @@ public class Fightsess extends Widget {
             }
             g.image(cdframe, Config.altfightui ? new Coord(gameui().sz.x / 2, 200).sub(cdframe.sz().div(2)) : cdc.sub(cdframe.sz().div(2)));
         }
-
         try {
             Indir<Resource> lastact = fv.lastact;
             if (lastact != this.lastact1) {
@@ -298,8 +297,8 @@ public class Fightsess extends Widget {
                     g.chcolor();
                 }
             }
-        } catch (Loading l) { }
-
+        } catch (Loading l) {
+        }
         if (fv.current != null) {
             try {
                 Indir<Resource> lastact = fv.current.lastact;
@@ -324,24 +323,22 @@ public class Fightsess extends Widget {
             } catch (Loading l) {
             }
         }
-
-
-        for(int i = 0; i < actions.length; i++) {
+        for (int i = 0; i < actions.length; i++) {
             Coord ca = Config.altfightui ? new Coord(gcx - 18, gui.sz.y - 250).add(actc(i)).add(16, 16) : pcc.add(actc(i));
             Action act = actions[i];
             try {
-                if(act != null) {
+                if (act != null) {
                     Resource res = act.res.get();
                     Tex img = res.layer(Resource.imgc).tex();
                     Coord ic = ca.sub(img.sz().div(2));
                     g.image(img, ic);
-                    if(now < act.ct) {
+                    if (now < act.ct) {
                         double a = (now - act.cs) / (act.ct - act.cs);
                         g.chcolor(0, 0, 0, 128);
                         g.prect(ca, ic.sub(ca), ic.add(img.sz()).sub(ca), (1.0 - a) * Math.PI * 2);
                         g.chcolor();
                     }
-                    if(i == use) {
+                    if (i == use) {
                         g.image(indframe, ic.sub(indframeo));
                     } else if (i == useb) {
                         g.image(indbframe, ic.sub(indbframeo));
@@ -351,23 +348,19 @@ public class Fightsess extends Widget {
 
                     if (Config.combshowkeys) {
 
-                    	Tex key;
-                    	if(Config.combatkeys == 0)
-                    	{
-                    		key = keystex[i];
-                    	}
-                    	else if (Config.combatkeys == 1)
-                    	{
-                    		key = keysftex[i];
-                    	}
-                    	else
-                    	{
-                    		key = keysfftex[i];
-                    	}
+                        Tex key;
+                        if (Config.combatkeys == 0) {
+                            key = keystex[i];
+                        } else if (Config.combatkeys == 1) {
+                            key = keysftex[i];
+                        } else {
+                            key = keysfftex[i];
+                        }
                         g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y - 6));
                     }
                 }
-            } catch(Loading l) {}
+            } catch (Loading l) {
+            }
         }
     }
 
@@ -444,13 +437,15 @@ public class Fightsess extends Widget {
             bc.y = bc.y + smalSz.y / 2 - atex.sz().y / 2;
             g.image(atex, bc);
             g.chcolor();
-        } catch (Loading l) {}
+        } catch (Loading l) {
+        }
 
     }
 
     private Widget prevtt = null;
     private Text acttip = null;
     public static final String[] keytips = {"1", "2", "3", "4", "5", "Shift+1", "Shift+2", "Shift+3", "Shift+4", "Shift+5"};
+
     public Object tooltip(Coord c, Widget prev) {
         int cx = gameui().sz.x / 2;
 
@@ -464,7 +459,6 @@ public class Fightsess extends Widget {
                 }
             }
         }
-
         if (fv.current != null) {
             for (Buff buff : fv.current.buffs.children(Buff.class)) {
                 Coord dc = Config.altfightui ? new Coord(cx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
@@ -487,39 +481,40 @@ public class Fightsess extends Widget {
                     ca = ca.sub(img.sz().div(2));
                     if (c.isect(ca, img.sz())) {
                         String tip = act.get().layer(Resource.tooltip).t + " ($b{$col[255,128,0]{" + keytips[i] + "}})";
-                        if((acttip == null) || !acttip.text.equals(tip))
+                        if ((acttip == null) || !acttip.text.equals(tip))
                             acttip = RichText.render(tip, -1);
-                        return(acttip);
+                        return (acttip);
                     }
                 }
             } catch (Loading l) {
             }
         }
-
         try {
             Indir<Resource> lastact = this.lastact1;
-            if(lastact != null) {
+            if (lastact != null) {
                 Coord usesz = lastact.get().layer(Resource.imgc).sz;
                 Coord lac = Config.altfightui ? new Coord(cx - 69, 120).add(usesz.div(2)) : pcc.add(usec1);
-                if(c.isect(lac.sub(usesz.div(2)), usesz)) {
-                    if(lastacttip1 == null)
+                if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                    if (lastacttip1 == null)
                         lastacttip1 = Text.render(lastact.get().layer(Resource.tooltip).t);
-                    return(lastacttip1);
+                    return (lastacttip1);
                 }
             }
-        } catch(Loading l) {}
+        } catch (Loading l) {
+        }
         try {
             Indir<Resource> lastact = this.lastact2;
-            if(lastact != null) {
+            if (lastact != null) {
                 Coord usesz = lastact.get().layer(Resource.imgc).sz;
                 Coord lac = Config.altfightui ? new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2)) : pcc.add(usec2);
-                if(c.isect(lac.sub(usesz.div(2)), usesz)) {
-                    if(lastacttip2 == null)
+                if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                    if (lastacttip2 == null)
                         lastacttip2 = Text.render(lastact.get().layer(Resource.tooltip).t);
-                    return(lastacttip2);
+                    return (lastacttip2);
                 }
             }
-        } catch(Loading l) {}
+        } catch (Loading l) {
+        }
         return (null);
     }
 
@@ -532,36 +527,51 @@ public class Fightsess extends Widget {
             } else {
                 actions[n] = null;
             }
-        } else if(msg == "acool") {
-            int n = (Integer)args[0];
+        } else if (msg == "acool") {
+            int n = (Integer) args[0];
             double now = Utils.rtime();
             actions[n].cs = now;
-            actions[n].ct = now + (((Number)args[1]).doubleValue() * 0.06);
+            actions[n].ct = now + (((Number) args[1]).doubleValue() * 0.06);
         } else if (msg == "use") {
             this.use = (Integer) args[0];
-            this.useb = (args.length > 1) ? ((Integer)args[1]) : -1;
+            this.useb = (args.length > 1) ? ((Integer) args[1]) : -1;
         } else if (msg == "used") {
         } else {
             super.uimsg(msg, args);
         }
     }
 
+    public static final KeyBinding[] kb_acts = {
+            KeyBinding.get("fgt/0", KeyMatch.forcode(KeyEvent.VK_1, 0)),
+            KeyBinding.get("fgt/1", KeyMatch.forcode(KeyEvent.VK_2, 0)),
+            KeyBinding.get("fgt/2", KeyMatch.forcode(KeyEvent.VK_3, 0)),
+            KeyBinding.get("fgt/3", KeyMatch.forcode(KeyEvent.VK_4, 0)),
+            KeyBinding.get("fgt/4", KeyMatch.forcode(KeyEvent.VK_5, 0)),
+            KeyBinding.get("fgt/5", KeyMatch.forcode(KeyEvent.VK_1, KeyMatch.S)),
+            KeyBinding.get("fgt/6", KeyMatch.forcode(KeyEvent.VK_2, KeyMatch.S)),
+            KeyBinding.get("fgt/7", KeyMatch.forcode(KeyEvent.VK_3, KeyMatch.S)),
+            KeyBinding.get("fgt/8", KeyMatch.forcode(KeyEvent.VK_4, KeyMatch.S)),
+            KeyBinding.get("fgt/9", KeyMatch.forcode(KeyEvent.VK_5, KeyMatch.S)),
+    };
+    public static final KeyBinding kb_relcycle = KeyBinding.get("fgt-cycle", KeyMatch.forcode(KeyEvent.VK_TAB, KeyMatch.C), KeyMatch.S);
 
     private int last_button = -1;
     private long last_sent = System.currentTimeMillis();
 
     /* XXX: This is a bit ugly, but release message do need to be
      * properly sequenced with use messages in some way. */
-    private class Release implements MapView.Delayed, BGL.Request {
+    private class Release implements Runnable {
         final int n;
 
-        Release(int n) {this.n = n;}
-
-        public void run(GOut g) {
-            g.gl.bglSubmit(this);
+        Release(int n) {
+            this.n = n;
+            Environment env = ui.getenv();
+            Render out = env.render();
+            out.fence(this);
+            env.submit(out);
         }
 
-        public void run(javax.media.opengl.GL2 gl) {
+        public void run() {
             wdgmsg("rel", n);
         }
     }
@@ -570,116 +580,168 @@ public class Fightsess extends Widget {
     private int held = -1;
 
     public boolean globtype(char key, KeyEvent ev) {
-        int n = -1;
-        if (Config.combatkeys == 0) {
-            if((ev.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK | KeyEvent.META_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) == 0) {
+        // ev = new KeyEvent((java.awt.Component)ev.getSource(), ev.getID(), ev.getWhen(), ev.getModifiersEx(), ev.getKeyCode(), ev.getKeyChar(), ev.getKeyLocation());
+        {
+            int n = -1;
+            if (Config.combatkeys == 0) {
+                if ((ev.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK | KeyEvent.META_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) == 0) {
 
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_5:
-                        n = 4;
-                        break;
+                    switch (ev.getKeyCode()) {
+                        case KeyEvent.VK_1:
+                            n = 0;
+                            break;
+                        case KeyEvent.VK_2:
+                            n = 1;
+                            break;
+                        case KeyEvent.VK_3:
+                            n = 2;
+                            break;
+                        case KeyEvent.VK_4:
+                            n = 3;
+                            break;
+                        case KeyEvent.VK_5:
+                            n = 4;
+                            break;
+                    }
+                    if ((n >= 0) && ((ev.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0))
+                        n += 5;
                 }
-                if ((n >= 0) && ((ev.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0))
-                    n += 5;
+            } else if (Config.combatkeys == 1) { // F1-F5
+                if (key == 0) {
+
+                    switch (ev.getKeyCode()) {
+                        case KeyEvent.VK_1:
+                            n = 0;
+                            break;
+                        case KeyEvent.VK_2:
+                            n = 1;
+                            break;
+                        case KeyEvent.VK_3:
+                            n = 2;
+                            break;
+                        case KeyEvent.VK_4:
+                            n = 3;
+                            break;
+                        case KeyEvent.VK_5:
+                            n = 4;
+                            break;
+                        case KeyEvent.VK_F1:
+                            n = 5;
+                            break;
+                        case KeyEvent.VK_F2:
+                            n = 6;
+                            break;
+                        case KeyEvent.VK_F3:
+                            n = 7;
+                            break;
+                        case KeyEvent.VK_F4:
+                            n = 8;
+                            break;
+                        case KeyEvent.VK_F5:
+                            n = 9;
+                            break;
+                    }
+                }
+            } else { // F1-F10
+                if (key == 0) {
+
+                    switch (ev.getKeyCode()) {
+                        case KeyEvent.VK_F1:
+                            n = 0;
+                            break;
+                        case KeyEvent.VK_F2:
+                            n = 1;
+                            break;
+                        case KeyEvent.VK_F3:
+                            n = 2;
+                            break;
+                        case KeyEvent.VK_F4:
+                            n = 3;
+                            break;
+                        case KeyEvent.VK_F5:
+                            n = 4;
+                            break;
+                        case KeyEvent.VK_F6:
+                            n = 5;
+                            break;
+                        case KeyEvent.VK_F7:
+                            n = 6;
+                            break;
+                        case KeyEvent.VK_F8:
+                            n = 7;
+                            break;
+                        case KeyEvent.VK_F9:
+                            n = 8;
+                            break;
+                        case KeyEvent.VK_F10:
+                            n = 9;
+                            break;
+                    }
+                }
             }
-        } else if (Config.combatkeys == 1) { // F1-F5
-            if (key == 0) {
 
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_5:
-                        n = 4;
-                        break;
-                    case KeyEvent.VK_F1:
-                        n = 5;
-                        break;
-                    case KeyEvent.VK_F2:
-                        n = 6;
-                        break;
-                    case KeyEvent.VK_F3:
-                        n = 7;
-                        break;
-                    case KeyEvent.VK_F4:
-                        n = 8;
-                        break;
-                    case KeyEvent.VK_F5:
-                        n = 9;
-                        break;
+            int fn = n;
+            if ((n >= 0) && (n < actions.length)) {
+                MapView map = getparent(GameUI.class).map;
+                Coord mvc = map.rootxlate(ui.mc);
+                if (held >= 0) {
+                    new Release(held);
+                    held = -1;
                 }
-            }
-        } else { // F1-F10
-            if (key == 0) {
+                if (mvc.isect(Coord.z, map.sz)) {
+                    map.new Maptest(mvc) {
+                        protected void hit(Coord pc, Coord2d mc) {
+                            wdgmsg("use", fn, 1, ui.modflags(), mc.floor(OCache.posres));
+                            last_button = fn;
+                            last_sent = System.currentTimeMillis();
+                        }
 
-                switch (ev.getKeyCode()) {
-                    case KeyEvent.VK_F1:
-                        n = 0;
-                        break;
-                    case KeyEvent.VK_F2:
-                        n = 1;
-                        break;
-                    case KeyEvent.VK_F3:
-                        n = 2;
-                        break;
-                    case KeyEvent.VK_F4:
-                        n = 3;
-                        break;
-                    case KeyEvent.VK_F5:
-                        n = 4;
-                        break;
-                    case KeyEvent.VK_F6:
-                        n = 5;
-                        break;
-                    case KeyEvent.VK_F7:
-                        n = 6;
-                        break;
-                    case KeyEvent.VK_F8:
-                        n = 7;
-                        break;
-                    case KeyEvent.VK_F9:
-                        n = 8;
-                        break;
-                    case KeyEvent.VK_F10:
-                        n = 9;
-                        break;
+                        protected void nohit(Coord pc) {
+                            wdgmsg("use", fn, 1, ui.modflags());
+                            last_button = fn;
+                            last_sent = System.currentTimeMillis();
+                        }
+                    }.run();
                 }
+                if (holdgrab == null)
+                    holdgrab = ui.grabkeys(this);
+                held = n;
+                return (true);
             }
         }
-
-        int fn = n;
-        if ((n >= 0) && (n < actions.length) && (last_button != fn || (System.currentTimeMillis() - last_sent) >= 150)) {
-            wdgmsg("use", fn, 1, ui.modflags());
-            last_button = fn;
-            last_sent = System.currentTimeMillis();
+        if (kb_relcycle.key().match(ev, KeyMatch.S)) {
+            if ((ev.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) == 0) {
+                Fightview.Relation cur = fv.current;
+                if (cur != null) {
+                    fv.lsrel.remove(cur);
+                    fv.lsrel.addLast(cur);
+                }
+            } else {
+                Fightview.Relation last = fv.lsrel.getLast();
+                if (last != null) {
+                    fv.lsrel.remove(last);
+                    fv.lsrel.addFirst(last);
+                }
+            }
+            fv.wdgmsg("bump", (int) fv.lsrel.get(0).gobid);
             return (true);
         }
-        else if((n >= 0) && (n < actions.length))
-        return (true);
-        else
-        return(super.globtype(key, ev));
+        return (super.globtype(key, ev));
     }
 
+    public boolean keydown(KeyEvent ev) {
+        return (false);
+    }
 
+    public boolean keyup(KeyEvent ev) {
+        if ((holdgrab != null) && (kb_acts[held].key().match(ev, KeyMatch.MODS))) {
+            MapView map = getparent(GameUI.class).map;
+            new Release(held);
+            holdgrab.remove();
+            holdgrab = null;
+            held = -1;
+            return (true);
+        }
+        return (false);
+    }
 }

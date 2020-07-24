@@ -42,7 +42,7 @@ public class Audio {
     public static boolean enabled = true;
     private static Player player;
     public static final AudioFormat fmt = new AudioFormat(44100, 16, 2, true, false);
-    private static int bufsize = Utils.getprefi("audiobufsize", 4096);
+    private static int bufsize = Utils.getprefi("audiobuf", 4096);
     public static double volume = 1.0;
     public static Date lastlvlup;
 
@@ -559,7 +559,6 @@ public class Audio {
 
     public static CS fromres(Resource res) {
         Collection<Resource.Audio> clips = res.layers(Resource.audio);
-
         synchronized (reslastc) {
             Resource.Audio last = reslastc.get(res);
             int sz = clips.size();
@@ -578,32 +577,32 @@ public class Audio {
             if (Config.sfxwhipvol != 1.0 && "sfx/balders".equals(res.name))
                 return new Audio.VolAdjust(clip.stream(), Config.sfxwhipvol);
 
-            try{
+            try {
 
-            if(res.name.equals("sfx/lvlup") || res.name.equals("sfx/msg")) {
-                Date thislvlup = new Date();
-                if (lastlvlup != null) {
-                    if ((Math.abs(lastlvlup.getTime() - thislvlup.getTime()) / 1000) < 1)
-                        return new Audio.VolAdjust(clip.stream(), 0);
-                    else
+                if (res.name.equals("sfx/lvlup") || res.name.equals("sfx/msg")) {
+                    Date thislvlup = new Date();
+                    if (lastlvlup != null) {
+                        if ((Math.abs(lastlvlup.getTime() - thislvlup.getTime()) / 1000) < 1)
+                            return new Audio.VolAdjust(clip.stream(), 0);
+                        else
+                            lastlvlup = thislvlup;
+                    } else
                         lastlvlup = thislvlup;
-                } else
-                    lastlvlup = thislvlup;
+                }
+            } catch (NoClassDefFoundError q) {
             }
-            }catch(NoClassDefFoundError q){}
             return (clip.stream());
         }
     }
 
     public static void play(Resource res) {
-        if(res.name.equals("sfx/msg"))
-            play(res,Config.sfxdingvol);
+        if (res.name.equals("sfx/msg"))
+            play(res, Config.sfxdingvol);
         else
             play(fromres(res));
     }
 
-    public static void play(Resource res, double vol)
-    {
+    public static void play(Resource res, double vol) {
         play(new Audio.VolAdjust(fromres(res), vol));
     }
 
@@ -618,11 +617,12 @@ public class Audio {
             }
         });
     }
+
     public static void play(final Indir<Resource> clip, double vol) {
         queue(new Runnable() {
             public void run() {
                 try {
-                    play(clip.get(),vol);
+                    play(clip.get(), vol);
                 } catch (Loading e) {
                     queue(this);
                 }
@@ -647,16 +647,27 @@ public class Audio {
     }
 
     static {
-        Console.setscmd("sfx", (cons, args) -> play(Resource.remote().load(args[1])));
-        Console.setscmd("audiobuf", (cons, args) -> {
-            int nsz = Integer.parseInt(args[1]);
-            if (nsz > 44100)
-                throw (new Exception("Rejecting buffer longer than 1 second"));
-            bufsize = nsz * 4;
-            Utils.setprefi("audiobufsize", bufsize);
-            Player pl = ckpl(false);
-            if (pl != null)
-                pl.reopen();
+        Console.setscmd("sfx", new Console.Command() {
+            public void run(Console cons, String[] args) {
+                play(Resource.remote().load(args[1]));
+            }
+        });
+        Console.setscmd("sfxvol", new Console.Command() {
+            public void run(Console cons, String[] args) {
+                setvolume(Double.parseDouble(args[1]));
+            }
+        });
+        Console.setscmd("audiobuf", new Console.Command() {
+            public void run(Console cons, String[] args) throws Exception {
+                int nsz = Integer.parseInt(args[1]);
+                if (nsz > 44100)
+                    throw (new Exception("Rejecting buffer longer than 1 second"));
+                bufsize = nsz * 4;
+                Utils.setprefi("audiobuf", bufsize);
+                Player pl = ckpl(false);
+                if (pl != null)
+                    pl.reopen();
+            }
         });
     }
 }

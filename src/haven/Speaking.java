@@ -26,47 +26,44 @@
 
 package haven;
 
-import java.awt.Color;
+import java.awt.*;
 
-public class Speaking extends GAttrib {
-    float zo;
-    Text text;
-    static IBox sb = null;
-    Tex svans;
-    static final int sx = 3;
+import haven.render.*;
 
-    public Speaking(Gob gob, float zo, String text) {
-        super(gob);
-        if (sb == null)
-            sb = new IBox("gfx/hud/emote", "tl", "tr", "bl", "br", "el", "er", "et", "eb");
-        svans = Resource.loadtex("gfx/hud/emote/svans");
-        this.zo = zo;
-        this.text = Text.render(text, Color.BLACK);
-    }
+public class Speaking extends GAttrib implements RenderTree.Node, PView.Render2D {
+	public static final IBox sb = new IBox("gfx/hud/emote", "tl", "tr", "bl", "br", "el", "er", "et", "eb");
+	public static final Tex svans = Resource.loadtex("gfx/hud/emote/svans");
+	public static final int sx = 3;
+	public float zo;
+	public Text text;
 
-    public void update(String text) {
-        this.text = Text.render(text, Color.BLACK);
-    }
+	public Speaking(Gob gob, float zo, String text) {
+		super(gob);
+		this.zo = zo;
+		this.text = Text.render(text, Color.BLACK);
+	}
 
-    public void draw(GOut g, Coord c) {
-        Coord sz = text.sz();
-        if (sz.x < 10)
-            sz.x = 10;
-        Coord tl = c.add(new Coord(sx, sb.cisz().y + sz.y + svans.sz().y - 1).inv());
-        Coord ftl = tl.add(sb.btloff());
-        g.chcolor(Color.WHITE);
-        g.frect(ftl, sz);
-        sb.draw(g, tl, sz.add(sb.cisz()));
-        g.chcolor(Color.BLACK);
-        g.image(text.tex(), ftl);
-        g.chcolor(Color.WHITE);
-        g.image(svans, c.add(0, -svans.sz().y));
-    }
+	public void update(String text) {
+		this.text = Text.render(text, Color.BLACK);
+	}
 
-    final PView.Draw2D fx = new PView.Draw2D() {
-        public void draw2d(GOut g) {
-            if (gob.sc != null)
-                Speaking.this.draw(g, gob.sc.add(new Coord(gob.sczu.mul(zo))).add(3, 0));
-        }
-    };
+	public void draw(GOut g, Coord c) {
+		Coord sz = text.sz();
+		if (sz.x < 10)
+			sz.x = 10;
+		Coord tl = c.add(new Coord(sx, sb.cisz().y + sz.y + svans.sz().y - 1).inv());
+		Coord ftl = tl.add(sb.btloff());
+		g.chcolor(Color.WHITE);
+		g.frect(ftl, sz);
+		sb.draw(g, tl, sz.add(sb.cisz()));
+		g.chcolor(Color.BLACK);
+		g.image(text.tex(), ftl);
+		g.chcolor(Color.WHITE);
+		g.image(svans, c.add(0, -svans.sz().y));
+	}
+
+	public void draw(GOut g, Pipe state) {
+		Coord sc = Homo3D.obj2view(new Coord3f(0, 0, zo), state).round2();
+		draw(g, sc.add(3, 0));
+	}
 }

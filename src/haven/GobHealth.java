@@ -26,53 +26,27 @@
 
 package haven;
 
-import haven.DefSettings;
-
 import java.awt.Color;
 
-import static haven.Gob.SEMISTATIC;
+import haven.render.*;
 
-/**
- *
- * TODO: Think of a way to represent the stage in 3D to avoid static/semistatic mess.
- */
-public class GobHealth extends GAttrib {
-    private static final Tex[] gobhp = new Tex[] {
-	    Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
-    };
-    public int hp;
-    Material.Colors fx;
-    public PView.Draw2D hpfx;
+public class GobHealth extends GAttrib implements Gob.SetupMod {
+	public final int hp;
+	public final MixColor fx;
 
-    public GobHealth(Gob g, int hp) {
-        super(g);
-        this.hp = hp;
-        this.fx = new Material.Colors(new Color(255, 0, 0, 128 - ((hp * 128) / 4)));
-	hpfx = new PView.Draw2D() {
-	    public void draw2d(GOut g) {
-		if(gob.sc != null && hp < 4) {
-		    g.image(gobhp[hp-1], gob.sc.sub(15, 10));
-		}
-	    }
-	};
-    }
+	public GobHealth(Gob g, int hp) {
+		super(g);
+		this.hp = hp;
+		this.fx = new MixColor(255, 0, 0, 128 - ((hp * 128) / 4));
+	}
 
-    public GLState getfx() {
-        if (hp >= 4)
-            return (GLState.nullstate);
-        return (fx);
-    }
+	public Pipe.Op gobstate() {
+		if (hp >= 4)
+			return (null);
+		return (fx);
+	}
 
-    public double asfloat() {
-        return (((double) hp) / 4.0);
-    }
-
-    public Object staticp() {
-        if(!DefSettings.SHOWGOBHP.get() || hp >= 4)
-	    return super.staticp();
-        else
-            return SEMISTATIC;
-    }
+	public double asfloat() {
+		return (((double) hp) / 4.0);
+	}
 }

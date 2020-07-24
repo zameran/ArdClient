@@ -62,10 +62,15 @@ public abstract class ConsoleHost extends Widget {
                 String msg = e.getMessage();
                 if (msg == null)
                     msg = e.toString();
-                if (ui != null && ui.cons != null && ui.cons.out != null) {
-                    ui.cons.out.println(msg);
-                    error(msg);
+                try {
+                    if (ui != null && ui.cons != null && ui.cons.out != null) {
+                        ui.cons.out.println(msg);
+                        error(msg);
+                    }
+                } catch (Exception ex) {
+                    e.printStackTrace();
                 }
+
             }
             cancel();
         }
@@ -120,15 +125,6 @@ public abstract class ConsoleHost extends Widget {
         kg = ui.grabkeys(this);
         hpos = history.size();
         cmdline = new CommandLine();
-    }
-
-    public boolean type(char ch, KeyEvent ev) {
-        if (cmdline == null) {
-            return (super.type(ch, ev));
-        } else {
-            cmdline.key(ev);
-            return (true);
-        }
     }
 
     public boolean keydown(KeyEvent ev) {

@@ -26,9 +26,6 @@
 
 package haven;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import java.util.*;
 
 public class Bufflist extends MovableWidget {
@@ -38,11 +35,13 @@ public class Bufflist extends MovableWidget {
     public interface Managed {
         public void move(Coord c, double off);
     }
+
     public final static Resource buffswim = Resource.local().loadwait("gfx/hud/buffs/toggles/swim");
     public final static Resource bufftrack = Resource.local().loadwait("gfx/hud/buffs/toggles/tracking");
     public final static Resource buffcrime = Resource.local().loadwait("gfx/hud/buffs/toggles/crime");
     public final static Resource partyperm = Resource.local().loadwait("gfx/hud/buffs/toggles/partyperm");
     public final static Resource buffbrain = Resource.local().loadwait("gfx/hud/buffs/brain");
+
     Bufflist() {
         super("Bufflist");
     }
@@ -52,9 +51,9 @@ public class Bufflist extends MovableWidget {
         Coord br = new Coord();
         Collection<Pair<Managed, Coord>> mv = new ArrayList<>();
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-            if(!(wdg instanceof Managed))
+            if (!(wdg instanceof Managed))
                 continue;
-            Managed ch = (Managed)wdg;
+            Managed ch = (Managed) wdg;
             Coord c = new Coord(x, y);
             if (ch == imm)
                 wdg.c = c;
@@ -63,18 +62,18 @@ public class Bufflist extends MovableWidget {
             i++;
             x += wdg.sz.x + margin;
             maxh = Math.max(maxh, wdg.sz.y);
-            if(++rn >= num) {
+            if (++rn >= num) {
                 x = 0;
                 y += maxh + margin;
                 maxh = 0;
                 rn = 0;
             }
-            if(c.x + wdg.sz.x > br.x) br.x = c.x + wdg.sz.x;
-            if(c.y + wdg.sz.y > br.y) br.y = c.y + wdg.sz.y;
+            if (c.x + wdg.sz.x > br.x) br.x = c.x + wdg.sz.x;
+            if (c.y + wdg.sz.y > br.y) br.y = c.y + wdg.sz.y;
         }
         resize(br);
         double off = 1.0 / mv.size(), coff = 0.0;
-        for(Pair<Managed, Coord> p : mv) {
+        for (Pair<Managed, Coord> p : mv) {
             p.a.move(p.b, coff);
             coff += off;
         }
@@ -82,13 +81,13 @@ public class Bufflist extends MovableWidget {
 
     @Override
     protected boolean moveHit(Coord c, int btn) {
-        if(btn == 3 && ui.modmeta) {
-	    for (Widget wdg = child; wdg != null; wdg = wdg.next) {
-		if (c.isect(wdg.c, wdg.sz))
-		    return true;
-	    }
-	}
-	return false;
+        if (btn == 3 && ui.modmeta) {
+            for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+                if (c.isect(wdg.c, wdg.sz))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public void addchild(Widget child, Object... args) {
@@ -101,9 +100,9 @@ public class Bufflist extends MovableWidget {
     }
 
     public void draw(GOut g) {
-        for(Widget wdg = child, next; wdg != null; wdg = next) {
+        for (Widget wdg = child, next; wdg != null; wdg = next) {
             next = wdg.next;
-            if(!wdg.visible || !(wdg instanceof Managed))
+            if (!wdg.visible || !(wdg instanceof Managed))
                 continue;
             wdg.draw(g.reclipl(xlate(wdg.c, true), wdg.sz));
         }

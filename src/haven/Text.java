@@ -26,7 +26,10 @@
 
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -42,6 +45,12 @@ public class Text {
     public static final Font mono;
     public static final Font fraktur;
     public static final Font dfont;
+    //public static final Font latin = new Font("Dialog", Font.PLAIN, 10);
+    //public static final Font serif = new Font("Serif", Font.PLAIN, 10);
+    //public static final Font sans = new Font("Sans", Font.PLAIN, 10);
+    //public static final Font mono = new Font("Monospaced", Font.PLAIN, 10);
+    //public static final Font fraktur = Resource.local().loadwait("ui/fraktur").layer(Resource.Font.class).font;
+    //public static final Font dfont = sans;
     public static final Foundry std;
 
     public static final Font latin;
@@ -59,6 +68,8 @@ public class Text {
     public final BufferedImage img;
     public final String text;
     private Tex tex;
+    public static final Color black = Color.BLACK;
+    public static final Color white = Color.WHITE;
 
     public static class FontSettings {
         public Map<String, String> font = new HashMap<>(4);
@@ -96,18 +107,23 @@ public class Text {
     }
 
     static {
+        //std = new Foundry(sans, 10);
         // here be localization horrors...
-        
+
         switch (Resource.language) {
             default:
             case "en":
-                cfg = new FontSettings(11, 11, 14, 11, 11, 14, 12, 14, 12, 12, 12, 11); break;
+                cfg = new FontSettings(11, 11, 14, 11, 11, 14, 12, 14, 12, 12, 12, 11);
+                break;
             case "ru":
-                cfg = new FontSettings(11, 11, 13, 11, 11, 14, 12, 14, 12, 12, 12, 11); break;
+                cfg = new FontSettings(11, 11, 13, 11, 11, 14, 12, 14, 12, 12, 12, 11);
+                break;
             case "ko":
-                cfg = new FontSettings(14, 14, 16, 14, 14, 14, 14, 14, 12, 12, 12, 14); break;
+                cfg = new FontSettings(14, 14, 16, 14, 14, 14, 14, 14, 12, 12, 12, 14);
+                break;
             case "zh":
-                cfg = new FontSettings(14, 16, 14, 16, 16, 16, 16, 16, 12, 14, 16, 16); break;
+                cfg = new FontSettings(14, 16, 14, 16, 16, 16, 16, 16, 12, 14, 16, 16);
+                break;
         }
 
         // this mapping is not really needed anymore.
@@ -217,6 +233,7 @@ public class Text {
         private FontMetrics m;
         Font font;
         Color defcol;
+        //public boolean aa = false;
         public boolean aa = Config.fontaa;
         private RichText.Foundry wfnd = null;
 
@@ -252,8 +269,8 @@ public class Text {
         }
 
         public int height() {
-        /* XXX: Should leading go into this, when it's mostly
-         * supposed to be used for one-liners? */
+            /* XXX: Should leading go into this, when it's mostly
+             * supposed to be used for one-liners? */
             return (m.getAscent() + m.getDescent());
         }
 
@@ -306,7 +323,7 @@ public class Text {
             g.drawString(text, 0, m.getAscent());
             g.drawString(text, 2, m.getAscent());
             g.drawString(text, 1, m.getAscent() - 1);
-            g.drawString(text,1, m.getAscent() + 1);
+            g.drawString(text, 1, m.getAscent() + 1);
             g.setColor(c);
             g.drawString(text, 1, m.getAscent());
             g.dispose();
@@ -318,6 +335,7 @@ public class Text {
         }
 
     }
+
     public static Line renderstroked(String text) {
         return renderstroked(text, Color.WHITE, Color.BLACK);
     }
@@ -345,16 +363,20 @@ public class Text {
             this.fnd = fnd;
         }
 
+        protected Text render(String text) {
+            return (fnd.render(text));
+        }
+
         protected String text(T value) {
             return (String.valueOf(value));
         }
-        protected Text render(String text) {return(fnd.render(text));}
+
         protected abstract T value();
 
         public Text get() {
             T value = value();
             if (!Utils.eq(value, cv))
-                cur = fnd.render(text(cv = value));
+                cur = render(text(cv = value));
             return (cur);
         }
 
@@ -433,6 +455,7 @@ public class Text {
         if (cmd == "render") {
             PosixArgs opt = PosixArgs.getopt(args, 1, "aw:f:s:");
             boolean aa = false;
+            //String font = "SansSerif";
             String font = Config.font;
             int width = 100, size = 10;
             for (char c : opt.parsed()) {

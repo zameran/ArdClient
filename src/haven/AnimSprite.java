@@ -26,23 +26,28 @@
 
 package haven;
 
+import haven.render.RenderTree;
 import haven.sloth.gob.Type;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class AnimSprite extends Sprite {
-    private Rendered[] parts;
-    private MeshAnim.Anim[] anims;
+    private final RenderTree.Node[] parts;
+    private final MeshAnim.Anim[] anims;
 
     public static final Factory fact = new Factory() {
         public Sprite create(Owner owner, Resource res, Message sdt) {
             if (res.layer(MeshAnim.Res.class) == null)
-                return null;
+                return (null);
             CheckListboxItem itm = Config.disableanim.get(res.name);
             if (itm != null && itm.selected)
                 return null;
-            return (new AnimSprite(owner, res, sdt));
+            return (new AnimSprite(owner, res, sdt) {
+                public String toString() {
+                    return (String.format("#<anim-sprite %s>", res.name));
+                }
+            });
         }
     };
 
@@ -56,7 +61,7 @@ public class AnimSprite extends Sprite {
         }
         this.anims = anims.toArray(new MeshAnim.Anim[0]);
         MorphedMesh.Morpher.Factory morph = MorphedMesh.combine(this.anims);
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<RenderTree.Node> rl = new LinkedList<>();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             if ((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & mask) != 0))) {
                 boolean stat = true;
@@ -66,25 +71,24 @@ public class AnimSprite extends Sprite {
                         break;
                     }
                 }
-                if (stat)
+                if (stat) {
                     rl.add(mr.mat.get().apply(mr.m));
-                else
+                } else {
                     rl.add(mr.mat.get().apply(new MorphedMesh(mr.m, morph)));
+                }
             }
         }
-        parts = rl.toArray(new Rendered[0]);
+        parts = rl.toArray(new RenderTree.Node[0]);
     }
 
-    public boolean setup(RenderList rl) {
-        for (Rendered p : parts)
-            rl.add(p, null);
-        return (false);
+    public void added(RenderTree.Slot slot) {
+        for (RenderTree.Node p : parts)
+            slot.add(p);
     }
 
-    public boolean tick(int idt) {
-
+    public boolean tick(double ddt) {
+        float dt = (float) ddt;
         boolean ret = false;
-        float dt = idt / 1000.0f;
         for (MeshAnim.Anim anim : anims)
             ret = ret | anim.tick(dt);
         return (ret);

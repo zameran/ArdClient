@@ -32,7 +32,6 @@ import haven.Coord;
 import haven.GLState;
 import haven.GOut;
 import haven.PView;
-import haven.RenderList;
 import haven.Rendered;
 
 public class BufView {

@@ -43,7 +43,7 @@ public class RootWidget extends ConsoleHost {
         setfocusctl(true);
         hasfocus = true;
         cursor = defcurs.indir();
-        if(Config.sessiondisplay){
+        if (Config.sessiondisplay) {
             add(sessionDisplay = new SessionDisplay());
         }
     }
@@ -51,29 +51,33 @@ public class RootWidget extends ConsoleHost {
     public boolean globtype(char key, KeyEvent ev) {
         if (!super.globtype(key, ev)) {
             if (key == '`') {
-                GameUI gi = findchild(GameUI.class);
+                //GameUI gi = findchild(GameUI.class); //XXXRENDER
                 if (Config.profile) {
                     add(new Profwnd(guprof, "UI profile"), new Coord(100, 100));
-                    add(new Profwnd(grprof, "GL profile"), new Coord(450, 100));
-                    if ((gi != null) && (gi.map != null))
-                        add(new Profwnd(gi.map.prof, "Map profile"), new Coord(100, 250));
+                    add(new Profwnd(grprof, "GL profile"), new Coord(500, 100));
+		    /* XXXRENDER
+		    if((gi != null) && (gi.map != null))
+			add(new Profwnd(gi.map.prof, "Map profile"), new Coord(100, 250));
+		    */
                 }
                 if (Config.profilegpu) {
-                    add(new Profwnd(ggprof, "GPU profile"), new Coord(450, 250));
+                    add(new Profwnd(ggprof, "GPU profile"), new Coord(500, 250));
                 }
             } else if (key == ':') {
                 entercmd();
-	    } else if(key != 0 && (last_gk != key || (System.currentTimeMillis() - last_gk_time) >= 500)) {
-		wdgmsg("gk", (int)key);
-		last_gk = key;
-		last_gk_time = System.currentTimeMillis();
+            } else if (key != 0 && (last_gk != key || (System.currentTimeMillis() - last_gk_time) >= 500)) {
+                wdgmsg("gk", (int) key);
+                last_gk = key;
+                last_gk_time = System.currentTimeMillis();
             }
         }
-	return(true);
+        return (true);
     }
 
-   @Override
-    public boolean mousedown(Coord c, int button) { return super.mousedown(c, button); }
+    @Override
+    public boolean mousedown(Coord c, int button) {
+        return super.mousedown(c, button);
+    }
 
     public void draw(GOut g) {
         super.draw(g);

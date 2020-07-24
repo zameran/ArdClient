@@ -1,9 +1,14 @@
 package haven.res.ui.tt.q.qbuff;
 
-import haven.*;
+import haven.Config;
+import haven.ItemInfo;
+import haven.Resource;
+import haven.Tex;
+import haven.Text;
+import haven.Utils;
 import haven.purus.pbot.PBotUtils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static haven.Text.num10Fnd;
@@ -11,8 +16,8 @@ import static haven.Text.num12boldFnd;
 
 
 public class QBuff extends ItemInfo.Tip {
-    public final BufferedImage icon;
-    public final String name;
+	public final BufferedImage icon;
+	public final String name;
     public final String origName;
     public double q;
     public static final Layout.ID<Table> lid = new Tid();
@@ -20,11 +25,11 @@ public class QBuff extends ItemInfo.Tip {
     public Tex qtex, qwtex;
     public Color color, outline = Color.BLACK;
     public QBuff(Owner owner, BufferedImage icon, String name, double q) {
-        super(owner);
-        this.icon = icon;
+		super(owner);
+		this.icon = icon;
         this.origName = name;
         this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
-        this.q = q;
+		this.q = q;
         if(Config.qualitycolor){
             if(q < 11){
                 color = Color.white;
@@ -55,13 +60,13 @@ public class QBuff extends ItemInfo.Tip {
                 qwtex = Text.renderstroked(Math.round(q) + "", color, outline, num12boldFnd).tex();
             }
         }
-    }
+	}
 
     public void prepare(Layout layout) {
         layout.intern(lid).ql.add(this);
-    }
+	}
 
-    public Tip shortvar() {
+	public Tip shortvar() {
         return new ShortTip(this, this.owner);
-    }
-}
+		}
+	}

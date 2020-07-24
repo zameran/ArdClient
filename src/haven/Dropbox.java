@@ -104,7 +104,7 @@ public abstract class Dropbox<T> extends ListWidget<T> {
             super.draw(g);
             if (selhighlight >= 0) {
                 g.chcolor(115, 210, 22, 128);
-                g.frect(new Coord(0, selhighlight * itemh), new Coord(g.sz.x, itemh));
+                g.frect(new Coord(0, selhighlight * itemh), new Coord(g.br.x, itemh));
                 g.chcolor();
             }
         }

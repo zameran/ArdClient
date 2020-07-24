@@ -26,54 +26,44 @@
 
 package haven.resutil;
 
-import static haven.glsl.Cons.add;
-import static haven.glsl.Cons.mul;
-import static haven.glsl.Type.VEC2;
 
 import haven.Coord3f;
-import haven.GLState;
-import haven.GOut;
 import haven.Material;
 import haven.Resource;
-import haven.glsl.MiscLib;
-import haven.glsl.ShaderMacro;
-import haven.glsl.Tex2D;
-import haven.glsl.Uniform;
+import haven.render.FrameInfo;
+import haven.render.Pipe;
+import haven.render.State;
+import haven.render.Tex2D;
+import haven.render.sl.ShaderMacro;
+import haven.render.sl.Uniform;
+
+import static haven.render.sl.Cons.add;
+import static haven.render.sl.Cons.mul;
+import static haven.render.sl.Type.VEC2;
 
 @Material.ResName("texrot")
-public class TexAnim extends GLState {
-    public static final Slot<TexAnim> slot = new Slot<TexAnim>(Slot.Type.DRAW, TexAnim.class);
-    public final Coord3f ax;
+public class TexAnim extends State {
+	public static final Slot<TexAnim> slot = new Slot<TexAnim>(Slot.Type.DRAW, TexAnim.class);
+	public final Coord3f ax;
 
-    public TexAnim(Coord3f ax) {
-        this.ax = ax;
-    }
+	public TexAnim(Coord3f ax) {
+		this.ax = ax;
+	}
 
-    public TexAnim(Resource res, Object... args) {
-        this(new Coord3f(((Number) args[0]).floatValue(), ((Number) args[1]).floatValue(), 0));
-    }
+	public TexAnim(Resource res, Object... args) {
+		this(new Coord3f(((Number) args[0]).floatValue(), ((Number) args[1]).floatValue(), 0));
+	}
 
-    private static final Uniform cax = new Uniform(VEC2);
-    private static final ShaderMacro shader = prog -> {
-        Tex2D.rtexcoord.value(prog.vctx).mod(in -> add(in, mul(cax.ref(), MiscLib.time.ref())), 0);
-    };
+	private static final Uniform cax = new Uniform(VEC2, p -> p.get(slot).ax, slot);
+	private static final ShaderMacro shader = prog -> {
+		Tex2D.rtexcoord.value(prog.vctx).mod(in -> add(in, mul(cax.ref(), FrameInfo.time())), 0);
+	};
 
-    public ShaderMacro shader() {
-        return (shader);
-    }
+	public ShaderMacro shader() {
+		return (shader);
+	}
 
-    public void reapply(GOut g) {
-        g.gl.glUniform2f(g.st.prog.uniform(cax), ax.x, ax.y);
-    }
-
-    public void apply(GOut g) {
-        reapply(g);
-    }
-
-    public void unapply(GOut g) {
-    }
-
-    public void prep(Buffer buf) {
-        buf.put(slot, this);
-    }
+	public void apply(Pipe buf) {
+		buf.put(slot, this);
+	}
 }

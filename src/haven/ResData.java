@@ -26,49 +26,47 @@
 
 package haven;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ResData {
-    public Indir<Resource> res;
-    public MessageBuf sdt;
+	public Indir<Resource> res;
+	public MessageBuf sdt;
 
-    public ResData(Indir<Resource> res, Message sdt) {
-        this.res = res;
-        this.sdt = new MessageBuf(sdt);
-    }
+	public ResData(Indir<Resource> res, Message sdt) {
+		this.res = res;
+		this.sdt = new MessageBuf(sdt);
+	}
 
-    public ResData clone() {
-        return (new ResData(res, sdt));
-    }
+	public ResData clone() {
+		return (new ResData(res, sdt));
+	}
 
-    public boolean equals(Object other) {
-        if (!(other instanceof ResData))
-            return (false);
-        ResData o = (ResData) other;
-        return (res.equals(o.res) && sdt.equals(o.sdt));
-    }
+	public int hashCode() {
+		return (Objects.hash(res, sdt));
+	}
 
-    public static List<ResData> wrap(List<? extends Indir<Resource>> in) {
-        List<ResData> ret = new ArrayList<ResData>(in.size());
-        for (Indir<Resource> res : in)
-            ret.add(new ResData(res, Message.nil));
-        return (ret);
-    }
+	public boolean equals(Object other) {
+		if (!(other instanceof ResData))
+			return (false);
+		ResData o = (ResData) other;
+		return (res.equals(o.res) && sdt.equals(o.sdt));
+	}
 
-    public static ResData[] wrap(Indir<Resource>[] in) {
-        ResData[] ret = new ResData[in.length];
-        for (int i = 0; i < in.length; i++)
-            ret[i] = new ResData(in[i], Message.nil);
-        return (ret);
-    }
+	public static List<ResData> wrap(List<? extends Indir<Resource>> in) {
+		List<ResData> ret = new ArrayList<ResData>(in.size());
+		for (Indir<Resource> res : in)
+			ret.add(new ResData(res, Message.nil));
+		return (ret);
+	}
 
-    public String toString() {
-	    return(String.format("(%s, %s)", res, sdt));
-    }
+	public static ResData[] wrap(Indir<Resource>[] in) {
+		ResData[] ret = new ResData[in.length];
+		for (int i = 0; i < in.length; i++)
+			ret[i] = new ResData(in[i], Message.nil);
+		return (ret);
+	}
 
-    public int hashCode() {
-        return(Objects.hash(res, sdt));
-    }
+	public String toString() {
+		return (String.format("(%s, %s)", res, sdt));
+	}
 }

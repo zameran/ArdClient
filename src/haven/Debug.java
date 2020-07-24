@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -43,23 +44,27 @@ public class Debug {
     public static boolean pk1, pk2, pk3, pk4;
     public static PrintWriter log = new PrintWriter(System.err);
 
-    public static void cycle() {
+    public static void cycle(int modflags) {
         pk1 = kf1;
         pk2 = kf2;
         pk3 = kf3;
         pk4 = kf4;
+        kf1 = (modflags & 1) != 0;
+        kf2 = (modflags & 2) != 0;
+        kf3 = (modflags & 4) != 0;
+        kf4 = (modflags & 8) != 0;
     }
 
     public static void dumpimage(BufferedImage img, File path) {
         try {
-	    javax.imageio.ImageIO.write(img, "PNG", path);
+            javax.imageio.ImageIO.write(img, "PNG", path);
         } catch (IOException e) {
             throw (new RuntimeException(e));
         }
     }
 
     public static void dumpimage(BufferedImage img, String fn) {
-	dumpimage(img, new File(fn));
+        dumpimage(img, new File(fn));
     }
 
     public static void dumpimage(BufferedImage img) {
@@ -67,7 +72,10 @@ public class Debug {
     }
 
     public static File somedir(String basename) {
-	    return(new File(basename));
+        String home = System.getProperty("user.home", null);
+        if (home == null)
+            return (new File(basename));
+        return (new File(new File(home), basename));
     }
 
     public static class DumpGL extends TraceGL4bc {
@@ -104,8 +112,8 @@ public class Debug {
 
     public static PrintWriter getdump() {
         try {
-            return (new java.io.PrintWriter(new java.io.FileWriter("/tmp/dbdump-" + dumpseq++)));
-        } catch (java.io.IOException e) {
+            return (new PrintWriter(new FileWriter("/tmp/dbdump-" + dumpseq++)));
+        } catch (IOException e) {
             throw (new RuntimeException(e));
         }
     }

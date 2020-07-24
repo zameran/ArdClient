@@ -26,49 +26,48 @@
 
 package haven;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class RepeatStream extends InputStream {
-    private final Repeater rep;
-    private InputStream cur;
+	private final Repeater rep;
+	private InputStream cur;
 
-    public interface Repeater {
-        public InputStream cons();
-    }
+	public interface Repeater {
+		public InputStream cons();
+	}
 
-    public RepeatStream(Repeater rep) {
-        this.rep = rep;
-        this.cur = rep.cons();
-    }
+	public RepeatStream(Repeater rep) {
+		this.rep = rep;
+		this.cur = rep.cons();
+	}
 
-    public int read(byte[] b, int off, int len) throws IOException {
-        if (cur == null)
-            return (-1);
-        int ret;
-        while ((ret = cur.read(b, off, len)) < 0) {
-            cur.close();
-            if ((cur = rep.cons()) == null)
-                return (-1);
-        }
-        return (ret);
-    }
+	public int read(byte[] b, int off, int len) throws IOException {
+		if (cur == null)
+			return (-1);
+		int ret;
+		while ((ret = cur.read(b, off, len)) < 0) {
+			cur.close();
+			if ((cur = rep.cons()) == null)
+				return (-1);
+		}
+		return (ret);
+	}
 
-    public int read() throws IOException {
-        if (cur == null)
-            return (-1);
-        int ret;
-        while ((ret = cur.read()) < 0) {
-            cur.close();
-            if ((cur = rep.cons()) == null)
-                return (-1);
-        }
-        return (ret);
-    }
+	public int read() throws IOException {
+		if (cur == null)
+			return (-1);
+		int ret;
+		while ((ret = cur.read()) < 0) {
+			cur.close();
+			if ((cur = rep.cons()) == null)
+				return (-1);
+		}
+		return (ret);
+	}
 
-    public void close() throws IOException {
-        if (cur != null)
-            cur.close();
-        cur = null;
-    }
+	public void close() throws IOException {
+		if (cur != null)
+			cur.close();
+		cur = null;
+	}
 }

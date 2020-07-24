@@ -28,13 +28,24 @@ package haven;
 
 import haven.sloth.script.SessionDetails;
 
-import java.net.*;
-import java.util.*;
-import java.io.*;
-import java.lang.ref.*;
+import java.io.IOException;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 
 public class Session implements Resource.Resolver {
-    public static final int PVER = 23;
+    public static final int PVER = 24;
 
     public static final int MSG_SESS = 0;
     public static final int MSG_REL = 1;
@@ -100,10 +111,14 @@ public class Session implements Resource.Resolver {
             this.resid = res.resid;
         }
 
-        public void waitfor() throws InterruptedException {
+        public void waitfor(Runnable callback, Consumer<Waiting> reg) {
             synchronized (res) {
-                while (res.resnm == null)
-                    res.wait();
+                if (res.resnm != null) {
+                    reg.accept(Waiting.dummy);
+                    callback.run();
+                } else {
+                    reg.accept(res.wq.add(callback));
+                }
             }
         }
 
@@ -113,6 +128,7 @@ public class Session implements Resource.Resolver {
     }
 
     private static class CachedRes {
+        private final Waitable.Queue wq = new Waitable.Queue();
         private final int resid;
         private String resnm = null;
         private int resver;
@@ -165,16 +181,16 @@ public class Session implements Resource.Resolver {
                 this.resnm = nm;
                 this.resver = ver;
                 get().reset();
-                notifyAll();
+                wq.wnotify();
             }
         }
 
-        public void set(Resource res){
-            synchronized(this) {
+        public void set(Resource res) {
+            synchronized (this) {
                 this.resnm = res.name;
                 this.resver = res.ver;
                 ind = new WeakReference<Ref>(new SRef(res));
-                notifyAll();
+                wq.wnotify();
             }
         }
     }
@@ -189,11 +205,12 @@ public class Session implements Resource.Resolver {
             return (ret);
         }
     }
-    private int cacheres(String resname){
+
+    private int cacheres(String resname) {
         return cacheres(Resource.local().loadwait(resname));
     }
 
-    private int cacheres(Resource res){
+    private int cacheres(Resource res) {
         cachedres(--localCacheId).set(res);
         return localCacheId;
     }
@@ -201,14 +218,16 @@ public class Session implements Resource.Resolver {
     public Indir<Resource> getres(int id) {
         return (cachedres(id).get());
     }
+
     public int getresid(Resource res) {
         synchronized (rescache) {
             for (Map.Entry<Integer, CachedRes> entry : rescache.entrySet()) {
                 try {
-                    if(entry.getValue().get().get() == res) {
+                    if (entry.getValue().get().get() == res) {
                         return entry.getKey();
                     }
-                } catch (Loading ignored) {}
+                } catch (Loading ignored) {
+                }
             }
         }
         return -1;
@@ -216,7 +235,7 @@ public class Session implements Resource.Resolver {
 
     public int getresidf(Resource res) {
         int id = getresid(res);
-        if(id == -1) {
+        if (id == -1) {
             id = cacheres(res);
         }
         return id;
@@ -283,29 +302,12 @@ public class Session implements Resource.Resolver {
                 int fl = msg.uint8();
                 long id = msg.uint32();
                 int frame = msg.int32();
-                synchronized (oc) {
-                    if ((fl & 1) != 0)
-                        oc.remove(id, frame - 1);
-                    Gob gob = oc.getgob(id, frame);
-                    if (gob != null) {
-                        gob.frame = frame;
-                        gob.virtual = ((fl & 2) != 0);
-                    }
-                    while (true) {
-                        int type = msg.uint8();
-                        if (type == OCache.OD_REM) {
-                            oc.remove(id, frame);
-                        } else if (type == OCache.OD_END) {
-                            break;
-                        } else {
-                            oc.receive(gob, type, msg);
-                        }
-                    }
-                }
+                oc.receive(fl, id, frame, msg);
                 synchronized (objacks) {
                     if (objacks.containsKey(id)) {
                         ObjAck a = objacks.get(id);
-                        a.frame = frame;
+                        if (frame > a.frame)
+                            a.frame = frame;
                         a.recv = System.currentTimeMillis();
                     } else {
                         objacks.put(id, new ObjAck(id, frame, System.currentTimeMillis()));
@@ -318,7 +320,7 @@ public class Session implements Resource.Resolver {
         }
 
         private void handlerel(PMessage msg) {
-            if(msg.type == RMessage.RMSG_FRAGMENT) {
+            if (msg.type == RMessage.RMSG_FRAGMENT) {
                 int head = msg.uint8();
                 if ((head & 0x80) == 0) {
                     if (fragbuf != null)
@@ -342,7 +344,7 @@ public class Session implements Resource.Resolver {
                         throw (new MessageException("Got invalid fragment type: " + head, msg));
                     }
                 }
-            } else if((msg.type == RMessage.RMSG_NEWWDG) || (msg.type == RMessage.RMSG_WDGMSG) ||
+            } else if ((msg.type == RMessage.RMSG_NEWWDG) || (msg.type == RMessage.RMSG_WDGMSG) ||
                     (msg.type == RMessage.RMSG_DSTWDG) || (msg.type == RMessage.RMSG_ADDWDG)) {
                 synchronized (uimsgs) {
                     uimsgs.add(msg);
@@ -357,7 +359,7 @@ public class Session implements Resource.Resolver {
                 int resver = msg.uint16();
                 try {
                     cachedres(resid).set(resname, resver);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 //   cachedres(resid).set(resname, resver);
@@ -515,9 +517,12 @@ public class Session implements Resource.Resolver {
                                     return;
                                 }
                             }
+                            String protocol = "Hafen";
+                            if (!Config.confid.equals(""))
+                                protocol += "/" + Config.confid;
                             PMessage msg = new PMessage(MSG_SESS);
                             msg.adduint16(2);
-                            msg.addstring("Hafen/ArdClient");
+                            msg.addstring(protocol);
                             msg.adduint16(PVER);
                             msg.addstring(username);
                             msg.adduint16(cookie.length);
@@ -545,8 +550,8 @@ public class Session implements Resource.Resolver {
                         }
                         now = System.currentTimeMillis();
                         boolean beat = true;
-            /*
-              if((closing != -1) && (now - closing > 500)) {
+			/*
+			  if((closing != -1) && (now - closing > 500)) {
 			  Message cm = new Message(MSG_CLOSE);
 			  sendmsg(cm);
 			  closing = now;

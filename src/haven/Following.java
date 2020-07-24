@@ -26,19 +26,18 @@
 
 package haven;
 
+import java.util.Optional;
+import java.util.function.*;
+
+import haven.render.*;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Holding;
 
-import java.util.Optional;
-
 public class Following extends Moving {
-    long tgt;
+    public final long tgt;
     double lastv = 0.0;
-    Indir<Resource> xfres;
-    String xfname;
-    GLState xf = null, lpxf = null;
-    Gob lxfb = null;
-    Skeleton.Pose lpose = null;
+    public final Indir<Resource> xfres;
+    public final String xfname;
 
     public Following(Gob gob, long tgt, Indir<Resource> xfres, String xfname) {
         super(gob);
@@ -67,18 +66,18 @@ public class Following extends Moving {
     }
 
     public Optional<Coord2d> getDest() {
-	Gob tgt = gob.glob.oc.getgob(this.tgt);
-	if(tgt != null) {
-	    return Optional.of(new Coord2d(tgt.getc()));
-	} else {
-	    return Optional.empty();
-	}
+        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        if (tgt != null) {
+            return Optional.of(new Coord2d(tgt.getc()));
+        } else {
+            return Optional.empty();
+        }
     }
+
     public Gob tgt() {
         return (gob.glob.oc.getgob(this.tgt));
     }
 
-    @Override
     public void tick() {
         super.tick();
         final Gob tgt = tgt();
@@ -94,38 +93,43 @@ public class Following extends Moving {
     private Skeleton.Pose getpose(Gob tgt) {
         if (tgt == null)
             return (null);
-	    return(Skeleton.getpose(tgt.getattr(Drawable.class)));
+        return (Skeleton.getpose(tgt.getattr(Drawable.class)));
     }
 
-    public GLState xf() {
+    private Pipe.Op xf = null, lpxf = null, lbxf = null;
+    private Supplier<? extends Pipe.Op> bxf = () -> null;
+    private Skeleton.Pose lpose = null;
+    private boolean hlpose = false;
+
+    public Pipe.Op xf() {
         synchronized (this) {
             Gob tgt = tgt();
-            Skeleton.Pose cpose = getpose(tgt);
-            GLState pxf = xf(tgt);
-            if ((xf == null) || (cpose != lpose) || (lpxf != pxf)) {
-                if (tgt == null) {
-                    xf = null;
-                    lpose = null;
-                    lxfb = null;
-                    lpxf = null;
-                    return (null);
+            if (tgt != null) {
+                Skeleton.Pose cpose = getpose(tgt);
+                if (!hlpose || (cpose != lpose)) {
+                    Skeleton.BoneOffset bo = xfres.get().layer(Skeleton.BoneOffset.class, xfname);
+                    if (bo == null)
+                        throw (new RuntimeException("No such boneoffset in " + xfres.get() + ": " + xfname));
+                    bxf = bo.forpose(lpose = cpose);
+                    hlpose = true;
                 }
-                Skeleton.BoneOffset bo = xfres.get().layer(Skeleton.BoneOffset.class, xfname);
-                if (bo == null)
-                    throw (new RuntimeException("No such boneoffset in " + xfres.get() + ": " + xfname));
-                if (pxf != null)
-                    xf = GLState.compose(pxf, bo.forpose(cpose));
-                else
-                    xf = GLState.compose(tgt.loc, bo.forpose(cpose));
-                lpxf = pxf;
-                lxfb = tgt;
-                lpose = cpose;
+            } else {
+                bxf = () -> null;
+                lpose = null;
+                hlpose = false;
+            }
+            Pipe.Op cpxf = (tgt == null) ? null : tgt.placed.placement();
+            Pipe.Op cbxf = bxf.get();
+            if ((xf == null) || !Utils.eq(cbxf, lbxf) || !Utils.eq(cpxf, lpxf)) {
+                xf = Pipe.Op.compose(cpxf, cbxf);
+                lpxf = cpxf;
+                lbxf = cbxf;
             }
         }
         return (xf);
     }
 
-    public static GLState xf(Gob gob) {
+    public Pipe.Op xf(Gob gob) {
         if (gob == null)
             return (null);
         Following flw = gob.getattr(Following.class);

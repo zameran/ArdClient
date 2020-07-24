@@ -26,7 +26,6 @@
 
 package haven;
 
-
 import haven.automation.Discord;
 import haven.purus.Iconfinder;
 import haven.purus.pbot.PBotAPI;
@@ -37,36 +36,89 @@ import haven.sloth.gob.Movable;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
-import static haven.DefSettings.*;
-
+import static haven.DefSettings.ALLWATERCOL;
+import static haven.DefSettings.AMBERMENU;
+import static haven.DefSettings.ANIMALDANGERCOLOR;
+import static haven.DefSettings.ANIMALPATHCOL;
+import static haven.DefSettings.BEEHIVECOLOR;
+import static haven.DefSettings.BTNCOL;
+import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
+import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DEEPWATERCOL;
+import static haven.DefSettings.ERRORTEXTCOLOR;
+import static haven.DefSettings.GARDENPOTDONECOLOR;
+import static haven.DefSettings.GOBPATHCOL;
+import static haven.DefSettings.GUIDESCOLOR;
+import static haven.DefSettings.HIDDENCOLOR;
+import static haven.DefSettings.HUDTHEME;
+import static haven.DefSettings.NVAMBIENTCOL;
+import static haven.DefSettings.NVDIFFUSECOL;
+import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.PLAYERPATHCOL;
+import static haven.DefSettings.SHOWANIMALPATH;
+import static haven.DefSettings.SHOWFKBELT;
+import static haven.DefSettings.SHOWGOBPATH;
+import static haven.DefSettings.SHOWHALO;
+import static haven.DefSettings.SHOWHALOONHEARTH;
+import static haven.DefSettings.SHOWNBELT;
+import static haven.DefSettings.SHOWNPBELT;
+import static haven.DefSettings.SHOWPLAYERPATH;
+import static haven.DefSettings.SLIDERCOL;
+import static haven.DefSettings.SUPPORTDANGERCOLOR;
+import static haven.DefSettings.THEMES;
+import static haven.DefSettings.TROUGHCOLOR;
+import static haven.DefSettings.TXBCOL;
+import static haven.DefSettings.WNDCOL;
 
 public class OptWnd extends Window {
     public static final int VERTICAL_MARGIN = 10;
     public static final int HORIZONTAL_MARGIN = 5;
     private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
     public static final int VERTICAL_AUDIO_MARGIN = 5;
-    public final Panel main, video, audio, display, map, general, combat, control, uis,uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
+    public final Panel main, video, audio, keybind, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
+    public final ModificationPanel modification;
+    public final Panel camera, chat;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
     CheckBox sm = null, rm = null, lt = null, bt = null, ltl, discordrole, discorduser;
 
     public void chpanel(Panel p) {
+        Coord cc = this.c.add(this.sz.div(2));
         if (current != null)
             current.hide();
         (current = p).show();
+        pack();
+        move(cc.sub(this.sz.div(2)));
+    }
+
+    public void chpanel(Panel p, String cap) {
+        Coord cc = this.c.add(this.sz.div(2));
+        if (current != null)
+            current.hide();
+        (current = p).show();
+        pack();
+        move(cc.sub(this.sz.div(2)));
+
+        chcap(cap);
     }
 
     public class PButton extends Button {
@@ -79,33 +131,40 @@ public class OptWnd extends Window {
             this.key = key;
         }
 
+        public PButton(int w, int key, Panel tgt) {
+            super(w, tgt.title);
+            this.tgt = tgt;
+            this.key = key;
+        }
+
         public void click() {
-            if(tgt == clearboulders){
+            if (tgt == clearboulders) {
                 final String charname = gameui().chrid;
                 for (CheckListboxItem itm : Config.boulders.values())
                     itm.selected = false;
                 Utils.setprefchklst("boulderssel_" + charname, Config.boulders);
-            }else if(tgt == clearbushes){
+            } else if (tgt == clearbushes) {
                 final String charname = gameui().chrid;
                 for (CheckListboxItem itm : Config.bushes.values())
                     itm.selected = false;
                 Utils.setprefchklst("bushessel_" + charname, Config.bushes);
-            }else if(tgt == cleartrees){
+            } else if (tgt == cleartrees) {
                 final String charname = gameui().chrid;
                 for (CheckListboxItem itm : Config.trees.values())
                     itm.selected = false;
                 Utils.setprefchklst("treessel_" + charname, Config.trees);
-            }else if(tgt == clearhides){
+            } else if (tgt == clearhides) {
                 final String charname = gameui().chrid;
                 for (CheckListboxItem itm : Config.icons.values())
                     itm.selected = false;
                 Utils.setprefchklst("iconssel_" + charname, Config.icons);
-            }else
+            } else
                 chpanel(tgt);
+            chpanel(tgt, tgt.title); //FIXME title new
         }
 
-        public boolean type(char key, java.awt.event.KeyEvent ev) {
-            if ((this.key != -1) && (key == this.key)) {
+        public boolean keydown(KeyEvent ev) {
+            if ((this.key != -1) && (ev.getKeyChar() == this.key)) {
                 click();
                 return (true);
             }
@@ -114,10 +173,44 @@ public class OptWnd extends Window {
     }
 
     public class Panel extends Widget {
+        String title;
+        int y = 0;
+
+        public void addWdg(Widget widget, int h) {
+            add(widget, new Coord(0, y));
+            y += h;
+        }
+
+        public void addWdg(Widget widget, int h, Coord coord) {
+            add(widget, coord);
+            y += h;
+        }
+
+        public void addWdg(Panel panel, int w, int h, int key) {
+            add(new PButton(w, key, panel), new Coord(0, y));
+            y += h;
+        }
+
+        public void addWdg(Panel panel, int w, int h, int key, String tittle) {
+            add(new PButton(w, tittle, key, panel), new Coord(0, y));
+            y += h;
+        }
+
         public Panel() {
             visible = false;
             c = Coord.z;
         }
+
+        public Panel(String title) {
+            this();
+            this.title = title;
+        }
+    }
+
+    private void error(String msg) {
+        GameUI gui = getparent(GameUI.class);
+        if (gui != null)
+            gui.error(msg);
     }
 
     public class VideoPanel extends Panel {
@@ -128,35 +221,220 @@ public class OptWnd extends Window {
         }
 
         public class CPanel extends Widget {
-            public final GLSettings cf;
+            public GSettings prefs;
 
-            public CPanel(GLSettings gcf) {
-                this.cf = gcf;
+            public CPanel(GSettings gprefs) {
+                this.prefs = gprefs;
                 final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
                 appender.setVerticalMargin(VERTICAL_MARGIN);
                 appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-                appender.add(new CheckBox("Per-fragment lighting") {
+
+                appender.add(new CheckBox("Render shadows") {
                     {
-                        a = cf.flight.val;
+                        a = prefs.lshadow.val;
                     }
 
                     public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.flight.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                GameUI gui = getparent(GameUI.class);
-                                if (gui != null)
-                                    gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.flight.set(false);
+                        try {
+                            GSettings np = prefs.update(null, prefs.lshadow, val);
+                            ui.setgprefs(prefs = np);
+                        } catch (GSettings.SettingException e) {
+                            error(e.getMessage());
+                            return;
                         }
                         a = val;
-                        cf.dirty = true;
                     }
                 });
+
+                appender.add(new Label("Render scale"));
+                {
+                    Label dpy = new Label("");
+                    final int steps = 4;
+                    appender.addRow(new HSlider(160, -2 * steps, 2 * steps, (int) Math.round(steps * Math.log(prefs.rscale.val) / Math.log(2.0f))) {
+                        protected void added() {
+                            dpy();
+                            this.c.y = dpy.c.y + ((dpy.sz.y - this.sz.y) / 2);
+                        }
+
+                        void dpy() {
+                            dpy.settext(String.format("%.2f\u00d7", Math.pow(2, this.val / (double) steps)));
+                        }
+
+                        public void changed() {
+                            try {
+                                float val = (float) Math.pow(2, this.val / (double) steps);
+                                ui.setgprefs(prefs = prefs.update(null, prefs.rscale, val));
+                            } catch (GSettings.SettingException e) {
+                                error(e.getMessage());
+                                return;
+                            }
+                            dpy();
+                        }
+                    }, dpy);
+                }
+
+                appender.add(new CheckBox("Vertical sync") {
+                    {
+                        a = prefs.vsync.val;
+                    }
+
+                    public void set(boolean val) {
+                        try {
+                            GSettings np = prefs.update(null, prefs.vsync, val);
+                            ui.setgprefs(prefs = np);
+                        } catch (GSettings.SettingException e) {
+                            error(e.getMessage());
+                            return;
+                        }
+                        a = val;
+                    }
+                });
+                appender.add(new Label("Framerate limit (active window)"));
+                {
+                    Label dpy = new Label("");
+                    final int max = 250;
+                    appender.addRow(new HSlider(160, 1, max, (prefs.hz.val == Float.POSITIVE_INFINITY) ? max : prefs.hz.val.intValue()) {
+                        protected void added() {
+                            dpy();
+                            this.c.y = dpy.c.y + ((dpy.sz.y - this.sz.y) / 2);
+                        }
+
+                        void dpy() {
+                            if (this.val == max)
+                                dpy.settext("None");
+                            else
+                                dpy.settext(Integer.toString(this.val));
+                        }
+
+                        public void changed() {
+                            try {
+                                if (this.val > 10)
+                                    this.val = (this.val / 2) * 2;
+                                float val = (this.val == max) ? Float.POSITIVE_INFINITY : this.val;
+                                ui.setgprefs(prefs = prefs.update(null, prefs.hz, val));
+                            } catch (GSettings.SettingException e) {
+                                error(e.getMessage());
+                                return;
+                            }
+                            dpy();
+                        }
+                    }, dpy);
+                }
+                appender.add(new Label("Framerate limit (background window)"));
+                {
+                    Label dpy = new Label("");
+                    final int max = 250;
+                    appender.addRow(new HSlider(160, 1, max, (prefs.bghz.val == Float.POSITIVE_INFINITY) ? max : prefs.bghz.val.intValue()) {
+                        protected void added() {
+                            dpy();
+                            this.c.y = dpy.c.y + ((dpy.sz.y - this.sz.y) / 2);
+                        }
+
+                        void dpy() {
+                            if (this.val == max)
+                                dpy.settext("None");
+                            else
+                                dpy.settext(Integer.toString(this.val));
+                        }
+
+                        public void changed() {
+                            try {
+                                if (this.val > 10)
+                                    this.val = (this.val / 2) * 2;
+                                float val = (this.val == max) ? Float.POSITIVE_INFINITY : this.val;
+                                ui.setgprefs(prefs = prefs.update(null, prefs.bghz, val));
+                            } catch (GSettings.SettingException e) {
+                                error(e.getMessage());
+                                return;
+                            }
+                            dpy();
+                        }
+                    }, dpy);
+                }
+                appender.add(new Label("Frame sync mode"));
+                {
+                    boolean[] done = {false};
+                    RadioGroup grp = new RadioGroup(this) {
+                        public void changed(int btn, String lbl) {
+                            if (!done[0])
+                                return;
+                            try {
+                                ui.setgprefs(prefs = prefs.update(null, prefs.syncmode, JOGLPanel.SyncMode.values()[btn]));
+                            } catch (GSettings.SettingException e) {
+                                error(e.getMessage());
+                                return;
+                            }
+                        }
+                    };
+                    Widget prev;//FIXME RadioGroup with appender
+                    prev = new Label("\u2191 Better performance, worse latency");
+                    appender.add(prev);
+                    prev = grp.add("One-frame overlay", new Coord(5, y));
+                    appender.add(prev);
+                    prev = grp.add("Tick overlay", new Coord(5, y));
+                    appender.add(prev);
+                    prev = grp.add("CPU-sequential", new Coord(5, y));
+                    appender.add(prev);
+                    prev = grp.add("GPU-sequential", new Coord(5, y));
+                    appender.add(prev);
+                    prev = new Label("\u2193 Worse performance, better latency");
+                    appender.add(prev);
+                    grp.check(prefs.syncmode.val.ordinal());
+                    done[0] = true;
+                }
+		/* XXXRENDER
+		add(new CheckBox("Antialiasing") {
+			{a = cf.fsaa.val;}
+
+			public void set(boolean val) {
+			    try {
+				cf.fsaa.set(val);
+			    } catch(GLSettings.SettingException e) {
+				error(e.getMessage());
+				return;
+			    }
+			    a = val;
+			    cf.dirty = true;
+			}
+		    }, new Coord(0, y));
+		y += 25;
+		add(new Label("Anisotropic filtering"), new Coord(0, y));
+		if(cf.anisotex.max() <= 1) {
+		    add(new Label("(Not supported)"), new Coord(15, y + 15));
+		} else {
+		    final Label dpy = add(new Label(""), new Coord(165, y + 15));
+		    add(new HSlider(160, (int)(cf.anisotex.min() * 2), (int)(cf.anisotex.max() * 2), (int)(cf.anisotex.val * 2)) {
+			    protected void added() {
+				dpy();
+				this.c.y = dpy.c.y + ((dpy.sz.y - this.sz.y) / 2);
+			    }
+			    void dpy() {
+				if(val < 2)
+				    dpy.settext("Off");
+				else
+				    dpy.settext(String.format("%.1f\u00d7", (val / 2.0)));
+			    }
+			    public void changed() {
+				try {
+				    cf.anisotex.set(val / 2.0f);
+				} catch(GLSettings.SettingException e) {
+				    error(e.getMessage());
+				    return;
+				}
+				dpy();
+				cf.dirty = true;
+			    }
+			}, new Coord(0, y + 15));
+		}
+		*/
+                appender.add(new Button(200, "Reset to defaults") {
+                    public void click() {
+                        ui.setgprefs(GSettings.defaults());
+                        curcf.destroy();
+                        curcf = null;
+                    }
+                });
+
                 appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
                     {
                         a = Config.DivertPolityMessages;
@@ -168,137 +446,6 @@ public class OptWnd extends Window {
                         a = val;
                     }
                 });
-                appender.add(new CheckBox("Render shadows") {
-                    {
-                        a = cf.lshadow.val;
-                    }
-
-                    public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.lshadow.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                GameUI gui = getparent(GameUI.class);
-                                if (gui != null)
-                                    gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.lshadow.set(false);
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-                appender.add(new CheckBox("Antialiasing") {
-                    {
-                        a = cf.fsaa.val;
-                    }
-
-                    public void set(boolean val) {
-                        try {
-                            cf.fsaa.set(val);
-                        } catch (GLSettings.SettingException e) {
-                            GameUI gui = getparent(GameUI.class);
-                            if (gui != null)
-                                gui.error(e.getMessage());
-                            return;
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-
-                Label fpsBackgroundLimitLbl = new Label("Background FPS limit: " + (Config.fpsBackgroundLimit == -1 ? "unlimited" : Config.fpsBackgroundLimit));
-                appender.add(fpsBackgroundLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void attach(UI ui) {
-                        super.attach(ui);
-                        if(Config.fpsBackgroundLimit == -1) {
-                            val = 49;
-                        } else {
-                            val = Config.fpsBackgroundLimit / 5;
-                        }
-                    }
-
-                    public void changed() {
-                        if(val == 0) {
-                            Config.fpsBackgroundLimit = 1;
-                        } else if(val == 49) {
-                            Config.fpsBackgroundLimit = -1; // Unlimited
-                        } else {
-                            Config.fpsBackgroundLimit = val * 5;
-                        }
-                        Utils.setprefi("fpsBackgroundLimit", Config.fpsBackgroundLimit);
-                        HavenPanel.bgfd = 1000 / Config.fpsBackgroundLimit;
-                        if(Config.fpsBackgroundLimit == -1) {
-                            fpsBackgroundLimitLbl.settext("Background FPS limit: unlimited");
-                        } else {
-                            fpsBackgroundLimitLbl.settext("Background FPS limit: " + Config.fpsBackgroundLimit);
-                        }
-                    }
-                });
-
-                Label fpsLimitLbl = new Label("FPS limit: " + (Config.fpsLimit == -1 ? "unlimited" : Config.fpsLimit));
-                appender.add(fpsLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void attach(UI ui) {
-                        super.attach(ui);
-                        if(Config.fpsLimit == -1) {
-                            val = 49;
-                        } else {
-                            val = Config.fpsLimit / 5;
-                        }
-                    }
-
-                    public void changed() {
-                        if(val == 0) {
-                            Config.fpsLimit = 1;
-                        } else if (val == 49) {
-                            Config.fpsLimit = -1; // Unlimited
-                        } else {
-                            Config.fpsLimit = val * 5;
-                        }
-                        Utils.setprefi("fpsLimit", Config.fpsLimit);
-                        HavenPanel.fd = 1000 / Config.fpsLimit;
-                        if(Config.fpsLimit == -1) {
-                            fpsLimitLbl.settext("FPS limit: unlimited");
-                        } else {
-                            fpsLimitLbl.settext("FPS limit: " + Config.fpsLimit);
-                        }
-                    }
-                });
-                appender.add(new Label("Anisotropic filtering"));
-                if (cf.anisotex.max() <= 1) {
-                    appender.add(new Label("(Not supported)"));
-                } else {
-                    final Label dpy = new Label("");
-                    appender.addRow(
-                            new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
-                                protected void added() {
-                                    dpy();
-                                }
-
-                                void dpy() {
-                                    if (val < 2)
-                                        dpy.settext("Off");
-                                    else
-                                        dpy.settext(String.format("%.1f\u00d7", (val / 2.0)));
-                                }
-
-                                public void changed() {
-                                    try {
-                                        cf.anisotex.set(val / 2.0f);
-                                    } catch (GLSettings.SettingException e) {
-                                        getparent(GameUI.class).error(e.getMessage());
-                                        return;
-                                    }
-                                    dpy();
-                                    cf.dirty = true;
-                                }
-                            },
-                            dpy);
-                }
                 appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious. (Requires restart)") {
                     {
                         a = Config.obviousridges;
@@ -325,6 +472,7 @@ public class OptWnd extends Window {
                     {
                         a = Config.lowerterraindistance;
                     }
+
                     public void set(boolean val) {
                         Config.lowerterraindistance = val;
                         Utils.setprefb("lowerterraindistance", val);
@@ -335,6 +483,7 @@ public class OptWnd extends Window {
                     {
                         a = Config.disabletiletrans;
                     }
+
                     public void set(boolean val) {
                         Config.disabletiletrans = val;
                         Utils.setprefb("disabletiletrans", val);
@@ -345,6 +494,7 @@ public class OptWnd extends Window {
                     {
                         a = Config.disableterrainsmooth;
                     }
+
                     public void set(boolean val) {
                         Config.disableterrainsmooth = val;
                         Utils.setprefb("disableterrainsmooth", val);
@@ -355,6 +505,7 @@ public class OptWnd extends Window {
                     {
                         a = Config.disableelev;
                     }
+
                     public void set(boolean val) {
                         Config.disableelev = val;
                         Utils.setprefb("disableelev", val);
@@ -462,7 +613,6 @@ public class OptWnd extends Window {
                 for (CheckListboxItem itm : Config.disableanim.values())
                     disanimlist.items.add(itm);
                 appender.add(disanimlist);
-
                 pack();
             }
         }
@@ -470,21 +620,22 @@ public class OptWnd extends Window {
         private CPanel curcf = null;
 
         public void draw(GOut g) {
-            if ((curcf == null) || (g.gc.pref != curcf.cf)) {
+            if ((curcf == null) || (ui.gprefs != curcf.prefs)) {
                 if (curcf != null)
                     curcf.destroy();
-                curcf = add(new CPanel(g.gc.pref), Coord.z);
+                curcf = add(new CPanel(ui.gprefs), Coord.z);
             }
             super.draw(g);
         }
     }
+
     private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
         final Widget container = new Widget();
         final Label lbl = new Label(text);
         final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl);
         final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
-        container.add(lbl, new Coord(0, height - lbl.sz.y/2));
-        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y/2));
+        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
+        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
         container.pack();
         return container;
     }
@@ -494,71 +645,10 @@ public class OptWnd extends Window {
         final Label lbl = new Label(text);
         final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl, cb);
         final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
-        container.add(lbl, new Coord(0, height - lbl.sz.y/2));
-        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y/2));
+        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
+        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
         container.pack();
         return container;
-    }
-
-
-
-
-
-
-
-    public OptWnd(boolean gopts) {
-        super(new Coord(620, 400), "Options", true);
-
-        main = add(new Panel());
-        video = add(new VideoPanel(main));
-        audio = add(new Panel());
-        display = add(new Panel());
-        map = add(new Panel());
-        general = add(new Panel());
-        combat = add(new Panel());
-        control = add(new Panel());
-        uis = add(new Panel());
-        uip = add(new Panel());
-        quality = add(new Panel());
-        flowermenus = add(new Panel());
-        soundalarms = add(new Panel());
-        hidesettings = add(new Panel());
-        studydesksettings = add(new Panel());
-        autodropsettings = add(new Panel());
-        keybindsettings = add(new Panel());
-        chatsettings = add(new Panel());
-        clearboulders = add(new Panel());
-        clearbushes = add(new Panel());
-        cleartrees = add(new Panel());
-        clearhides = add(new Panel());
-        additions = add(new Panel());
-        discord = add(new Panel());
-        mapping = add(new Panel());
-        modification = add(new Panel());
-
-        initMain(gopts);
-        initAudio();
-        initDisplay();
-        initMap();
-        initGeneral();
-        initCombat();
-        initControl();
-        initUis();
-        initTheme();
-        initQuality();
-        initFlowermenus();
-        initSoundAlarms();
-        initHideMenu();
-        initstudydesksettings();
-        initautodropsettings();
-        initkeybindsettings();
-        initchatsettings();
-        initAdditions();
-        initMapping();
-        initDiscord();
-        initModification();
-
-        chpanel(main);
     }
 
     private void initMapping() {
@@ -651,8 +741,8 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "Hidden Objects", 'h', hidesettings), new Coord(420, 90));
         main.add(new PButton(200, "Study Desk", 'o', studydesksettings), new Coord(0, 120));
         main.add(new PButton(200, "Keybinds", 'p', keybindsettings), new Coord(210, 120));
-        main.add(new PButton(200, "Chat",'c', chatsettings), new Coord(420,120));
-        main.add(new PButton(200, "Theme",'t', uip), new Coord(0,150));
+        main.add(new PButton(200, "Chat", 'c', chatsettings), new Coord(420, 120));
+        main.add(new PButton(200, "Theme", 't', uip), new Coord(0, 150));
         main.add(new PButton(200, "Autodrop", 's', autodropsettings), new Coord(420, 150));
         main.add(new PButton(200, "Additional settings", 'z', additions), new Coord(0, 180));
         main.add(new PButton(200, "PBotDiscord", 'z', discord), new Coord(0, 210));
@@ -662,38 +752,37 @@ public class OptWnd extends Window {
             main.add(new Button(200, "Disconnect Discord") {
                 public void click() {
                     gameui().discordconnected = false;
-                    if(Discord.jdalogin != null) {
-                        PBotUtils.sysMsg("Discord Disconnected",Color.white);
+                    if (Discord.jdalogin != null) {
+                        PBotUtils.sysMsg("Discord Disconnected", Color.white);
                         gameui().discordconnected = false;
                         Discord.jdalogin.shutdownNow();
                         Discord.jdalogin = null;
-                        for(int i=0;i<15;i++) {
+                        for (int i = 0; i < 15; i++) {
                             for (Widget w = gameui().chat.lchild; w != null; w = w.prev) {
                                 if (w instanceof ChatUI.DiscordChat)
                                     w.destroy();
                             }
                         }
-                    }else
-                        PBotUtils.sysMsg("Not currently connected.",Color.white);
+                    } else
+                        PBotUtils.sysMsg("Not currently connected.", Color.white);
                 }
             }, new Coord(210, 150));
             main.add(new Button(200, "Join Village Discord") {
                 public void click() {
-                    if(!gameui().discordconnected) {
+                    if (!gameui().discordconnected) {
                         if (Resource.getLocString(Resource.BUNDLE_LABEL, Config.discordbotkey) != null) {
                             new Thread(new Discord(PBotAPI.gui, "normal")).start();
                             gameui().discordconnected = true;
-                        }
-                        else
-                            PBotUtils.sysMsg("No Key Detected, if there is one in chat settings you might need to relog.",Color.white);
-                    }else if(gameui().discordconnected)
-                        PBotUtils.sysMsg("Already connected.",Color.white);
+                        } else
+                            PBotUtils.sysMsg("No Key Detected, if there is one in chat settings you might need to relog.", Color.white);
+                    } else if (gameui().discordconnected)
+                        PBotUtils.sysMsg("Already connected.", Color.white);
                 }
             }, new Coord(210, 180));
             main.add(new Button(200, "Join Ingame Discord") {
                 public void click() {
-                    if(gameui().discordconnected)
-                        PBotUtils.sysMsg("Already Connected.",Color.white);
+                    if (gameui().discordconnected)
+                        PBotUtils.sysMsg("Already Connected.", Color.white);
                     else {
                         new Thread(new Discord(PBotAPI.gui, "ard")).start();
                         gameui().discordconnected = true;
@@ -722,7 +811,7 @@ public class OptWnd extends Window {
             main.add(new Button(200, "Switch character") {
                 public void click() {
                     GameUI gui = gameui();
-                    if(Discord.jdalogin != null)
+                    if (Discord.jdalogin != null)
                         gui.DiscordToggle();
                     gui.act("lo", "cs");
                     if (gui != null & gui.map != null)
@@ -732,7 +821,7 @@ public class OptWnd extends Window {
             main.add(new Button(200, "Log out") {
                 public void click() {
                     GameUI gui = gameui();
-                    if(Discord.jdalogin !=null)
+                    if (Discord.jdalogin != null)
                         gui.DiscordToggle();
                     gui.act("lo");
                     if (gui != null & gui.map != null)
@@ -795,7 +884,7 @@ public class OptWnd extends Window {
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
-                val = (int)(Config.cleavesoundvol * 1000);
+                val = (int) (Config.cleavesoundvol * 1000);
             }
 
             public void changed() {
@@ -1029,12 +1118,12 @@ public class OptWnd extends Window {
         display.pack();
     }
 
-    private void initTheme(){
+    private void initTheme() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(uip, new Coord(620, 350)));
         appender.setVerticalMargin(VERTICAL_MARGIN);
         { //Theme
             final IndirRadioGroup<String> rgrp = new IndirRadioGroup<>("Main Hud Theme (requires restart)", HUDTHEME);
-            for(final String name : THEMES.get()) {
+            for (final String name : THEMES.get()) {
                 rgrp.add(name, name);
             }
             appender.add(rgrp);
@@ -1239,15 +1328,15 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new IndirCheckBox("Show Your Movement Path", SHOWPLAYERPATH));
-        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val ->{
+        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> {
             GobPath.clrst = new States.ColState(val);
         }));
         appender.add(new IndirCheckBox("Show Other Player Paths - Kinned player's paths will be their kin color.", SHOWGOBPATH));
-        appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val ->{
+        appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val -> {
             Movable.unknowngobcol = new States.ColState(val);
         }));
         appender.add(new IndirCheckBox("Show Mob Paths", SHOWANIMALPATH));
-        appender.add(ColorPreWithLabel("Animal path color: ", ANIMALPATHCOL, val ->{
+        appender.add(ColorPreWithLabel("Animal path color: ", ANIMALPATHCOL, val -> {
             Movable.animalpathcol = new States.ColState(val);
         }));
         appender.add(new CheckBox("Show wear bars") {
@@ -1272,7 +1361,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new Label("Cave-in Warning Dust Duration in Minutes"),makeCaveInDropdown());
+        appender.addRow(new Label("Cave-in Warning Dust Duration in Minutes"), makeCaveInDropdown());
         appender.add(new CheckBox("Show animal radius") {
             {
                 a = Config.showanimalrad;
@@ -1297,7 +1386,7 @@ public class OptWnd extends Window {
         });
         appender.add(ColorPreWithLabel("Deep Ocean Color: (requires relog)", DEEPWATERCOL));
         appender.add(ColorPreWithLabel("All Other Water Color: (requires relog)", ALLWATERCOL));
-        appender.add(ColorPreWithLabel("Beehive radius color: ", BEEHIVECOLOR, val ->{
+        appender.add(ColorPreWithLabel("Beehive radius color: ", BEEHIVECOLOR, val -> {
             BPRadSprite.smatBeehive = new States.ColState(val);
             GameUI gui = gameui();
             if (gui != null) {
@@ -1307,7 +1396,7 @@ public class OptWnd extends Window {
                 }
             }
         }));
-        appender.add(ColorPreWithLabel("Trough radius color: ", TROUGHCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Trough radius color: ", TROUGHCOLOR, val -> {
             BPRadSprite.smatTrough = new States.ColState(val);
             GameUI gui = gameui();
             if (gui != null) {
@@ -1317,7 +1406,7 @@ public class OptWnd extends Window {
                 }
             }
         }));
-        appender.add(ColorPreWithLabel("Dangerous animal radius color: ", ANIMALDANGERCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Dangerous animal radius color: ", ANIMALDANGERCOLOR, val -> {
             BPRadSprite.smatDanger = new States.ColState(val);
             GameUI gui = gameui();
             if (gui != null) {
@@ -1328,7 +1417,7 @@ public class OptWnd extends Window {
                 }
             }
         }));
-        appender.add(ColorPreWithLabel("Mine support radius color: ", SUPPORTDANGERCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Mine support radius color: ", SUPPORTDANGERCOLOR, val -> {
             BPRadSprite.smatSupports = new States.ColState(val);
             GameUI gui = gameui();
             if (gui != null) {
@@ -1418,7 +1507,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val -> {
             BPRadSprite.cRackMissing = new Material.Colors(CHEESERACKMISSINGCOLOR.get());
         }));
         appender.add(new CheckBox("Highlight finished garden pots. Requires restart.") {
@@ -1548,7 +1637,7 @@ public class OptWnd extends Window {
          }
          };**/
 
-        appender.addRow(new CheckBox("Scalable trees (req. logout)"){
+        appender.addRow(new CheckBox("Scalable trees (req. logout)") {
             {
                 this.a = configuration.scaletree;
             }
@@ -1559,7 +1648,7 @@ public class OptWnd extends Window {
                 configuration.scaletree = val;
                 this.a = val;
             }
-        }, new HSlider(200, 0, 255, configuration.scaletreeint){
+        }, new HSlider(200, 0, 255, configuration.scaletreeint) {
 
             @Override
             protected void attach(UI ui) {
@@ -1571,6 +1660,7 @@ public class OptWnd extends Window {
                 configuration.scaletreeint = this.val;
                 Utils.setprefi("scaletreeint", configuration.scaletreeint);
             }
+
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 Tex tex = Text.render("Scale tree and brush : " + configuration.scaletreeint + "%").tex();
@@ -1596,9 +1686,9 @@ public class OptWnd extends Window {
         Button OutputSettings = new Button(220, "Output Light Settings to System Tab") {
             @Override
             public void click() {
-                PBotUtils.sysLogAppend("Ambient Red "+DefSettings.NVAMBIENTCOL.get().getRed() + " Green - "+DefSettings.NVAMBIENTCOL.get().getGreen()+ " Blue - "+NVAMBIENTCOL.get().getBlue(),"white");
-                PBotUtils.sysLogAppend("Diffuse Red "+DefSettings.NVDIFFUSECOL.get().getRed() + " Green - "+DefSettings.NVDIFFUSECOL.get().getGreen()+ " Blue - "+NVDIFFUSECOL.get().getBlue(),"white");
-                PBotUtils.sysLogAppend("Specular Red "+DefSettings.NVSPECCOC.get().getRed() + " Green - "+DefSettings.NVSPECCOC.get().getGreen()+ " Blue - "+NVSPECCOC.get().getBlue(),"white");
+                PBotUtils.sysLogAppend("Ambient Red " + DefSettings.NVAMBIENTCOL.get().getRed() + " Green - " + DefSettings.NVAMBIENTCOL.get().getGreen() + " Blue - " + NVAMBIENTCOL.get().getBlue(), "white");
+                PBotUtils.sysLogAppend("Diffuse Red " + DefSettings.NVDIFFUSECOL.get().getRed() + " Green - " + DefSettings.NVDIFFUSECOL.get().getGreen() + " Blue - " + NVDIFFUSECOL.get().getBlue(), "white");
+                PBotUtils.sysLogAppend("Specular Red " + DefSettings.NVSPECCOC.get().getRed() + " Green - " + DefSettings.NVSPECCOC.get().getGreen() + " Blue - " + NVSPECCOC.get().getBlue(), "white");
             }
         };
         appender.add(OutputSettings);
@@ -1606,36 +1696,36 @@ public class OptWnd extends Window {
         Button Preset1 = new Button(220, "Friday Evening") {
             @Override
             public void click() {
-                DefSettings.NVAMBIENTCOL.set(new Color(51,59,119));
-                DefSettings.NVDIFFUSECOL.set(new Color(20,28,127));
-                DefSettings.NVSPECCOC.set(new Color(167,117,103));
+                DefSettings.NVAMBIENTCOL.set(new Color(51, 59, 119));
+                DefSettings.NVDIFFUSECOL.set(new Color(20, 28, 127));
+                DefSettings.NVSPECCOC.set(new Color(167, 117, 103));
             }
         };
         appender.add(Preset1);
         Button Preset2 = new Button(220, "Thieving Night") {
             @Override
             public void click() {
-                DefSettings.NVAMBIENTCOL.set(new Color(5,10,51));
-                DefSettings.NVDIFFUSECOL.set(new Color(0,31,50));
-                DefSettings.NVSPECCOC.set(new Color(138,64,255));
+                DefSettings.NVAMBIENTCOL.set(new Color(5, 10, 51));
+                DefSettings.NVDIFFUSECOL.set(new Color(0, 31, 50));
+                DefSettings.NVSPECCOC.set(new Color(138, 64, 255));
             }
         };
         appender.add(Preset2);
         Button Preset3 = new Button(220, "Hunting Dusk") {
             @Override
             public void click() {
-                DefSettings.NVAMBIENTCOL.set(new Color(165,213,255));
-                DefSettings.NVDIFFUSECOL.set(new Color(160,193,255));
-                DefSettings.NVSPECCOC.set(new Color(138,64,255));
+                DefSettings.NVAMBIENTCOL.set(new Color(165, 213, 255));
+                DefSettings.NVDIFFUSECOL.set(new Color(160, 193, 255));
+                DefSettings.NVSPECCOC.set(new Color(138, 64, 255));
             }
         };
         appender.add(Preset3);
         Button Preset4 = new Button(220, "Sunny Morning") {
             @Override
             public void click() {
-                DefSettings.NVAMBIENTCOL.set(new Color(211,180,72));
-                DefSettings.NVDIFFUSECOL.set(new Color(255,178,169));
-                DefSettings.NVSPECCOC.set(new Color(255,255,255));
+                DefSettings.NVAMBIENTCOL.set(new Color(211, 180, 72));
+                DefSettings.NVDIFFUSECOL.set(new Color(255, 178, 169));
+                DefSettings.NVSPECCOC.set(new Color(255, 255, 255));
             }
         };
         appender.add(Preset4);
@@ -1643,9 +1733,9 @@ public class OptWnd extends Window {
         Button Preset5 = new Button(220, "Amber Default") {
             @Override
             public void click() {
-                DefSettings.NVAMBIENTCOL.set(new Color(200,200,200));
-                DefSettings.NVDIFFUSECOL.set(new Color(200,200,200));
-                DefSettings.NVSPECCOC.set(new Color(255,255,255));
+                DefSettings.NVAMBIENTCOL.set(new Color(200, 200, 200));
+                DefSettings.NVDIFFUSECOL.set(new Color(200, 200, 200));
+                DefSettings.NVSPECCOC.set(new Color(255, 255, 255));
             }
         };
         appender.add(Preset5);
@@ -1676,7 +1766,7 @@ public class OptWnd extends Window {
                 Config.mapdrawparty = val;
                 a = val;
             }
-        },10,370);
+        }, 10, 370);
 
         map.add(new CheckBox("Show names above questgivers") {
             {
@@ -1688,7 +1778,7 @@ public class OptWnd extends Window {
                 Config.mapdrawquests = val;
                 a = val;
             }
-        },10,330);
+        }, 10, 330);
         map.add(new CheckBox("Show names above marker flags") {
             {
                 a = Config.mapdrawflags;
@@ -1699,7 +1789,7 @@ public class OptWnd extends Window {
                 Config.mapdrawflags = val;
                 a = val;
             }
-        },10,350);
+        }, 10, 350);
         map.add(new CheckBox("Disable map updating") {
             {
                 a = Config.stopmapupdate;
@@ -1710,7 +1800,7 @@ public class OptWnd extends Window {
                 Config.stopmapupdate = val;
                 a = val;
             }
-        },425,350);
+        }, 425, 350);
 
         map.add(new PButton(200, "Back", 27, main), new Coord(210, 380));
         map.pack();
@@ -1863,7 +1953,7 @@ public class OptWnd extends Window {
             }
         });
         Label AutodrinkThreshold;
-        AutodrinkThreshold = new Label("Autodrink Threshold: "+Config.autodrinkthreshold);
+        AutodrinkThreshold = new Label("Autodrink Threshold: " + Config.autodrinkthreshold);
         appender.add(AutodrinkThreshold);
         appender.add(new HSlider(130, 0, 100, Config.autodrinkthreshold) {
             public void added() {
@@ -2047,7 +2137,7 @@ public class OptWnd extends Window {
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
-                val = (int)(Config.attackedvol * 1000);
+                val = (int) (Config.attackedvol * 1000);
             }
 
             public void changed() {
@@ -2468,7 +2558,7 @@ public class OptWnd extends Window {
                 Utils.setprefb("hidecalendar", val);
                 Config.hidecalendar = val;
                 a = val;
-                if(gameui() != null)
+                if (gameui() != null)
                     gameui().cal.visible = !Config.hidecalendar;
             }
         });
@@ -2484,17 +2574,17 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new IndirCheckBox("Show F Key Belt", SHOWFKBELT, val -> {
-            if(ui.gui != null && ui.gui.fbelt != null) {
+            if (ui.gui != null && ui.gui.fbelt != null) {
                 ui.gui.fbelt.setVisibile(val);
             }
         }));
         appender.add(new IndirCheckBox("Show NumPad Key Belt", SHOWNPBELT, val -> {
-            if(ui.gui != null && ui.gui.npbelt != null) {
+            if (ui.gui != null && ui.gui.npbelt != null) {
                 ui.gui.npbelt.setVisibile(val);
             }
         }));
         appender.add(new IndirCheckBox("Show Number Key Belt", SHOWNBELT, val -> {
-            if(ui.gui != null && ui.gui.nbelt != null) {
+            if (ui.gui != null && ui.gui.nbelt != null) {
                 ui.gui.nbelt.setVisibile(val);
             }
         }));
@@ -2614,11 +2704,13 @@ public class OptWnd extends Window {
                     public void added() {
                         updateLabel();
                     }
+
                     public void changed() {
                         Utils.setprefi("fontadd", val);
                         Config.fontadd = val;
                         updateLabel();
                     }
+
                     private void updateLabel() {
                         fontAdd.settext(String.format("%d", val));
                     }
@@ -2662,7 +2754,7 @@ public class OptWnd extends Window {
                 Utils.delpref("haven.study.position");
             }
         };
-        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2 , 320));
+        uis.add(resetWndBtn, new Coord(620 / 2 - resetWndBtn.sz.x / 2, 320));
         uis.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         uis.pack();
     }
@@ -2856,7 +2948,6 @@ public class OptWnd extends Window {
         }, new Coord(140, 70));
 
 
-
         additions.add(f, new Coord(300, 10));
 
         appender.add(new CheckBox("Insane Item Alert (Above Legendary)") {
@@ -3001,6 +3092,7 @@ public class OptWnd extends Window {
             {
                 a = Config.discordplayeralert;
             }
+
             public void set(boolean val) {
                 Utils.setprefb("discordplayeralert", val);
                 Config.discordplayeralert = val;
@@ -3012,6 +3104,7 @@ public class OptWnd extends Window {
             {
                 a = Config.discordalarmalert;
             }
+
             public void set(boolean val) {
                 Utils.setprefb("discordalarmalert", val);
                 Config.discordalarmalert = val;
@@ -3019,7 +3112,7 @@ public class OptWnd extends Window {
             }
         });
 
-        Frame f = new Frame(new Coord( 300, 100), false);
+        Frame f = new Frame(new Coord(300, 100), false);
 
         discorduser = new CheckBox("Message a specific user.") {
             {
@@ -3056,19 +3149,18 @@ public class OptWnd extends Window {
 
         f.add(new Label("User Name/Role ID to Alert:"), 2, 60);
         f.add(new TextEntry(80, Utils.getpref("discordalertstring", "")) {
-                    @Override
-                    public boolean keydown(KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-                        Utils.setpref("discordalertstring", text);
-                        Config.discordalertstring = text;
-                        System.out.println(text);
-                        System.out.println(Utils.getpref("discordalertstring", ""));
-                        return buf.key(ev);
-                    }
-                }
-        , new Coord(180, 60));
-
+                  @Override
+                  public boolean keydown(KeyEvent ev) {
+                      if (!parent.visible)
+                          return false;
+                      Utils.setpref("discordalertstring", text);
+                      Config.discordalertstring = text;
+                      System.out.println(text);
+                      System.out.println(Utils.getpref("discordalertstring", ""));
+                      return buf.key(ev);
+                  }
+              }
+                , new Coord(180, 60));
 
 
         discord.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
@@ -3120,7 +3212,7 @@ public class OptWnd extends Window {
                                 configuration.defaultUtilsCustomLoginScreenBgBoolean = val;
                                 a = val;
                                 LoginScreen.bg = configuration.bgCheck();
-                                if(ui.gui == null || ui.gui.ui == null || ui.gui.ui.sess == null || !ui.sess.alive())
+                                if (ui.gui == null || ui.gui.ui == null || ui.gui.ui.sess == null || !ui.sess.alive())
                                     ui.uimsg(1, "bg");
                             }
 
@@ -3201,6 +3293,7 @@ public class OptWnd extends Window {
                 configuration.autoclick = val;
                 a = val;
             }
+
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 Tex tex = Text.render("Bad works with the old system movement. Turn on only by interest.").tex();
@@ -3230,7 +3323,7 @@ public class OptWnd extends Window {
         appender.add(new Label(""));
         appender.add(new Label("Map settings. temp."));
 
-        appender.add(new CheckBox("Map settings. temp."){
+        appender.add(new CheckBox("Map settings. temp.") {
             {
                 a = configuration.customMarkObj;
             }
@@ -3253,7 +3346,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        flowermenus.add(new Label("Autopick Clusters:"), new Coord(150,0));
+        flowermenus.add(new Label("Autopick Clusters:"), new Coord(150, 0));
         CheckListbox clusterlist = new CheckListbox(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
@@ -3268,7 +3361,7 @@ public class OptWnd extends Window {
         flowermenus.add(clusterlist, new Coord(150, 20));
 
 
-        flowermenus.add(new Label("Automatic selecton:"), new Coord(0,0));
+        flowermenus.add(new Label("Automatic selecton:"), new Coord(0, 0));
         CheckListbox flowerlist = new CheckListbox(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
@@ -3277,7 +3370,7 @@ public class OptWnd extends Window {
             }
         };
         Utils.loadprefchklist("flowersel", Config.flowermenus);
-        for(CheckListboxItem itm : Config.flowermenus.values())
+        for (CheckListboxItem itm : Config.flowermenus.values())
             flowerlist.items.add(itm);
         //  flowerlist.items.addAll(Config.flowermenus.values());
         flowermenus.add(flowerlist, new Coord(0, 20));
@@ -3285,12 +3378,13 @@ public class OptWnd extends Window {
         flowermenus.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         flowermenus.pack();
     }
+
     private void initstudydesksettings() {
         int x = 0;
         int y = 0, my = 0;
-        studydesksettings.add(new Label("Choose curios to check your studydesk for:"),x, y);
+        studydesksettings.add(new Label("Choose curios to check your studydesk for:"), x, y);
         y += 15;
-        final CurioList list = studydesksettings.add(new CurioList(),x,y);
+        final CurioList list = studydesksettings.add(new CurioList(), x, y);
 
         y += list.sz.y + 5;
         final TextEntry value = studydesksettings.add(new TextEntry(150, "") {
@@ -3314,12 +3408,13 @@ public class OptWnd extends Window {
         studydesksettings.add(new PButton(200, "Back", 27, main), 0, my + 35);
         studydesksettings.pack();
     }
+
     private void initautodropsettings() {
         int x = 0;
         int y = 0;
-        autodropsettings.add(new Label("Choose/add inventory items to automatically drop:"),x, y);
+        autodropsettings.add(new Label("Choose/add inventory items to automatically drop:"), x, y);
         y += 15;
-        final AutodropList list = autodropsettings.add(new AutodropList(),x,y);
+        final AutodropList list = autodropsettings.add(new AutodropList(), x, y);
 
         y += list.sz.y + 5;
         final TextEntry value = autodropsettings.add(new TextEntry(150, "") {
@@ -3350,7 +3445,7 @@ public class OptWnd extends Window {
                 Config.dropMinedStones = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         y += 20;
         autodropsettings.add(new CheckBox("Drop mined ore") {
             {
@@ -3362,7 +3457,7 @@ public class OptWnd extends Window {
                 Config.dropMinedOre = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         y += 20;
         autodropsettings.add(new CheckBox("Drop mined silver/gold ore") {
             {
@@ -3374,7 +3469,7 @@ public class OptWnd extends Window {
                 Config.dropMinedOrePrecious = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         y += 20;
         autodropsettings.add(new CheckBox("Drop mined Cat Gold.") {
             {
@@ -3386,7 +3481,7 @@ public class OptWnd extends Window {
                 Config.dropMinedCatGold = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         y += 20;
         autodropsettings.add(new CheckBox("Drop mined Petrified SeaShells.") {
             {
@@ -3398,7 +3493,7 @@ public class OptWnd extends Window {
                 Config.dropMinedSeaShells = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         y += 20;
         autodropsettings.add(new CheckBox("Drop mined Strange Crystals.") {
             {
@@ -3410,17 +3505,18 @@ public class OptWnd extends Window {
                 Config.dropMinedCrystals = val;
                 a = val;
             }
-        }, new Coord(list.sz.x + 10,y));
+        }, new Coord(list.sz.x + 10, y));
         autodropsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         autodropsettings.pack();
     }
+
     private void initkeybindsettings() {
-        WidgetList<KeyBinder.ShortcutWidget> list = keybindsettings.add(new WidgetList<KeyBinder.ShortcutWidget>(new Coord(300, 24), 16){
+        WidgetList<KeyBinder.ShortcutWidget> list = keybindsettings.add(new WidgetList<KeyBinder.ShortcutWidget>(new Coord(300, 24), 16) {
             @Override
             public boolean mousedown(Coord c0, int button) {
                 boolean result = super.mousedown(c0, button);
                 KeyBinder.ShortcutWidget item = itemat(c0);
-                if(item != null) {
+                if (item != null) {
                     c0 = c0.add(0, sb.val * itemsz.y);
                     item.mousedown(c0.sub(item.parentpos(this)), button);
                 }
@@ -3430,7 +3526,7 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 KeyBinder.ShortcutWidget item = itemat(c0);
-                if(item != null) {
+                if (item != null) {
                     c0 = c0.add(0, sb.val * itemsz.y);
                     return item.tooltip(c0, prev);
                 }
@@ -3438,14 +3534,12 @@ public class OptWnd extends Window {
             }
         });
         list.canselect = false;
-        KeyBinder.makeWidgets(()->{
-            for(int i = 0; i< list.listitems();i++){
+        KeyBinder.makeWidgets(() -> {
+            for (int i = 0; i < list.listitems(); i++) {
                 list.listitem(i).update();
             }
             return null;
         }).forEach(list::additem);
-
-
 
 
         keybindsettings.pack();
@@ -3554,14 +3648,14 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        discordcheckbox = new CheckBox("Log village chat to Discord - Warning, best used if only one person is using on an alt."){
+        discordcheckbox = new CheckBox("Log village chat to Discord - Warning, best used if only one person is using on an alt.") {
             {
                 a = Config.discordchat;
             }
 
             public void set(boolean val) {
                 final String charname = gameui().chrid;
-                Utils.setprefb("discordchat_"+charname, val);
+                Utils.setprefb("discordchat_" + charname, val);
                 Config.discordchat = val;
                 a = val;
             }
@@ -3676,42 +3770,43 @@ public class OptWnd extends Window {
             {
                 a = Config.showoverlay;
             }
+
             public void set(boolean val) {
                 Utils.setprefb("showoverlay", val);
                 Config.showoverlay = val;
                 a = val;
             }
         });
-        appender.add(ColorPreWithLabel("Hidden/Hitbox color: ", HIDDENCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Hidden/Hitbox color: ", HIDDENCOLOR, val -> {
             GobHitbox.fillclrstate = new States.ColState(val);
             HitboxMesh.updateColor(new States.ColState(val));
-            if(ui.sess != null) {
+            if (ui.sess != null) {
                 ui.sess.glob.oc.changeAllGobs();
             }
         }));
-        appender.add(ColorPreWithLabel("Guidelines color: ", GUIDESCOLOR, val ->{
+        appender.add(ColorPreWithLabel("Guidelines color: ", GUIDESCOLOR, val -> {
             GobHitbox.bbclrstate = new States.ColState(val);
             TileOutline.color = new States.ColState(
                     val.getRed(),
                     val.getGreen(),
                     val.getBlue(),
-                    (int)(val.getAlpha() * 0.5)
+                    (int) (val.getAlpha() * 0.5)
             );
-            if(ui.sess != null) {
+            if (ui.sess != null) {
                 ui.sess.glob.oc.changeAllGobs();
             }
         }));
         appender.add(new Button(200, "New Hidden System", false) {
             public void click() {
                 GameUI gui = gameui();
-                if(gui != null)
+                if (gui != null)
                     gui.toggleHidden();
             }
         });
         appender.add(new Button(200, "New Deleted System", false) {
             public void click() {
                 GameUI gui = gameui();
-                if(gui != null)
+                if (gui != null)
                     gui.toggleDeleted();
             }
         });
@@ -3743,7 +3838,7 @@ public class OptWnd extends Window {
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
-                val = (int)(Config.alarmunknownvol * 1000);
+                val = (int) (Config.alarmunknownvol * 1000);
             }
 
             public void changed() {
@@ -3753,7 +3848,7 @@ public class OptWnd extends Window {
             }
         });
         appender.setVerticalMargin(0);
-        appender.addRow(new Label("Red Player Alarm"),makeAlarmDropdownRed());
+        appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
@@ -3810,7 +3905,7 @@ public class OptWnd extends Window {
         appender.add(new Button(200, "New Alerts System", false) {
             public void click() {
                 GameUI gui = gameui();
-                if(gui != null)
+                if (gui != null)
                     gui.toggleAlerted();
             }
         });
@@ -3819,13 +3914,369 @@ public class OptWnd extends Window {
         soundalarms.pack();
     }
 
+    public class AudioPanel extends Panel {
+        public AudioPanel(Panel back, String title) {
+            super(title);
+
+            addWdg(new Label("Master audio volume"), 15);
+            {
+                Label dpy = new Label("");
+                addWdg(dpy, 0, new Coord(165, y));
+                addWdg(new HSlider(dpy.c.x - 5, 0, 1000, (int) (Audio.volume * 1000)) {
+                    protected void added() {
+                        dpy();
+                        this.c.y = dpy.c.y + ((dpy.sz.y - sz.y) / 2);
+                    }
+
+                    void dpy() {
+                        dpy.settext(Double.toString(val / 1000.0));
+                    }
+
+                    public void changed() {
+                        Audio.setvolume(val / 1000.0);
+                        dpy();
+                    }
+
+                    public Object tooltip(Coord c, Widget prev) {
+                        return RichText.render("Master audio volume: " + val / 1000.0, 0).tex();
+                    }
+                }, 20);
+            }
+
+            addWdg(new Label("In-game event volume"), 15);
+            {
+                Label dpy = new Label("");
+                addWdg(dpy, 0, new Coord(165, y));
+                addWdg(new HSlider(dpy.c.x - 5, 0, 1000, 0) {
+                    protected void added() {
+                        dpy();
+                        this.c.y = dpy.c.y + ((dpy.sz.y - sz.y) / 2);
+                    }
+
+                    void dpy() {
+                        dpy.settext(Double.toString(val / 1000.0));
+                    }
+
+                    protected void attach(UI ui) {
+                        super.attach(ui);
+                        val = (int) (ui.audio.pos.volume * 1000);
+                        dpy();
+                    }
+
+                    public void changed() {
+                        ui.audio.pos.setvolume(val / 1000.0);
+                        dpy();
+                    }
+
+                    public Object tooltip(Coord c, Widget prev) {
+                        return RichText.render("In-game event volume: " + val / 1000.0, 0).tex();
+                    }
+                }, 20);
+            }
+
+            addWdg(new Label("Ambient volume"), 15);
+            {
+                Label dpy = new Label("");
+                addWdg(dpy, 0, new Coord(165, y));
+                addWdg(new HSlider(dpy.c.x - 5, 0, 1000, 0) {
+                    protected void added() {
+                        dpy();
+                        this.c.y = dpy.c.y + ((dpy.sz.y - sz.y) / 2);
+                    }
+
+                    void dpy() {
+                        dpy.settext(Double.toString(val / 1000.0));
+                    }
+
+                    protected void attach(UI ui) {
+                        super.attach(ui);
+                        val = (int) (ui.audio.amb.volume * 1000);
+                        dpy();
+                    }
+
+                    public void changed() {
+                        ui.audio.amb.setvolume(val / 1000.0);
+                        dpy();
+                    }
+
+                    public Object tooltip(Coord c, Widget prev) {
+                        return RichText.render("Ambient volume: " + val / 1000.0, 0).tex();
+                    }
+                }, 20);
+            }
+
+            y += 20;
+            addWdg(back, 200, 20, 27, "Back");
+            pack();
+        }
+    }
+
+    private static final Text kbtt = RichText.render("$col[255,255,0]{Escape}: Cancel input\n" +
+            "$col[255,255,0]{Backspace}: Revert to default\n" +
+            "$col[255,255,0]{Delete}: Disable keybinding", 0);
+
+    public class BindingPanel extends Panel {
+        private int addbtn(Widget cont, String nm, KeyBinding cmd, int y) {
+            Widget btn = cont.add(new SetButton(175, cmd), 100, y);
+            cont.adda(new Label(nm), 0, y + (btn.sz.y / 2), 0, 0.5);
+            return (y + 30);
+        }
+
+        public BindingPanel(Panel back) {
+            super();
+            Widget cont = add(new Scrollport(new Coord(300, 300))).cont;
+            int y = 0;
+            cont.adda(new Label("Main menu"), cont.sz.x / 2, y, 0.5, 0);
+            y += 20;
+            y = addbtn(cont, "Inventory", GameUI.kb_inv, y);
+            y = addbtn(cont, "Equipment", GameUI.kb_equ, y);
+            y = addbtn(cont, "Character sheet", GameUI.kb_chr, y);
+            y = addbtn(cont, "Map window", GameUI.kb_map, y);
+            y = addbtn(cont, "Kith & Kin", GameUI.kb_bud, y);
+            y = addbtn(cont, "Options", GameUI.kb_opt, y);
+            y = addbtn(cont, "Search actions", GameUI.kb_srch, y);
+            y = addbtn(cont, "Toggle chat", GameUI.kb_chat, y);
+            y = addbtn(cont, "Quick chat", ChatUI.kb_quick, y);
+            y = addbtn(cont, "Display claims", GameUI.kb_claim, y);
+            y = addbtn(cont, "Display villages", GameUI.kb_vil, y);
+            y = addbtn(cont, "Display realms", GameUI.kb_rlm, y);
+            y = addbtn(cont, "Take screenshot", GameUI.kb_shoot, y);
+            y = addbtn(cont, "Toggle UI", GameUI.kb_hide, y);
+            y += 10;
+            cont.adda(new Label("Camera control"), cont.sz.x / 2, y, 0.5, 0);
+            y += 20;
+            y = addbtn(cont, "Rotate left", MapView.kb_camleft, y);
+            y = addbtn(cont, "Rotate right", MapView.kb_camright, y);
+            y = addbtn(cont, "Zoom in", MapView.kb_camin, y);
+            y = addbtn(cont, "Zoom out", MapView.kb_camout, y);
+            y = addbtn(cont, "Reset", MapView.kb_camreset, y);
+            y += 10;
+            cont.adda(new Label("Walking speed"), cont.sz.x / 2, y, 0.5, 0);
+            y += 20;
+            y = addbtn(cont, "Increase speed", Speedget.kb_speedup, y);
+            y = addbtn(cont, "Decrease speed", Speedget.kb_speeddn, y);
+            for (int i = 0; i < 4; i++)
+                y = addbtn(cont, String.format("Set speed %d", i + 1), Speedget.kb_speeds[i], y);
+            y += 10;
+            cont.adda(new Label("Combat actions"), cont.sz.x / 2, y, 0.5, 0);
+            y += 20;
+            for (int i = 0; i < Fightsess.kb_acts.length; i++)
+                y = addbtn(cont, String.format("Combat action %d", i + 1), Fightsess.kb_acts[i], y);
+            y = addbtn(cont, "Switch targets", Fightsess.kb_relcycle, y);
+            y += 10;
+            y = cont.sz.y + 10;
+            adda(new PointBind(200), cont.sz.x / 2, y, 0.5, 0);
+            y += 30;
+            adda(new PButton(200, "Back", 27, back), cont.sz.x / 2, y, 0.5, 0);
+            y += 30;
+            pack();
+        }
+
+        public class SetButton extends KeyMatch.Capture {
+            public final KeyBinding cmd;
+
+            public SetButton(int w, KeyBinding cmd) {
+                super(w, cmd.key());
+                this.cmd = cmd;
+            }
+
+            public void set(KeyMatch key) {
+                super.set(key);
+                cmd.set(key);
+            }
+
+            protected KeyMatch mkmatch(KeyEvent ev) {
+                return (KeyMatch.forevent(ev, ~cmd.modign));
+            }
+
+            protected boolean handle(KeyEvent ev) {
+                if (ev.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    cmd.set(null);
+                    super.set(cmd.key());
+                    return (true);
+                }
+                return (super.handle(ev));
+            }
+
+            public Object tooltip(Coord c, Widget prev) {
+                return (kbtt.tex());
+            }
+        }
+    }
+
+    public class ModificationPanel extends Panel {
+        Panel back;
+
+        public ModificationPanel(Panel back) {
+            super();
+            this.back = back;
+            pack();
+        }
+    }
+
+    public class CameraPanel extends Panel {
+        public CameraPanel(Panel back, String title) {
+            super(title);
+
+            addWdg(new Label("Bad Camera Distance Wheel"), 15);
+            {
+                Label dpy = new Label("");
+                addWdg(dpy, 0, new Coord(165, y));
+                addWdg(new HSlider(dpy.c.x - 5, 1, 100, (int) Utils.getpreff("badcamdistwheeldefault", 5.0f)) {
+                    protected void added() {
+                        dpy();
+                        this.c.y = dpy.c.y + ((dpy.sz.y - sz.y) / 2);
+                    }
+
+                    void dpy() {
+                        dpy.settext(Integer.toString(val));
+                    }
+
+                    public void changed() {
+                        Utils.setpreff("badcamdistwheeldefault", val);
+                        dpy();
+                    }
+
+                    public Object tooltip(Coord c, Widget prev) {
+                        return RichText.render("Distance wheel: " + val, 0).tex();
+                    }
+                }, 20);
+            }
+
+            y += 20;
+            addWdg(back, 200, 20, 27, "Back");
+            pack();
+        }
+    }
+
+    public class ChatPanel extends Panel {
+        public ChatPanel(Panel back, String title) {
+            super(title);
+
+            y += 20;
+            addWdg(back, 200, 20, 27, "Back");
+            pack();
+        }
+    }
+
+    public static class PointBind extends Button {
+        public static final String msg = "Bind other elements...";
+        public static final Resource curs = Resource.local().loadwait("gfx/hud/curs/wrench");
+        private UI.Grab mg, kg;
+        private KeyBinding cmd;
+
+        public PointBind(int w) {
+            super(w, msg, false);
+            tooltip = RichText.render("Bind a key to an element not listed above, such as an action-menu " +
+                            "button. Click the element to bind, and then press the key to bind to it. " +
+                            "Right-click to stop rebinding.",
+                    300);
+        }
+
+        public void click() {
+            if (mg == null) {
+                change("Click element...");
+                mg = ui.grabmouse(this);
+            } else if (kg != null) {
+                kg.remove();
+                kg = null;
+                change(msg);
+            }
+        }
+
+        private boolean handle(KeyEvent ev) {
+            switch (ev.getKeyCode()) {
+                case KeyEvent.VK_SHIFT:
+                case KeyEvent.VK_CONTROL:
+                case KeyEvent.VK_ALT:
+                case KeyEvent.VK_META:
+                case KeyEvent.VK_WINDOWS:
+                    return (false);
+            }
+            int code = ev.getKeyCode();
+            if (code == KeyEvent.VK_ESCAPE) {
+                return (true);
+            }
+            if (code == KeyEvent.VK_BACK_SPACE) {
+                cmd.set(null);
+                return (true);
+            }
+            if (code == KeyEvent.VK_DELETE) {
+                cmd.set(KeyMatch.nil);
+                return (true);
+            }
+            KeyMatch key = KeyMatch.forevent(ev, ~cmd.modign);
+            if (key != null)
+                cmd.set(key);
+            return (true);
+        }
+
+        public boolean mousedown(Coord c, int btn) {
+            if (mg == null)
+                return (super.mousedown(c, btn));
+            Coord gc = ui.mc;
+            if (btn == 1) {
+                this.cmd = KeyBinding.Bindable.getbinding(ui.root, gc);
+                return (true);
+            }
+            if (btn == 3) {
+                mg.remove();
+                mg = null;
+                change(msg);
+                return (true);
+            }
+            return (false);
+        }
+
+        public boolean mouseup(Coord c, int btn) {
+            if (mg == null)
+                return (super.mouseup(c, btn));
+            Coord gc = ui.mc;
+            if (btn == 1) {
+                if ((this.cmd != null) && (KeyBinding.Bindable.getbinding(ui.root, gc) == this.cmd)) {
+                    mg.remove();
+                    mg = null;
+                    kg = ui.grabkeys(this);
+                    change("Press key...");
+                } else {
+                    this.cmd = null;
+                }
+                return (true);
+            }
+            if (btn == 3)
+                return (true);
+            return (false);
+        }
+
+        public Resource getcurs(Coord c) {
+            if (mg == null)
+                return (null);
+            return (curs);
+        }
+
+        public boolean keydown(KeyEvent ev) {
+            if (kg == null)
+                return (super.keydown(ev));
+            if (handle(ev)) {
+                kg.remove();
+                kg = null;
+                cmd = null;
+                change("Click another element...");
+                mg = ui.grabmouse(this);
+            }
+            return (true);
+        }
+    }
+
     private static final List<Integer> caveindust = Arrays.asList(1, 2, 5, 10, 15, 30, 45, 60, 120);
+
     private Dropbox<Integer> makeCaveInDropdown() {
         List<String> values = caveindust.stream().map(x -> x.toString()).collect(Collectors.toList());
         return new Dropbox<Integer>(9, values) {
             {
                 super.change(null);
             }
+
             @Override
             protected Integer listitem(int i) {
                 return caveindust.get(i);
@@ -4012,23 +4463,28 @@ public class OptWnd extends Window {
     }
 
     private static final List<String> statSize = Arrays.asList("1", "2", "5", "10", "25", "50", "100", "200", "500", "1000");
+
     private Dropbox<String> makeStatGainDropdown() {
         return new Dropbox<String>(statSize.size(), statSize) {
             {
                 super.change(Integer.toString(Config.statgainsize));
             }
+
             @Override
             protected String listitem(int i) {
                 return statSize.get(i);
             }
+
             @Override
             protected int listitems() {
                 return statSize.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
@@ -4038,24 +4494,29 @@ public class OptWnd extends Window {
         };
     }
 
-    private static final List<String> afkTime = Arrays.asList("0","5","10","15","20","25","30","45","60");
+    private static final List<String> afkTime = Arrays.asList("0", "5", "10", "15", "20", "25", "30", "45", "60");
+
     private Dropbox<String> makeafkTimeDropdown() {
         return new Dropbox<String>(afkTime.size(), afkTime) {
             {
                 super.change(Integer.toString(Config.afklogouttime));
             }
+
             @Override
             protected String listitem(int i) {
                 return afkTime.get(i);
             }
+
             @Override
             protected int listitems() {
                 return afkTime.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
@@ -4065,24 +4526,29 @@ public class OptWnd extends Window {
         };
     }
 
-    private static final List<String> AutoDrinkTime = Arrays.asList("1","3","5","10","15","20","25","30","45","60");
+    private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
+
     private Dropbox<String> makeAutoDrinkTimeDropdown() {
         return new Dropbox<String>(AutoDrinkTime.size(), AutoDrinkTime) {
             {
                 super.change(Integer.toString(Config.autodrinktime));
             }
+
             @Override
             protected String listitem(int i) {
                 return AutoDrinkTime.get(i);
             }
+
             @Override
             protected int listitems() {
                 return AutoDrinkTime.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
@@ -4090,6 +4556,95 @@ public class OptWnd extends Window {
                 Utils.setpref("autodrinktime", item);
             }
         };
+    }
+
+    public OptWnd(boolean gopts) {
+        super(new Coord(620, 400), "Options", true);
+
+        main = add(new Panel());
+        video = add(new VideoPanel(main));
+        audio = add(new Panel());
+        keybind = add(new BindingPanel(main));
+        //modification = add(new ModificationPanel(main));
+        display = add(new Panel());
+        map = add(new Panel());
+        general = add(new Panel());
+        combat = add(new Panel());
+        control = add(new Panel());
+        uis = add(new Panel());
+        uip = add(new Panel());
+        quality = add(new Panel());
+        flowermenus = add(new Panel());
+        soundalarms = add(new Panel());
+        hidesettings = add(new Panel());
+        studydesksettings = add(new Panel());
+        autodropsettings = add(new Panel());
+        keybindsettings = add(new Panel());
+        chatsettings = add(new Panel());
+        clearboulders = add(new Panel());
+        clearbushes = add(new Panel());
+        cleartrees = add(new Panel());
+        clearhides = add(new Panel());
+        additions = add(new Panel());
+        discord = add(new Panel());
+        mapping = add(new Panel());
+        modification = add(new Panel());
+
+
+        //main.add(new PButton(200, "Video settings", 'v', video), new Coord(0, 0));
+        //main.add(new PButton(200, "Audio settings", 'a', audio), new Coord(0, 30));
+        //main.add(new PButton(200, "Keybindings", 'k', keybind), new Coord(0, 60));
+        //main.add(new PButton(200, "Modification", 'm', modification), new Coord(0, 120));
+
+//        modification.addWdg(camera = add(new CameraPanel(modification, "Camera")), 200, 30, 'c');
+//        modification.addWdg(chat = add(new ChatPanel(modification, "Chat")), 200, 30, 'c');
+//        modification.y += 20;
+//        modification.addWdg(main, 200, 20, 27, "Back");
+//        modification.pack();
+
+        initMain(gopts);
+        initAudio();
+        initKeybind();
+        initDisplay();
+        initMap();
+        initGeneral();
+        initCombat();
+        initControl();
+        initUis();
+        initTheme();
+        initQuality();
+        initFlowermenus();
+        initSoundAlarms();
+        initHideMenu();
+        initstudydesksettings();
+        initautodropsettings();
+        initkeybindsettings();
+        initchatsettings();
+        initAdditions();
+        initMapping();
+        initDiscord();
+        initModification();
+
+        if (gopts) {
+            main.add(new Button(200, "Switch character") {
+                public void click() {
+                    getparent(GameUI.class).act("lo", "cs");
+                }
+            }, new Coord(0, 120));
+            main.add(new Button(200, "Log out") {
+                public void click() {
+                    getparent(GameUI.class).act("lo");
+                }
+            }, new Coord(0, 150));
+        }
+        main.add(new Button(200, "Close") {
+            public void click() {
+                OptWnd.this.hide();
+            }
+        }, new Coord(0, 180));
+        main.pack();
+
+        chpanel(main);
     }
 
     static private Scrollport.Scrollcont withScrollport(Widget widget, Coord sz) {
@@ -4159,7 +4714,7 @@ public class OptWnd extends Window {
                 Config.showroadendpoint = val;
                 a = val;
             }
-        },240,330);
+        }, 240, 330);
 
         map.add(new CheckBox("Show road Midpoints") {
             {
@@ -4171,7 +4726,7 @@ public class OptWnd extends Window {
                 Config.showroadmidpoint = val;
                 a = val;
             }
-        },240,350);
+        }, 240, 350);
 
         map.add(new CheckBox("Hide ALL Icons") {
             {
@@ -4183,13 +4738,13 @@ public class OptWnd extends Window {
                 Config.hideallicons = val;
                 a = val;
             }
-        },425,330);
+        }, 425, 330);
 
 
-        map.add(new PButton(140,"Clear Boulders", 27,clearboulders), new Coord(10,302));
-        map.add(new PButton(140,"Clear Bushes", 27,clearbushes), new Coord(165,302));
-        map.add(new PButton(140,"Clear Trees", 27,cleartrees), new Coord(320,302));
-        map.add(new PButton(140,"Clear Icons", 27,clearhides), new Coord(475,302));
+        map.add(new PButton(140, "Clear Boulders", 27, clearboulders), new Coord(10, 302));
+        map.add(new PButton(140, "Clear Bushes", 27, clearbushes), new Coord(165, 302));
+        map.add(new PButton(140, "Clear Trees", 27, cleartrees), new Coord(320, 302));
+        map.add(new PButton(140, "Clear Icons", 27, clearhides), new Coord(475, 302));
 
 
         map.pack();
@@ -4198,7 +4753,7 @@ public class OptWnd extends Window {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if ((sender == this) && (msg == "close")) {
             hide();
-            if(ui.gui != null)
+            if (ui.gui != null)
                 setfocus(ui.gui.invwnd);
         } else {
             super.wdgmsg(sender, msg, args);
@@ -4244,25 +4799,29 @@ public class OptWnd extends Window {
             {
                 super.change(Config.alarmunknownplayer);
             }
+
             @Override
             protected String listitem(int i) {
                 return alarms.get(i);
             }
+
             @Override
             protected int listitems() {
                 return alarms.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 Config.alarmunknownplayer = item;
                 Utils.setpref("alarmunknownplayer", item);
-                if(!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item),Config.alarmunknownvol);
+                if (!item.equals("None"))
+                    Audio.play(Resource.local().loadwait(item), Config.alarmunknownvol);
             }
         };
     }
@@ -4273,25 +4832,29 @@ public class OptWnd extends Window {
             {
                 super.change(Config.alarmredplayer);
             }
+
             @Override
             protected String listitem(int i) {
                 return alarms.get(i);
             }
+
             @Override
             protected int listitems() {
                 return alarms.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 Config.alarmredplayer = item;
                 Utils.setpref("alarmredplayer", item);
-                if(!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item),Config.alarmredvol);
+                if (!item.equals("None"))
+                    Audio.play(Resource.local().loadwait(item), Config.alarmredvol);
             }
         };
     }
@@ -4302,141 +4865,165 @@ public class OptWnd extends Window {
             {
                 super.change(Config.alarmstudy);
             }
+
             @Override
             protected String listitem(int i) {
                 return alarms.get(i);
             }
+
             @Override
             protected int listitems() {
                 return alarms.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 Config.alarmstudy = item;
                 Utils.setpref("alarmstudy", item);
-                if(!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item),Config.studyalarmvol);
+                if (!item.equals("None"))
+                    Audio.play(Resource.local().loadwait(item), Config.studyalarmvol);
             }
         };
     }
+
     private Dropbox<String> makeDropdownCleave() {
         final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.cleavesfx);
             }
+
             @Override
             protected String listitem(int i) {
                 return alarms.get(i);
             }
+
             @Override
             protected int listitems() {
                 return alarms.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 Config.cleavesfx = item;
                 Utils.setpref("cleavesfx", item);
-                if(!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item),Config.cleavesoundvol);
+                if (!item.equals("None"))
+                    Audio.play(Resource.local().loadwait(item), Config.cleavesoundvol);
             }
         };
     }
+
     private Dropbox<String> makeDropdownCombat() {
         final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.attackedsfx);
             }
+
             @Override
             protected String listitem(int i) {
                 return alarms.get(i);
             }
+
             @Override
             protected int listitems() {
                 return alarms.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 Config.attackedsfx = item;
                 Utils.setpref("attackedsfx", item);
-                if(!item.equals("None"))
-                    Audio.play(Resource.local().loadwait(item),Config.attackedvol);
+                if (!item.equals("None"))
+                    Audio.play(Resource.local().loadwait(item), Config.attackedvol);
             }
         };
     }
 
 
     private static List<String> pictureList = configuration.findFiles("modification", Arrays.asList(".png", ".jpg", ".gif"));
+
     private Dropbox<String> makePictureChoiseDropdown() {
         return new Dropbox<String>(pictureList.size(), pictureList) {
             {
                 super.change(configuration.defaultUtilsCustomLoginScreenBg);
             }
+
             @Override
             protected String listitem(int i) {
                 return pictureList.get(i);
             }
+
             @Override
             protected int listitems() {
                 return pictureList.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 configuration.defaultUtilsCustomLoginScreenBg = item;
                 Utils.setpref("custom-login-background", item);
                 LoginScreen.bg = configuration.bgCheck();
-                if(ui.gui == null || ui.gui.ui == null || ui.gui.ui.sess == null || !ui.sess.alive())
+                if (ui.gui == null || ui.gui.ui == null || ui.gui.ui.sess == null || !ui.sess.alive())
                     ui.uimsg(1, "bg");
             }
         };
     }
 
     private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
+
     private Dropbox<String> makeCustomMenuGrid(int n) {
         return new Dropbox<String>(menuSize.size(), menuSize) {
             {
                 super.change(configuration.customMenuGrid[n]);
             }
+
             @Override
             protected String listitem(int i) {
                 return menuSize.get(i);
             }
+
             @Override
             protected int listitems() {
                 return menuSize.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
                 configuration.customMenuGrid[n] = item;
                 Utils.setpref("customMenuGrid" + n, item);
                 MenuGrid.gsz = configuration.getMenuGrid();
-                MenuGrid.cap = (MenuGrid.gsz.x *  MenuGrid.gsz.y) - 2;
+                MenuGrid.cap = (MenuGrid.gsz.x * MenuGrid.gsz.y) - 2;
 
                 if (ui != null && ui.gui != null && ui.gui.menu != null) {
                     ui.gui.menu.layout = new MenuGrid.PagButton[configuration.getMenuGrid().x][configuration.getMenuGrid().y];

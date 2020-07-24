@@ -1,5 +1,7 @@
 package haven;
 
+import haven.render.RenderList;
+
 import java.awt.Color;
 
 import javax.media.opengl.GL2;

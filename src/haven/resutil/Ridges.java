@@ -26,23 +26,35 @@
 
 package haven.resutil;
 
-import java.util.*;
 
-import haven.*;
+import haven.Config;
+import haven.Coord;
+import haven.Coord3f;
+import haven.FColor;
+import haven.Light;
+import haven.MCache;
+import haven.MapMesh;
 import haven.MapMesh.Scan;
 import haven.MapMesh.Model;
+import haven.MeshBuf;
 import haven.Surface.Vertex;
+import haven.Tiler;
 import haven.Tiler.MPart;
-import haven.Tiler.SModel;
-import haven.Tiler.VertFactory;
 import haven.Surface.MeshVertex;
+import haven.Utils;
+import haven.render.Pipe;
+import haven.render.VertexColor;
+
+import java.util.Arrays;
+import java.util.Random;
+
 import static haven.Utils.clip;
 
 public class Ridges extends MapMesh.Hooks {
     public static final MapMesh.DataID<Ridges> id = MapMesh.makeid(Ridges.class);
     public static final int segh = 8;
-    public final MapMesh m;
     private static final Coord tilesz = MCache.tilesz2;
+    public final MapMesh m;
     private final MapMesh.MapSurface ms;
     private final boolean[] breaks;
     private Vertex[][] edges, edgec;
@@ -58,7 +70,7 @@ public class Ridges extends MapMesh.Hooks {
         public int[] rn;
         public float[] rh;
 
-        public RPart(Coord lc, Coord gc, Surface.Vertex[] v, float[] tcx, float[] tcy, int[] f, float[] rcx, float[] rcy, int[] rn, float[] rh) {
+        public RPart(Coord lc, Coord gc, Vertex[] v, float[] tcx, float[] tcy, int[] f, float[] rcx, float[] rcy, int[] rn, float[] rh) {
             super(lc, gc, v, tcx, tcy, f);
             this.rcx = rcx;
             this.rcy = rcy;
@@ -639,17 +651,17 @@ public class Ridges extends MapMesh.Hooks {
         } else {
             try {
                 modelcomplex(tc, b);
-            } catch(ArrayIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
                 /* XXX: Just ignore for now, until I can find the
                  * cause of this. */
-            } catch(NegativeArraySizeException e) {
+            } catch (NegativeArraySizeException e) {
             }
             return (true);
         }
     }
 
     static final Tiler.MCons testcons = new Tiler.MCons() {
-        GLState mat = GLState.compose(new Material.Colors(new java.awt.Color(255, 255, 255)), States.vertexcolor, Light.deflight);
+        Pipe.Op mat = Pipe.Op.compose(new Light.PhongLight(true, FColor.WHITE), VertexColor.instance);
 
         public void faces(MapMesh m, MPart mdesc) {
             RPart desc = (RPart) mdesc;
@@ -667,26 +679,26 @@ public class Ridges extends MapMesh.Hooks {
     };
 
     public static class TexCons implements Tiler.MCons {
-        public final GLState mat;
+        public final Pipe.Op mat;
         public final float texh;
 
-        public TexCons(GLState mat, float texh) {
+        public TexCons(Pipe.Op mat, float texh) {
             this.mat = mat;
             this.texh = texh;
         }
 
         public void faces(MapMesh m, MPart mdesc) {
-            RPart desc = (RPart)mdesc;
+            RPart desc = (RPart) mdesc;
             Model mod = Model.get(m, mat);
             MeshBuf.Tex tex = mod.layer(MeshBuf.tex);
             MeshBuf.Vec3Layer tan = mod.layer(BumpMap.ltan);
             MeshBuf.Vec3Layer bit = mod.layer(BumpMap.lbit);
             int[] trn = new int[desc.rh.length];
             float zf = 1.0f / texh;
-            for(int i = 0; i < trn.length; i++)
-                trn[i] = Math.max((int)((desc.rh[i] + (texh * 0.5f)) * zf), 1);
+            for (int i = 0; i < trn.length; i++)
+                trn[i] = Math.max((int) ((desc.rh[i] + (texh * 0.5f)) * zf), 1);
             MeshVertex[] v = new MeshVertex[desc.v.length];
-            for(int i = 0; i < desc.v.length; i++) {
+            for (int i = 0; i < desc.v.length; i++) {
                 v[i] = new MeshVertex(mod, desc.v[i]);
                 /* tex.set(v[i], new Coord3f(desc.rcx[i], desc.v[i].z * zf, 0)); */
                 tex.set(v[i], new Coord3f(desc.rcx[i], desc.rcy[i] * trn[desc.rn[i]], 0));
@@ -694,7 +706,7 @@ public class Ridges extends MapMesh.Hooks {
                 bit.set(v[i], Coord3f.zu);
             }
             int[] f = desc.f;
-            for(int i = 0; i < f.length; i += 3)
+            for (int i = 0; i < f.length; i += 3)
                 mod.new Face(v[f[i]], v[f[i + 1]], v[f[i + 2]]);
         }
     }

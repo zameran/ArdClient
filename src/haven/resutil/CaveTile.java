@@ -52,11 +52,11 @@ public class CaveTile extends Tiler {
 
         public Vertex[] fortile(Coord tc) {
             if (wv[cs.o(tc)] == null) {
-                if(Config.flatcaves){
+                if (Config.flatcaves) {
                     Vertex[] buf = wv[cs.o(tc)] = new Vertex[2];
                     buf[0] = ms.fortile(tc);
                     buf[1] = ms.new Vertex(buf[0].x, buf[0].y, buf[0].z + 7F);
-                }else {
+                } else {
                     Vertex[] buf = wv[cs.o(tc)] = new Vertex[4];
                     buf[0] = ms.new Vertex(ms.fortile(tc));
                     if (Config.straightcavewall) {
@@ -64,7 +64,7 @@ public class CaveTile extends Tiler {
                             buf[i] = ms.new Vertex(buf[0].x, buf[0].y, buf[0].z + (i * h / (buf.length - 1)));
                         }
                     } else {
-                        Random rnd = MapMesh.grnd(tc.add(m.ul));
+                        Random rnd = m.grnd(tc.add(m.ul)); //FIXME maybe MapMesh
                         for (int i = 1; i < buf.length; i++) {
                             buf[i] = ms.new Vertex(buf[0].x, buf[0].y, buf[0].z + (i * h / (buf.length - 1)));
                             buf[i].x += (rnd.nextFloat() - 0.5f) * 3.0f;
@@ -86,21 +86,21 @@ public class CaveTile extends Tiler {
         public Tiler create(int id, Tileset set) {
             Material wtex = null;
             Tiler ground = null;
-            for(Object rdesc : set.ta) {
-                Object[] desc = (Object[])rdesc;
-                String p = (String)desc[0];
-                if(p.equals("wmat")) {
-                    wtex = set.getres().layer(Material.Res.class, (Integer)desc[1]).get();
-                } else if(p.equals("gnd")) {
-                    Resource gres = set.getres().pool.load((String)desc[1], (Integer)desc[2]).get();
+            for (Object rdesc : set.ta) {
+                Object[] desc = (Object[]) rdesc;
+                String p = (String) desc[0];
+                if (p.equals("wmat")) {
+                    wtex = set.getres().layer(Material.Res.class, (Integer) desc[1]).get();
+                } else if (p.equals("gnd")) {
+                    Resource gres = set.getres().pool.load((String) desc[1], (Integer) desc[2]).get();
                     Tileset ts = gres.layer(Tileset.class);
                     ground = ts.tfac().create(id, ts);
                 }
             }
-            if(Config.flatcaves)
-                 return(new CaveTile(id, wtex, ground));
+            if (Config.flatcaves)
+                return (new CaveTile(id, wtex, ground));
             else
-                 return(new CaveTile(id, set, wtex, ground));
+                return (new CaveTile(id, set, wtex, ground));
         }
     }
 
@@ -109,6 +109,7 @@ public class CaveTile extends Tiler {
         this.wtex = wtex;
         this.ground = ground;
     }
+
     public CaveTile(int id, Material wtex, Tiler ground) {
         super(id);
         this.wtex = wtex;
@@ -166,7 +167,7 @@ public class CaveTile extends Tiler {
             if (w == null) w = m.data(walls);
             mkwall(m, w, lc.add(tccs[(i + 1) % 4]), lc.add(tccs[i]));
         }
-        if(ground != null)
+        if (ground != null)
             ground.lay(m, rnd, lc, gc);
     }
 

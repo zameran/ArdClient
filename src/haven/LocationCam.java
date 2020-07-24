@@ -26,27 +26,30 @@
 
 package haven;
 
+
+import haven.render.Camera;
+
 public class LocationCam extends Camera {
-    private final static Matrix4f base = makerot(new Matrix4f(), new Coord3f(0.0f, 0.0f, 1.0f), (float) (Math.PI / 2))
-            .mul1(makerot(new Matrix4f(), new Coord3f(0.0f, 1.0f, 0.0f), (float) (Math.PI / 2)));
-    public final Location.Chain loc;
-    private Matrix4f ll;
+	private final static Matrix4f base = makerot(new Matrix4f(), new Coord3f(0.0f, 0.0f, 1.0f), (float) (Math.PI / 2))
+			.mul1(makerot(new Matrix4f(), new Coord3f(0.0f, 1.0f, 0.0f), (float) (Math.PI / 2)));
+	public final haven.render.Location.Chain loc;
+	private Matrix4f ll;
 
-    /* Oh, Java. <3 */
-    private LocationCam(Location.Chain loc, Matrix4f lm) {
-        super(base.mul(rxinvert(lm)));
-        this.ll = lm;
-        this.loc = loc;
-    }
+	/* Oh, Java. <3 */
+	private LocationCam(haven.render.Location.Chain loc, Matrix4f lm) {
+		super(base.mul(rxinvert(lm)));
+		this.ll = lm;
+		this.loc = loc;
+	}
 
-    public LocationCam(Location.Chain loc) {
-        this(loc, loc.fin(Matrix4f.id));
-    }
+	public LocationCam(haven.render.Location.Chain loc) {
+		this(loc, loc.fin(Matrix4f.id));
+	}
 
-    public Matrix4f fin(Matrix4f p) {
-        Matrix4f lm = loc.fin(Matrix4f.id);
-        if (lm != ll)
-            update(base.mul(rxinvert(ll = lm)));
-        return (super.fin(p));
-    }
+	public Matrix4f fin(Matrix4f p) {
+		Matrix4f lm = loc.fin(Matrix4f.id);
+		if (lm != ll)
+			update(base.mul(rxinvert(ll = lm)));
+		return (super.fin(p));
+	}
 }

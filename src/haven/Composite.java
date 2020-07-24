@@ -26,12 +26,9 @@
 
 package haven;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-import haven.Composited.ED;
-import haven.Composited.MD;
+import haven.render.*;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
@@ -43,15 +40,15 @@ public class Composite extends Drawable {
     public final static float ipollen = 0.2f;
     public final Indir<Resource> base;
     public Composited comp;
-    public Collection<ResData> nposes = null, tposes = null, prevposes;
-    public Collection<ResData> oldposes = null, oldtposes;
-    public boolean nposesold, retainequ = false;
-    private float tptime;
-    private WrapMode tpmode;
     public int pseq;
     public List<MD> nmod;
-    private List<ED> nequ;
+    public List<ED> nequ;
     public List<ED> lastnequ;
+    public Collection<ResData> nposes = null, tposes = null, prevposes;
+    public Collection<ResData> oldposes = null, oldtposes;
+    private boolean nposesold, retainequ = false;
+    private float tptime;
+    private WrapMode tpmode;
 
     public Composite(Gob gob, Indir<Resource> base) {
         super(gob);
@@ -72,19 +69,20 @@ public class Composite extends Drawable {
         }
     }
 
-    public void setup(RenderList rl) {
+    public void added(RenderTree.Slot slot) {
         try {
             init();
         } catch (Loading e) {
             return;
         }
-        rl.add(comp, null);
+        slot.add(comp);
+        super.added(slot);
     }
 
-    private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, boolean old) {
-	List<PoseMod> mods = new ArrayList<>(rl.size());
+    public static List<PoseMod> loadposes(Collection<ResData> rl, Skeleton.ModOwner owner, Skeleton skel, boolean old) {
+        List<PoseMod> mods = new ArrayList<PoseMod>(rl.size());
         for (ResData dat : rl) {
-            PoseMod mod = skel.mkposemod(gob, dat.res.get(), dat.sdt.clone());
+            PoseMod mod = skel.mkposemod(owner, dat.res.get(), dat.sdt.clone());
             if (old)
                 mod.age();
             mods.add(mod);
@@ -92,8 +90,12 @@ public class Composite extends Drawable {
         return (mods);
     }
 
+    private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, boolean old) {
+        return (loadposes(rl, gob, skel, old));
+    }
+
     private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, WrapMode mode) {
-	List<PoseMod> mods = new ArrayList<>(rl.size());
+        List<PoseMod> mods = new ArrayList<PoseMod>(rl.size());
         for (ResData dat : rl) {
             for (Skeleton.ResPose p : dat.res.get().layers(Skeleton.ResPose.class))
                 mods.add(p.forskel(gob, skel, (mode == null) ? p.defmode : mode));
@@ -104,27 +106,35 @@ public class Composite extends Drawable {
     private void updequ() {
         retainequ = false;
         if (nmod != null) {
-            comp.chmod(nmod);
-            nmod = null;
+            try {
+                comp.chmod(nmod);
+                nmod = null;
+            } catch (Loading l) {
+            }
         }
         if (nequ != null) {
-            comp.chequ(nequ);
-	    lastnequ = nequ;
-            nequ = null;
+            try {
+                comp.chequ(nequ);
+                lastnequ = nequ;
+                nequ = null;
+            } catch (Loading l) {
+            }
         }
     }
 
-    public void ctick(int dt) {
+    public void ctick(double dt) {
         if (comp == null)
             return;
         if (nposes != null) {
             try {
                 Composited.Poses np = comp.new Poses(loadposes(nposes, comp.skel, nposesold));
                 np.set(nposesold ? 0 : ipollen);
+                nposes = null;
                 updequ();
                 prevposes = nposes;
                 nposes = null;
-	    } catch(Loading e) {}
+            } catch (Loading e) {
+            }
         } else if (tposes != null) {
             try {
                 final Composited.Poses cp = comp.poses;
@@ -138,18 +148,21 @@ public class Composite extends Drawable {
                 np.set(ipollen);
                 tposes = null;
                 retainequ = true;
-	    } catch(Loading e) {}
+            } catch (Loading e) {
+            }
         } else if (!retainequ) {
             updequ();
         }
         comp.tick(dt);
     }
 
+    public void gtick(Render g) {
+        comp.gtick(g);
+    }
+
     public Resource getres() {
         return (base.get());
     }
-
-
 
     public Pose getpose() {
         init();
@@ -171,7 +184,7 @@ public class Composite extends Drawable {
 
     public void tposes(Collection<ResData> poses, WrapMode mode, float time) {
         this.tposes = poses;
-	oldtposes = poses;
+        oldtposes = poses;
         this.tpmode = mode;
         this.tptime = time;
     }
@@ -185,15 +198,11 @@ public class Composite extends Drawable {
         nmod = mod;
     }
 
-public void chequ(List<ED> equ) {
+    public void chequ(List<ED> equ) {
         nequ = equ;
-        }
+    }
 
-
-//TODO: Should inherit from `comp`, this composite could very well be static. Ex: dead animals
-//      OCache already calls changed anytime it changes equ/poses.. so this should ONLY be dynamic
-//      If one of the equ/poses are an animation and `Show Animations` is on
-public Object staticp() {
+    public Object staticp() {
         return comp != null ? comp.staticp() : null;
-        }
-        }
+    }
+}

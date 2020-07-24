@@ -19,11 +19,11 @@ public class DefName implements InfoFactory {
             GSprite var3 = ((SpriteOwner)var1).sprite();
             if (var3 instanceof DynName) {
                 return new Name(var1, ((DynName)var3).name());
-            }
-        }
+			}
+		}
 
         if (!(var1 instanceof ResOwner)) {
-            return null;
+			return null;
         } else {
             Resource var5 = ((ResOwner)var1).resource();
             Tooltip var4 = (Tooltip)var5.layer(Resource.tooltip);
@@ -31,7 +31,7 @@ public class DefName implements InfoFactory {
                 throw new RuntimeException("Item resource " + var5 + " is missing default tooltip");
             } else {
                 return new Name(var1, var4.t);
-            }
-        }
-    }
+		}
+		}
+	}
 }

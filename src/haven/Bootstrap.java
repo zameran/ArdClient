@@ -128,7 +128,7 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
                 }
             } else {
                 AuthClient.NativeCred nativecreds;
-
+//				AuthClient.Credentials creds;
                 ui.uimsg(1, "passwd", loginname, savepw);
                 while (true) {
                     Message msg;
@@ -216,17 +216,16 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
                 }
             }
         } while (true);
-
+        haven.error.ErrorHandler.setprop("usr", sess.username);
         if (creds != null) {
-            LoginData ld = new LoginData(creds.name(), ((AuthClient.NativeCred)creds).pass);
+            LoginData ld = new LoginData(creds.name(), ((AuthClient.NativeCred) creds).pass);
             synchronized (Config.logins) {
                 if (!Config.logins.contains(ld)) {
-                    Config.logins.add(new LoginData(creds.name(), ((AuthClient.NativeCred)creds).pass));
+                    Config.logins.add(new LoginData(creds.name(), ((AuthClient.NativeCred) creds).pass));
                     Config.saveLogins();
                 }
             }
         }
-
         return (sess);
         //(new RemoteUI(sess, ui)).start();
     }

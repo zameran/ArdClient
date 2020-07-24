@@ -26,144 +26,125 @@
 
 package haven;
 
+import java.util.*;
 import java.awt.Color;
 import java.awt.font.TextAttribute;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Textlog extends Widget {
-    static Tex texpap = Resource.loadtex("gfx/hud/texpap");
-    static Tex schain = Resource.loadtex("gfx/hud/schain");
-    static Tex sflarp = Resource.loadtex("gfx/hud/sflarp");
-    static RichText.Foundry fnd = new RichText.Foundry(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.SIZE, 11, TextAttribute.FOREGROUND, Color.BLACK);
-    List<Text> lines;
-    int maxy, cury;
-    int margin = 3;
-    public int maxLines = 150;
-    boolean quote = true;
-    UI.Grab sdrag = null;
+	static Tex texpap = Resource.loadtex("gfx/hud/texpap");
+	static Tex schain = Resource.loadtex("gfx/hud/schain");
+	static Tex sflarp = Resource.loadtex("gfx/hud/sflarp");
+	static RichText.Foundry fnd = new RichText.Foundry(TextAttribute.FAMILY, "SansSerif", TextAttribute.SIZE, 9, TextAttribute.FOREGROUND, Color.BLACK);
+	List<Text> lines;
+	int maxy, cury;
+	int margin = 3;
+	UI.Grab sdrag = null;
 
-    @RName("log")
-    public static class $_ implements Factory {
-        public Widget create(UI ui, Object[] args) {
-            return (new Textlog((Coord) args[0]));
-        }
-    }
+	@RName("log")
+	public static class $_ implements Factory {
+		public Widget create(UI ui, Object[] args) {
+			return (new Textlog((Coord) args[0]));
+		}
+	}
 
-    public void draw(GOut g) {
-        Coord dc = new Coord();
-        for (dc.y = 0; dc.y < sz.y; dc.y += texpap.sz().y) {
-            for (dc.x = 0; dc.x < sz.x; dc.x += texpap.sz().x) {
-                g.image(texpap, dc);
-            }
-        }
-        g.chcolor();
-        int y = -cury;
-        synchronized (lines) {
-            for (Text line : lines) {
-                int dy1 = sz.y + y;
-                int dy2 = dy1 + line.sz().y;
-                if ((dy2 > 0) && (dy1 < sz.y))
-                    g.image(line.tex(), new Coord(margin, dy1));
-                y += line.sz().y;
-            }
-        }
-        if (maxy > sz.y) {
-            int fx = sz.x - sflarp.sz().x;
-            int cx = fx + (sflarp.sz().x / 2) - (schain.sz().x / 2);
-            for (y = 0; y < sz.y; y += schain.sz().y - 1)
-                g.image(schain, new Coord(cx, y));
-            double a = (double) (cury - sz.y) / (double) (maxy - sz.y);
-            int fy = (int) ((sz.y - sflarp.sz().y) * a);
-            g.image(sflarp, new Coord(fx, fy));
-        }
-    }
+	public void draw(GOut g) {
+		Coord dc = new Coord();
+		for (dc.y = 0; dc.y < sz.y; dc.y += texpap.sz().y) {
+			for (dc.x = 0; dc.x < sz.x; dc.x += texpap.sz().x) {
+				g.image(texpap, dc);
+			}
+		}
+		g.chcolor();
+		int y = -cury;
+		synchronized (lines) {
+			for (Text line : lines) {
+				int dy1 = sz.y + y;
+				int dy2 = dy1 + line.sz().y;
+				if ((dy2 > 0) && (dy1 < sz.y))
+					g.image(line.tex(), new Coord(margin, dy1));
+				y += line.sz().y;
+			}
+		}
+		if (maxy > sz.y) {
+			int fx = sz.x - sflarp.sz().x;
+			int cx = fx + (sflarp.sz().x / 2) - (schain.sz().x / 2);
+			for (y = 0; y < sz.y; y += schain.sz().y - 1)
+				g.image(schain, new Coord(cx, y));
+			double a = (double) (cury - sz.y) / (double) (maxy - sz.y);
+			int fy = (int) ((sz.y - sflarp.sz().y) * a);
+			g.image(sflarp, new Coord(fx, fy));
+		}
+	}
 
-    public Textlog(Coord sz) {
-        super(sz);
-        lines = new LinkedList<Text>();
-        maxy = cury = 0;
-    }
+	public Textlog(Coord sz) {
+		super(sz);
+		lines = new LinkedList<Text>();
+		maxy = cury = 0;
+	}
 
-    public void append(String line, Color col) {
-        Text rl;
-        if(quote){
-            line = RichText.Parser.quote(line);
-        }
-        if (col == null)
-            rl = fnd.render(line, sz.x - (margin * 2) - sflarp.sz().x);
-        else
-            rl = fnd.render(line, sz.x - (margin * 2) - sflarp.sz().x, TextAttribute.FOREGROUND, col);
-        synchronized (lines) {
-            lines.add(rl);
-            if((maxLines > 0)&&(lines.size() > maxLines)){
-                Text tl = lines.remove(0);
-                int dy = tl.sz().y;
-                maxy -= dy;
-                cury -= dy;
-            }
-        }
-        if (cury == maxy)
-            cury += rl.sz().y;
-        maxy += rl.sz().y;
-    }
+	public void append(String line, Color col) {
+		Text rl;
+		if (col == null)
+			rl = fnd.render(RichText.Parser.quote(line), sz.x - (margin * 2) - sflarp.sz().x);
+		else
+			rl = fnd.render(RichText.Parser.quote(line), sz.x - (margin * 2) - sflarp.sz().x, TextAttribute.FOREGROUND, col);
+		synchronized (lines) {
+			lines.add(rl);
+		}
+		if (cury == maxy)
+			cury += rl.sz().y;
+		maxy += rl.sz().y;
+	}
 
-    public void append(String line) {
-        append(line, null);
-    }
+	public void append(String line) {
+		append(line, null);
+	}
 
-    public void uimsg(String msg, Object... args) {
-        if (msg == "apnd") {
-            append((String) args[0]);
-        }
-    }
+	public void uimsg(String msg, Object... args) {
+		if (msg == "apnd") {
+			append((String) args[0]);
+		}
+	}
 
-    public boolean mousewheel(Coord c, int amount) {
-        cury += amount * 20;
-        if (cury < sz.y)
-            cury = sz.y;
-        if (cury > maxy)
-            cury = maxy;
-        return (true);
-    }
+	public boolean mousewheel(Coord c, int amount) {
+		cury += amount * 20;
+		if (cury < sz.y)
+			cury = sz.y;
+		if (cury > maxy)
+			cury = maxy;
+		return (true);
+	}
 
-    public boolean mousedown(Coord c, int button) {
-        if (button != 1)
-            return (false);
-        int fx = sz.x - sflarp.sz().x;
-        int cx = fx + (sflarp.sz().x / 2) - (schain.sz().x / 2);
-        if ((maxy > sz.y) && (c.x >= fx)) {
-            sdrag = ui.grabmouse(this);
-            mousemove(c);
-            return (true);
-        }
-        return (false);
-    }
+	public boolean mousedown(Coord c, int button) {
+		if (button != 1)
+			return (false);
+		int fx = sz.x - sflarp.sz().x;
+		int cx = fx + (sflarp.sz().x / 2) - (schain.sz().x / 2);
+		if ((maxy > sz.y) && (c.x >= fx)) {
+			sdrag = ui.grabmouse(this);
+			mousemove(c);
+			return (true);
+		}
+		return (false);
+	}
 
-    public void mousemove(Coord c) {
-        if (sdrag != null) {
-            double a = (double) (c.y - (sflarp.sz().y / 2)) / (double) (sz.y - sflarp.sz().y);
-            if (a < 0)
-                a = 0;
-            if (a > 1)
-                a = 1;
-            cury = (int) (a * (maxy - sz.y)) + sz.y;
-        }
-    }
+	public void mousemove(Coord c) {
+		if (sdrag != null) {
+			double a = (double) (c.y - (sflarp.sz().y / 2)) / (double) (sz.y - sflarp.sz().y);
+			if (a < 0)
+				a = 0;
+			if (a > 1)
+				a = 1;
+			cury = (int) (a * (maxy - sz.y)) + sz.y;
+		}
+	}
 
-    public boolean mouseup(Coord c, int button) {
-        if ((button == 1) && (sdrag != null)) {
-            sdrag.remove();
-            sdrag = null;
-            return (true);
-        }
-        return (false);
-    }
-    public void setprog(double a){
-        if(a < 0)
-            a = 0;
-        if(a > 1)
-            a = 1;
-        cury = (int)(a * (maxy - sz.y)) + sz.y;
-    }
+	public boolean mouseup(Coord c, int button) {
+		if ((button == 1) && (sdrag != null)) {
+			sdrag.remove();
+			sdrag = null;
+			return (true);
+		}
+		return (false);
+	}
 }

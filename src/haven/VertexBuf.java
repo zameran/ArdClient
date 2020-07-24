@@ -29,673 +29,467 @@ package haven;
 import java.nio.*;
 import java.util.*;
 import java.lang.annotation.*;
-import javax.media.opengl.*;
 
-import haven.GLProgram.VarID;
+import haven.render.*;
+import haven.render.VertexArray.Layout;
+import haven.render.sl.Attribute;
 
 public class VertexBuf {
-    public static final GLState.Slot<Binding> bound = new GLState.Slot<Binding>(GLState.Slot.Type.GEOM, Binding.class);
-    public final AttribArray[] bufs;
-    public final int num;
-
-    public VertexBuf(AttribArray... bufs) {
-        AttribArray[] na = new AttribArray[bufs.length];
-        na[0] = bufs[0];
-        int num = na[0].size();
-        for (int i = 1; i < bufs.length; i++) {
-            na[i] = bufs[i];
-            if (na[i].size() != num)
-                throw (new RuntimeException("Buffer sizes do not match"));
-        }
-        this.bufs = na;
-        this.num = num;
-    }
-
-    public <T extends AttribArray> T buf(Class<T> type) {
-        for (AttribArray a : bufs) {
-            if (type.isInstance(a))
-                return (type.cast(a));
-        }
-        return (null);
-    }
-
-    public abstract class Binding extends GLState {
-        public void prep(GLState.Buffer buf) {
-            buf.put(bound, this);
-        }
-    }
-
-    public class MemBinding extends Binding {
-        public void apply(GOut g) {
-            for (int i = 0; i < bufs.length; i++) {
-                if (bufs[i] instanceof GLArray)
-                    ((GLArray) bufs[i]).bind(g, false);
-            }
-        }
-
-        public void unapply(GOut g) {
-            for (int i = 0; i < bufs.length; i++) {
-                if (bufs[i] instanceof GLArray)
-                    ((GLArray) bufs[i]).unbind(g);
-            }
-        }
-    }
-
-    public abstract static class AttribArray {
-        public final int n;
-
-        public AttribArray(int n) {
-            this.n = n;
-        }
-
-        public abstract Buffer data();
-
-        public abstract Buffer direct();
-
-        public abstract int elsize();
-
-        public int size() {
-            Buffer b = data();
-            b.rewind();
-            return (b.capacity() / this.n);
-        }
-
-        /* XXX: It would be terribly nice if GLArray could be a
-         * multiply inhereted class and these could be put in it
-         * instead; but alas, this is Java. QQ */
-        private GLBuffer bufobj;
-        private int bufmode = GL.GL_STATIC_DRAW;
-        private boolean update = false;
-
-        public void bindvbo(GOut g) {
-            BGL gl = g.gl;
-            synchronized (this) {
-                if ((bufobj != null) && (bufobj.cur != g.curgl))
-                    dispose();
-                if (bufobj == null) {
-                    bufobj = new GLBuffer(g);
-                    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufobj);
-                    Buffer data = data();
-                    data.rewind();
-                    gl.glBufferData(GL.GL_ARRAY_BUFFER, data.remaining() * elsize(), data, bufmode);
-                    GOut.checkerr(gl);
-                    update = false;
-                } else if (update) {
-                    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufobj);
-                    Buffer data = data();
-                    data.rewind();
-                    gl.glBufferData(GL.GL_ARRAY_BUFFER, data.remaining() * elsize(), data, bufmode);
-                    update = false;
-                } else {
-                    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufobj);
-                }
-            }
-        }
-
-        public void vbomode(int mode) {
-            bufmode = mode;
-            dispose();
-        }
-
-        public void dispose() {
-            synchronized (this) {
-                if (bufobj != null) {
-                    bufobj.dispose();
-                    bufobj = null;
-                }
-            }
-        }
-
-        public void update() {
-            update = true;
-        }
-    }
-
-    public static interface GLArray {
-        public void bind(GOut g, boolean asvbo);
-
-        public void unbind(GOut g);
-
-        public Object progid(GOut g);
-    }
-
-    public abstract static class FloatArray extends AttribArray {
-        public FloatBuffer data;
-
-        public FloatArray(int n, FloatBuffer data) {
-            super(n);
-            data.rewind();
-            if (data.capacity() % n != 0)
-                throw (new RuntimeException(String.format("float-array length %d does not match element count %d", data.capacity(), n)));
-            this.data = data;
-        }
-
-        public FloatBuffer data() {
-            return (data);
-        }
-
-        public FloatBuffer direct() {
-            if (!data.isDirect())
-                data = Utils.bufcp(data);
-            return (data);
-        }
-
-        public int elsize() {
-            return (4);
-        }
-    }
-
-    public abstract static class IntArray extends AttribArray {
-        public IntBuffer data;
-
-        public IntArray(int n, IntBuffer data) {
-            super(n);
-            data.rewind();
-            if (data.capacity() % n != 0)
-                throw (new RuntimeException(String.format("int-array length %d does not match element count %d", data.capacity(), n)));
-            this.data = data;
-        }
-
-        public IntBuffer data() {
-            return (data);
-        }
-
-        public IntBuffer direct() {
-            if (!data.isDirect())
-                data = Utils.bufcp(data);
-            return (data);
-        }
-
-        public int elsize() {
-            return (4);
-        }
-    }
-
-    @ResName("pos2")
-    public static class VertexArray extends FloatArray implements GLArray, MorphedMesh.MorphArray {
-        public VertexArray(FloatBuffer data) {
-            super(3, data);
-        }
-
-        public VertexArray(Resource res, Message buf, int nv) {
-            this(loadbuf2(Utils.wfbuf(nv * 3), buf));
-        }
-
-        public VertexArray dup() {
-            return (new VertexArray(Utils.bufcp(data)));
-        }
-
-        public void bind(GOut g, boolean asvbo) {
-            BGL gl = g.gl;
-            if (asvbo) {
-                bindvbo(g);
-                gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
-                gl.glBindBuffer(GL.GL_ARRAY_BUFFER, null);
-            } else {
-                gl.glVertexPointer(3, GL.GL_FLOAT, 0, direct(), 0);
-            }
-            gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-        }
-
-        public void unbind(GOut g) {
-            g.gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-        }
-
-        public Object progid(GOut g) {
-            return (null);
-        }
-
-        /* XXX: It feels very much like morphing should be layered
-         * strictly above VertexBuf, but I can't quite see an
-         * alternative to this at this point. */
-        public MorphedMesh.MorphType morphtype() {
-            return (MorphedMesh.MorphType.POS);
-        }
-    }
-
-    @ResName("pos")
-    public static class VertexDecode implements ArrayCons {
-        public void cons(Collection<AttribArray> dst, Resource res, Message buf, int nv) {
-            dst.add(new VertexArray(loadbuf(Utils.wfbuf(nv * 3), buf)));
-        }
-    }
-
-    @ResName("nrm2")
-    public static class NormalArray extends FloatArray implements GLArray, MorphedMesh.MorphArray {
-        public NormalArray(FloatBuffer data) {
-            super(3, data);
-        }
-
-        public NormalArray(Resource res, Message buf, int nv) {
-            this(loadbuf2(Utils.wfbuf(nv * 3), buf));
-        }
-
-        public NormalArray dup() {
-            return (new NormalArray(Utils.bufcp(data)));
-        }
-
-        public void bind(GOut g, boolean asvbo) {
-            BGL gl = g.gl;
-            if (asvbo) {
-                bindvbo(g);
-                gl.glNormalPointer(GL.GL_FLOAT, 0, 0);
-                gl.glBindBuffer(GL.GL_ARRAY_BUFFER, null);
-            } else {
-                gl.glNormalPointer(GL.GL_FLOAT, 0, direct(), 0);
-            }
-            gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-        }
-
-        public void unbind(GOut g) {
-            g.gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-        }
-
-        public Object progid(GOut g) {
-            return (null);
-        }
-
-        public MorphedMesh.MorphType morphtype() {
-            return (MorphedMesh.MorphType.DIR);
-        }
-    }
-
-    @ResName("nrm")
-    public static class NormalDecode implements ArrayCons {
-        public void cons(Collection<AttribArray> dst, Resource res, Message buf, int nv) {
-            dst.add(new NormalArray(loadbuf(Utils.wfbuf(nv * 3), buf)));
-        }
-    }
-
-    @ResName("col2")
-    public static class ColorArray extends FloatArray implements GLArray {
-        public ColorArray(FloatBuffer data) {
-            super(4, data);
-        }
-
-        public ColorArray(Resource res, Message buf, int nv) {
-            this(loadbuf2(Utils.wfbuf(nv * 4), buf));
-        }
-
-        public ColorArray dup() {
-            return (new ColorArray(Utils.bufcp(data)));
-        }
-
-        public void bind(GOut g, boolean asvbo) {
-            BGL gl = g.gl;
-            if (asvbo) {
-                bindvbo(g);
-                gl.glColorPointer(4, GL.GL_FLOAT, 0, 0);
-                gl.glBindBuffer(GL.GL_ARRAY_BUFFER, null);
-            } else {
-                gl.glColorPointer(4, GL.GL_FLOAT, 0, direct(), 0);
-            }
-            gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
-        }
-
-        public void unbind(GOut g) {
-            g.gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
-        }
-
-        public Object progid(GOut g) {
-            return (null);
-        }
-    }
-
-    @ResName("col")
-    public static class ColorDecode implements ArrayCons {
-        public void cons(Collection<AttribArray> dst, Resource res, Message buf, int nv) {
-            dst.add(new ColorArray(loadbuf(Utils.wfbuf(nv * 4), buf)));
-        }
-    }
-
-    @ResName("tex2")
-    public static class TexelArray extends FloatArray implements GLArray {
-        public TexelArray(FloatBuffer data) {
-            super(2, data);
-        }
-
-        public TexelArray(Resource res, Message buf, int nv) {
-            this(loadbuf2(Utils.wfbuf(nv * 2), buf));
-        }
-
-        public TexelArray dup() {
-            return (new TexelArray(Utils.bufcp(data)));
-        }
-
-        public void bind(GOut g, boolean asvbo) {
-            BGL gl = g.gl;
-            if (asvbo) {
-                bindvbo(g);
-                gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
-                gl.glBindBuffer(GL.GL_ARRAY_BUFFER, null);
-            } else {
-                gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, direct(), 0);
-            }
-            gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-        }
-
-        public void unbind(GOut g) {
-            g.gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-        }
-
-        public Object progid(GOut g) {
-            return (null);
-        }
-    }
-
-    @ResName("tex")
-    public static class TexelDecode implements ArrayCons {
-        public void cons(Collection<AttribArray> dst, Resource res, Message buf, int nv) {
-            dst.add(new TexelArray(loadbuf(Utils.wfbuf(nv * 2), buf)));
-        }
-    }
-
-    public static class NamedFloatArray extends FloatArray implements GLArray {
-        public final haven.glsl.Attribute attr;
-        private VarID bound = null;
-
-        public NamedFloatArray(int n, FloatBuffer data, haven.glsl.Attribute attr) {
-            super(n, data);
-            this.attr = attr;
-        }
-
-        public void bind(GOut g, boolean asvbo) {
-            if ((bound = g.st.prog.cattrib(attr)) != null) {
-                BGL gl = g.gl;
-                if (asvbo) {
-                    bindvbo(g);
-                    gl.glVertexAttribPointer(bound, n, GL2.GL_FLOAT, false, 0, 0);
-                    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, null);
-                } else {
-                    gl.glVertexAttribPointer(bound, n, GL2.GL_FLOAT, false, 0, direct(), 0);
-                }
-                gl.glEnableVertexAttribArray(bound);
-            }
-        }
-
-        public void unbind(GOut g) {
-            if (bound != null) {
-                g.gl.glDisableVertexAttribArray(bound);
-                bound = null;
-            }
-        }
-
-        public Object progid(GOut g) {
-        /* XXX: This is not a good ID, as it doesn't intern
-         * locations in various programs. */
-            return (g.st.prog.cattrib(attr));
-        }
-    }
-
-    public static class Vec1Array extends NamedFloatArray implements GLArray {
-        public Vec1Array(FloatBuffer data, haven.glsl.Attribute attr) {
-            super(1, data, attr);
-        }
-    }
-
-    public static class Vec2Array extends NamedFloatArray implements GLArray {
-        public Vec2Array(FloatBuffer data, haven.glsl.Attribute attr) {
-            super(2, data, attr);
-        }
-    }
-
-    public static class Vec3Array extends NamedFloatArray implements GLArray {
-        public Vec3Array(FloatBuffer data, haven.glsl.Attribute attr) {
-            super(3, data, attr);
-        }
-    }
-
-    public static class Vec4Array extends NamedFloatArray implements GLArray {
-        public Vec4Array(FloatBuffer data, haven.glsl.Attribute attr) {
-            super(4, data, attr);
-        }
-    }
-
-    public void dispose() {
-        for (AttribArray buf : bufs)
-            buf.dispose();
-    }
-
-    @dolda.jglob.Discoverable
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface ResName {
-        public String value();
-    }
-
-    public interface ArrayCons {
-        public void cons(Collection<AttribArray> dst, Resource res, Message buf, int nvert);
-    }
-
-    public static FloatBuffer loadbuf(FloatBuffer dst, Message buf) {
-        for (int i = 0; i < dst.capacity(); i++)
-            dst.put(i, buf.float32());
-        return (dst);
-    }
-
-    public static FloatBuffer loadbuf2(FloatBuffer dst, Message buf) {
-        int ver = buf.uint8();
-        if(ver != 1)
-            throw(new RuntimeException("Unknown vertex-data version: " + ver));
-        String fmt = buf.string();
-        switch(fmt) {
-            case "f4": {
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.float32());
-                break;
-            }
-            case "f2": {
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, Utils.hfdec((short)buf.int16()));
-                break;
-            }
-            case "f1": {
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, Utils.mfdec((byte)buf.int8()));
-                break;
-            }
-            case "sn4": {
-                float F = buf.float32() / 2147483647.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.int32() * F);
-                break;
-            }
-            case "sn2": {
-                float F = buf.float32() / 32767.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.int16() * F);
-                break;
-            }
-            case "sn1": {
-                float F = buf.float32() / 127.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.int8() * F);
-                break;
-            }
-            case "un4": {
-                float F = buf.float32() / 4294967295.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.uint32() * F);
-                break;
-            }
-            case "un2": {
-                float F = buf.float32() / 65535.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.uint16() * F);
-                break;
-            }
-            case "un1": {
-                float F = buf.float32() / 255.0f;
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, buf.uint8() * F);
-                break;
-            }
-            case "uvec1": {
-                int i = 0;
-                float F = 1.0f / 127.0f;
-                float[] vb = new float[3];
-                while(i < dst.capacity()) {
-                    Utils.oct2uvec(vb, buf.int8() * F, buf.int8() * F);
-                    dst.put(i++, vb[0]);
-                    dst.put(i++, vb[1]);
-                    dst.put(i++, vb[2]);
-                }
-                break;
-            }
-            case "uvec2": {
-                int i = 0;
-                float F = 1.0f / 32767.0f;
-                float[] vb = new float[3];
-                while(i < dst.capacity()) {
-                    Utils.oct2uvec(vb, buf.int16() * F, buf.int16() * F);
-                    dst.put(i++, vb[0]);
-                    dst.put(i++, vb[1]);
-                    dst.put(i++, vb[2]);
-                }
-                break;
-            }
-            default:
-                throw(new RuntimeException("Unknown vertex-data format: " + fmt));
-        }
-        return(dst);
-    }
-
-    private static final Map<String, ArrayCons> rnames = new TreeMap<String, ArrayCons>();
-
-    static {
-        for (Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
-            String nm = cl.getAnnotation(ResName.class).value();
-            if (ArrayCons.class.isAssignableFrom(cl)) {
-                try {
-                    rnames.put(nm, cl.asSubclass(ArrayCons.class).newInstance());
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
-            } else if (AttribArray.class.isAssignableFrom(cl)) {
-                final java.lang.reflect.Constructor<? extends AttribArray> cons;
-                try {
-                    cons = cl.asSubclass(AttribArray.class).getConstructor(Resource.class, Message.class, Integer.TYPE);
-                } catch (NoSuchMethodException e) {
-                    throw (new Error("No proper constructor for res-consable vertex-array class " + cl, e));
-                }
-                rnames.put(nm, new ArrayCons() {
-                    public void cons(Collection<AttribArray> dst, Resource res, Message buf, int num) {
-                        dst.add(Utils.construct(cons, res, buf, num));
-                    }
-                });
-            } else {
-                throw (new Error("Illegal vertex-array constructor class: " + cl));
-            }
-        }
-    }
-
-    @Resource.LayerName("vbuf2")
-    public static class VertexRes extends Resource.Layer {
-        public transient final VertexBuf b;
-        public final int id;
-
-        private VertexRes(Resource res, VertexBuf b) {
-            res.super();
-            this.b = b;
-            this.id = 0;
-        }
-
-        public VertexRes(Resource res, Message buf) {
-            res.super();
-            List<AttribArray> bufs = new LinkedList<AttribArray>();
-            int fl = buf.uint8();
-            int ver = (fl & 0xf);
-            if(ver >= 2)
-                throw(new Resource.LoadException(String.format("Unknown vbuf version: %d", ver), res));
-            if((fl & ~0xf) != 0)
-                throw(new Resource.LoadException(String.format("Unknown vbuf flags: %02x", fl), res));
-            if(ver >= 1)
-                this.id = buf.int16();
-            else
-                this.id = 0;
-            int num = buf.uint16();
-            while(!buf.eom()) {
-                String nm = buf.string();
-                ArrayCons cons = rnames.get(nm);
-                if(cons == null)
-                    throw(new Resource.LoadException("Unknown vertex-array name: " + nm, res));
-                if(ver >= 1) {
-                    Message sub = new LimitMessage(buf, buf.int32());
-                    cons.cons(bufs, res, sub, num);
-                    sub.skip();
-                } else {
-                cons.cons(bufs, res, buf, num);
-            }
-            }
-            this.b = new VertexBuf(bufs.toArray(new AttribArray[0]));
-        }
-
-        public void init() {
-        }
-    }
-
-    @Resource.LayerName("vbuf")
-    public static class Legacy implements Resource.LayerFactory<VertexRes> {
-        public VertexRes cons(Resource res, Message buf) {
-            ArrayList<AttribArray> bufs = new ArrayList<AttribArray>();
-            int fl = buf.uint8();
-            int num = buf.uint16();
-            while (!buf.eom()) {
-                int id = buf.uint8();
-                if (id == 0) {
-                    FloatBuffer data = Utils.wfbuf(num * 3);
-                    for (int i = 0; i < num * 3; i++)
-                        data.put((float) buf.cpfloat());
-                    bufs.add(new VertexArray(data));
-                } else if (id == 1) {
-                    FloatBuffer data = Utils.wfbuf(num * 3);
-                    for (int i = 0; i < num * 3; i++)
-                        data.put((float) buf.cpfloat());
-                    bufs.add(new NormalArray(data));
-                } else if (id == 2) {
-                    FloatBuffer data = Utils.wfbuf(num * 2);
-                    for (int i = 0; i < num * 2; i++)
-                        data.put((float) buf.cpfloat());
-                    bufs.add(new TexelArray(data));
-                } else if (id == 3) {
-                    int mba = buf.uint8();
-                    IntBuffer ba = Utils.wibuf(num * mba);
-                    for (int i = 0; i < num * mba; i++)
-                        ba.put(-1);
-                    ba.rewind();
-                    FloatBuffer bw = Utils.wfbuf(num * mba);
-                    int[] na = new int[num];
-                    List<String> bones = new ArrayList<String>();
-                    while (true) {
-                        String bone = buf.string();
-                        if (bone.length() == 0)
-                            break;
-                        int bidx = bones.size();
-                        bones.add(bone);
-                        while (true) {
-                            int run = buf.uint16();
-                            int st = buf.uint16();
-                            if (run == 0)
-                                break;
-                            for (int i = 0; i < run; i++) {
-                                float w = (float) buf.cpfloat();
-                                int v = i + st;
-                                int cna = na[v]++;
-                                if (cna >= mba)
-                                    continue;
-                                bw.put(v * mba + cna, w);
-                                ba.put(v * mba + cna, bidx);
-                            }
-                        }
-                    }
-                    PoseMorph.normweights(bw, ba, mba);
-                    bufs.add(new PoseMorph.BoneArray(mba, ba, bones.toArray(new String[0])));
-                    bufs.add(new PoseMorph.WeightArray(mba, bw));
-                }
-            }
-            return (new VertexRes(res, new VertexBuf(bufs.toArray(new AttribArray[0]))));
-        }
-    }
+	public final AttribData[] bufs;
+	public final int num;
+	private VertexArray data = null;
+	private VertexArray.Buffer dbuf = null;
+
+	public VertexBuf(AttribData... bufs) {
+		AttribData[] na = new AttribData[bufs.length];
+		na[0] = bufs[0];
+		int num = na[0].size();
+		for (int i = 1; i < bufs.length; i++) {
+			na[i] = bufs[i];
+			if (na[i].size() != num)
+				throw (new RuntimeException("Buffer sizes do not match"));
+		}
+		this.bufs = na;
+		this.num = num;
+	}
+
+	public <T extends AttribData> T buf(Class<T> type) {
+		for (AttribData a : bufs) {
+			if (type.isInstance(a))
+				return (type.cast(a));
+		}
+		return (null);
+	}
+
+	private static Layout fmtfor(AttribData[] allbufs) {
+		int n = 0;
+		for (AttribData buf : allbufs) {
+			if (buf.attr != null)
+				n++;
+		}
+		AttribData[] bufs = new AttribData[n];
+		n = 0;
+		for (AttribData buf : allbufs) {
+			if (buf.attr != null)
+				bufs[n++] = buf;
+		}
+		/* XXX: This algorithm assumes the maximum and minimum
+		 * alignment is four, which is currently true for all vertex
+		 * buffers, but may have to be adjusted. */
+		int[] offs = new int[bufs.length];
+		int galign = 4, off = 0;
+		for (int i = 0; i < bufs.length; i++) {
+			// Apparently, all attributes should be aligned to four bytes.
+			int align = 4;
+			off = ((off + align - 1) / align) * align;
+			offs[i] = off;
+			off += bufs[i].elfmt.size();
+		}
+		off = ((off + galign - 1) / galign) * galign;
+		int elsize = off;
+		Layout.Input[] inputs = new Layout.Input[bufs.length];
+		for (int i = 0; i < bufs.length; i++)
+			inputs[i] = new Layout.Input(bufs[i].attr, bufs[i].elfmt, 0, offs[i], elsize);
+		return (new Layout(inputs));
+	}
+
+	protected VertexArray fmtdata() {
+		Layout fmt = fmtfor(bufs);
+		this.dbuf = new VertexArray.Buffer(fmt.inputs[0].stride * num, DataBuffer.Usage.STATIC, this::fill).shared();
+		return (new VertexArray(fmt, dbuf).shared());
+	}
+
+	public VertexArray data() {
+		if (data == null) {
+			synchronized (this) {
+				if (data == null)
+					data = fmtdata();
+			}
+		}
+		return (data);
+	}
+
+	private FillBuffer fill(VertexArray.Buffer vbuf, Environment env) {
+		Layout fmt = data().fmt;
+		FillBuffer dst = env.fillbuf(vbuf);
+		ByteBuffer buf = dst.push();
+		int inp = 0;
+		for (AttribData attr : bufs) {
+			if (attr.attr == null)
+				continue;
+			attr.data(buf, fmt.inputs[inp++].offset, fmt.inputs[0].stride);
+		}
+		return (dst);
+	}
+
+	public void update(Render g) {
+		if (data != null) {
+			if (data.bufs.length != 1) throw (new AssertionError());
+			g.update(data().bufs[0], this::fill);
+		}
+	}
+
+	public abstract static class AttribData {
+		public final Attribute attr;
+		public final VectorFormat elfmt;
+
+		public AttribData(Attribute attr, VectorFormat elfmt) {
+			this.attr = attr;
+			this.elfmt = elfmt;
+		}
+
+		public abstract void data(ByteBuffer dst, int offset, int stride);
+
+		public abstract int size();
+	}
+
+	public abstract static class FloatData extends AttribData {
+		public final FloatBuffer data;
+
+		public FloatData(Attribute attr, int n, FloatBuffer data) {
+			super(attr, new VectorFormat(n, NumberFormat.FLOAT32));
+			if (data.capacity() % n != 0)
+				throw (new RuntimeException(String.format("float-array length %d does not match element count %d", data.capacity(), n)));
+			this.data = data;
+		}
+
+		public int size() {
+			return (data.capacity() / elfmt.nc);
+		}
+
+		public void data(ByteBuffer bdst, int offset, int stride) {
+			if ((offset % 4) != 0)
+				throw (new AssertionError());
+			FloatBuffer dst = bdst.asFloatBuffer();
+			if (stride == elfmt.size()) {
+				dst.position(offset / 4);
+				dst.put(data);
+			} else if ((stride % 4) == 0) {
+				for (int i = 0, o = offset / 4, fs = stride / 4; i < data.capacity(); i += elfmt.nc, o += fs) {
+					for (int e = 0; e < elfmt.nc; e++)
+						dst.put(o + e, data.get(i + e));
+				}
+			} else {
+				throw (new AssertionError());
+			}
+		}
+	}
+
+	public abstract static class IntData extends AttribData {
+		public final IntBuffer data;
+
+		public IntData(Attribute attr, int n, IntBuffer data) {
+			super(attr, new VectorFormat(n, NumberFormat.SINT32));
+			if (data.capacity() % n != 0)
+				throw (new RuntimeException(String.format("int-array length %d does not match element count %d", data.capacity(), n)));
+			this.data = data;
+		}
+
+		public int size() {
+			return (data.capacity() / elfmt.nc);
+		}
+
+		public void data(ByteBuffer bdst, int offset, int stride) {
+			if ((offset % 4) != 0)
+				throw (new AssertionError());
+			IntBuffer dst = bdst.asIntBuffer();
+			if (stride == elfmt.size()) {
+				dst.position(offset / 4);
+				dst.put(data);
+			} else if ((stride % 4) == 0) {
+				for (int i = 0, o = offset / 4, fs = stride / 4; i < data.capacity(); i += elfmt.nc, o += fs) {
+					for (int e = 0; e < elfmt.nc; e++)
+						dst.put(o + e, data.get(i + e));
+				}
+			} else {
+				throw (new AssertionError());
+			}
+		}
+	}
+
+	@ResName("pos2")
+	public static class VertexData extends FloatData implements MorphedMesh.MorphData {
+		public VertexData(FloatBuffer data) {
+			super(Homo3D.vertex, 3, data);
+		}
+
+		public VertexData(Resource res, Message buf, int nv) {
+			this(loadbuf2(Utils.wfbuf(nv * 3), buf));
+		}
+
+		/* XXX: It feels very much like morphing should be layered
+		 * strictly above VertexBuf, but I can't quite see an
+		 * alternative to this at this point. */
+		public MorphedMesh.MorphType morphtype() {
+			return (MorphedMesh.MorphType.POS);
+		}
+
+		public VertexData dup() {
+			return (new VertexData(Utils.bufcp(data)));
+		}
+	}
+
+	@ResName("pos")
+	public static class VertexDecode implements DataCons {
+		public void cons(Collection<AttribData> dst, Resource res, Message buf, int nv) {
+			dst.add(new VertexData(loadbuf(Utils.wfbuf(nv * 3), buf)));
+		}
+	}
+
+	@ResName("nrm2")
+	public static class NormalData extends FloatData implements MorphedMesh.MorphData {
+		public NormalData(FloatBuffer data) {
+			super(Homo3D.normal, 3, data);
+		}
+
+		public NormalData(Resource res, Message buf, int nv) {
+			this(loadbuf2(Utils.wfbuf(nv * 3), buf));
+		}
+
+		public MorphedMesh.MorphType morphtype() {
+			return (MorphedMesh.MorphType.DIR);
+		}
+
+		public NormalData dup() {
+			return (new NormalData(Utils.bufcp(data)));
+		}
+	}
+
+	@ResName("nrm")
+	public static class NormalDecode implements DataCons {
+		public void cons(Collection<AttribData> dst, Resource res, Message buf, int nv) {
+			dst.add(new NormalData(loadbuf(Utils.wfbuf(nv * 3), buf)));
+		}
+	}
+
+	@ResName("col2")
+	public static class ColorData extends FloatData {
+		public ColorData(FloatBuffer data) {
+			super(VertexColor.color, 4, data);
+		}
+
+		public ColorData(Resource res, Message buf, int nv) {
+			this(loadbuf2(Utils.wfbuf(nv * 4), buf));
+		}
+	}
+
+	@ResName("col")
+	public static class ColorDecode implements DataCons {
+		public void cons(Collection<AttribData> dst, Resource res, Message buf, int nv) {
+			dst.add(new ColorData(loadbuf(Utils.wfbuf(nv * 4), buf)));
+		}
+	}
+
+	@ResName("tex2")
+	public static class TexelData extends FloatData {
+		public TexelData(FloatBuffer data) {
+			super(Tex2D.texc, 2, data);
+		}
+
+		public TexelData(Resource res, Message buf, int nv) {
+			this(loadbuf2(Utils.wfbuf(nv * 2), buf));
+		}
+	}
+
+	@ResName("tex")
+	public static class TexelDecode implements DataCons {
+		public void cons(Collection<AttribData> dst, Resource res, Message buf, int nv) {
+			dst.add(new TexelData(loadbuf(Utils.wfbuf(nv * 2), buf)));
+		}
+	}
+
+	public void dispose() {
+		synchronized (this) {
+			if (data != null) {
+				data.dispose();
+				dbuf.dispose();
+				data = null;
+				dbuf = null;
+			}
+		}
+	}
+
+	@dolda.jglob.Discoverable
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ResName {
+		public String value();
+	}
+
+	public interface DataCons {
+		public void cons(Collection<AttribData> dst, Resource res, Message buf, int nvert);
+	}
+
+	public static FloatBuffer loadbuf(FloatBuffer dst, Message buf) {
+		for (int i = 0; i < dst.capacity(); i++)
+			dst.put(i, buf.float32());
+		return (dst);
+	}
+
+	public static FloatBuffer loadbuf2(FloatBuffer dst, Message buf) {
+		int ver = buf.uint8();
+		if (ver != 1)
+			throw (new RuntimeException("Unknown vertex-data version: " + ver));
+		String fmt = buf.string();
+		switch (fmt) {
+			case "f4": {
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.float32());
+				break;
+			}
+			case "f2": {
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, Utils.hfdec((short) buf.int16()));
+				break;
+			}
+			case "f1": {
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, Utils.mfdec((byte) buf.int8()));
+				break;
+			}
+			case "sn4": {
+				float F = buf.float32() / 2147483647.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.int32() * F);
+				break;
+			}
+			case "sn2": {
+				float F = buf.float32() / 32767.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.int16() * F);
+				break;
+			}
+			case "sn1": {
+				float F = buf.float32() / 127.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.int8() * F);
+				break;
+			}
+			case "un4": {
+				float F = buf.float32() / 4294967295.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.uint32() * F);
+				break;
+			}
+			case "un2": {
+				float F = buf.float32() / 65535.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.uint16() * F);
+				break;
+			}
+			case "un1": {
+				float F = buf.float32() / 255.0f;
+				for (int i = 0; i < dst.capacity(); i++)
+					dst.put(i, buf.uint8() * F);
+				break;
+			}
+			case "uvec1": {
+				int i = 0;
+				float F = 1.0f / 127.0f;
+				float[] vb = new float[3];
+				while (i < dst.capacity()) {
+					Utils.oct2uvec(vb, buf.int8() * F, buf.int8() * F);
+					dst.put(i++, vb[0]);
+					dst.put(i++, vb[1]);
+					dst.put(i++, vb[2]);
+				}
+				break;
+			}
+			case "uvec2": {
+				int i = 0;
+				float F = 1.0f / 32767.0f;
+				float[] vb = new float[3];
+				while (i < dst.capacity()) {
+					Utils.oct2uvec(vb, buf.int16() * F, buf.int16() * F);
+					dst.put(i++, vb[0]);
+					dst.put(i++, vb[1]);
+					dst.put(i++, vb[2]);
+				}
+				break;
+			}
+			default:
+				throw (new RuntimeException("Unknown vertex-data format: " + fmt));
+		}
+		return (dst);
+	}
+
+	private static final Map<String, DataCons> rnames = new TreeMap<String, DataCons>();
+
+	static {
+		for (Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
+			String nm = cl.getAnnotation(ResName.class).value();
+			if (DataCons.class.isAssignableFrom(cl)) {
+				try {
+					rnames.put(nm, cl.asSubclass(DataCons.class).newInstance());
+				} catch (InstantiationException e) {
+					throw (new Error(e));
+				} catch (IllegalAccessException e) {
+					throw (new Error(e));
+				}
+			} else if (AttribData.class.isAssignableFrom(cl)) {
+				final java.lang.reflect.Constructor<? extends AttribData> cons;
+				try {
+					cons = cl.asSubclass(AttribData.class).getConstructor(Resource.class, Message.class, Integer.TYPE);
+				} catch (NoSuchMethodException e) {
+					throw (new Error("No proper constructor for res-consable vertex-array class " + cl, e));
+				}
+				rnames.put(nm, new DataCons() {
+					public void cons(Collection<AttribData> dst, Resource res, Message buf, int num) {
+						dst.add(Utils.construct(cons, res, buf, num));
+					}
+				});
+			} else {
+				throw (new Error("Illegal vertex-array constructor class: " + cl));
+			}
+		}
+	}
+
+	@Resource.LayerName("vbuf2")
+	public static class VertexRes extends Resource.Layer {
+		public transient final VertexBuf b;
+		public final int id;
+
+		private VertexRes(Resource res, VertexBuf b) {
+			res.super();
+			this.b = b;
+			this.id = 0;
+		}
+
+		public VertexRes(Resource res, Message buf) {
+			res.super();
+			List<AttribData> bufs = new LinkedList<AttribData>();
+			int fl = buf.uint8();
+			int ver = (fl & 0xf);
+			if (ver >= 2)
+				throw (new Resource.LoadException(String.format("Unknown vbuf version: %d", ver), res));
+			if ((fl & ~0xf) != 0)
+				throw (new Resource.LoadException(String.format("Unknown vbuf flags: %02x", fl), res));
+			if (ver >= 1)
+				this.id = buf.int16();
+			else
+				this.id = 0;
+			int num = buf.uint16();
+			while (!buf.eom()) {
+				String nm = buf.string();
+				DataCons cons = rnames.get(nm);
+				if (cons == null)
+					throw (new Resource.LoadException("Unknown vertex-array name: " + nm, res));
+				if (ver >= 1) {
+					Message sub = new LimitMessage(buf, buf.int32());
+					cons.cons(bufs, res, sub, num);
+					sub.skip();
+				} else {
+					cons.cons(bufs, res, buf, num);
+				}
+			}
+			this.b = new VertexBuf(bufs.toArray(new AttribData[0])) {
+				public String toString() {
+					return (String.format("#<vertexbuf %s>", res.name));
+				}
+			};
+		}
+
+		public void init() {
+		}
+	}
 }

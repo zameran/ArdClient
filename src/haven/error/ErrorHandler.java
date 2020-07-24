@@ -26,13 +26,37 @@
 
 package haven.error;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
 
-import haven.Config;
+import java.net.URL;
+import java.net.URLConnection;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Queue;
+
 
 public class ErrorHandler extends ThreadGroup {
+    private final URL errordest;
+    private static final String[] sysprops = {
+            "java.version",
+            "java.vendor",
+            "os.name",
+            "os.arch",
+            "os.version",
+    };
     private final ThreadGroup initial;
     private Map<String, Object> props = new HashMap<String, Object>();
     private Reporter reporter;
@@ -43,6 +67,12 @@ public class ErrorHandler extends ThreadGroup {
                 return ((ErrorHandler) tg);
         }
         return (null);
+    }
+
+    public static void setprop(String key, Object val) {
+        ErrorHandler tg = find();
+        if (tg != null)
+            tg.lsetprop(key, val);
     }
 
     public void lsetprop(String key, Object val) {
@@ -72,6 +102,7 @@ public class ErrorHandler extends ThreadGroup {
                         try {
                             doreport(r);
                         } catch (Exception e) {
+                            status.senderror(e);
                         }
                     }
                 }
@@ -79,22 +110,50 @@ public class ErrorHandler extends ThreadGroup {
         }
 
         private void doreport(Report r) throws IOException {
-            if (!status.goterror(r))
+            if (!status.goterror(r.t))
                 return;
-            status.done(null, null);
+            URLConnection c = errordest.openConnection();
+            status.connecting();
+            c.setDoOutput(true);
+            c.addRequestProperty("Content-Type", "application/x-java-error");
+            c.connect();
+            ObjectOutputStream o = new ObjectOutputStream(c.getOutputStream());
+            status.sending();
+            o.writeObject(r);
+            o.close();
+            String ctype = c.getContentType();
+            StringWriter buf = new StringWriter();
+            Reader i = new InputStreamReader(c.getInputStream(), "utf-8");
+            char[] dbuf = new char[1024];
+            while (true) {
+                int len = i.read(dbuf);
+                if (len < 0)
+                    break;
+                buf.write(dbuf, 0, len);
+            }
+            i.close();
+            if (ctype.equals("text/x-report-info")) {
+                status.done("text/x-report-info", buf.toString());
+            } else if (ctype.equals("text/x-report-error")) {
+                throw (new ReportException(buf.toString()));
+            } else {
+                status.done(null, null);
+            }
         }
 
-        public void report(Throwable t) {
+        public void report(Thread th, Throwable t) {
             Report r = new Report(t);
             r.props.putAll(props);
-            String filename ="Haven Exception ";
-            filename =  filename + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            r.props.put("thnm", th.getName());
+            r.props.put("thcl", th.getClass().getName());
+            String filename = "Haven Exception ";
+            filename = filename + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             filename = filename + ".log";
-            String info = ("Java "+System.getProperty("java.runtime.version")+ "\n"
-                    + "OS "+System.getProperty("os.name")+ " " + System.getProperty("os.version") + " " + System.getProperty("os.arch") + "\n"
-                    + "GPU " + (String)r.props.get("gpu")+ "\n");
+            String info = ("Java " + System.getProperty("java.runtime.version") + "\n"
+                    + "OS " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch") + "\n"
+                    + "GPU " + (String) r.props.get("gpu") + "\n");
 
-            File folder = new File("crashes");
+            File folder = new File("errors");
             if (!folder.exists()) folder.mkdir();
 
             File file = new File(folder + "/" + filename);
@@ -103,7 +162,8 @@ public class ErrorHandler extends ThreadGroup {
                 pw.append(info);
                 t.printStackTrace(pw);
                 pw.close();
-            }catch(FileNotFoundException qq){}
+            } catch (FileNotFoundException qq) {
+            }
             synchronized (errors) {
                 errors.add(r);
                 errors.notifyAll();
@@ -115,28 +175,38 @@ public class ErrorHandler extends ThreadGroup {
     }
 
     private void defprops() {
-        String os = System.getProperty("os.name");
-        String osVer = System.getProperty("os.version");
-        String osArch;
-        if (Config.iswindows)
-            osArch = (System.getenv("ProgramFiles(x86)") != null) ? " x64" : " x86";
-        else
-            osArch = ""; // ignore on Linux
-        props.put("os", os + " " + osVer + osArch);
-
-        props.put("java", System.getProperty("java.version") + " " + System.getProperty("os.arch"));
+        for (String p : sysprops)
+            props.put(p, System.getProperty(p));
+        Runtime rt = Runtime.getRuntime();
+        props.put("cpus", rt.availableProcessors());
+        InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
+        try {
+            try {
+                if (in != null) {
+                    Properties info = new Properties();
+                    info.load(in);
+                    for (Map.Entry<Object, Object> e : info.entrySet())
+                        props.put("jar." + (String) e.getKey(), e.getValue());
+                }
+            } finally {
+                in.close();
+            }
+        } catch (IOException e) {
+            throw (new Error(e));
+        }
     }
 
-    public ErrorHandler(ErrorStatus ui) {
+    public ErrorHandler(ErrorStatus ui, URL errordest) {
         super("Haven client");
+        this.errordest = errordest;
         initial = Thread.currentThread().getThreadGroup();
         reporter = new Reporter(ui);
         reporter.start();
         defprops();
     }
 
-    public ErrorHandler() {
-        this(new ErrorStatus.Simple());
+    public ErrorHandler(URL errordest) {
+        this(new ErrorStatus.Simple(), errordest);
     }
 
     public void sethandler(ErrorStatus handler) {
@@ -144,6 +214,6 @@ public class ErrorHandler extends ThreadGroup {
     }
 
     public void uncaughtException(Thread t, Throwable e) {
-        reporter.report(e);
+        reporter.report(t, e);
     }
 }

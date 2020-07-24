@@ -26,83 +26,80 @@
 
 package haven;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.awt.Color;
 
 public class Party {
-    Map<Long, Member> memb = new TreeMap<Long, Member>();
-    Member leader = null;
-    public static final int PD_LIST = 0;
-    public static final int PD_LEADER = 1;
-    public static final int PD_MEMBER = 2;
-    private Glob glob;
+	Map<Long, Member> memb = new TreeMap<Long, Member>();
+	Member leader = null;
+	public static final int PD_LIST = 0;
+	public static final int PD_LEADER = 1;
+	public static final int PD_MEMBER = 2;
+	private Glob glob;
 
-    public Party(Glob glob) {
-        this.glob = glob;
-    }
+	public Party(Glob glob) {
+		this.glob = glob;
+	}
 
-    public class Member {
-        long gobid;
-        private Coord2d c = null;
-        Color col = Color.BLACK;
+	public class Member {
+		long gobid;
+		private Coord2d c = null;
+		Color col = Color.BLACK;
 
-        public Gob getgob() {
-            return (glob.oc.getgob(gobid));
-        }
+		public Gob getgob() {
+			return (glob.oc.getgob(gobid));
+		}
 
-        public Coord2d getc() {
-            Gob gob;
-            try {
-                if ((gob = getgob()) != null)
-                    return (new Coord2d(gob.getc()));
-            } catch (Loading e) {
-            }
-            return (c);
-        }
-    }
+		public Coord2d getc() {
+			Gob gob;
+			try {
+				if ((gob = getgob()) != null)
+					return (new Coord2d(gob.getc()));
+			} catch (Loading e) {
+			}
+			return (c);
+		}
+	}
 
-    public void msg(Message msg) {
-        while (!msg.eom()) {
-            int type = msg.uint8();
-            if (type == PD_LIST) {
-                ArrayList<Long> ids = new ArrayList<Long>();
-                while (true) {
-                    long id = msg.int32();
-                    if (id < 0)
-                        break;
-                    ids.add(id);
-                }
-                Map<Long, Member> nmemb = new TreeMap<Long, Member>();
-                for (long id : ids) {
-                    Member m = memb.get(id);
-                    if (m == null) {
-                        m = new Member();
-                        m.gobid = id;
-                    }
-                    nmemb.put(id, m);
-                }
-                long lid = (leader == null) ? -1 : leader.gobid;
-                memb = nmemb;
-                leader = memb.get(lid);
-            } else if (type == PD_LEADER) {
-                Member m = memb.get((long) msg.int32());
-                if (m != null)
-                    leader = m;
-            } else if (type == PD_MEMBER) {
-                long gobId = msg.int32();
-                Member m = memb.get(gobId);
-                Coord2d c = null;
-                boolean vis = msg.uint8() == 1;
-                if (vis)
-                    c = msg.coord().mul(OCache.posres);
-                Color col = msg.color();
-                if (m != null) {
-                    m.c = c;
-                    m.col = col;
-                }
-            }
-        }
-    }
+	public void msg(Message msg) {
+		while (!msg.eom()) {
+			int type = msg.uint8();
+			if (type == PD_LIST) {
+				ArrayList<Long> ids = new ArrayList<Long>();
+				while (true) {
+					long id = msg.int32();
+					if (id < 0)
+						break;
+					ids.add(id);
+				}
+				Map<Long, Member> nmemb = new TreeMap<Long, Member>();
+				for (long id : ids) {
+					Member m = memb.get(id);
+					if (m == null) {
+						m = new Member();
+						m.gobid = id;
+					}
+					nmemb.put(id, m);
+				}
+				long lid = (leader == null) ? -1 : leader.gobid;
+				memb = nmemb;
+				leader = memb.get(lid);
+			} else if (type == PD_LEADER) {
+				Member m = memb.get((long) msg.int32());
+				if (m != null)
+					leader = m;
+			} else if (type == PD_MEMBER) {
+				Member m = memb.get((long) msg.int32());
+				Coord2d c = null;
+				boolean vis = msg.uint8() == 1;
+				if (vis)
+					c = msg.coord().mul(OCache.posres);
+				Color col = msg.color();
+				if (m != null) {
+					m.c = c;
+					m.col = col;
+				}
+			}
+		}
+	}
 }

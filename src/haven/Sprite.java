@@ -26,135 +26,154 @@
 
 package haven;
 
-import java.lang.reflect.Constructor;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.awt.image.BufferedImage;
+import java.awt.Graphics;
+import java.util.*;
 import java.util.function.*;
+import java.lang.reflect.Constructor;
 
-public abstract class Sprite implements Rendered {
-    public static final int GOB_HEALTH_ID = -1001;
-    public static final int GROWTH_STAGE_ID = -1002;
-    public static final int GOB_QUALITY_ID = -1003;
-    public static final int GOB_CUSTOM_ID = -1004;
-    public static final int GOB_TEXT_ID = -1005;
-    public final Resource res;
-    public final Owner owner;
-    public static List<Factory> factories = new LinkedList<Factory>();
+import haven.render.*;
 
-    static {
-        factories.add(SpriteLink.sfact);
-        factories.add(SkelSprite.fact);
-        factories.add(AnimSprite.fact);
-        factories.add(StaticSprite.fact);
-        factories.add(AudioSprite.fact);
-    }
+public abstract class Sprite implements RenderTree.Node {
+	public final Resource res;
+	public final Owner owner;
+	public static List<Factory> factories = new LinkedList<Factory>();
 
-    public interface Owner extends OwnerContext {
-        public Random mkrandoom();
-        public Resource getres();
-        @Deprecated
-        public default Glob glob() {return(context(Glob.class));}
-    }
+	static {
+		factories.add(SpriteLink.sfact);
+		factories.add(SkelSprite.fact);
+		factories.add(AnimSprite.fact);
+		factories.add(StaticSprite.fact);
+		factories.add(AudioSprite.fact);
+	}
 
-    public static class FactMaker implements Resource.PublishedCode.Instancer {
-        public Factory make(Class<?> cl) throws InstantiationException, IllegalAccessException {
-            if (Factory.class.isAssignableFrom(cl))
-                return (cl.asSubclass(Factory.class).newInstance());
-            try {
-                Function<Object[], Sprite> make = Utils.smthfun(cl, "mksprite", Sprite.class, Owner.class, Resource.class, Message.class);
-                return(new Factory() {
-                    public Sprite create(Owner owner, Resource res, Message sdt) {
-                        return(make.apply(new Object[] {owner, res, sdt}));
-                    }
-                });
-            } catch(NoSuchMethodException e) {}
-            if (Sprite.class.isAssignableFrom(cl))
-                return (mkdynfact(cl.asSubclass(Sprite.class)));
-            return (null);
-        }
-    }
+	public interface Owner extends OwnerContext {
+		public Random mkrandoom();
 
-    @Resource.PublishedCode(name = "spr", instancer = FactMaker.class)
-    public interface Factory {
-        public Sprite create(Owner owner, Resource res, Message sdt);
-    }
+		public Resource getres();
 
-    public static Factory mkdynfact(Class<? extends Sprite> cl) {
-        try {
-            final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class);
-            return (new Factory() {
-                public Sprite create(Owner owner, Resource res, Message sdt) {
-                    return (Utils.construct(cons, owner, res));
-                }
-            });
-        } catch (NoSuchMethodException e) {
-        }
-        try {
-            final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class, Message.class);
-            return (new Factory() {
-                public Sprite create(Owner owner, Resource res, Message sdt) {
-                    return (Utils.construct(cons, owner, res, sdt));
-                }
-            });
-        } catch (NoSuchMethodException e) {
-        }
-        throw (new RuntimeException("Could not find any suitable constructor for dynamic sprite"));
-    }
+		@Deprecated
+		public default Glob glob() {
+			return (context(Glob.class));
+		}
+	}
 
-    public static class ResourceException extends RuntimeException {
-        public Resource res;
+	public static interface CDel {
+		public void delete();
+	}
 
-        public ResourceException(String msg, Resource res) {
-            super(msg + " (" + res + ", from " + res.source + ")");
-            this.res = res;
-        }
+	public static interface CUpd {
+		public void update(Message sdt);
+	}
 
-        public ResourceException(String msg, Throwable cause, Resource res) {
-            super(msg + " (" + res + ", from " + res.source + ")", cause);
-            this.res = res;
-        }
-    }
+	public static class FactMaker implements Resource.PublishedCode.Instancer {
+		public Factory make(Class<?> cl) throws InstantiationException, IllegalAccessException {
+			if (Factory.class.isAssignableFrom(cl))
+				return (cl.asSubclass(Factory.class).newInstance());
+			try {
+				Function<Object[], Sprite> make = Utils.smthfun(cl, "mksprite", Sprite.class, Owner.class, Resource.class, Message.class);
+				return (new Factory() {
+					public Sprite create(Owner owner, Resource res, Message sdt) {
+						return (make.apply(new Object[]{owner, res, sdt}));
+					}
+				});
+			} catch (NoSuchMethodException e) {
+			}
+			if (Sprite.class.isAssignableFrom(cl))
+				return (mkdynfact(cl.asSubclass(Sprite.class)));
+			return (null);
+		}
+	}
 
-    protected Sprite(Owner owner, Resource res) {
-        this.res = res;
-        this.owner = owner;
-    }
+	@Resource.PublishedCode(name = "spr", instancer = FactMaker.class)
+	public interface Factory {
+		public Sprite create(Owner owner, Resource res, Message sdt);
+	}
 
-    public static int decnum(Message sdt) {
-        if (sdt == null)
-            return (0);
-        int ret = 0, off = 0;
-        while (!sdt.eom()) {
-            ret |= sdt.uint8() << off;
-            off += 8;
-        }
-        return (ret);
-    }
+	public static Factory mkdynfact(Class<? extends Sprite> cl) {
+		try {
+			final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class);
+			return (new Factory() {
+				public Sprite create(Owner owner, Resource res, Message sdt) {
+					return (Utils.construct(cons, owner, res));
+				}
+			});
+		} catch (NoSuchMethodException e) {
+		}
+		try {
+			final Constructor<? extends Sprite> cons = cl.getConstructor(Owner.class, Resource.class, Message.class);
+			return (new Factory() {
+				public Sprite create(Owner owner, Resource res, Message sdt) {
+					return (Utils.construct(cons, owner, res, sdt));
+				}
+			});
+		} catch (NoSuchMethodException e) {
+		}
+		throw (new RuntimeException("Could not find any suitable constructor for dynamic sprite"));
+	}
 
-    public static Sprite create(Owner owner, Resource res, Message sdt) {
-        {
-            Factory f = res.getcode(Factory.class, false);
-            if (f != null)
-                return (f.create(owner, res, sdt));
-        }
-        for (Factory f : factories) {
-            Sprite ret = f.create(owner, res, sdt);
-            if (ret != null)
-                return (ret);
-        }
-        throw (new ResourceException("Does not know how to draw resource " + res.name, res));
-    }
+	public static class ResourceException extends RuntimeException {
+		public Resource res;
 
-    public void draw(GOut g) {
-    }
+		public ResourceException(String msg, Resource res) {
+			super(msg + " (" + res + ", from " + res.source + ")");
+			this.res = res;
+		}
 
+		public ResourceException(String msg, Throwable cause, Resource res) {
+			super(msg + " (" + res + ", from " + res.source + ")", cause);
+			this.res = res;
+		}
+	}
+
+	protected Sprite(Owner owner, Resource res) {
+		this.res = res;
+		this.owner = owner;
+	}
+
+	public static int decnum(Message sdt) {
+		if (sdt == null)
+			return (0);
+		int ret = 0, off = 0;
+		while (!sdt.eom()) {
+			ret |= sdt.uint8() << off;
+			off += 8;
+		}
+		return (ret);
+	}
+
+	public static Sprite create(Owner owner, Resource res, Message sdt) {
+		{
+			Factory f = res.getcode(Factory.class, false);
+			if (f != null)
+				return (f.create(owner, res, sdt));
+		}
+		for (Factory f : factories) {
+			Sprite ret = f.create(owner, res, sdt);
+			if (ret != null)
+				return (ret);
+		}
+	/* XXXRENDER
+	throw(new ResourceException("Does not know how to draw resource " + res.name, res));
+	*/
+		return (new Sprite(owner, res) {
+		});
+	}
+
+	public void draw(GOut g) {
+	}
+
+    /* XXXRENDER
     public abstract boolean setup(RenderList d);
+    */
 
-    public boolean tick(int dt) {
-        return (false);
-    }
+	public boolean tick(double dt) {
+		return (false);
+	}
 
-    public void dispose() {
-    }
+	public void gtick(Render g) {
+	}
+
+	public void dispose() {
+	}
 }

@@ -1,161 +1,191 @@
 package haven;
 
-import java.awt.event.KeyEvent;
 import java.util.*;
+import java.awt.event.KeyEvent;
 
-public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pagina>{
-    private static final int WIDTH = 200;
-    private final TextEntry entry;
-    private final List<MenuGrid.Pagina> all = new ArrayList<>();
-    private final ActList list;
-    public boolean ignoreinit;
-    public MenuSearch(String caption) {
-        super(Coord.z, caption, caption);
-        setcanfocus(true);
-        setfocusctl(true);
-        entry = add(new TextEntry(WIDTH, "") {
-            public void activate(String text) {
-                if(list.sel != null)
-                    act(list.sel.pagina);
-                MenuSearch.this.hide();
-            }
+import haven.MenuGrid.Pagina;
+import haven.MenuGrid.PagButton;
 
-            protected void changed() {
-                super.changed();
-                refilter();
-            }
+public class MenuSearch extends Window {
+	public final MenuGrid menu;
+	public final Results rls;
+	public final TextEntry sbox;
+	private Pagina root;
+	private List<Result> cur = Collections.emptyList();
+	private List<Result> filtered = Collections.emptyList();
+	private boolean recons = false;
 
-            public boolean type(char c, KeyEvent ev)
-            {
-                if(ignoreinit){
-                    ignoreinit = false;
-                    return false;
-                }
-                return super.type(c, ev);
-            }
+	public class Result {
+		public final PagButton btn;
+		private Text rname;
+		private Tex rimg;
 
-            public boolean keydown(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_UP) {
-                    final Optional<Integer> idx = list.selindex();
-                    if(idx.isPresent()) {
-                        list.change(Math.max(idx.get() - 1, 0));
-                    } else {
-                        list.change(0);
-                    }
-                    return true;
-                } else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    final Optional<Integer> idx = list.selindex();
-                    if(idx.isPresent()) {
-                        list.change(Math.min(idx.get() + 1, list.listitems() - 1));
-                    } else {
-                        list.change(0);
-                    }
-                    return true;
-                } else {
-                    return super.keydown(e) ;
-                }
-            }
-        });
-        setfocus(entry);
-        list = add(new ActList(WIDTH, 10) {
-            protected void itemclick(ActItem item, int button) {
-               // if(sel == item) {
-                    act(item.pagina);
-                   // MenuSearch.this.hide();
-              //  } else {
-                    super.itemclick(item, button);
-               // }
-            }
-        }, 0, entry.sz.y + 5);
-        pack();
-    }
+		private Result(PagButton btn) {
+			this.btn = btn;
+		}
+	}
 
-    public void act(MenuGrid.Pagina act) {
-        if(ui.gui != null) {
-            ui.gui.menu.use(act.button(), false);
-        }
-    }
+	private static final Text.Foundry elf = CharWnd.attrf;
+	private static final int elh = elf.height() + 2;
 
-    public void show() {
-        super.show();
-        entry.settext("");
-        list.change(0);
-        parent.setfocus(this);
-    }
+	public class Results extends Listbox<Result> {
+		private Results(int w, int h) {
+			super(w, h, elh);
+		}
 
-    @Override
-    protected void added() {
-        super.added();
-        ui.gui.menu.paginae.addListener(this);
-    }
+		protected void drawbg(GOut g) {
+		}
 
-    public void close() { hide(); }
+		protected Result listitem(int i) {
+			return (filtered.get(i));
+		}
 
-    @Override
-    protected void removed() {
-        ui.gui.menu.paginae.removeListener(this);
-    }
+		protected int listitems() {
+			return (filtered.size());
+		}
 
-    private void refilter() {
-        list.clear();
-        for (MenuGrid.Pagina p : all) {
-            if (p.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text.toLowerCase()))
-                list.add(p);
-        }
-        list.sort(new ItemComparator());
-        if (list.listitems() > 0) {
-            final Optional<Integer> idx = list.selindex();
-            if(idx.isPresent()) {
-                list.change(Math.max(idx.get() - 1, 0));
-            } else {
-                list.change(0);
-            }
-        }
-    }
+		protected void drawitem(GOut g, Result el, int idx) {
+			g.chcolor((((idx % 2) == 0) ? CharWnd.every : CharWnd.other));
+			g.frect(Coord.z, g.sz());
+			g.chcolor();
+			if (el.rname == null)
+				el.rname = elf.render(el.btn.name());
+			if (el.rimg == null)
+				el.rimg = new TexI(PUtils.convolvedown(el.btn.img(), new Coord(elh, elh), CharWnd.iconfilter));
+			g.image(el.rimg, Coord.z);
+			g.image(el.rname.tex(), new Coord(elh + 5, 0));
+		}
 
-    @Override
-    public void init(Collection<MenuGrid.Pagina> base) {
-        for(final MenuGrid.Pagina pag : base) {
-            all.add(pag);
-            if(isIncluded(pag)) {
-                list.add(pag);
-            }
-        }
-    }
+		private Result prevsel = null;
+		private double lastcl = 0;
 
-    @Override
-    public void added(MenuGrid.Pagina item) {
-        all.add(item);
-        if(isIncluded(item)) {
-            list.add(item);
-        }
-    }
+		public boolean mousedown(Coord c, int button) {
+			super.mousedown(c, button);
+			double now = Utils.rtime();
+			if (prevsel == sel) {
+				if (now - lastcl < 0.5)
+					menu.use(sel.btn, false);
+			} else {
+				prevsel = sel;
+			}
+			lastcl = now;
+			return (true);
+		}
+	}
 
-    @Override
-    public void remove(MenuGrid.Pagina item) {
-        all.remove(item);
-        if(isIncluded(item)) {
-            list.remove(item);
-        }
-    }
+	public MenuSearch(MenuGrid menu) {
+		super(Coord.z, "Action search");
+		this.menu = menu;
+		rls = add(new Results(250, 25), Coord.z);
+		sbox = add(new TextEntry(250, "") {
+			protected void changed() {
+				refilter();
+			}
 
-    private class ItemComparator implements Comparator<ActList.ActItem> {
-        public int compare(ActList.ActItem a, ActList.ActItem b) {
-            return a.name.text.compareTo(b.name.text);
-        }
-    }
+			public void activate(String text) {
+				if (rls.sel != null)
+					menu.use(rls.sel.btn, false);
+				if (!ui.modctrl)
+					MenuSearch.this.wdgmsg("close");
+			}
+		}, 0, rls.sz.y);
+		pack();
+		setroot(null);
+	}
 
-    private boolean isIncluded(MenuGrid.Pagina pagina) {
-        //ensure it's loaded
-        try {
-            pagina.res();
-        } catch (Loading e) {
-            try {
-                e.waitfor();
-            } catch (InterruptedException ex) {
-                //Ignore
-            }
-        }
-        return pagina.res.get().layer(Resource.action).name.toLowerCase().contains(entry.text.toLowerCase());
-    }
+	private void refilter() {
+		List<Result> found = new ArrayList<>();
+		String needle = sbox.text.toLowerCase();
+		for (Result res : this.cur) {
+			if (res.btn.name().toLowerCase().indexOf(needle) >= 0)
+				found.add(res);
+		}
+		this.filtered = found;
+		int idx = rls.find(rls.sel);
+		if (idx < 0) {
+			if (rls.listitems() > 0) {
+				rls.change(rls.listitem(0));
+				rls.display(0);
+			}
+		} else {
+			rls.display(idx);
+		}
+	}
+
+	private void updlist() {
+		recons = false;
+		Pagina root = this.root;
+		List<PagButton> found = new ArrayList<>();
+		{
+			Collection<Pagina> leaves = new ArrayList<>();
+			synchronized (menu.paginae) {
+				leaves.addAll(menu.paginae);
+			}
+			for (Pagina pag : leaves) {
+				try {
+					if (root == null) {
+						found.add(pag.button());
+					} else {
+						for (Pagina parent = pag; parent != null; parent = menu.paginafor(parent.act().parent)) {
+							if (parent == root) {
+								found.add(pag.button());
+								break;
+							}
+						}
+					}
+				} catch (Loading l) {
+					recons = true;
+				}
+			}
+		}
+		Collections.sort(found, Comparator.comparing(PagButton::name));
+		Map<PagButton, Result> prev = new HashMap<>();
+		for (Result pr : this.cur)
+			prev.put(pr.btn, pr);
+		List<Result> results = new ArrayList<>();
+		for (PagButton btn : found) {
+			Result pr = prev.get(btn);
+			if (pr != null)
+				results.add(pr);
+			else
+				results.add(new Result(btn));
+		}
+		this.cur = results;
+		refilter();
+	}
+
+	public void setroot(Pagina nr) {
+		root = nr;
+		updlist();
+		rls.sb.val = 0;
+	}
+
+	public void tick(double dt) {
+		if (menu.cur != root)
+			setroot(menu.cur);
+		if (recons)
+			updlist();
+	}
+
+	public boolean keydown(KeyEvent ev) {
+		if (ev.getKeyCode() == KeyEvent.VK_DOWN) {
+			int idx = rls.find(rls.sel);
+			if ((idx >= 0) && (idx < rls.listitems() - 1)) {
+				idx++;
+				rls.change(rls.listitem(idx));
+				rls.display(idx);
+			}
+			return (true);
+		} else if (ev.getKeyCode() == KeyEvent.VK_UP) {
+			int idx = rls.find(rls.sel);
+			if (idx > 0) {
+				idx--;
+				rls.change(rls.listitem(idx));
+				rls.display(idx);
+			}
+			return (true);
+		} else {
+			return (super.keydown(ev));
+		}
+	}
 }

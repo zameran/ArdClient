@@ -26,51 +26,49 @@
 
 package haven;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class PrioQueue<E extends Prioritized> extends LinkedList<E> {
-    public E peek() {
-        E rv = null;
-        int mp = 0;
-        for (E e : this) {
-            int ep = e.priority();
-            if ((rv == null) || (ep > mp)) {
-                mp = ep;
-                rv = e;
-            }
-        }
-        return (rv);
-    }
+	public E peek() {
+		E rv = null;
+		int mp = 0;
+		for (E e : this) {
+			int ep = e.priority();
+			if ((rv == null) || (ep > mp)) {
+				mp = ep;
+				rv = e;
+			}
+		}
+		return (rv);
+	}
 
-    public E element() {
-        E rv;
-        if ((rv = peek()) == null)
-            throw (new NoSuchElementException());
-        return (rv);
-    }
+	public E element() {
+		E rv;
+		if ((rv = peek()) == null)
+			throw (new NoSuchElementException());
+		return (rv);
+	}
 
-    public E poll() {
-        E rv = peek();
-        removeid(rv);
-        return (rv);
-    }
+	public E poll() {
+		E rv = peek();
+		removeid(rv);
+		return (rv);
+	}
 
-    public E remove() {
-        E rv;
-        if ((rv = poll()) == null)
-            throw (new NoSuchElementException());
-        return (rv);
-    }
+	public E remove() {
+		E rv;
+		if ((rv = poll()) == null)
+			throw (new NoSuchElementException());
+		return (rv);
+	}
 
-    public boolean removeid(E el) {
-        for (Iterator<E> i = iterator(); i.hasNext(); ) {
-            if (i.next() == el) {
-                i.remove();
-                return (true);
-            }
-        }
-        return (false);
-    }
+	public boolean removeid(E el) {
+		for (Iterator<E> i = iterator(); i.hasNext(); ) {
+			if (i.next() == el) {
+				i.remove();
+				return (true);
+			}
+		}
+		return (false);
+	}
 }

@@ -29,102 +29,102 @@ package haven;
 import java.util.Iterator;
 
 public class Area implements Iterable<Coord>, java.io.Serializable {
-    public Coord ul, br;
+	public Coord ul, br;
 
-    public Area(Coord ul, Coord br) {
-        this.ul = ul;
-        this.br = br;
-    }
+	public Area(Coord ul, Coord br) {
+		this.ul = ul;
+		this.br = br;
+	}
 
-    public int hashCode() {
-	return((ul.hashCode() * 31) + br.hashCode());
-    }
+	public int hashCode() {
+		return ((ul.hashCode() * 31) + br.hashCode());
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof Area))
-            return (false);
-        Area a = (Area) o;
-        return (a.ul.equals(ul) && a.br.equals(br));
-    }
+	public boolean equals(Object o) {
+		if (!(o instanceof Area))
+			return (false);
+		Area a = (Area) o;
+		return (a.ul.equals(ul) && a.br.equals(br));
+	}
 
-    public static Area sized(Coord ul, Coord sz) {
-        return (new Area(ul, ul.add(sz)));
-    }
+	public static Area sized(Coord ul, Coord sz) {
+		return (new Area(ul, ul.add(sz)));
+	}
 
-    public Coord sz() {
-        return (br.sub(ul));
-    }
+	public Coord sz() {
+		return (br.sub(ul));
+	}
 
-    public boolean contains(Coord c) {
-        return ((c.x >= ul.x) && (c.y >= ul.y) && (c.x < br.x) && (c.y < br.y));
-    }
+	public boolean contains(Coord c) {
+		return ((c.x >= ul.x) && (c.y >= ul.y) && (c.x < br.x) && (c.y < br.y));
+	}
 
-    public boolean isects(Area o) {
-        return ((br.x > o.ul.x) && (br.y > o.ul.y) && (o.br.x > ul.x) && (o.br.y > ul.y));
-    }
+	public boolean isects(Area o) {
+		return ((br.x > o.ul.x) && (br.y > o.ul.y) && (o.br.x > ul.x) && (o.br.y > ul.y));
+	}
 
-    public boolean contains(Area o) {
-        return ((o.ul.x >= ul.x) && (o.ul.y >= ul.y) && (o.br.x <= br.x) && (o.br.y <= br.y));
-    }
+	public boolean contains(Area o) {
+		return ((o.ul.x >= ul.x) && (o.ul.y >= ul.y) && (o.br.x <= br.x) && (o.br.y <= br.y));
+	}
 
-    public Area overlap(Area o) {
-	if(!isects(o))
-	    return(null);
-	return(new Area(new Coord(Math.max(ul.x, o.ul.x), Math.max(ul.y, o.ul.y)),
-			new Coord(Math.min(br.x, o.br.x), Math.min(br.y, o.br.y))));
-    }
+	public Area overlap(Area o) {
+		if (!isects(o))
+			return (null);
+		return (new Area(new Coord(Math.max(ul.x, o.ul.x), Math.max(ul.y, o.ul.y)),
+				new Coord(Math.min(br.x, o.br.x), Math.min(br.y, o.br.y))));
+	}
 
-    public Coord closest(Coord p) {
-	if(contains(p))
-	    return(p);
-	return(new Coord(Utils.clip(p.x, ul.x, br.x),
-			 Utils.clip(p.y, ul.y, br.y)));
-    }
+	public Coord closest(Coord p) {
+		if (contains(p))
+			return (p);
+		return (new Coord(Utils.clip(p.x, ul.x, br.x),
+				Utils.clip(p.y, ul.y, br.y)));
+	}
 
-    public int area() {
-	return((br.x - ul.x) * (br.y - ul.y));
-    }
+	public int area() {
+		return ((br.x - ul.x) * (br.y - ul.y));
+	}
 
-    public Area xl(Coord off) {
-        return (new Area(ul.add(off), br.add(off)));
-    }
+	public Area xl(Coord off) {
+		return (new Area(ul.add(off), br.add(off)));
+	}
 
-    public Area margin(Coord m) {
-        return (new Area(ul.sub(m), br.add(m)));
-    }
+	public Area margin(Coord m) {
+		return (new Area(ul.sub(m), br.add(m)));
+	}
 
-    public Area margin(int m) {
-        return (margin(new Coord(m, m)));
-    }
+	public Area margin(int m) {
+		return (margin(new Coord(m, m)));
+	}
 
-    public Iterator<Coord> iterator() {
-        return (new Iterator<Coord>() {
-            int x = ul.x, y = ul.y;
+	public Iterator<Coord> iterator() {
+		return (new Iterator<Coord>() {
+			int x = ul.x, y = ul.y;
 
-            public boolean hasNext() {
-                return ((y < br.y) && (x < br.x));
-            }
+			public boolean hasNext() {
+				return ((y < br.y) && (x < br.x));
+			}
 
-            public Coord next() {
-                Coord ret = new Coord(x, y);
-                if (++x >= br.x) {
-                    x = ul.x;
-                    y++;
-                }
-                return (ret);
-            }
-        });
-    }
+			public Coord next() {
+				Coord ret = new Coord(x, y);
+				if (++x >= br.x) {
+					x = ul.x;
+					y++;
+				}
+				return (ret);
+			}
+		});
+	}
 
-    public int ri(Coord c) {
-        return ((c.x - ul.x) + ((c.y - ul.y) * (br.x - ul.x)));
-    }
+	public int ri(Coord c) {
+		return ((c.x - ul.x) + ((c.y - ul.y) * (br.x - ul.x)));
+	}
 
-    public int rsz() {
-        return ((br.x - ul.x) * (br.y - ul.y));
-    }
+	public int rsz() {
+		return ((br.x - ul.x) * (br.y - ul.y));
+	}
 
-    public String toString() {
-        return (String.format("((%d, %d) - (%d, %d))", ul.x, ul.y, br.x, br.y));
-    }
+	public String toString() {
+		return (String.format("((%d, %d) - (%d, %d))", ul.x, ul.y, br.x, br.y));
+	}
 }

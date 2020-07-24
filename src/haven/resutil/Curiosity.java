@@ -26,8 +26,15 @@
 
 package haven.resutil;
 
-import haven.*;
-
+import haven.GItem;
+import haven.Glob;
+import haven.ItemData;
+import haven.ItemInfo;
+import haven.QualityList;
+import haven.Resource;
+import haven.RichText;
+import haven.Session;
+import haven.Utils;
 
 import java.awt.image.BufferedImage;
 
@@ -45,6 +52,28 @@ public class Curiosity extends ItemInfo.Tip {
         this.time = time / Glob.SERVER_TIME_RATIO / 60;
         if (owner instanceof GItem)
             ((GItem) owner).studytime = this.time;
+    }
+
+    static String[] units = {"s", "m", "h", "d"};
+    static int[] div = {60, 60, 24};
+
+    static String timefmt(int time) {
+        int[] vals = new int[units.length];
+        vals[0] = time;
+        for (int i = 0; i < div.length; i++) {
+            vals[i + 1] = vals[i] / div[i];
+            vals[i] = vals[i] % div[i];
+        }
+        StringBuilder buf = new StringBuilder();
+        for (int i = units.length - 1; i >= 0; i--) {
+            if (vals[i] > 0) {
+                if (buf.length() > 0)
+                    buf.append(' ');
+                buf.append(vals[i]);
+                buf.append(units[i]);
+            }
+        }
+        return (buf.toString());
     }
 
     private String timefmt() {
@@ -74,22 +103,22 @@ public class Curiosity extends ItemInfo.Tip {
     }
 
     public static class Data implements ItemData.ITipData {
-	public final int lp, weight, xp, time;
+        public final int lp, weight, xp, time;
 
-	public Data(Curiosity ii, QualityList q) {
-	    QualityList.Quality single = q.single(Quality);
-	    if(single == null) {
-		single = QualityList.DEFAULT;
-	    }
-	    lp = (int) Math.round(ii.exp / single.multiplier);
-	    weight = ii.mw;
-	    xp = ii.enc;
-	    time = (int)ii.time;
-	}
+        public Data(Curiosity ii, QualityList q) {
+            QualityList.Quality single = q.single(Quality);
+            if (single == null) {
+                single = QualityList.DEFAULT;
+            }
+            lp = (int) Math.round(ii.exp / single.multiplier);
+            weight = ii.mw;
+            xp = ii.enc;
+            time = (int) ii.time;
+        }
 
-	@Override
-	public ItemInfo create(Session sess) {
-	    return new Curiosity(null, lp, weight, xp, time);
-	}
+        @Override
+        public ItemInfo create(Session sess) {
+            return new Curiosity(null, lp, weight, xp, time);
+        }
     }
 }

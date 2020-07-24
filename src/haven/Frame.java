@@ -30,7 +30,7 @@ public class Frame extends Widget {
     private final IBox box;
 
     public Frame(Coord sz, boolean inner, IBox box) {
-	super(inner?sz.add(box.bisz()):sz);
+        super(inner ? sz.add(box.bisz()) : sz);
         this.box = box;
     }
 
@@ -61,7 +61,7 @@ public class Frame extends Widget {
     }
 
     public Coord inner() {
-	return(sz.sub(box.bisz()));
+        return (sz.sub(box.bisz()));
     }
 
     public Coord xlate(Coord c, boolean in) {
@@ -77,8 +77,8 @@ public class Frame extends Widget {
     }
 
     public <T extends Widget> T addin(T child) {
-	child.resize(inner());
-	parent.add(child, this.c.add(box.btloff()));
-	return(child);
+        child.resize(inner());
+        parent.add(child, this.c.add(box.btloff()));
+        return (child);
     }
 }

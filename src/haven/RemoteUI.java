@@ -26,68 +26,83 @@
 
 package haven;
 
+import modification.configuration;
+
 public class RemoteUI implements UI.Receiver, UI.Runner {
-    Session sess, ret;
-    UI ui;
+	Session sess, ret;
+	UI ui;
 
-    public RemoteUI(Session sess) {
-        this.sess = sess;
-        Widget.initnames();
-    }
+	public RemoteUI(Session sess) {
+		this.sess = sess;
+		Widget.initnames();
+	}
 
-    public void rcvmsg(int id, String name, Object... args) {
-        PMessage msg = new PMessage(RMessage.RMSG_WDGMSG);
-        msg.adduint16(id);
-        msg.addstring(name);
-        msg.addlist(args);
-        sess.queuemsg(msg);
-    }
+	public void rcvmsg(int id, String name, Object... args) {
+		PMessage msg = new PMessage(RMessage.RMSG_WDGMSG);
+		msg.adduint16(id);
+		msg.addstring(name);
+		msg.addlist(args);
+		sess.queuemsg(msg);
+	}
 
-    public void ret(Session sess) {
-        synchronized (this.sess) {
-            this.ret = sess;
-            this.sess.notifyAll();
-        }
-    }
+	public void ret(Session sess) {
+		synchronized (this.sess) {
+			this.ret = sess;
+			this.sess.notifyAll();
+		}
+	}
 
-    public Session run(UI ui) throws InterruptedException {
-        this.ui = ui;
-        ui.setreceiver(this);
-        while (true) {
-            PMessage msg;
-            synchronized (ui) {
-                while ((msg = sess.getuimsg()) != null) {
-                    if (msg.type == RMessage.RMSG_NEWWDG) {
-                        int id = msg.uint16();
-                        String type = msg.string();
-                        int parent = msg.uint16();
-                        Object[] pargs = msg.list();
-                        Object[] cargs = msg.list();
-                        ui.newwidget(id, type, parent, pargs, cargs);
-                    } else if (msg.type == RMessage.RMSG_WDGMSG) {
-                        int id = msg.uint16();
-                        String name = msg.string();
-                        ui.uimsg(id, name, msg.list());
-                    } else if (msg.type == RMessage.RMSG_DSTWDG) {
-                        int id = msg.uint16();
-                        ui.destroy(id);
-                    } else if(msg.type == RMessage.RMSG_ADDWDG) {
-                        int id = msg.uint16();
-                        int parent = msg.uint16();
-                        Object[] pargs = msg.list();
-                        ui.addwidget(id, parent, pargs);
-                    }
-                }
-            }
-            synchronized (sess) {
-                if (ret != null) {
-                    sess.close();
-                    return (ret);
-                }
-                if (!sess.alive())
-                    return (null);
-                sess.wait();
-            }
-        }
-    }
+	public Session run(UI ui) throws InterruptedException {
+		this.ui = ui;
+		ui.setreceiver(this);
+		while (true) {
+			PMessage msg;
+			synchronized (ui) {
+				while ((msg = sess.getuimsg()) != null) {
+					if (msg.type == RMessage.RMSG_NEWWDG) {
+						int id = msg.uint16();
+						String type = msg.string();
+						int parent = msg.uint16();
+						Object[] pargs = msg.list();
+						Object[] cargs = msg.list();
+						ui.newwidget(id, type, parent, pargs, cargs);
+
+						Widget wdg = ui.getwidget(id);
+						configuration.SyslogRemote("RMSG_NEWWDG", wdg, id, null, type, parent, pargs, cargs);
+					} else if (msg.type == RMessage.RMSG_WDGMSG) {
+						int id = msg.uint16();
+						String name = msg.string();
+						Object[] pargs = msg.list();
+						ui.uimsg(id, name, pargs);
+
+						Widget wdg = ui.getwidget(id);
+						configuration.SyslogRemote("RMSG_WDGMSG", wdg, id, name, null, -1, pargs);
+					} else if (msg.type == RMessage.RMSG_DSTWDG) {
+						int id = msg.uint16();
+						ui.destroy(id);
+
+						Widget wdg = ui.getwidget(id);
+						configuration.SyslogRemote("RMSG_DSTWDG", wdg, id, null, null, -1, null, null);
+					} else if (msg.type == RMessage.RMSG_ADDWDG) {
+						int id = msg.uint16();
+						int parent = msg.uint16();
+						Object[] pargs = msg.list();
+						ui.addwidget(id, parent, pargs);
+
+						Widget wdg = ui.getwidget(id);
+						configuration.SyslogRemote("RMSG_ADDWDG", wdg, id, null,null, parent, pargs, null);
+					}
+				}
+			}
+			synchronized (sess) {
+				if (ret != null) {
+					sess.close();
+					return (ret);
+				}
+				if (!sess.alive())
+					return (null);
+				sess.wait();
+			}
+		}
+	}
 }
