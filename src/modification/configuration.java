@@ -87,6 +87,8 @@ public class configuration {
 
 	public static boolean pbotmode = Utils.getprefb("pbotmode", false); //off - latest ui, on - current ui
 
+	public static String autoDrinkLiquid = Utils.getpref("autoDrinkLiquid", "Water");
+
 	public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
 
 	public static boolean customMarkObj = Utils.getprefb("customMarkObj", false);

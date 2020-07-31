@@ -1,6 +1,7 @@
 package haven.purus;
 
 import haven.*;
+import modification.configuration;
 
 public class DrinkWater implements Runnable {
 
@@ -81,7 +82,7 @@ public class DrinkWater implements Runnable {
 				for(ItemInfo info : contents.sub) {
 					if(info instanceof ItemInfo.Name) {
 						ItemInfo.Name name = (ItemInfo.Name) info;
-						if(name.str != null && name.str.text.contains("Water"))
+						if(name.str != null && name.str.text.contains(configuration.autoDrinkLiquid)) //"Water"
 							return true;
 					}
 				}

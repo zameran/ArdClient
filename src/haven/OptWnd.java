@@ -44,6 +44,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -1881,7 +1882,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Autodrink below threshold") {
+        appender.addRow(new CheckBox("Autodrink below threshold") {
             {
                 a = Config.autodrink;
             }
@@ -1891,7 +1892,7 @@ public class OptWnd extends Window {
                 Config.autodrink = val;
                 a = val;
             }
-        });
+        }, makeSelectAutoDrinkLiquid());
         Label AutodrinkThreshold;
         AutodrinkThreshold = new Label("Autodrink Threshold: " + Config.autodrinkthreshold);
         appender.add(AutodrinkThreshold);
@@ -4250,6 +4251,44 @@ public class OptWnd extends Window {
                 super.change(item);
                 Config.autodrinktime = Integer.parseInt(item);
                 Utils.setpref("autodrinktime", item);
+            }
+        };
+    }
+
+    private List<String> liquids = new ArrayList<>(Arrays.asList("Water", "Piping Hot Tea", "Tea", "Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Beer", "Wine", "Applejuice", "Pearjuice", "Cider", "Perry", "Weißbier", "Grapejuice", "Mead"));
+
+    private Dropbox<String> makeSelectAutoDrinkLiquid() {
+        liquids.sort(new Comparator<String>() {
+            @Override
+            public int compare(String l1, String l2) {
+                return l1.compareTo(l2);
+            }
+        });
+        return new Dropbox<String>(liquids.size(), liquids) {
+            {
+                super.change(configuration.autoDrinkLiquid);
+            }
+
+            @Override
+            protected String listitem(int i) {
+                return liquids.get(i);
+            }
+
+            @Override
+            protected int listitems() {
+                return liquids.size();
+            }
+
+            @Override
+            protected void drawitem(GOut g, String item, int i) {
+                g.text(item, Coord.z);
+            }
+
+            @Override
+            public void change(String item) {
+                super.change(item);
+                configuration.autoDrinkLiquid = item;
+                Utils.setpref("autoDrinkLiquid", item);
             }
         };
     }
