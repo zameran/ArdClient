@@ -19,7 +19,7 @@ add pack warcraft icons
     and add animated login screen aka world of warcraft reopen settings? i don't know how
 
 map - bigmap add grid, setting, editor for marks
-    add cave marks
+    +add cave marks
     fix object id
     MapFileWidget - fix Unknown tooltip from 7 zoom
     pathfinder on bigmap
@@ -76,6 +76,18 @@ more big animals - customize
 ingame cookbook
 
 food info categories fix
+
+indicator liquid of watercontainer
+
+list of information about game like food_data.json
+
+movable buffs
+
+free fly camera
+
+foodmeter to imeter
+
+food buff meat bread what is it? fix
 
 
 for Jorb and Loftar:

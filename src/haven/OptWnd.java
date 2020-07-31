@@ -44,7 +44,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -1598,7 +1597,7 @@ public class OptWnd extends Window {
 
             @Override
             public void changed() {
-                configuration.scaletreeint = this.val;
+                configuration.scaletreeint = val;
                 Utils.setprefi("scaletreeint", configuration.scaletreeint);
             }
 
@@ -2220,7 +2219,7 @@ public class OptWnd extends Window {
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.addRow(new Label("Bad camera scrolling sensitivity"),
-                new HSlider(50, 0, 50, 0) {
+                new HSlider(200, 0, 50, Config.badcamsensitivity) {
                     protected void attach(UI ui) {
                         super.attach(ui);
                         val = Config.badcamsensitivity;
@@ -2229,6 +2228,12 @@ public class OptWnd extends Window {
                     public void changed() {
                         Config.badcamsensitivity = val;
                         Utils.setprefi("badcamsensitivity", val);
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        Tex tex = Text.render("Bad camera scrolling sensitivity : " + val).tex();
+                        return tex;
                     }
                 });
         appender.add(new CheckBox("Use French (AZERTY) keyboard layout") {
@@ -3144,16 +3149,10 @@ public class OptWnd extends Window {
                         },
                 new ResizableTextEntry(configuration.defaultUtilsCustomTitle) {
                     @Override
-                    public boolean keydown(KeyEvent ev) {
-                        if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
-                            if (!parent.visible)
-                                return false;
-                            Utils.setpref("custom-title", text);
-                            configuration.defaultUtilsCustomTitle = text;
-
-                            MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
-                        }
-                        return buf.key(ev);
+                    public void activate(String text) {
+                        Utils.setpref("custom-title", text);
+                        configuration.defaultUtilsCustomTitle = text;
+                        MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
                     }
                 });
         appender.addRow(new CheckBox("Custom login background: ") {
@@ -3400,6 +3399,26 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+
+        appender.addRow(new Label("Minimal distance for free camera"),
+                new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
+                    @Override
+                    protected void attach(UI ui) {
+                        super.attach(ui);
+                    }
+
+                    @Override
+                    public void changed() {
+                        configuration.badcamdistminimaldefault = val;
+                        Utils.setpreff("badcamdistminimaldefault", configuration.badcamdistminimaldefault);
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        Tex tex = Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
+                        return tex;
+                    }
+                });
 
         modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         modification.pack();
@@ -4640,6 +4659,21 @@ public class OptWnd extends Window {
                 LoginScreen.bg = configuration.bgCheck();
                 if (ui == null || ui.gui == null || ui.sess == null || !ui.sess.alive())
                     ui.uimsg(1, "bg");
+            }
+
+            @Override
+            public boolean mousedown(Coord c, int btn) {
+                if (btn == 3) {
+                    pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
+                }
+                super.mousedown(c, btn);
+                return true;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("Right click to reload folder").tex();
+                return tex;
             }
         };
     }

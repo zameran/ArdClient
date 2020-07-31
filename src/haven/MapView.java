@@ -330,9 +330,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public class FreeCam extends Camera {
-        private float dist = 50.0f;
-        private float elev = (float) Math.PI / 4.0f;
-        private float angl = 0.0f;
+        private float dist = configuration.badcamdistdefault; //50.0f;
+        private float elev = configuration.badcamelevdefault; //(float) Math.PI / 4.0f;
+        private float angl = configuration.badcamangldefault; //0.0f;
         private Coord dragorig = null;
         private float elevorig, anglorig;
 
@@ -367,13 +367,18 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (elev > (Math.PI / 2.0)) elev = (float) Math.PI / 2.0f;
             angl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
             angl = angl % ((float) Math.PI * 2.0f);
+            configuration.badcamelevdefault = elev;
+            configuration.badcamangldefault = angl;
+            Utils.setpreff("badcamelevdefault", elev);
+            Utils.setpreff("badcamangldefault", angl);
         }
 
         public boolean wheel(Coord c, int amount) {
             float d = dist + (amount * Config.badcamsensitivity);
-            if (d < 5)
-                d = 5;
+            if (d < configuration.badcamdistminimaldefault)
+                d = configuration.badcamdistminimaldefault;
             dist = d;
+            Utils.setpreff("badcamdistdefault", dist);
             return (true);
         }
     }
