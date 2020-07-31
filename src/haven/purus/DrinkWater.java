@@ -98,7 +98,7 @@ public class DrinkWater implements Runnable {
                     if (info instanceof ItemInfo.Name) {
                         ItemInfo.Name name = (ItemInfo.Name) info;
                         if (name.str != null)
-                            if (configuration.autoDrinkWhatever)
+                            if (configuration.autoDrinkWhatever && liquidPattern.matcher(name.str.text).matches())
                                 return true;
                             else if (name.str.text.contains(configuration.autoDrinkLiquid)) //"Water"
                                 return true;
