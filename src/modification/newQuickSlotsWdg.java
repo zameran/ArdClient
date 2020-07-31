@@ -10,7 +10,6 @@ import haven.GSprite;
 import haven.Indir;
 import haven.ItemInfo;
 import haven.Loading;
-import haven.MovableWidget;
 import haven.Resource;
 import haven.RichText;
 import haven.Tex;
@@ -22,6 +21,7 @@ import haven.WItem;
 import haven.Widget;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.sloth.gui.MovableWidget;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

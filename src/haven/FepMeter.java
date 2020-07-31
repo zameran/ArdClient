@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.gui.MovableWidget;
+
 import java.awt.Color;
 
 public class FepMeter extends MovableWidget {
@@ -26,14 +28,14 @@ public class FepMeter extends MovableWidget {
         g.chcolor();
         double x = 0;
         int w = isz.x;
-        for(CharWnd.FoodMeter.El el : food.els) {
-            int l = (int)Math.floor((x / food.cap) * w);
-            int r = (int)Math.floor(((x += el.a) / food.cap) * w);
+        for (CharWnd.FoodMeter.El el : food.els) {
+            int l = (int) Math.floor((x / food.cap) * w);
+            int r = (int) Math.floor(((x += el.a) / food.cap) * w);
             try {
                 Color col = el.ev().col;
                 g.chcolor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 255));
                 g.frect(off.add(l, 0), new Coord(r - l, isz.y));
-            } catch(Loading e) {
+            } catch (Loading e) {
             }
         }
         g.chcolor();

@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.gui.MovableWidget;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;

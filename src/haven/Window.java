@@ -29,6 +29,7 @@ package haven;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.Wear;
 import haven.resutil.Curiosity;
+import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
 
 import java.awt.Color;

@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.gui.MovableWidget;
+
 public class HungerMeter extends MovableWidget {
     private static final Tex bg = Resource.loadtex("hud/meter/hungermeter");
 
@@ -17,8 +19,8 @@ public class HungerMeter extends MovableWidget {
 
     @Override
     public void draw(GOut g) {
-    	if(glut.bg == null)
-    		return;
+        if (glut.bg == null)
+            return;
         Coord isz = IMeter.msz;
         Coord off = IMeter.off;
         g.chcolor(glut.bg);

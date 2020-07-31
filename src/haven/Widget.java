@@ -47,7 +47,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import static haven.MovableWidget.VISIBLE_PER;
+import static haven.sloth.gui.MovableWidget.VISIBLE_PER;
 
 public class Widget {
     public UI ui;

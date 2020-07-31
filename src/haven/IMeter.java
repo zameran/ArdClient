@@ -25,7 +25,10 @@
  */
 
 package haven;
-import java.awt.*;
+
+import haven.sloth.gui.MovableWidget;
+
+import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -88,9 +91,9 @@ public class IMeter extends MovableWidget {
                 w = (w * m.a) / 100;
                 g.chcolor(m.c);
                 g.frect(off, new Coord(w, msz.y));
-                if(Config.showmetertext){
+                if (Config.showmetertext) {
                     g.chcolor();
-                    g.atextstroked(meterinfo,new Coord(msz.x/2 + 10, msz.y/2 - 1), 0, 0, Color.WHITE, Color.BLACK, Text.num10Fnd);
+                    g.atextstroked(meterinfo, new Coord(msz.x / 2 + 10, msz.y / 2 - 1), 0, 0, Color.WHITE, Color.BLACK, Text.num10Fnd);
                 }
             }
             g.chcolor();
@@ -121,32 +124,32 @@ public class IMeter extends MovableWidget {
             }
         } else {
             super.uimsg(msg, args);
-            if(msg.equals("tip")) {
-                final String tt = (String)args[0];
+            if (msg.equals("tip")) {
+                final String tt = (String) args[0];
                 Matcher matcher = hppat.matcher(tt);
-                if(matcher.find()) {
+                if (matcher.find()) {
                     ui.sess.details.shp = Integer.parseInt(matcher.group(1));
                     ui.sess.details.hhp = Integer.parseInt(matcher.group(2));
                     ui.sess.details.mhp = Integer.parseInt(matcher.group(3));
                 } else {
                     matcher = stampat.matcher(tt);
-                    if(matcher.find()) {
+                    if (matcher.find()) {
                         ui.sess.details.stam = Integer.parseInt(matcher.group(1));
                     } else {
                         matcher = energypat.matcher(tt);
-                        if(matcher.find()) {
+                        if (matcher.find()) {
                             ui.sess.details.energy = Integer.parseInt(matcher.group(1));
                         }
                     }
                 }
-                if(Config.showmetertext){
+                if (Config.showmetertext) {
                     meterinfo = tt;
-                    if(meterinfo.contains("ow")){
+                    if (meterinfo.contains("ow")) {
                         meterinfo = args[0].toString().split(" ")[2];
-                    } else{
+                    } else {
                         meterinfo = args[0].toString().split(" ")[1];
                     }
-                    if(meterinfo.contains("/")){
+                    if (meterinfo.contains("/")) {
                         meterinfo = Integer.toString(ui.sess.details.shp);
                     }
                 }
