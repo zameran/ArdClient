@@ -1893,6 +1893,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, makeSelectAutoDrinkLiquid());
+        appender.add(new CheckBox("Autodrink whatever i find") {
+            {
+                a = configuration.autoDrinkWhatever;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoDrinkWhatever", val);
+                configuration.autoDrinkWhatever = val;
+                a = val;
+            }
+        });
         Label AutodrinkThreshold;
         AutodrinkThreshold = new Label("Autodrink Threshold: " + Config.autodrinkthreshold);
         appender.add(AutodrinkThreshold);
@@ -4255,28 +4266,20 @@ public class OptWnd extends Window {
         };
     }
 
-    private List<String> liquids = new ArrayList<>(Arrays.asList("Water", "Piping Hot Tea", "Tea", "Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Beer", "Wine", "Applejuice", "Pearjuice", "Cider", "Perry", "Weißbier", "Grapejuice", "Mead"));
-
     private Dropbox<String> makeSelectAutoDrinkLiquid() {
-        liquids.sort(new Comparator<String>() {
-            @Override
-            public int compare(String l1, String l2) {
-                return l1.compareTo(l2);
-            }
-        });
-        return new Dropbox<String>(liquids.size(), liquids) {
+        return new Dropbox<String>(configuration.liquids.size(), configuration.liquids) {
             {
                 super.change(configuration.autoDrinkLiquid);
             }
 
             @Override
             protected String listitem(int i) {
-                return liquids.get(i);
+                return configuration.liquids.get(i);
             }
 
             @Override
             protected int listitems() {
-                return liquids.size();
+                return configuration.liquids.size();
             }
 
             @Override

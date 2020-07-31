@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,16 @@ public class configuration {
 
 	public static boolean pbotmode = Utils.getprefb("pbotmode", false); //off - latest ui, on - current ui
 
+	public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead")) {{
+		sort(new Comparator<String>() {
+			@Override
+			public int compare(String l1, String l2) {
+				return l1.compareTo(l2);
+			}
+		});
+	}};
 	public static String autoDrinkLiquid = Utils.getpref("autoDrinkLiquid", "Water");
+	public static boolean autoDrinkWhatever = Utils.getprefb("autoDrinkWhatever", false);
 
 	public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
 
