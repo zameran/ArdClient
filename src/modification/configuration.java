@@ -194,7 +194,8 @@ public class configuration {
 			}*/
 
             System.out.print(" || " + who);
-            System.out.print(" || " + widget + "(" + id + ") ");
+            System.out.print(" || " + widget + "(" + id + ")");
+            if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
 
             int a;
             if (id == -1) a = 1;
@@ -220,8 +221,8 @@ public class configuration {
                         AuthClient.NativeCred arg = (AuthClient.NativeCred) args[i];
                         System.out.print("{(AuthClient.NativeCred):" + arg.name() + "}");
                     } else if (args[i] instanceof Integer) {
-                        System.out.print("i{" + args[i] + "}");
                         if (msg.equals("chres")) System.out.print("[" + widget.ui.sess.getres((Integer) args[i]) + "]");
+                        System.out.print("i{" + args[i] + "}");
                     } else if (args[i] instanceof Long) {
                         System.out.print("l{" + args[i] + "}");
                     } else if (args[i] instanceof String) {

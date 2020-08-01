@@ -3149,7 +3149,7 @@ public class OptWnd extends Window {
                         },
                 new ResizableTextEntry(configuration.defaultUtilsCustomTitle) {
                     @Override
-                    public void activate(String text) {
+                    public void changed() {
                         Utils.setpref("custom-title", text);
                         configuration.defaultUtilsCustomTitle = text;
                         MainFrame.instance.setTitle(configuration.tittleCheck(ui.sess));
