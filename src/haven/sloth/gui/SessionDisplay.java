@@ -18,19 +18,27 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
             this.ui = ui;
             this.nm = "Login";
             add(this.btn = new Button(100, nm, this::click));
+            add(new Button(0, "X", this::close), new Coord(btn.sz.x, 0));
             pack();
         }
 
         @Override
         public void tick(double dt) {
-            if (nm.equals("Login") && ui.sess != null && ui.sess.username != null) {
+            if (nm.equals("Login") && ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
                 nm = ui.sess.username;
+                btn.change(nm);
+            } else if (!nm.equals("Login") && (ui.sess == null || !ui.sess.alive())) {
+                nm = "Login";
                 btn.change(nm);
             }
         }
 
         private void click() {
             MainFrame.instance.p.setActiveUI(ui);
+        }
+
+        private void close() {
+            MainFrame.instance.p.closeSession(ui);
         }
     }
 

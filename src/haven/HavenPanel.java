@@ -30,15 +30,39 @@ import com.jogamp.opengl.util.awt.Screenshot;
 import haven.sloth.util.ObservableCollection;
 import integrations.mapv4.MappingClient;
 
-import javax.media.opengl.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.GraphicsConfiguration;
+import java.awt.Point;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
-import java.util.*;
+import java.util.TreeMap;
 
 public class HavenPanel extends GLCanvas implements Runnable, Console.Directory, UI.Context {
     //All of our UIs
@@ -159,7 +183,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                         ((GL2) gl).glDebugMessageControl(GL.GL_DONT_CARE, GL.GL_DONT_CARE, GL.GL_DONT_CARE, 0, null, true);
                     }
                     glconf.pref = GLSettings.load(glconf, true);
-                    if (ui!= null) {
+                    if (ui != null) {
                         ui.cons.add(glconf);
                     }
                     gstate = new GLState() {
@@ -364,6 +388,15 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
             } //TODO: should be a way to close a session that's not logged in
         }
     }
+    public void closeSession(UI ui) {
+        if (ui.gui != null) {
+            ui.gui.act("lo");
+        } else {
+            if (ui.sess != null) {
+                ui.sess.close();
+            } //TODO: should be a way to close a session that's not logged in
+        }
+    }
 
     //Remove a UI
     public void removeUI(final UI lui) {
@@ -378,6 +411,13 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                 Iterator<UI> itr = sessions.iterator();
                 if (itr.hasNext())
                     setActiveUI(itr.next());
+            }
+        }
+
+        synchronized (sessions) {
+            if (sessions.size() == 0) {
+                MainFrame.instance.makeNewSession();
+                setActiveUI(ui);
             }
         }
     }
@@ -407,10 +447,9 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
         }
 
 
-
         if (Config.dbtext) {
             int y = h - 190;
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "FPS: %d (%d%%, %d%% idle)", fps, (int)(uidle * 100.0), (int)(ridle * 100.0));
+            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "FPS: %d (%d%%, %d%% idle)", fps, (int) (uidle * 100.0), (int) (ridle * 100.0));
             Runtime rt = Runtime.getRuntime();
             long free = rt.freeMemory(), total = rt.totalMemory();
             FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Mem: %,011d/%,011d/%,011d/%,011d", free, total - free, total, rt.maxMemory());
@@ -572,7 +611,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
             f.doneat = System.currentTimeMillis();
         }
 
-        if(iswap != aswap)
+        if (iswap != aswap)
             gl.setSwapInterval((aswap = iswap) ? 1 : 0);
     }
 
@@ -730,10 +769,10 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                             waited[framep] = fwaited;
                             {
                                 int i = 0, ckf = framep, twait = 0;
-                                for(; i < frames.length - 1; i++) {
+                                for (; i < frames.length - 1; i++) {
                                     ckf = (ckf - 1 + frames.length) % frames.length;
                                     twait += waited[ckf];
-                                    if(now - frames[ckf] > 1000)
+                                    if (now - frames[ckf] > 1000)
                                         break;
                                 }
                                 fps = (i * 1000) / (now - frames[ckf]);
