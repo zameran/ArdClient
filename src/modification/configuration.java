@@ -2,6 +2,7 @@ package modification;
 
 import haven.AuthClient;
 import haven.Coord;
+import haven.GItem;
 import haven.MainFrame;
 import haven.Resource;
 import haven.Session;
@@ -133,6 +134,7 @@ public class configuration {
 
     public static boolean logging = Utils.getprefb("msglogging", false);      //allow log in console
     public static boolean loadLog = false;
+    public static boolean decodeCode = Utils.getprefb("decodeCode", false);
 
     public static boolean msg_log_skip_boolean = true;     //allow chosen skip
     public static ArrayList<String> msg_log_skip = new ArrayList<String>() {{       //chosen msg
@@ -158,6 +160,15 @@ public class configuration {
                 if (i != stackTraceElementsLength - 1) System.out.print(">");
             }
 
+            System.out.println();
+        }
+    }
+
+    public static void resourceLog(Object... strings) {
+        if (logging) {
+            for (Object s : strings) {
+                System.out.print(s.toString() + " ");
+            }
             System.out.println();
         }
     }
@@ -194,8 +205,18 @@ public class configuration {
 			}*/
 
             System.out.print(" || " + who);
-            System.out.print(" || " + widget + "(" + id + ")");
             if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
+
+            System.out.print(" || " + widget + "(" + id + ")");
+            if (widget instanceof GItem) {
+                try {
+                    Resource res = ((GItem) widget).getres();
+                    System.out.print("[" + res + "]");
+                } catch (Exception e) {
+                    System.out.print(e);
+                }
+
+            }
 
             int a;
             if (id == -1) a = 1;
@@ -209,10 +230,10 @@ public class configuration {
 			else
 				for (int i = 4 + a; i < max_wdg_length; i++)
 					System.out.print(" ");*/
-            System.out.print("|| " + msg + " ");
+            System.out.print(" || " + msg);
 			/*for (int i = msg.length(); i < max_msg_length; i++)
 				System.out.print(" ");*/
-            System.out.print("|| [" + args.length + "]:");
+            System.out.print(" || [" + args.length + "]:");
 
 
             try {
@@ -221,8 +242,8 @@ public class configuration {
                         AuthClient.NativeCred arg = (AuthClient.NativeCred) args[i];
                         System.out.print("{(AuthClient.NativeCred):" + arg.name() + "}");
                     } else if (args[i] instanceof Integer) {
-                        if (msg.equals("chres")) System.out.print("[" + widget.ui.sess.getres((Integer) args[i]) + "]");
                         System.out.print("i{" + args[i] + "}");
+                        if (msg.equals("chres")) System.out.print("[" + widget.ui.sess.getres((Integer) args[i]) + "]");
                     } else if (args[i] instanceof Long) {
                         System.out.print("l{" + args[i] + "}");
                     } else if (args[i] instanceof String) {

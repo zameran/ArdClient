@@ -3264,6 +3264,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Decode code") {
+            {
+                a = configuration.decodeCode;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("decodeCode", val);
+                configuration.decodeCode = val;
+                a = val;
+            }
+        });
 
         appender.add(new CheckBox("Mode for PBot") {
             {

@@ -327,6 +327,7 @@ public class Resource implements Serializable {
 		}
 
 		public HttpSource(URL baseurl) {
+			System.out.println("baseurl " + baseurl);
 			this.baseurl = baseurl;
 		}
 
@@ -377,7 +378,6 @@ public class Resource implements Serializable {
 		}
 
 		public String toString() {
-			configuration.sysPrintStackTrace("#<Resource " + res.name + ">");
 			return ("#<Resource " + res.name + ">");
 		}
 
@@ -980,6 +980,7 @@ public class Resource implements Serializable {
 			if (img == null)
 				throw (new LoadException("Invalid image data in " + name, Resource.this));
 			sz = Utils.imgsz(img);
+			System.out.println("Image " + z + " " + subz + " " + nooff + " " + id + " " + o + " " + img + " " + sz + " ");
 		}
 
 		public synchronized Tex tex() {
@@ -1037,24 +1038,35 @@ public class Resource implements Serializable {
 
 		public Tooltip(Message buf) {
 			String text = new String(buf.bytes(), Utils.utf8);
-			Resource res = super.getres();
-			String locText = getLocString(BUNDLE_TOOLTIP, res, text);
+			Resource res = null;
+			try {
+				res = super.getres();
+			} catch (Exception e) {
+				System.out.println("Tooltip res " + text);
+			}
+			if (res != null) {
+				String locText = getLocString(BUNDLE_TOOLTIP, res, text);
 
-			if (!language.equals("en")) {
-				if (locText.equals(text) || !res.name.startsWith("gfx/invobjs") ||
-						// exclude meat "conditions" since the tooltip is dynamically generated and it won't be in right order
-						text.contains("Raw ") || text.contains("Filet of ") || text.contains("Sizzling") ||
-						text.contains("Roast") || text.contains("Meat") || text.contains("Spitroast") ||
-						// exclude food conditions
-						res.name.startsWith("gfx/invobjs/food/")) {
-					this.t = locText;
-				} else {
-					this.t = locText + " (" + text + ")";
+				if (!language.equals("en")) {
+					if (locText.equals(text) || !res.name.startsWith("gfx/invobjs") ||
+							// exclude meat "conditions" since the tooltip is dynamically generated and it won't be in right order
+							text.contains("Raw ") || text.contains("Filet of ") || text.contains("Sizzling") ||
+							text.contains("Roast") || text.contains("Meat") || text.contains("Spitroast") ||
+							// exclude food conditions
+							res.name.startsWith("gfx/invobjs/food/")) {
+						this.t = locText;
+					} else {
+						this.t = locText + " (" + text + ")";
+					}
+					return;
 				}
-				return;
+				this.t = locText;
+			} else {
+				this.t = text;
 			}
 
-			this.t = locText;
+
+			System.out.println("Tooltip " + t);
 		}
 
 		public void init() {
@@ -1082,6 +1094,7 @@ public class Resource implements Serializable {
 				for (int o = 0; o < cn; o++)
 					ep[epid][o] = cdec(buf);
 			}
+			System.out.println("Neg " + cc + " " + bc + " " + bs + " " + sz + " " + ep + " ");
 		}
 
 	public void init() {}
@@ -1099,6 +1112,7 @@ public class Resource implements Serializable {
 			ids = new int[buf.uint16()];
 			for (int i = 0; i < ids.length; i++)
 				ids[i] = buf.int16();
+			configuration.resourceLog("Anim " + id + " " + d + " " + ids);
 		}
 
 		public void init() {
@@ -1112,6 +1126,7 @@ public class Resource implements Serializable {
 				}
 				f[i] = buf.toArray(typeinfo);
 			}
+			configuration.resourceLog("Anim init " + f);
 		}
 	}
 
@@ -1122,6 +1137,7 @@ public class Resource implements Serializable {
 		public Pagina(Message buf) {
 			String text = new String(buf.bytes(), Utils.utf8);
 			this.text = Resource.getLocString(Resource.BUNDLE_PAGINA, super.getres(), text);
+			configuration.resourceLog("Pagina " + text);
 		}
 
 		public void init() {
@@ -1193,11 +1209,13 @@ public class Resource implements Serializable {
 		public Code(Message buf) {
 			name = buf.string();
 			data = buf.bytes();
-    /*        try {
-                decode();
-            }catch (Exception ex){
-                System.out.println("Error Code: " +ex.getMessage());
-            }*/
+			configuration.resourceLog("Code " + name + " " + data);
+            if (configuration.decodeCode)
+            	try {
+                	decode();
+				} catch (Exception ex) {
+					System.out.println("Error Code: " +ex.getMessage());
+				}
 			//Ardenneses pro fucking code do not touch ever
 		}
 
@@ -1454,6 +1472,7 @@ public class Resource implements Serializable {
 		public Audio(byte[] coded, String id) {
 			this.coded = coded;
 			this.id = id.intern();
+			configuration.resourceLog("Audio " + coded + " " + id);
 		}
 
 		public Audio(Message buf) {
@@ -1501,6 +1520,7 @@ public class Resource implements Serializable {
 		public Music(Message buf) {
 			try {
 				seq = javax.sound.midi.MidiSystem.getSequence(new MessageInputStream(buf));
+				configuration.resourceLog("Music " + seq);
 			} catch (javax.sound.midi.InvalidMidiDataException e) {
 				throw (new LoadException("Invalid MIDI data", Resource.this));
 			} catch (IOException e) {
@@ -1523,6 +1543,7 @@ public class Resource implements Serializable {
 				if (type == 0) {
 					try {
 						this.font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new MessageInputStream(buf));
+						configuration.resourceLog("Font " + font);
 					} catch (Exception e) {
 						throw (new RuntimeException(e));
 					}
