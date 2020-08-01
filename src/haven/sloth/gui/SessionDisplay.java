@@ -38,7 +38,9 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
         }
 
         private void close() {
-            MainFrame.instance.p.closeSession(ui);
+            if (ui.sess != null) {
+                ui.sess.close();
+            }
         }
     }
 
