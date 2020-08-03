@@ -30,6 +30,7 @@ import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import integrations.food.FoodService;
 import integrations.food.IconService;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -241,8 +242,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public List<ItemInfo> info() {
         if (info == null && rawinfo != null) {
             info = ItemInfo.buildinfo(this, rawinfo);
-            if (Config.resinfo)
-                info.add(new ItemInfo.AdHoc(this, "\n" + this.getres().name));
+            configuration.resourceLog(getname(), "tt", info);
+                info.add(new ItemInfo.AdHoc(this, "\n" + getres().name));
             try {
                 // getres() can throw Loading, ignore it
                 FoodService.checkFood(info, getres().name);

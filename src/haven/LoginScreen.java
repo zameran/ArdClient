@@ -458,7 +458,6 @@ public class LoginScreen extends Widget {
         Thread statusupdaterthread = new Thread(new Runnable() {
             public void run() {
                 try {
-
                     URL url = new URL("http://www.havenandhearth.com/portal/index/status");
                     while (true) {
                         Scanner scan = new Scanner(url.openStream());

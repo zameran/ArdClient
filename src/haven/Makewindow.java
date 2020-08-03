@@ -69,8 +69,8 @@ public class Makewindow extends Widget {
         public Spec(Indir<Resource> res, Message sdt, int num, Object[] info) {
             this.res = res;
             this.sdt = new MessageBuf(sdt);
-	    if(num >= 0)
-                this.num = new TexI(Utils.outline2(Text.render(Integer.toString(num), Color.WHITE,  Text.num10Fnd).img, Utils.contrast(Color.WHITE)));
+            if (num >= 0)
+                this.num = new TexI(Utils.outline2(Text.render(Integer.toString(num), Color.WHITE, Text.num10Fnd).img, Utils.contrast(Color.WHITE)));
             else
                 this.num = null;
             this.rawinfo = info;
@@ -88,15 +88,16 @@ public class Makewindow extends Widget {
         }
 
         private int opt = 0;
+
         public boolean opt() {
-            if(opt == 0) {
+            if (opt == 0) {
                 try {
                     opt = (ItemInfo.find(Optional.class, info()) != null) ? 1 : 2;
-                } catch(Loading l) {
-                    return(false);
+                } catch (Loading l) {
+                    return (false);
                 }
             }
-            return(opt == 1);
+            return (opt == 1);
         }
 
         public BufferedImage shorttip() {
@@ -201,8 +202,8 @@ public class Makewindow extends Widget {
                 Message sdt = (args[i] instanceof byte[]) ? new MessageBuf((byte[]) args[i++]) : MessageBuf.nil;
                 int num = (Integer) args[i++];
                 Object[] info = {};
-                if((i < args.length) && (args[i] instanceof Object[]))
-                    info = (Object[])args[i++];
+                if ((i < args.length) && (args[i] instanceof Object[]))
+                    info = (Object[]) args[i++];
                 inputs.add(new Spec(ui.sess.getres(resid), sdt, num, info));
             }
             this.inputs = inputs;
@@ -213,8 +214,8 @@ public class Makewindow extends Widget {
                 Message sdt = (args[i] instanceof byte[]) ? new MessageBuf((byte[]) args[i++]) : MessageBuf.nil;
                 int num = (Integer) args[i++];
                 Object[] info = {};
-                if((i < args.length) && (args[i] instanceof Object[]))
-                    info = (Object[])args[i++];
+                if ((i < args.length) && (args[i] instanceof Object[]))
+                    info = (Object[]) args[i++];
                 outputs.add(new Spec(ui.sess.getres(resid), sdt, num, info));
             }
             this.outputs = outputs;
@@ -235,10 +236,10 @@ public class Makewindow extends Widget {
         boolean popt = false;
         for (Spec s : inputs) {
             boolean opt = s.opt();
-            if(opt != popt)
+            if (opt != popt)
                 c = c.add(10, 0);
             GOut sg = g.reclip(c, Inventory.invsq.sz());
-            if(opt) {
+            if (opt) {
                 sg.chcolor(0, 255, 0, 255);
                 sg.image(Inventory.invsq, Coord.z);
                 sg.chcolor();
@@ -247,7 +248,7 @@ public class Makewindow extends Widget {
             }
             s.draw(sg);
             c = c.add(Inventory.sqsz.x, 0);
-	    popt = opt;
+            popt = opt;
         }
         if (qmod != null) {
             g.image(qmodl.tex(), new Coord(0, qmy + 4));
@@ -306,7 +307,7 @@ public class Makewindow extends Widget {
                 Coord sz = softcap.sz();
                 Coord szl = softcapl.sz();
                 g.image(softcapl, this.sz.sub(sz.x + szl.x + 113, (this.sz.y / 2 + szl.y / 2) - 15));
-                g.image(softcap, this.sz.sub(sz.x +105, (this.sz.y / 2 + sz.y / 2) -15));
+                g.image(softcap, this.sz.sub(sz.x + 105, (this.sz.y / 2 + sz.y / 2) - 15));
             }
         }
         c = new Coord(xoff, outy);
@@ -322,8 +323,9 @@ public class Makewindow extends Widget {
     private long hoverstart;
     private Spec lasttip;
     private Indir<Object> stip, ltip;
+
     public Object tooltip(Coord mc, Widget prev) {
-	String name = null;
+        String name = null;
         Spec tspec = null;
         Coord c;
         if (qmod != null) {
@@ -344,18 +346,18 @@ public class Makewindow extends Widget {
             boolean popt = false;
             for (Spec s : inputs) {
                 boolean opt = s.opt();
-                if(opt != popt)
+                if (opt != popt)
                     c = c.add(10, 0);
                 if (mc.isect(c, Inventory.invsq.sz())) {
-		    name = getDynamicName(s.spr);
-		    if(name == null){
-                    tspec = s;
-		    }
+                    name = getDynamicName(s.spr);
+                    if (name == null) {
+                        tspec = s;
+                    }
                     break find;
                 }
                 c = c.add(Inventory.sqsz.x, 0);
                 popt = opt;
-               // c = c.add(31, 0);
+                // c = c.add(31, 0);
             }
             c = new Coord(xoff, outy);
             for (Spec s : outputs) {
@@ -364,7 +366,7 @@ public class Makewindow extends Widget {
                     break find;
                 }
                 c = c.add(Inventory.sqsz.x, 0);
-              //  c = c.add(31, 0);
+                //  c = c.add(31, 0);
             }
         }
         if (lasttip != tspec) {
@@ -372,7 +374,7 @@ public class Makewindow extends Widget {
             stip = ltip = null;
         }
         if (tspec == null)
-	    return(name);
+            return (name);
         long now = System.currentTimeMillis();
         boolean sh = true;
         if (prev != this)
@@ -381,37 +383,37 @@ public class Makewindow extends Widget {
             sh = false;
         if (sh) {
             if (stip == null) {
-		BufferedImage tip = tspec.shorttip();
-		if(tip == null) {
-		    stip = () -> null;
-		} else {
-		    Tex tt = new TexI(tip);
-		    stip = () -> tt;
-		}
+                BufferedImage tip = tspec.shorttip();
+                if (tip == null) {
+                    stip = () -> null;
+                } else {
+                    Tex tt = new TexI(tip);
+                    stip = () -> tt;
+                }
             }
             return (stip);
         } else {
             if (ltip == null) {
-		BufferedImage tip = tspec.longtip();
-		if(tip == null) {
-		    ltip = () -> null;
-		} else {
-		    Tex tt = new TexI(tip);
-		    ltip = () -> tt;
-		}
+                BufferedImage tip = tspec.longtip();
+                if (tip == null) {
+                    ltip = () -> null;
+                } else {
+                    Tex tt = new TexI(tip);
+                    ltip = () -> tt;
+                }
             }
             return (ltip);
         }
     }
 
     private static String getDynamicName(GSprite spr) {
-	if(spr != null) {
-	    Class<? extends GSprite> sprClass = spr.getClass();
-	    if(Reflect.hasInterface("haven.res.ui.tt.defn.DynName", sprClass)) {
-		return (String) Reflect.invoke(spr, "name");
-	    }
-	}
-	return null;
+        if (spr != null) {
+            Class<? extends GSprite> sprClass = spr.getClass();
+            if (Reflect.hasInterface("haven.res.ui.tt.defn.DynName", sprClass)) {
+                return (String) Reflect.invoke(spr, "name");
+            }
+        }
+        return null;
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
@@ -435,16 +437,19 @@ public class Makewindow extends Widget {
         }
         return (super.globtype(ch, ev));
     }
+
     public static class Optional extends ItemInfo.Tip {
         public static final Text text = RichText.render("$i{Optional}", 0);
+
         public Optional(Owner owner) {
             super(owner);
         }
 
         public BufferedImage tipimg() {
-            return(text.img);
+            return (text.img);
         }
     }
+
     public static class MakePrep extends ItemInfo implements GItem.ColorInfo {
         private final static Color olcol = new Color(0, 255, 0, 64);
 

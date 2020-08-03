@@ -136,7 +136,7 @@ public class configuration {
     public static boolean loadLog = false;
     public static boolean decodeCode = Utils.getprefb("decodeCode", false);
 
-    public static boolean msg_log_skip_boolean = true;     //allow chosen skip
+    public static boolean msg_log_skip_boolean = false;     //allow chosen skip
     public static ArrayList<String> msg_log_skip = new ArrayList<String>() {{       //chosen msg
         addAll(Arrays.asList("glut", "click"));
     }};

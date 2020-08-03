@@ -429,15 +429,14 @@ public class UI {
             }
             id = rwidgets.get(sender);
         }
-        configuration.Syslog(configuration.clientSender, sender, id, msg, args);
         if (rcvr != null)
             rcvr.rcvmsg(id, msg, args);
+        configuration.Syslog(configuration.clientSender, sender, id, msg, args);
     }
 
     public void uimsg(int id, String msg, Object... args) {
         synchronized (this) {
             Widget wdg = widgets.get(id);
-            configuration.Syslog(configuration.serverSender, wdg, id, msg, args);
             if (realmchat != null) {
                 try {
                     if (realmchat.get() != null && id == realmchat.get().wdgid()) {
@@ -455,6 +454,7 @@ public class UI {
                 // try { for(Object obj:args) if(!wdg.toString().contains("CharWnd")) System.out.println("UI Wdg : " + wdg + " msg : "+msg+" id = " + id + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException qq){}
                 wdg.uimsg(msg.intern(), args);
             } else throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
+            configuration.Syslog(configuration.serverSender, wdg, id, msg, args);
         }
     }
 

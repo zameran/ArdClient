@@ -29,6 +29,7 @@ package haven;
 import com.jogamp.opengl.util.awt.Screenshot;
 import haven.sloth.util.ObservableCollection;
 import integrations.mapv4.MappingClient;
+import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
