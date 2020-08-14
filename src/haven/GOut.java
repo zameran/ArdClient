@@ -74,6 +74,10 @@ public class GOut {
         defstate();
     }
 
+    public Coord sz() {
+        return sz;
+    }
+
     public static class GLException extends RuntimeException {
         public int code;
         public String str;
