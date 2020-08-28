@@ -121,7 +121,6 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                         a = res.getBoolean(3);
                         if (qualityList == null) qualityList = new ArrayList<>();
                         qualityList.add(new ColorQuality(number, color, a));
-                        ;
                     }
                 }
             }

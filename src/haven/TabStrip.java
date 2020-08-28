@@ -160,7 +160,6 @@ public class TabStrip<T> extends Widget {
         Button(Tex image, String text) {
             this.image = image;
             this.text = font.render(text);
-            this.pagina = null;
             int w = this.text.sz().x + this.image.sz().x + padding.x * 2;
             if (text != null && !text.isEmpty()) {
                 w += 10; // space between image and text
@@ -209,7 +208,9 @@ public class TabStrip<T> extends Widget {
             } else {
                 if (pagina != null) {
                     try {
-                        return pagina.button().rendertt(true);
+                        BufferedImage bi = pagina.button().rendertt(true);
+                        if (bi != null) return (bi);
+                        else return ("...");
                     } catch (Loading e) {
                         return ("...");
                     }
