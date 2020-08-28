@@ -257,10 +257,10 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar" />
             </fileset>
         </copy>
         <copy todir="update/scripts">
-            <fileset dir="build/scripts/" includes="**"/>
+            <fileset dir="scripts/" includes="**"/>
         </copy>
         <copy todir="update/modification">
-            <fileset dir="build/modification/"/>
+            <fileset dir="modification/"/>
         </copy>
     </target>
 
