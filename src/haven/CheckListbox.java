@@ -10,8 +10,8 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
         @Override
         public boolean add(CheckListboxItem value) {
             super.add(value);
-            for (int i = size()-1; i > 0 && value.compareTo(get(i-1)) < 0; i--)
-                Collections.swap(this, i, i-1);
+            for (int i = size() - 1; i > 0 && value.compareTo(get(i - 1)) < 0; i--)
+                Collections.swap(this, i, i - 1);
             return true;
         }
     };

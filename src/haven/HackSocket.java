@@ -66,16 +66,16 @@ public class HackSocket extends Socket {
             try {
                 HackSocket.this.close();
             } catch (IOException e) {
-        /*
-         * Emm, well... Yeah.
-		 *
-		 * If the close fails, there isn't really a
-		 * lot to do about it, I guess. It's probably
-		 * unreasonable to throw exceptions around on
-		 * the thread calling interrupt(), though, so
-		 * the best action is probably to discard this
-		 * exception.
-		 */
+                /*
+                 * Emm, well... Yeah.
+                 *
+                 * If the close fails, there isn't really a
+                 * lot to do about it, I guess. It's probably
+                 * unreasonable to throw exceptions around on
+                 * the thread calling interrupt(), though, so
+                 * the best action is probably to discard this
+                 * exception.
+                 */
             }
         }
     }

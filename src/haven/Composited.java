@@ -31,7 +31,12 @@ import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 public class Composited implements Rendered, MapView.Clickable {
     public final Skeleton skel;
@@ -45,17 +50,17 @@ public class Composited implements Rendered, MapView.Clickable {
     public Sprite.Owner eqowner = null;
 
     public class Poses {
-	public final PoseMod[] mods;
-	Pose old;
-	float ipold = 0.0f, ipol = 0.0f;
-	public float limit = -1.0f;
+        public final PoseMod[] mods;
+        Pose old;
+        float ipold = 0.0f, ipol = 0.0f;
+        public float limit = -1.0f;
         public boolean stat, ldone, finished;
-	private Random srnd = new Random();
-	private float rsmod = (srnd.nextFloat() * 0.1f) + 0.95f;
+        private Random srnd = new Random();
+        private float rsmod = (srnd.nextFloat() * 0.1f) + 0.95f;
 
-	public Poses() {
-	    this.mods = new PoseMod[0];
-	}
+        public Poses() {
+            this.mods = new PoseMod[0];
+        }
 
         public Poses(List<? extends PoseMod> mods) {
             this.mods = mods.toArray(new PoseMod[0]);
@@ -338,7 +343,7 @@ public class Composited implements Rendered, MapView.Clickable {
                 ret.tex = new ArrayList<ResData>(tex);
                 return (ret);
             } catch (CloneNotSupportedException e) {
-        /* This is ridiculous. */
+                /* This is ridiculous. */
                 throw (new RuntimeException(e));
             }
         }
@@ -381,7 +386,7 @@ public class Composited implements Rendered, MapView.Clickable {
                 ret.res = res.clone();
                 return (ret);
             } catch (CloneNotSupportedException e) {
-        /* This is ridiculous. */
+                /* This is ridiculous. */
                 throw (new RuntimeException(e));
             }
         }
@@ -443,9 +448,9 @@ public class Composited implements Rendered, MapView.Clickable {
 
     private final Material.Owner matowner = new Material.Owner() {
         public <T> T context(Class<T> cl) {
-            if(eqowner == null)
-                throw(new NoContext(cl));
-            return(eqowner.context(cl));
+            if (eqowner == null)
+                throw (new NoContext(cl));
+            return (eqowner.context(cl));
         }
     };
 
@@ -458,8 +463,8 @@ public class Composited implements Rendered, MapView.Clickable {
                     if (mr == null)
                         throw (new Sprite.ResourceException("Model resource contains no mesh", md.mod.get()));
                     md.real = new Model(mr.m, md.id);
-            /* This is really ugly, but I can't really think of
-             * anything less ugly right now. */
+                    /* This is really ugly, but I can't really think of
+                     * anything less ugly right now. */
                     if (md.mod.get().name.equals("gfx/borka/male") || md.mod.get().name.equals("gfx/borka/female"))
                         md.real.z = -1;
                     this.mod.add(md.real);
@@ -620,9 +625,9 @@ public class Composited implements Rendered, MapView.Clickable {
 
     public Object staticp() {
         Gob compowner = null;
-        if(eqowner instanceof  Gob)
+        if (eqowner instanceof Gob)
             compowner = (Gob) eqowner;
-        if(eqowner instanceof Avaview.AvaOwner)
+        if (eqowner instanceof Avaview.AvaOwner)
             return null;
         if (!Config.disableAllAnimations || (compowner != null && compowner.type == Type.HUMAN)) {
             Object stat = poses.staticp();

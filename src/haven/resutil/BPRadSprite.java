@@ -1,20 +1,30 @@
 package haven.resutil;
 
+import haven.Config;
+import haven.DefSettings;
+import haven.GLState;
+import haven.GOut;
+import haven.Location;
+import haven.Material;
+import haven.RenderList;
+import haven.Rendered;
+import haven.Sprite;
+import haven.States;
+import haven.States.ColState;
+import haven.Utils;
+import haven.VertexBuf.NormalArray;
+import haven.VertexBuf.VertexArray;
+
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
-import haven.*;
-import haven.States.ColState;
-import haven.VertexBuf.NormalArray;
-import haven.VertexBuf.VertexArray;
 
 public class BPRadSprite extends Sprite {
     public static GLState smatDanger = new ColState(DefSettings.ANIMALDANGERCOLOR.get());
     public static GLState smatSupports = new ColState(DefSettings.SUPPORTDANGERCOLOR.get());
     public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
-    public static  GLState smatBeehive = new ColState((DefSettings.BEEHIVECOLOR.get()));
-    public static  GLState smatTrough = new ColState(DefSettings.TROUGHCOLOR.get());
+    public static GLState smatBeehive = new ColState((DefSettings.BEEHIVECOLOR.get()));
+    public static GLState smatTrough = new ColState(DefSettings.TROUGHCOLOR.get());
     final GLState smat;
     final VertexArray posa;
     final NormalArray nrma;
@@ -25,7 +35,7 @@ public class BPRadSprite extends Sprite {
         super(null, null);
 
         this.smat = smat;
-        
+
         int per = Math.max(24, (int) (2 * Math.PI * (double) rad / 11.0D));
         FloatBuffer pa = Utils.mkfbuf(per * 3 * 2);
         FloatBuffer na = Utils.mkfbuf(per * 3 * 2);
@@ -56,7 +66,7 @@ public class BPRadSprite extends Sprite {
         return true;
     }
 
-    public void updateSmatSupports(){
+    public void updateSmatSupports() {
         smatSupports = new ColState(new Color(Config.smatSupportsred, Config.smatSupportsgreen, Config.smatSupportsblue, 100));
     }
 

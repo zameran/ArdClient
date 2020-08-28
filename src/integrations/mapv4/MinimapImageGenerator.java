@@ -1,9 +1,14 @@
 package integrations.mapv4;
 
-import haven.*;
+import haven.Coord;
+import haven.MCache;
+import haven.Resource;
+import haven.TexI;
+import haven.Tiler;
+import haven.Utils;
 import haven.resutil.Ridges;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**

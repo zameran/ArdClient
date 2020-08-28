@@ -26,22 +26,21 @@
 
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static haven.Gob.SEMISTATIC;
 
 /**
- *
  * TODO: Think of a way to represent the stage in 3D to avoid static/semistatic mess.
  */
 public class GobCustomAttr extends GAttrib {
-    private static final Tex[] gobhp = new Tex[] {
-	    Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
+    private static final Tex[] gobhp = new Tex[]{
+            Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
+            Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
+            Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
     };
     public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, Text.cfg.charName);
-    private static Tex gobattr = Text.renderstroked("1",Color.WHITE,Color.BLACK,nfnd).tex();
+    private static Tex gobattr = Text.renderstroked("1", Color.WHITE, Color.BLACK, nfnd).tex();
     public String value = "";
 
     Material.Colors fx;
@@ -51,14 +50,14 @@ public class GobCustomAttr extends GAttrib {
         super(g);
         this.value = value;
         this.fx = new Material.Colors(new Color(255, 0, 0, 255));
-        gobattr = Text.renderstroked(value,Color.WHITE,Color.BLACK,nfnd).tex();
+        gobattr = Text.renderstroked(value, Color.WHITE, Color.BLACK, nfnd).tex();
         qualityfx = new PView.Draw2D() {
-	    public void draw2d(GOut g) {
-		if(gob.sc != null && !value.equals("")) {
-            g.image(gobattr, gob.sc.sub(15, -100));
-		}
-	    }
-	};
+            public void draw2d(GOut g) {
+                if (gob.sc != null && !value.equals("")) {
+                    g.image(gobattr, gob.sc.sub(15, -100));
+                }
+            }
+        };
     }
 
     public GLState getfx() {
@@ -68,8 +67,8 @@ public class GobCustomAttr extends GAttrib {
     }
 
     public Object staticp() {
-        if(!value.equals(""))
-	    return super.staticp();
+        if (!value.equals(""))
+            return super.staticp();
         else
             return SEMISTATIC;
     }

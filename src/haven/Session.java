@@ -28,10 +28,20 @@ package haven;
 
 import haven.sloth.script.SessionDetails;
 
-import java.net.*;
-import java.util.*;
-import java.io.*;
-import java.lang.ref.*;
+import java.io.IOException;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Session implements Resource.Resolver {
     public static final int PVER = 23;
@@ -169,8 +179,8 @@ public class Session implements Resource.Resolver {
             }
         }
 
-        public void set(Resource res){
-            synchronized(this) {
+        public void set(Resource res) {
+            synchronized (this) {
                 this.resnm = res.name;
                 this.resver = res.ver;
                 ind = new WeakReference<Ref>(new SRef(res));
@@ -189,11 +199,12 @@ public class Session implements Resource.Resolver {
             return (ret);
         }
     }
-    private int cacheres(String resname){
+
+    private int cacheres(String resname) {
         return cacheres(Resource.local().loadwait(resname));
     }
 
-    private int cacheres(Resource res){
+    private int cacheres(Resource res) {
         cachedres(--localCacheId).set(res);
         return localCacheId;
     }
@@ -201,14 +212,16 @@ public class Session implements Resource.Resolver {
     public Indir<Resource> getres(int id) {
         return (cachedres(id).get());
     }
+
     public int getresid(Resource res) {
         synchronized (rescache) {
             for (Map.Entry<Integer, CachedRes> entry : rescache.entrySet()) {
                 try {
-                    if(entry.getValue().get().get() == res) {
+                    if (entry.getValue().get().get() == res) {
                         return entry.getKey();
                     }
-                } catch (Loading ignored) {}
+                } catch (Loading ignored) {
+                }
             }
         }
         return -1;
@@ -216,7 +229,7 @@ public class Session implements Resource.Resolver {
 
     public int getresidf(Resource res) {
         int id = getresid(res);
-        if(id == -1) {
+        if (id == -1) {
             id = cacheres(res);
         }
         return id;
@@ -318,7 +331,7 @@ public class Session implements Resource.Resolver {
         }
 
         private void handlerel(PMessage msg) {
-            if(msg.type == RMessage.RMSG_FRAGMENT) {
+            if (msg.type == RMessage.RMSG_FRAGMENT) {
                 int head = msg.uint8();
                 if ((head & 0x80) == 0) {
                     if (fragbuf != null)
@@ -342,7 +355,7 @@ public class Session implements Resource.Resolver {
                         throw (new MessageException("Got invalid fragment type: " + head, msg));
                     }
                 }
-            } else if((msg.type == RMessage.RMSG_NEWWDG) || (msg.type == RMessage.RMSG_WDGMSG) ||
+            } else if ((msg.type == RMessage.RMSG_NEWWDG) || (msg.type == RMessage.RMSG_WDGMSG) ||
                     (msg.type == RMessage.RMSG_DSTWDG) || (msg.type == RMessage.RMSG_ADDWDG)) {
                 synchronized (uimsgs) {
                     uimsgs.add(msg);
@@ -357,7 +370,7 @@ public class Session implements Resource.Resolver {
                 int resver = msg.uint16();
                 try {
                     cachedres(resid).set(resname, resver);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 //   cachedres(resid).set(resname, resver);

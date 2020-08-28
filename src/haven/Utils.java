@@ -32,26 +32,56 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.*;
-import java.util.*;
-import java.util.function.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.prefs.Preferences;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Utils {
     public static final java.nio.charset.Charset utf8 = java.nio.charset.Charset.forName("UTF-8");
@@ -295,8 +325,8 @@ public class Utils {
             String jsonarr = "";
             Iterator it = val.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry)it.next();
-                CheckListboxItem itm = (CheckListboxItem)entry.getValue();
+                Map.Entry entry = (Map.Entry) it.next();
+                CheckListboxItem itm = (CheckListboxItem) entry.getValue();
                 if (itm.selected)
                     jsonarr += "\"" + entry.getKey() + "\",";
             }
@@ -308,8 +338,9 @@ public class Utils {
             ex.printStackTrace();
         }
     }
+
     @SuppressWarnings("SynchronizeOnNonFinalField")
-    public static void  saveCurioList() {
+    public static void saveCurioList() {
         synchronized (Config.curioslist) {
             Gson gson = (new GsonBuilder()).create();
             Config.saveFile("curiolist.json", gson.toJson(Config.curioslist));
@@ -318,21 +349,23 @@ public class Utils {
 
     public static void loadCurioList() {
         String json = Config.loadFile("curiolist.json");
-        if(json != null){
+        if (json != null) {
             try {
                 Gson gson = (new GsonBuilder()).create();
-                Type collectionType = new TypeToken<HashMap<String, Boolean>>(){}.getType();
+                Type collectionType = new TypeToken<HashMap<String, Boolean>>() {
+                }.getType();
                 Config.curioslist = gson.fromJson(json, collectionType);
-            }catch(Exception ignored){ }
+            } catch (Exception ignored) {
+            }
         }
-        if(Config.curioslist == null){
+        if (Config.curioslist == null) {
             Config.curioslist = new HashMap<>();
             Config.curioslist.put("Chiming Bluebell", false);
         }
     }
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
-    public static void  saveAutodropList() {
+    public static void saveAutodropList() {
         synchronized (Config.autodroplist) {
             Gson gson = (new GsonBuilder()).create();
             Config.saveFile("autodroplist.json", gson.toJson(Config.autodroplist));
@@ -341,14 +374,16 @@ public class Utils {
 
     public static void loadAutodropList() {
         String json = Config.loadFile("autodroplist.json");
-        if(json != null){
+        if (json != null) {
             try {
                 Gson gson = (new GsonBuilder()).create();
-                Type collectionType = new TypeToken<HashMap<String, Boolean>>(){}.getType();
+                Type collectionType = new TypeToken<HashMap<String, Boolean>>() {
+                }.getType();
                 Config.autodroplist = gson.fromJson(json, collectionType);
-            }catch(Exception ignored){ }
+            } catch (Exception ignored) {
+            }
         }
-        if(Config.autodroplist == null){
+        if (Config.autodroplist == null) {
             Config.autodroplist = new HashMap<>();
             Config.autodroplist.put("Intestines", false);
             Config.autodroplist.put("Bone Material", false);
@@ -511,15 +546,15 @@ public class Utils {
     }
 
     public static byte f2s8(float v) {
-	return((byte)Math.max(Math.min(Math.round(v * 127f), 127), -127));
+        return ((byte) Math.max(Math.min(Math.round(v * 127f), 127), -127));
     }
 
     public static byte f2u8(float v) {
-	return((byte)Math.max(Math.min(Math.round(v * 255f), 255), 0));
+        return ((byte) Math.max(Math.min(Math.round(v * 255f), 255), 0));
     }
 
     public static long uint32(int n) {
-        return(n & 0xffffffffl);
+        return (n & 0xffffffffl);
     }
 
     public static int uint16d(byte[] buf, int off) {
@@ -726,28 +761,28 @@ public class Utils {
     }
 
     public static void uvec2oct(float[] buf, float x, float y, float z) {
-	float m = 1.0f / (Math.abs(x) + Math.abs(y) + Math.abs(z));
-	float hx = x * m, hy = y * m;
-	if(z >= 0) {
-	    buf[0] = hx;
-	    buf[1] = hy;
-	} else {
-	    buf[0] = (1 - Math.abs(hy)) * Math.copySign(1, hx);
-	    buf[1] = (1 - Math.abs(hx)) * Math.copySign(1, hy);
-	}
+        float m = 1.0f / (Math.abs(x) + Math.abs(y) + Math.abs(z));
+        float hx = x * m, hy = y * m;
+        if (z >= 0) {
+            buf[0] = hx;
+            buf[1] = hy;
+        } else {
+            buf[0] = (1 - Math.abs(hy)) * Math.copySign(1, hx);
+            buf[1] = (1 - Math.abs(hx)) * Math.copySign(1, hy);
+        }
     }
 
     public static void oct2uvec(float[] buf, float x, float y) {
-	float z = 1 - (Math.abs(x) + Math.abs(y));
-	if(z < 0) {
-	    float xc = x, yc = y;
-	    x = (1 - Math.abs(yc)) * Math.copySign(1, xc);
-	    y = (1 - Math.abs(xc)) * Math.copySign(1, yc);
-	}
-	float f = 1 / (float)Math.sqrt((x * x) + (y * y) + (z * z));
-	buf[0] = x * f;
-	buf[1] = y * f;
-	buf[2] = z * f;
+        float z = 1 - (Math.abs(x) + Math.abs(y));
+        if (z < 0) {
+            float xc = x, yc = y;
+            x = (1 - Math.abs(yc)) * Math.copySign(1, xc);
+            y = (1 - Math.abs(xc)) * Math.copySign(1, yc);
+        }
+        float f = 1 / (float) Math.sqrt((x * x) + (y * y) + (z * z));
+        buf[0] = x * f;
+        buf[1] = y * f;
+        buf[2] = z * f;
     }
 
     static char num2hex(int num) {
@@ -995,50 +1030,52 @@ public class Utils {
     }
 
     public static void dumparr(int[] arr, PrintStream out, boolean term) {
-	if(arr == null) {
-	    out.print("null");
-	} else {
-	    out.print('[');
-	    boolean f = true;
-	    for(int i : arr) {
-		if(!f) out.print(", "); f = false;
-		out.print(i);
-	    }
-	    out.print(']');
-	}
-	if(term) out.println();
+        if (arr == null) {
+            out.print("null");
+        } else {
+            out.print('[');
+            boolean f = true;
+            for (int i : arr) {
+                if (!f) out.print(", ");
+                f = false;
+                out.print(i);
+            }
+            out.print(']');
+        }
+        if (term) out.println();
     }
 
     public static void dumparr(short[] arr, PrintStream out, boolean term) {
-	if(arr == null) {
-	    out.print("null");
-	} else {
-	    out.print('[');
-	    boolean f = true;
-	    for(int i : arr) {
-		if(!f) out.print(", "); f = false;
-		out.print(i);
-	    }
-	    out.print(']');
-	}
-	if(term) out.println();
+        if (arr == null) {
+            out.print("null");
+        } else {
+            out.print('[');
+            boolean f = true;
+            for (int i : arr) {
+                if (!f) out.print(", ");
+                f = false;
+                out.print(i);
+            }
+            out.print(']');
+        }
+        if (term) out.println();
     }
 
     public static void hexdump(byte[] arr, PrintStream out, int width) {
-	if(arr == null) {
-	    out.println("null");
-	    return;
-	}
-	if(width <= 0)
-	    width = 16;
-	for(int i = 0; i < arr.length; i += width) {
-	    out.printf("%08x:\t", i);
-	    for(int o = 0; (o < width) && (i + o < arr.length); o++) {
-		if(o > 0) out.print(' ');
-		out.printf("%02x", arr[i + o]);
-	    }
-	    out.print('\n');
-	}
+        if (arr == null) {
+            out.println("null");
+            return;
+        }
+        if (width <= 0)
+            width = 16;
+        for (int i = 0; i < arr.length; i += width) {
+            out.printf("%08x:\t", i);
+            for (int o = 0; (o < width) && (i + o < arr.length); o++) {
+                if (o > 0) out.print(' ');
+                out.printf("%02x", arr[i + o]);
+            }
+            out.print('\n');
+        }
     }
 
     public static String titlecase(String str) {
@@ -1079,18 +1116,18 @@ public class Utils {
     public static BufferedImage hconcat(final BufferedImage... imgs) {
         int width = 0;
         int height = 0;
-        for(final BufferedImage img : imgs) {
+        for (final BufferedImage img : imgs) {
             width += img.getWidth();
             height = Math.max(height, img.getHeight());
-	}
+        }
 
         final BufferedImage img = TexI.mkbuf(new Coord(width, height));
         final Graphics g = img.createGraphics();
         int x = 0;
-        for(final BufferedImage i : imgs) {
+        for (final BufferedImage i : imgs) {
             g.drawImage(i, x, 0, null);
             x += i.getWidth();
-	}
+        }
         g.dispose();
         return img;
     }
@@ -1159,7 +1196,7 @@ public class Utils {
 
     public static int floordiv(double a, double b) {
         double q = a / b;
-        return((q < 0)?(((int)q) - 1):((int)q));
+        return ((q < 0) ? (((int) q) - 1) : ((int) q));
     }
 
     public static float floormod(float a, float b) {
@@ -1169,7 +1206,7 @@ public class Utils {
 
     public static double floormod(double a, double b) {
         double r = a % b;
-        return((a < 0)?(r + b):r);
+        return ((a < 0) ? (r + b) : r);
     }
 
     public static double cangle(double a) {
@@ -1244,8 +1281,8 @@ public class Utils {
     public static Color preblend(Color c1, Color c2) {
         double a1 = c1.getAlpha() / 255.0;
         double a2 = c2.getAlpha() / 255.0;
-    /* I can't help but feel that this should be possible to
-     * express in some simpler form, but I can't see how. */
+        /* I can't help but feel that this should be possible to
+         * express in some simpler form, but I can't see how. */
         double ac = a1 + a2 - (a1 * a2);
         return (new Color((int) Math.round((((c2.getRed() * a2) - (c1.getRed() * a2)) / ac) + c1.getRed()),
                 (int) Math.round((((c2.getGreen() * a2) - (c1.getGreen() * a2)) / ac) + c1.getGreen()),
@@ -1344,9 +1381,9 @@ public class Utils {
         try {
             return (ByteBuffer.allocateDirect(n).order(ByteOrder.nativeOrder()));
         } catch (OutOfMemoryError e) {
-        /* At least Sun's class library doesn't try to collect
-         * garbage if it's out of direct memory, which is pretty
-	     * stupid. So do it for it, then. */
+            /* At least Sun's class library doesn't try to collect
+             * garbage if it's out of direct memory, which is pretty
+             * stupid. So do it for it, then. */
             System.gc();
             return (ByteBuffer.allocateDirect(n).order(ByteOrder.nativeOrder()));
         }
@@ -1393,26 +1430,28 @@ public class Utils {
     public static ShortBuffer wsbuf(int n) {
         return (ShortBuffer.wrap(new short[n]));
     }
+
     public static FloatBuffer wbufcp(FloatBuffer a) {
-	a.rewind();
-	FloatBuffer ret = wfbuf(a.remaining());
-	ret.put(a).rewind();
-	return(ret);
+        a.rewind();
+        FloatBuffer ret = wfbuf(a.remaining());
+        ret.put(a).rewind();
+        return (ret);
     }
+
     public static IntBuffer wbufcp(IntBuffer a) {
-	a.rewind();
-	IntBuffer ret = wibuf(a.remaining());
-	ret.put(a).rewind();
-	return(ret);
+        a.rewind();
+        IntBuffer ret = wibuf(a.remaining());
+        ret.put(a).rewind();
+        return (ret);
     }
 
     public static ByteBuffer growbuf(ByteBuffer buf, int req) {
-	if(buf.remaining() >= req)
-	    return(buf);
-	int sz = buf.capacity();
-	while(sz - buf.position() < req)
-	    sz <<= 1;
-	return(ByteBuffer.allocate(sz).order(buf.order()).put((ByteBuffer)buf.flip()));
+        if (buf.remaining() >= req)
+            return (buf);
+        int sz = buf.capacity();
+        while (sz - buf.position() < req)
+            sz <<= 1;
+        return (ByteBuffer.allocate(sz).order(buf.order()).put((ByteBuffer) buf.flip()));
     }
 
     public static float[] c2fa(Color c) {
@@ -1534,19 +1573,19 @@ public class Utils {
     }
 
     public static <T> T take(Iterable<T> c) {
-	Iterator<T> i = c.iterator();
-	if(!i.hasNext()) return(null);
-	T ret = i.next();
-	i.remove();
-	return(ret);
+        Iterator<T> i = c.iterator();
+        if (!i.hasNext()) return (null);
+        T ret = i.next();
+        i.remove();
+        return (ret);
     }
 
     public static <T> int index(T[] arr, T el) {
-	for(int i = 0; i < arr.length; i++) {
-	    if(Objects.equals(arr[i], el))
-		return(i);
-	}
-	return(-1);
+        for (int i = 0; i < arr.length; i++) {
+            if (Objects.equals(arr[i], el))
+                return (i);
+        }
+        return (-1);
     }
 
     public static boolean strcheck(String str, IntPredicate p) {
@@ -1558,21 +1597,21 @@ public class Utils {
     }
 
     public static <T> T find(Iterable<? extends T> in, Predicate<? super T> p) {
-        for(T obj : in) {
-            if(p.test(obj))
-                return(obj);
+        for (T obj : in) {
+            if (p.test(obj))
+                return (obj);
         }
-        return(null);
+        return (null);
     }
 
     @SafeVarargs
     public static <T> T or(Supplier<T>... vals) {
-        for(Supplier<T> val : vals) {
+        for (Supplier<T> val : vals) {
             T ret = val.get();
-            if(ret != null)
-                return(ret);
+            if (ret != null)
+                return (ret);
         }
-        return(null);
+        return (null);
     }
 
     public static <T> void clean(Collection<T> c, Consumer<? super T> clean) {
@@ -1596,25 +1635,25 @@ public class Utils {
     }
 
     public static Object invoke(Method mth, Object ob, Object... args) {
-	try {
-	    return(mth.invoke(ob, args));
-	} catch(IllegalAccessException e) {
-	    throw(new RuntimeException(e));
-	} catch(InvocationTargetException e) {
-	    if(e.getCause() instanceof RuntimeException)
-		throw((RuntimeException)e.getCause());
-	    throw(new RuntimeException(e.getCause()));
-	}
+        try {
+            return (mth.invoke(ob, args));
+        } catch (IllegalAccessException e) {
+            throw (new RuntimeException(e));
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException)
+                throw ((RuntimeException) e.getCause());
+            throw (new RuntimeException(e.getCause()));
+        }
     }
 
-    public static <R> Function<Object[], R> smthfun(Class<?> cl, String name, Class<R> rtype, Class<?>...args) throws NoSuchMethodException {
-	Method mth = cl.getDeclaredMethod(name, args);
-	if(!rtype.isAssignableFrom(mth.getReturnType()))
-	    throw(new NoSuchMethodException("unexpected return type: " + mth.getReturnType()));
-	int mod = mth.getModifiers();
-	if(((mod & Modifier.STATIC) == 0) || ((mod & Modifier.PUBLIC) == 0))
-	    throw(new NoSuchMethodException("expected public static method"));
-	return(iargs -> rtype.cast(invoke(mth, null, iargs)));
+    public static <R> Function<Object[], R> smthfun(Class<?> cl, String name, Class<R> rtype, Class<?>... args) throws NoSuchMethodException {
+        Method mth = cl.getDeclaredMethod(name, args);
+        if (!rtype.isAssignableFrom(mth.getReturnType()))
+            throw (new NoSuchMethodException("unexpected return type: " + mth.getReturnType()));
+        int mod = mth.getModifiers();
+        if (((mod & Modifier.STATIC) == 0) || ((mod & Modifier.PUBLIC) == 0))
+            throw (new NoSuchMethodException("expected public static method"));
+        return (iargs -> rtype.cast(invoke(mth, null, iargs)));
     }
 
     public static String urlencode(String in) {
@@ -1623,7 +1662,7 @@ public class Utils {
         try {
             enc = in.getBytes("utf-8");
         } catch (java.io.UnsupportedEncodingException e) {
-        /* ¦] */
+            /* ¦] */
             throw (new Error(e));
         }
         for (byte c : enc) {
@@ -1638,12 +1677,12 @@ public class Utils {
     }
 
     public static URL urlparam(URL base, String... pars) {
-	/* Why is Java so horribly bad? */
+        /* Why is Java so horribly bad? */
         String file = base.getFile();
         int p = file.indexOf('?');
         StringBuilder buf = new StringBuilder();
         if (p >= 0) {
-	    /* For now, only add; don't augment. Since Java sucks. */
+            /* For now, only add; don't augment. Since Java sucks. */
             buf.append('&');
         } else {
             buf.append('?');
@@ -1702,12 +1741,13 @@ public class Utils {
     }
 
     public static double ntime() {
-        return(System.currentTimeMillis() / 1e3);
+        return (System.currentTimeMillis() / 1e3);
     }
 
     private static final long rtimeoff = System.nanoTime();
+
     public static double rtime() {
-        return((System.nanoTime() - rtimeoff) / 1e9);
+        return ((System.nanoTime() - rtimeoff) / 1e9);
     }
 
     public static class MapBuilder<K, V> {
@@ -1719,27 +1759,27 @@ public class Utils {
 
         public MapBuilder<K, V> put(K k, V v) {
             bk.put(k, v);
-            return(this);
+            return (this);
         }
 
         public Map<K, V> map() {
-            return(Collections.unmodifiableMap(bk));
+            return (Collections.unmodifiableMap(bk));
         }
     }
 
     public static <T> Indir<T> cache(Indir<T> src) {
-	return(new Indir<T>() {
-		private T val;
-		private boolean has = false;
+        return (new Indir<T>() {
+            private T val;
+            private boolean has = false;
 
-		public T get() {
-		    if(!has) {
-			val = src.get();
-			has = true;
-		    }
-		    return(val);
-		}
-	    });
+            public T get() {
+                if (!has) {
+                    val = src.get();
+                    has = true;
+                }
+                return (val);
+            }
+        });
     }
 
     public static <K, V> MapBuilder<K, V> map() {
@@ -1747,27 +1787,27 @@ public class Utils {
     }
 
     public static <F, T> Iterator<T> map(Iterator<F> from, Function<F, T> fn) {
-        return(new Iterator<T>() {
+        return (new Iterator<T>() {
             boolean h = false;
             T n;
 
             public boolean hasNext() {
-                if(h)
-                    return(true);
-                if(!from.hasNext())
-                    return(false);
+                if (h)
+                    return (true);
+                if (!from.hasNext())
+                    return (false);
                 n = fn.apply(from.next());
                 h = true;
-                return(true);
+                return (true);
             }
 
             public T next() {
-                if(!hasNext())
-                    throw(new NoSuchElementException());
+                if (!hasNext())
+                    throw (new NoSuchElementException());
                 T ret = n;
                 h = false;
                 n = null;
-                return(ret);
+                return (ret);
             }
 
             public void remove() {
@@ -1777,72 +1817,72 @@ public class Utils {
     }
 
     public static <E> Iterator<E> filter(Iterator<E> from, Predicate<E> filter) {
-	return(new Iterator<E>() {
-		boolean h = false;
-		E n;
+        return (new Iterator<E>() {
+            boolean h = false;
+            E n;
 
-		public boolean hasNext() {
-		    while(!h) {
-			if(!from.hasNext())
-			    return(false);
-			E g = from.next();
-			if(filter.test(g)) {
-			    n = g;
-			    h = true;
-			    break;
-			}
-		    }
-		    return(true);
-		}
+            public boolean hasNext() {
+                while (!h) {
+                    if (!from.hasNext())
+                        return (false);
+                    E g = from.next();
+                    if (filter.test(g)) {
+                        n = g;
+                        h = true;
+                        break;
+                    }
+                }
+                return (true);
+            }
 
-		public E next() {
-		    if(!hasNext())
-			throw(new NoSuchElementException());
-		    E ret = n;
-		    h = false;
-		    n = null;
-		    return(ret);
-		}
+            public E next() {
+                if (!hasNext())
+                    throw (new NoSuchElementException());
+                E ret = n;
+                h = false;
+                n = null;
+                return (ret);
+            }
 
-		public void remove() {
-		    from.remove();
-		}
-	    });
+            public void remove() {
+                from.remove();
+            }
+        });
     }
 
     public static <T, F> Iterator<T> filter(Iterator<F> from, Class<T> filter) {
-	return(map(filter(from, filter::isInstance), filter::cast));
+        return (map(filter(from, filter::isInstance), filter::cast));
     }
 
     public static <E, T extends Collection<E>> T merge(T dst, Iterable<? extends E> a, Iterable<? extends E> b, Comparator<? super E> cmp) {
-	Iterator<? extends E> i = a.iterator(), o = b.iterator();
-	if(i.hasNext() && o.hasNext()) {
-	    E e = i.next(), f = o.next();
-	    while(true) {
-		if(cmp.compare(e, f) <= 0) {
-		    dst.add(e);
-		    if(i.hasNext()) {
-			e = i.next();
-		    } else {
-			dst.add(f);
-			break;
-		    }
-		} else {
-		    dst.add(f);
-		    if(o.hasNext()) {
-			f = o.next();
-		    } else {
-			dst.add(e);
-			break;
-		    }
-		}
-	    }
-	}
-	while(i.hasNext())
-	    dst.add(i.next());
-	while(o.hasNext())
-	    dst.add(o.next());
-	return(dst);
+        Iterator<? extends E> i = a.iterator(), o = b.iterator();
+        if (i.hasNext() && o.hasNext()) {
+            E e = i.next(), f = o.next();
+            while (true) {
+                if (cmp.compare(e, f) <= 0) {
+                    dst.add(e);
+                    if (i.hasNext()) {
+                        e = i.next();
+                    } else {
+                        dst.add(f);
+                        break;
+                    }
+                } else {
+                    dst.add(f);
+                    if (o.hasNext()) {
+                        f = o.next();
+                    } else {
+                        dst.add(e);
+                        break;
+                    }
+                }
+            }
+        }
+        while (i.hasNext())
+            dst.add(i.next());
+        while (o.hasNext())
+            dst.add(o.next());
+        return (dst);
     }
 
     public static final Comparator<Object> idcmp = new Comparator<Object>() {
@@ -1920,7 +1960,7 @@ public class Utils {
     // NOTE: will not work with values having large integer part
     public static String fmt1DecPlace(double value) {
         double rvalue = (double) Math.round(value * 10) / 10;
-        return (rvalue % 1 == 0) ? Integer.toString((int)rvalue) : Double.toString(rvalue);
+        return (rvalue % 1 == 0) ? Integer.toString((int) rvalue) : Double.toString(rvalue);
     }
 
     public static Color hex2rgb(String clrhex) {
@@ -1935,17 +1975,17 @@ public class Utils {
         return null;
     }
 
-    public static double round(double a, int order){
+    public static double round(double a, int order) {
         double o = Math.pow(10, order);
         return Math.round(o * a) / o;
     }
-    
+
     public static String timeLeft(long at) {
-		long t = at - System.currentTimeMillis();
-		if (t<0) return "Finishing...";
-		long hours = t / 3600000;
-		long mins = t / 60000 % 60;
-		long seconds = t / 1000 % 60;
-		return String.format("%02d:%02d:%02d",hours,mins,seconds);
+        long t = at - System.currentTimeMillis();
+        if (t < 0) return "Finishing...";
+        long hours = t / 3600000;
+        long mins = t / 60000 % 60;
+        long seconds = t / 1000 % 60;
+        return String.format("%02d:%02d:%02d", hours, mins, seconds);
     }
 }

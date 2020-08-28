@@ -26,12 +26,6 @@
 
 package haven.resutil;
 
-import static haven.glsl.Cons.pick;
-import static haven.glsl.Cons.texture2D;
-import static haven.glsl.Type.SAMPLER2D;
-
-import java.util.Collection;
-
 import haven.GLState;
 import haven.GOut;
 import haven.Indir;
@@ -42,6 +36,12 @@ import haven.TexR;
 import haven.glsl.ShaderMacro;
 import haven.glsl.Tex2D;
 import haven.glsl.Uniform;
+
+import java.util.Collection;
+
+import static haven.glsl.Cons.pick;
+import static haven.glsl.Cons.texture2D;
+import static haven.glsl.Type.SAMPLER2D;
 
 public class TexPal extends GLState {
     public static final Slot<TexPal> slot = new Slot<TexPal>(Slot.Type.DRAW, TexPal.class);

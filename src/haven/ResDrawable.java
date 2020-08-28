@@ -42,7 +42,7 @@ public class ResDrawable extends Drawable {
         this.sdt = new MessageBuf(sdt);
         try {
             init();
-            if(name == null){
+            if (name == null) {
                 //Large Animal debug
                 this.name = res.get().name;
                 //System.out.println(this.name);
@@ -95,12 +95,12 @@ public class ResDrawable extends Drawable {
             }
         }*/
         if (configuration.scaletree && (this.gob.type == Type.TREE || this.gob.type == Type.BUSH) && !stdCopy.eom()) {
-            args[0] = (byte)stdCopy.uint8();
+            args[0] = (byte) stdCopy.uint8();
             int fscale = configuration.scaletreeint;
             if (!stdCopy.eom() && (fscale = stdCopy.uint8()) > configuration.scaletreeint) {
                 fscale = configuration.scaletreeint;
             }
-            args[1] = (byte)fscale;
+            args[1] = (byte) fscale;
             stdCopy = new MessageBuf(args);
         }
         //Dump Name/Type of non-gob
@@ -120,11 +120,11 @@ public class ResDrawable extends Drawable {
     }
 
     public int sdtnum() {
-	if(sdt != null) {
-	    Message csdt = sdt.clone();
-	    return csdt.eom() ? 0xffff000 : Sprite.decnum(csdt);
-	}
-	return 0;
+        if (sdt != null) {
+            Message csdt = sdt.clone();
+            return csdt.eom() ? 0xffff000 : Sprite.decnum(csdt);
+        }
+        return 0;
     }
 
     public void ctick(int dt) {
@@ -151,6 +151,6 @@ public class ResDrawable extends Drawable {
     }
 
     public Object staticp() {
-        return((spr != null)?spr.staticp():null);
+        return ((spr != null) ? spr.staticp() : null);
     }
 }

@@ -104,6 +104,7 @@ public class Grainslot extends Widget implements DTarget {
 
     class GrainslotButtom extends Button {
         private final String name;
+
         GrainslotButtom(int var2, String var3) {
             super(var2, var3);
             name = var3.toLowerCase();

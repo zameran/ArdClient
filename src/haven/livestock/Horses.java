@@ -32,7 +32,7 @@ public class Horses extends Animal {
         x = addColumn(columns, "Milk quality2:", "Milk Final", 12, x);
         x = addColumn(columns, "Hide quality2:", "Hide Final", 13, x);
 
-            addColumn(columns, "X", "", 14, x);
+        addColumn(columns, "X", "", 14, x);
     }
 
     public Horses(long wndid, String type) {

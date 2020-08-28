@@ -35,12 +35,14 @@ public abstract class Moving extends GAttrib {
 
     public void move(Coord2d c) {
     }
+
     public abstract Optional<Coord2d> getDest();
+
     public abstract Coord3f getc();
 
     public abstract double getv();
 
     public Object staticp() {
-	return(null);
+        return (null);
     }
 }

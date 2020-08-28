@@ -51,21 +51,21 @@ public class CheckBox extends Widget {
     public CheckBox(String lbl, boolean lg, final Consumer<Boolean> onChange) {
         this.lbl = Text.std.render(Resource.getLocString(Resource.BUNDLE_LABEL, lbl), java.awt.Color.WHITE);
         if (lg) {
-	    type = "chkbox/large";
+            type = "chkbox/large";
         } else {
-	    type = "chkbox/small";
+            type = "chkbox/small";
         }
-	final Coord boxsz = Theme.timg(type, 0).sz;
-	sz = new Coord(boxsz.x + 5 + this.lbl.sz().x, Math.max(boxsz.y, this.lbl.sz().y));
-	this.onChange = onChange;
+        final Coord boxsz = Theme.timg(type, 0).sz;
+        sz = new Coord(boxsz.x + 5 + this.lbl.sz().x, Math.max(boxsz.y, this.lbl.sz().y));
+        this.onChange = onChange;
     }
 
     public CheckBox(String lbl, boolean lg) {
-	this(lbl, lg, null);
+        this(lbl, lg, null);
     }
 
     public CheckBox(String lbl) {
-	this(lbl, false, null);
+        this(lbl, false, null);
     }
 
     public CheckBox(final String lbl, final Consumer<Boolean> onChange, final boolean val) {
@@ -86,26 +86,26 @@ public class CheckBox extends Widget {
     }
 
     public void draw(GOut g) {
-	final int id = a ? 1 : 0;
-	final TextureAtlas.Img chk = Theme.timg(type, id);
-	g.image(chk, new Coord(0, sz.y / 2 - chk.sz.y / 2));
-	//Draw label
-	g.image(lbl.tex(), new Coord(chk.sz.x + 5, sz.y /2 - lbl.sz().y / 2 ));
+        final int id = a ? 1 : 0;
+        final TextureAtlas.Img chk = Theme.timg(type, id);
+        g.image(chk, new Coord(0, sz.y / 2 - chk.sz.y / 2));
+        //Draw label
+        g.image(lbl.tex(), new Coord(chk.sz.x + 5, sz.y / 2 - lbl.sz().y / 2));
         super.draw(g);
     }
 
     public void changed(boolean val) {
         if (canactivate)
-	    wdgmsg("ch", a?1:0);
-	if(onChange != null)
-	    onChange.accept(val);
+            wdgmsg("ch", a ? 1 : 0);
+        if (onChange != null)
+            onChange.accept(val);
     }
 
     public void uimsg(String msg, Object... args) {
-	if(msg == "ch") {
-	    this.a = ((Integer)args[0]) != 0;
-	} else {
-	    super.uimsg(msg, args);
-	}
+        if (msg == "ch") {
+            this.a = ((Integer) args[0]) != 0;
+        } else {
+            super.uimsg(msg, args);
+        }
     }
 }

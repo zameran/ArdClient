@@ -4,7 +4,6 @@ import haven.CheckListboxItem;
 import haven.Config;
 import haven.Resource;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +27,7 @@ public class Iconfinder {
 //		System.out.println(exists);
         try {
             lines = Files.readAllLines(Paths.get("./icons"));
-            for(int i=0; i<lines.size()-1; i++) {
+            for (int i = 0; i < lines.size() - 1; i++) {
                 String split[] = lines.get(i).split(";");
                 icons.put(split[0], split[1]);
             }
@@ -36,17 +35,18 @@ public class Iconfinder {
 
         }
         try {
-            if (lines == null){
+            if (lines == null) {
                 lines = Files.readAllLines(Paths.get("src/icons"));
-                for(int i=0; i<lines.size()-1; i++) {
+                for (int i = 0; i < lines.size() - 1; i++) {
                     String split[] = lines.get(i).split(";");
                     icons.put(split[0], split[1]);
                 }
             }
-        } catch (IOException e){
+        } catch (IOException e) {
 
         }
     }
+
     public static void updateConfig() {
         StringBuilder sb = new StringBuilder();
 
@@ -57,16 +57,16 @@ public class Iconfinder {
             put("oldtrunk", "gfx/invobjs/wblock-mirkwood");
         }};
 
-        for(Map.Entry<String, CheckListboxItem> entry: Config.trees.entrySet()) {
+        for (Map.Entry<String, CheckListboxItem> entry : Config.trees.entrySet()) {
             String icon = null;
-            if(exceptions.containsKey(entry.getKey())) {
+            if (exceptions.containsKey(entry.getKey())) {
                 icon = exceptions.get(entry.getKey());
             }
-            if(icon == null && entry.getKey().contains("tree"))
+            if (icon == null && entry.getKey().contains("tree"))
                 icon = findTreeIcon(entry.getKey().replaceAll("tree", ""));
-            if(icon == null)
+            if (icon == null)
                 icon = findTreeIcon(entry.getKey());
-            if(icon == null) {
+            if (icon == null) {
                 System.out.println("Didn't find icon for: " + entry.getKey());
             } else {
                 sb.append(entry.getKey() + ";" + icon + "\n");
@@ -74,13 +74,13 @@ public class Iconfinder {
             }
         }
 
-        for(Map.Entry<String, CheckListboxItem> entry: Config.bushes.entrySet()) {
+        for (Map.Entry<String, CheckListboxItem> entry : Config.bushes.entrySet()) {
             String icon = null;
-            if(entry.getKey().contains("bush"))
+            if (entry.getKey().contains("bush"))
                 icon = findTreeIcon(entry.getKey().replaceAll("bush", ""));
-            if(icon == null)
+            if (icon == null)
                 icon = findTreeIcon(entry.getKey());
-            if(icon == null) {
+            if (icon == null) {
                 System.out.println("Didn't find icon for: " + entry.getKey());
             } else {
                 sb.append(entry.getKey() + ";" + icon + "\n");
@@ -88,9 +88,9 @@ public class Iconfinder {
             }
         }
 
-        for(Map.Entry<String, CheckListboxItem> entry : Config.boulders.entrySet()) {
+        for (Map.Entry<String, CheckListboxItem> entry : Config.boulders.entrySet()) {
             String icon = findStoneIcon(entry.getKey());
-            if(icon == null ){
+            if (icon == null) {
                 System.out.println("Didn't find icon for: " + entry.getKey());
             } else {
                 sb.append(entry.getKey() + ";" + icon + "\n");
@@ -100,7 +100,7 @@ public class Iconfinder {
 
         try {
             Files.write(Paths.get("./icons"), Collections.singleton(sb.toString()), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -109,7 +109,7 @@ public class Iconfinder {
         try {
             Resource res = Resource.remote().loadwait("gfx/invobjs/" + name);
             return res.name;
-        } catch(Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
         return null;
@@ -126,11 +126,11 @@ public class Iconfinder {
                 name + "apple",
                 "seed-" + name,
         };
-        for(int i=0; i<options.length; i++) {
+        for (int i = 0; i < options.length; i++) {
             try {
                 Resource res = Resource.remote().loadwait("gfx/invobjs/" + options[i]);
                 return res.name;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

@@ -58,9 +58,9 @@ public class Tabs {
             tabs.remove(this);
         }
 
-	public void showtab() {
-	    Tabs.this.showtab(this);
-	}
+        public void showtab() {
+            Tabs.this.showtab(this);
+        }
     }
 
     public Tab add() {

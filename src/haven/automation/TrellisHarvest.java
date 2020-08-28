@@ -1,19 +1,18 @@
 package haven.automation;
 
 
-import static haven.OCache.posres;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import haven.Coord2d;
 import haven.FastMesh;
 import haven.FlowerMenu;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
-import haven.ResDrawable;
 import haven.Resource;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static haven.OCache.posres;
 
 public class TrellisHarvest implements Runnable {
     private GameUI gui;

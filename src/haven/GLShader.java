@@ -26,13 +26,12 @@
 
 package haven;
 
+import javax.media.opengl.GL2;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-
-import javax.media.opengl.GL2;
 
 public abstract class GLShader implements java.io.Serializable {
     public final String source, header;
@@ -67,11 +66,11 @@ public abstract class GLShader implements java.io.Serializable {
         }
 
         public void compile(BGL gl, final GLShader sh) {
-        /* Does JOGL use the byte or char length or the supplied
-         * String, and in case of the former, how does one know
-	     * the coding it encodes the String as so as to supply the
-	     * corrent length? It won't matter since all reasonable
-	     * programs will be ASCII, of course, but still... */
+            /* Does JOGL use the byte or char length or the supplied
+             * String, and in case of the former, how does one know
+             * the coding it encodes the String as so as to supply the
+             * corrent length? It won't matter since all reasonable
+             * programs will be ASCII, of course, but still... */
             gl.glShaderSourceARB(this, 1, new String[]{sh.source}, new int[]{sh.source.length()}, 0);
             gl.glCompileShaderARB(this);
             gl.bglSubmit(new BGL.Request() {
@@ -84,7 +83,7 @@ public abstract class GLShader implements java.io.Serializable {
                         if (buf[0] > 0) {
                             byte[] logbuf = new byte[buf[0]];
                             rgl.glGetInfoLogARB(id, logbuf.length, buf, 0, logbuf, 0);
-                /* The "platform's default charset" is probably a reasonable choice. */
+                            /* The "platform's default charset" is probably a reasonable choice. */
                             info = new String(logbuf, 0, buf[0]);
                         }
                         throw (new ShaderException("Failed to compile shader", sh, info));

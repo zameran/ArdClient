@@ -26,9 +26,8 @@
 
 package haven;
 
-import java.awt.Color;
-
 import javax.media.opengl.GL2;
+import java.awt.Color;
 
 public class PosLight extends Light {
     public float[] pos;

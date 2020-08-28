@@ -26,14 +26,6 @@
 
 package haven;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.WeakHashMap;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import haven.GLFrameBuffer.Attachment;
 import haven.GLProgram.VarID;
 import haven.glsl.Cons;
@@ -44,6 +36,13 @@ import haven.glsl.ShaderMacro;
 import haven.glsl.Tex2D;
 import haven.glsl.Type;
 import haven.glsl.Uniform;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class FBConfig {
     private static Map<ShaderMacro[], ShaderMacro> rescache = new WeakHashMap<ShaderMacro[], ShaderMacro>();
@@ -111,9 +110,9 @@ public class FBConfig {
         }
         this.color = color.toArray(new Attachment[0]);
         this.depth = depth;
-    /* XXX: Shaders should be canonized and cached to avoid
-	 * creation of unnecessary identical programs when
-	 * configurations change. */
+        /* XXX: Shaders should be canonized and cached to avoid
+         * creation of unnecessary identical programs when
+         * configurations change. */
         final ShaderMacro shader = ShaderMacro.compose(shb);
         this.fb = new GLFrameBuffer(this.color, this.depth) {
             public ShaderMacro shader() {
@@ -340,9 +339,9 @@ public class FBConfig {
             prog.fctx.fragcol.mod(new Macro1<Expression>() {
                 public Expression expand(Expression in) {
                     Expression[] texels = new Expression[samples];
-                    for(int i = 0; i < samples; i++)
+                    for (int i = 0; i < samples; i++)
                         texels[i] = Cons.texelFetch(ctex.ref(), Cons.ivec2(Cons.floor(Cons.mul(Tex2D.texcoord(prog.fctx).ref(), MiscLib.screensize.ref()))), Cons.l(i));
-                    return(Cons.mul(Cons.add(texels), Cons.l(1.0 / samples)));
+                    return (Cons.mul(Cons.add(texels), Cons.l(1.0 / samples)));
                 }
             }, 0);
         };

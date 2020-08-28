@@ -2,13 +2,11 @@ package haven;
 
 import haven.res.ui.tt.q.qbuff.QBuff;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.List;
+import java.awt.Color;
 
 public class QuickSlotsWdg extends Widget implements DTarget {
     private static final Tex sbg = Resource.loadtex("gfx/hud/slots");
-    public static final Coord lc =  new Coord(6, 6);
+    public static final Coord lc = new Coord(6, 6);
     public static final Coord rc = new Coord(56, 6);
     private static final Coord ssz = new Coord(44, 44);
     private UI.Grab dragging;
@@ -28,15 +26,15 @@ public class QuickSlotsWdg extends Widget implements DTarget {
             if (left != null) {
                 drawitem(g.reclipl(lc, g.sz), left);
                 drawamountbar(g, left.item, 44 + 6);
-                if(Config.showquality)
+                if (Config.showquality)
                     drawQualityLeft(g, left);
             }
             WItem right = e.quickslots[7];
             if (right != null) {
                 drawitem(g.reclipl(rc, g.sz), right);
                 drawamountbar(g, right.item, 0);
-                if(Config.showquality)
-                drawQualityRight(g, right);
+                if (Config.showquality)
+                    drawQualityRight(g, right);
             }
         }
     }
@@ -53,7 +51,7 @@ public class QuickSlotsWdg extends Widget implements DTarget {
         }
     }
 
-    private void drawQualityLeft(GOut g, WItem witem){
+    private void drawQualityLeft(GOut g, WItem witem) {
         QBuff quality = witem.item.quality();
         if (Config.showquality) {
             if (quality != null && quality.qtex != null) {
@@ -69,7 +67,7 @@ public class QuickSlotsWdg extends Widget implements DTarget {
         }
     }
 
-    private void drawQualityRight(GOut g, WItem witem){
+    private void drawQualityRight(GOut g, WItem witem) {
         QBuff quality = witem.item.quality();
         if (Config.showquality) {
             if (quality != null && quality.qtex != null) {
@@ -136,10 +134,10 @@ public class QuickSlotsWdg extends Widget implements DTarget {
 
     @Override
     public boolean mousedown(Coord c, int button) {
-       if (ui.modmeta)
+        if (ui.modmeta)
             return true;
-       if(ui.modctrl && button == 1 && Config.disablequickslotdrop)
-           return true;
+        if (ui.modctrl && button == 1 && Config.disablequickslotdrop)
+            return true;
         Equipory e = ui.gui.getequipory();
         if (e != null) {
             WItem w = e.quickslots[c.x <= 47 ? 6 : 7];

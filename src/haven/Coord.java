@@ -26,21 +26,21 @@
 
 package haven;
 
-import static java.lang.Math.PI;
-
 import java.util.Iterator;
 import java.util.Optional;
+
+import static java.lang.Math.PI;
 
 public class Coord implements Comparable<Coord>, java.io.Serializable {
     public int x, y;
     public static Coord z = new Coord(0, 0);
     public static Coord[] uecw = {new Coord(0, -1), new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0)};
     public static Coord[] uccw = {new Coord(0, 0), new Coord(1, 0), new Coord(1, 1), new Coord(0, 1)};
-    public static Coord[] upcw = {new Coord( 0, -1), new Coord( 1, -1), new Coord( 1,  0), new Coord( 1,  1),
-            new Coord( 0,  1), new Coord(-1,  1), new Coord(-1,  0), new Coord(-1, -1)};
-    public static Coord[] usqc = {new Coord(-1, -1), new Coord( 0, -1), new Coord( 1, -1),
-            new Coord(-1,  0), new Coord( 0,  0), new Coord( 1,  0),
-            new Coord(-1,  1), new Coord( 0,  1), new Coord( 1,  1)};
+    public static Coord[] upcw = {new Coord(0, -1), new Coord(1, -1), new Coord(1, 0), new Coord(1, 1),
+            new Coord(0, 1), new Coord(-1, 1), new Coord(-1, 0), new Coord(-1, -1)};
+    public static Coord[] usqc = {new Coord(-1, -1), new Coord(0, -1), new Coord(1, -1),
+            new Coord(-1, 0), new Coord(0, 0), new Coord(1, 0),
+            new Coord(-1, 1), new Coord(0, 1), new Coord(1, 1)};
 
     public Coord(int x, int y) {
         this.x = x;
@@ -48,7 +48,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public Coord(float x, float y) {
-        this((int)x, (int)y);
+        this((int) x, (int) y);
     }
 
     public Coord(Coord c) {
@@ -91,7 +91,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public int hashCode() {
-	return(((y & 0xffff) * 31) + (x & 0xffff));
+        return (((y & 0xffff) * 31) + (x & 0xffff));
     }
 
     public Coord add(int ax, int ay) {
@@ -119,7 +119,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public Coord mul(double f) {
-	return(new Coord((int)Math.round(x * f), (int)Math.round(y * f)));
+        return (new Coord((int) Math.round(x * f), (int) Math.round(y * f)));
     }
 
     public Coord inv() {
@@ -131,7 +131,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public Coord2d mul(Coord2d f) {
-        return(new Coord2d(x * f.x, y * f.y));
+        return (new Coord2d(x * f.x, y * f.y));
     }
 
     public Coord div(Coord d) {
@@ -143,7 +143,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public Coord div(double d) {
-        return new Coord((int)(x/d), (int)(y / d));
+        return new Coord((int) (x / d), (int) (y / d));
     }
 
     public Coord mod(Coord d) {
@@ -153,49 +153,50 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     public Coord copy() {
         return new Coord(x, y);
     }
+
     public boolean isect(Coord c, Coord s) {
         return ((x >= c.x) && (y >= c.y) && (x < c.x + s.x) && (y < c.y + s.y));
     }
 
     public boolean eisect(Coord c, Coord s) {
-	return ((x >= c.x) && (y >= c.y) && (x <= c.x + s.x) && (y <= c.y + s.y));
+        return ((x >= c.x) && (y >= c.y) && (x <= c.x + s.x) && (y <= c.y + s.y));
     }
 
     //m2 is 0, b2 is e2.y
     public Optional<Coord> hlsect(Coord e1, int b2) {
-	double m1 = (e1.y - y) / (double)(e1.x - x);
-	double b1 = e1.y - m1 * e1.x;
+        double m1 = (e1.y - y) / (double) (e1.x - x);
+        double b1 = e1.y - m1 * e1.x;
 
-	if(m1 != 0) {
-	    return Optional.of(new Coord((int)(Double.isFinite(m1) ? (b2-b1)/m1 : this.x), b2));
-	} else {
-	    return Optional.empty();
-	}
+        if (m1 != 0) {
+            return Optional.of(new Coord((int) (Double.isFinite(m1) ? (b2 - b1) / m1 : this.x), b2));
+        } else {
+            return Optional.empty();
+        }
     }
 
     //m2 is Inf, x is e2.x
     public Optional<Coord> vlsect(Coord e1, int x) {
-	double m = (e1.y - y) / (double)(e1.x - this.x);
-	double b = this.y - m * this.x;
+        double m = (e1.y - y) / (double) (e1.x - this.x);
+        double b = this.y - m * this.x;
 
-	if(Double.isFinite(m)) {
-	    return Optional.of(new Coord(x, (int)(m * x + b)));
-	} else {
-	    return Optional.empty();
-	}
+        if (Double.isFinite(m)) {
+            return Optional.of(new Coord(x, (int) (m * x + b)));
+        } else {
+            return Optional.empty();
+        }
     }
 
     public boolean between(Coord s, Coord e) {
         Coord sz = new Coord(e.x - s.x, e.y - s.y);
         Coord tl = new Coord(s);
-        if(sz.x < 0) {
+        if (sz.x < 0) {
             sz.x = -sz.x;
             tl.x = e.x;
-	}
-        if(sz.y < 0) {
+        }
+        if (sz.y < 0) {
             sz.y = -sz.y;
             tl.y = e.y;
-	}
+        }
         return eisect(tl, sz);
     }
 
@@ -223,20 +224,20 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     }
 
     public Coord rot(float angl) {
-	final float
-		cos = (float)Math.cos(angl),
-		sin = (float)Math.sin(angl);
-	return new Coord(x*cos - y*sin,
-		x*sin + y*cos);
+        final float
+                cos = (float) Math.cos(angl),
+                sin = (float) Math.sin(angl);
+        return new Coord(x * cos - y * sin,
+                x * sin + y * cos);
     }
 
     public double abs() {
-	double x = this.x, y = this.y;
-	return(Math.sqrt((x * x) + (y * y)));
+        double x = this.x, y = this.y;
+        return (Math.sqrt((x * x) + (y * y)));
     }
 
     public Coord norm(double n) {
-	return(mul(n / abs()));
+        return (mul(n / abs()));
     }
 
     public double dist(Coord o) {
@@ -257,6 +258,7 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
             ret = new Coord(ret.x, ul.y + sz.y);
         return (ret);
     }
+
     public int manhattan2(Coord c) {
         return Math.max(Math.abs(c.x - x), Math.abs(c.y - y));
     }
@@ -265,21 +267,21 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
         return new Coord((int) Math.round(x * cos - y * sin),
-                         (int) Math.round(y * cos + x * sin));
+                (int) Math.round(y * cos + x * sin));
     }
 
     public Iterable<Coord> offsets(Coord... list) {
-        return(new Iterable<Coord>() {
+        return (new Iterable<Coord>() {
             public Iterator<Coord> iterator() {
-                return(new Iterator<Coord>() {
+                return (new Iterator<Coord>() {
                     int i = 0;
 
                     public boolean hasNext() {
-                        return(i < list.length);
+                        return (i < list.length);
                     }
 
                     public Coord next() {
-                        return(add(list[i++]));
+                        return (add(list[i++]));
                     }
                 });
             }

@@ -4,11 +4,17 @@ import haven.Coord;
 import haven.DefSettings;
 import haven.UI;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 public class NBAPathfinder extends Pathfinder {
     enum Side {

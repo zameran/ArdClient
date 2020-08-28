@@ -67,8 +67,8 @@ public class RichTextBox extends Widget {
     }
 
     public void resize(Coord sz) {
-	super.resize(sz);
-	sb.c = new Coord(sz.x - sb.sz.x, 0);
-	sb.resize(sz.y);
+        super.resize(sz);
+        sb.c = new Coord(sz.x - sb.sz.x, 0);
+        sb.resize(sz.y);
     }
 }

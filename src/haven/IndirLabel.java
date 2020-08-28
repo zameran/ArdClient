@@ -14,15 +14,15 @@ public class IndirLabel extends Widget {
 
     @Override
     public void draw(GOut g) {
-	g.image(text.tex(), Coord.z);
+        g.image(text.tex(), Coord.z);
     }
 
     @Override
     public void tick(double dt) {
-	final String ntext = render.get();
-	if(!ntext.equals(text.text)) {
-	    text = Text.render(ntext);
-	    sz = text.sz();
-	}
+        final String ntext = render.get();
+        if (!ntext.equals(text.text)) {
+            text = Text.render(ntext);
+            sz = text.sz();
+        }
     }
 }

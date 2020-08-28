@@ -26,10 +26,6 @@
 
 package haven.resutil;
 
-import static haven.glsl.Cons.add;
-import static haven.glsl.Cons.mul;
-import static haven.glsl.Type.VEC2;
-
 import haven.Coord3f;
 import haven.GLState;
 import haven.GOut;
@@ -39,6 +35,10 @@ import haven.glsl.MiscLib;
 import haven.glsl.ShaderMacro;
 import haven.glsl.Tex2D;
 import haven.glsl.Uniform;
+
+import static haven.glsl.Cons.add;
+import static haven.glsl.Cons.mul;
+import static haven.glsl.Type.VEC2;
 
 @Material.ResName("texrot")
 public class TexAnim extends GLState {

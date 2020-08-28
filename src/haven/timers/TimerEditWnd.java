@@ -1,9 +1,6 @@
 package haven.timers;
 
 
-import java.awt.event.KeyEvent;
-import java.util.List;
-
 import haven.Button;
 import haven.Coord;
 import haven.GameUI;
@@ -12,6 +9,9 @@ import haven.Label;
 import haven.TextEntry;
 import haven.Widget;
 import haven.Window;
+
+import java.awt.event.KeyEvent;
+import java.util.List;
 
 public class TimerEditWnd extends Window {
 

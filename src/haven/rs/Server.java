@@ -26,6 +26,10 @@
 
 package haven.rs;
 
+import haven.Message;
+import haven.MessageBuf;
+import haven.Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,10 +42,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
-import haven.Message;
-import haven.MessageBuf;
-import haven.Utils;
 
 public class Server extends Thread {
     public static final Map<String, Command> commands = new HashMap<String, Command>();

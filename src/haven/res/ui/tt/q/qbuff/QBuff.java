@@ -2,13 +2,11 @@ package haven.res.ui.tt.q.qbuff;
 
 import haven.Config;
 import haven.CustomQualityList;
-import haven.GItem;
 import haven.ItemInfo;
 import haven.Resource;
 import haven.Tex;
 import haven.Text;
 import haven.Utils;
-import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 
 import java.awt.Color;

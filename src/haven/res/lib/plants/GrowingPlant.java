@@ -26,25 +26,25 @@ public class GrowingPlant implements Factory {
         ArrayList<MeshRes> meshes = new ArrayList<MeshRes>();
         Iterator allmeshes = res.layers(MeshRes.class).iterator();
 
-        while(allmeshes.hasNext()) {
-            MeshRes mesh = (MeshRes)allmeshes.next();
-            if(mesh.id / 10 == stg) {
+        while (allmeshes.hasNext()) {
+            MeshRes mesh = (MeshRes) allmeshes.next();
+            if (mesh.id / 10 == stg) {
                 meshes.add(mesh);
             }
         }
 
-        if(meshes.size() < 1) {
+        if (meshes.size() < 1) {
             throw new ResourceException("No variants for grow stage " + stg, res);
         } else {
             CSprite cs = new CSprite(owner, res);
             if (Config.simplecrops) {
-                MeshRes mesh = (MeshRes)meshes.get(0);
+                MeshRes mesh = (MeshRes) meshes.get(0);
                 cs.addpart(0, 0, mesh.mat.get(), mesh.m);
             } else {
                 Random rnd = owner.mkrandoom();
-                for(int i = 0; i < this.num; ++i) {
-                    MeshRes mesh = (MeshRes)meshes.get(rnd.nextInt(meshes.size()));
-                    if(this.num > 1) {
+                for (int i = 0; i < this.num; ++i) {
+                    MeshRes mesh = (MeshRes) meshes.get(rnd.nextInt(meshes.size()));
+                    if (this.num > 1) {
                         cs.addpart(rnd.nextFloat() * 11.0F - 5.5F, rnd.nextFloat() * 11.0F - 5.5F, mesh.mat.get(), mesh.m);
                     } else {
                         cs.addpart(rnd.nextFloat() * 4.4F - 2.2F, rnd.nextFloat() * 4.4F - 2.2F, mesh.mat.get(), mesh.m);

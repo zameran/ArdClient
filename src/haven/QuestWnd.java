@@ -3,7 +3,7 @@ package haven;
 public class QuestWnd extends Window {
     public QuestWnd() {
         super(Coord.z, (Resource.getLocString(Resource.BUNDLE_WINDOW, "Quest Log")), "Quest Log");
-	makeHidable();
+        makeHidable();
         hide();
     }
 
@@ -11,23 +11,24 @@ public class QuestWnd extends Window {
     public void close() {
         hide();
     }
+
     public void cresize(Widget ch) {
         pack();
-        if(parent != null)
+        if (parent != null)
             presize();
     }
 
     @Override
     public void cdestroy(Widget w) {
-	hide();
-	ui.gui.qqview = null;
+        hide();
+        ui.gui.qqview = null;
         super.cdestroy(w);
     }
 
 
     @Override
     public <T extends Widget> T add(T child) {
-	show();
+        show();
         return super.add(child);
     }
 }

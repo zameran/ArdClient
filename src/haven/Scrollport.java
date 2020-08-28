@@ -70,7 +70,7 @@ public class Scrollport extends Widget {
         public <T extends Widget> T add(T child) {
             super.add(child);
             update();
-            return(child);
+            return (child);
         }
 
         public Coord xlate(Coord c, boolean in) {

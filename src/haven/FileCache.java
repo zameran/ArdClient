@@ -77,8 +77,8 @@ public class FileCache implements ResCache {
             public void close() throws IOException {
                 super.close();
                 if (!tmp.renameTo(nm)) {
-            /* Apparently Java doesn't support atomic
-             * renames on Windows... :-/ */
+                    /* Apparently Java doesn't support atomic
+                     * renames on Windows... :-/ */
                     nm.delete();
                     tmp.renameTo(nm);
                 }

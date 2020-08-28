@@ -80,9 +80,9 @@ public class Music {
                 } catch (InvalidMidiDataException e) {
                     return;
                 } catch (IllegalArgumentException e) {
-            /* The soft synthesizer appears to be throwing
-             * non-checked exceptions through from the sampled
-		     * audio system. Ignore them and only them. */
+                    /* The soft synthesizer appears to be throwing
+                     * non-checked exceptions through from the sampled
+                     * audio system. Ignore them and only them. */
                     if (e.getMessage().startsWith("No line matching"))
                         return;
                     throw (e);
@@ -119,14 +119,14 @@ public class Music {
                             synth.close();
                     } catch (Throwable e2) {
                         if (e2 instanceof InterruptedException) {
-			    /* XXX: There appears to be a bug in Sun's
-			     * software MIDI implementation that throws back
-			     * an unchecked InterruptedException here when two
-			     * interrupts come close together (such as in the
-			     * case when the current player is first stopped,
-			     * and then another started immediately afterwards
-			     * on a new song before the first one has had time
-			     * to terminate entirely). */
+                            /* XXX: There appears to be a bug in Sun's
+                             * software MIDI implementation that throws back
+                             * an unchecked InterruptedException here when two
+                             * interrupts come close together (such as in the
+                             * case when the current player is first stopped,
+                             * and then another started immediately afterwards
+                             * on a new song before the first one has had time
+                             * to terminate entirely). */
                         } else {
                             throw (new RuntimeException(e2));
                         }

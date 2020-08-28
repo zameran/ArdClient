@@ -1,8 +1,6 @@
 package haven.automation;
 
 
-import static haven.OCache.posres;
-
 import haven.CheckListboxItem;
 import haven.Config;
 import haven.GameUI;
@@ -14,11 +12,13 @@ import haven.sloth.gob.Type;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
+
+import static haven.OCache.posres;
 
 public class PickForageable implements Runnable {
     private GameUI gui;
     public static final HashSet<String> gates = new HashSet(Arrays.asList("brickwallgate", "drystonewallgate", "drystonewallbiggate", "palisadegate", "palisadebiggate", "polegate", "polebiggate"));
+
     public PickForageable(GameUI gui) {
         this.gui = gui;
     }
@@ -42,10 +42,10 @@ public class PickForageable implements Runnable {
                 if (res != null) {
                     CheckListboxItem itm = Config.icons.get(res.basename());
                     Boolean hidden = Boolean.FALSE;
-                    if(!Config.disablegatekeybind)
-                    gate = gates.contains(res.basename());
-                    if(!Config.disablecartkeybind)
-                    cart = res.basename().equals("cart");
+                    if (!Config.disablegatekeybind)
+                        gate = gates.contains(res.basename());
+                    if (!Config.disablecartkeybind)
+                        cart = res.basename().equals("cart");
                     if (itm == null)
                         hidden = null;
                     else if (itm.selected)
@@ -53,7 +53,7 @@ public class PickForageable implements Runnable {
 
                     try {
                         if (gate) {
-                            for(Gob.Overlay ol : gob.ols){
+                            for (Gob.Overlay ol : gob.ols) {
                                 String resname = (this.gui.map.glob.sess.getres(Utils.uint16d(ol.sdt.rbuf, 0)).get()).basename();
                                 if (resname.equals("visflag")) {
                                     gate = false;
@@ -76,9 +76,9 @@ public class PickForageable implements Runnable {
             return;
         gui.map.wdgmsg("click", herb.sc, herb.rc.floor(posres), 3, 0, 0, (int) herb.id, herb.rc.floor(posres), 0, -1);
 
-        if(herb.getres() != null) {
+        if (herb.getres() != null) {
             CheckListboxItem itm = Config.autoclusters.get(herb.getres().name);
-            if(itm != null && itm.selected)
+            if (itm != null && itm.selected)
                 gui.map.startMusselsPicker(herb);
 
            /* if ((herb.getres().basename().contains("mussel") || herb.getres().basename().contains("oyster")) && Config.autopickmussels)

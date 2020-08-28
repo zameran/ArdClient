@@ -1,7 +1,3 @@
-import java.awt.image.BufferedImage;
-import java.util.Collections;
-import java.util.List;
-
 import haven.Buff;
 import haven.Coord;
 import haven.Glob;
@@ -18,6 +14,10 @@ import haven.TexI;
 import haven.Text;
 import haven.UI;
 import haven.Widget;
+
+import java.awt.image.BufferedImage;
+import java.util.Collections;
+import java.util.List;
 
 public class RealmBuff extends Buff implements ResOwner {
     public final Indir<Resource> res;

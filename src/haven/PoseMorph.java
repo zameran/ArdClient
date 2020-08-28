@@ -35,6 +35,7 @@ import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
 /*
 TODO FOR LARGE ANIMALS:
     Need to Collect:
@@ -230,8 +231,8 @@ public class PoseMorph implements Morpher.Factory {
                         float bw = wl.get(ao + o);
                         float[] xf = offs[bi];
                         //Big Animals HERE!!!!  ! ! ! !
-                        if(!Config.biganimals){
-                            if(name == null){
+                        if (!Config.biganimals) {
+                            if (name == null) {
                                 name = ba.names[0];
                                 //System.out.println(name);
                             }
@@ -241,19 +242,19 @@ public class PoseMorph implements Morpher.Factory {
                             npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw;
                             npz += ((xf[2] * opx) + (xf[6] * opy) + (xf[10] * opz) + xf[14]) * bw;
                         } else {
-                            if(name == null){
+                            if (name == null) {
                                 name = ba.names[0];
                                 //System.out.println(name);
                             }
-                            if(Config.smallworld){
-                                npx += ((xf[0] * opx) + (xf[4] * opy) + (xf[8] * opz) + xf[12]) * bw*6;
-                                npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw*6;
-                                npz += ((xf[2] * opx) + (xf[6] * opy) + (xf[10] * opz) + xf[14]) * bw*6;
+                            if (Config.smallworld) {
+                                npx += ((xf[0] * opx) + (xf[4] * opy) + (xf[8] * opz) + xf[12]) * bw * 6;
+                                npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw * 6;
+                                npz += ((xf[2] * opx) + (xf[6] * opy) + (xf[10] * opz) + xf[14]) * bw * 6;
                             } else {
-                                if(Config.bigAnimals.contains(name)){
-                                    npx += ((xf[0] * opx) + (xf[4] * opy) + (xf[8] * opz) + xf[12]) * bw*2;
-                                    npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw*2;
-                                    npz += ((xf[2] * opx) + (xf[6] * opy) + (xf[10] * opz) + xf[14]) * bw*2;
+                                if (Config.bigAnimals.contains(name)) {
+                                    npx += ((xf[0] * opx) + (xf[4] * opy) + (xf[8] * opz) + xf[12]) * bw * 2;
+                                    npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw * 2;
+                                    npz += ((xf[2] * opx) + (xf[6] * opy) + (xf[10] * opz) + xf[14]) * bw * 2;
                                 } else {
                                     npx += ((xf[0] * opx) + (xf[4] * opy) + (xf[8] * opz) + xf[12]) * bw;
                                     npy += ((xf[1] * opx) + (xf[5] * opy) + (xf[9] * opz) + xf[13]) * bw;

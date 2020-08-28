@@ -26,14 +26,14 @@
 
 package haven;
 
-import static haven.BuddyWnd.width;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static haven.BuddyWnd.width;
 
 public class Polity extends Widget {
     public final String cap, name;
@@ -126,7 +126,7 @@ public class Polity extends Widget {
                 g.frect(new Coord(0, 0), new Coord(sz.x, sz.y));
                 g.chcolor(128, 0, 0, 255);
                 //g.frect(new Coord(1, 1), new Coord(((sz.x - 2) * auth) / ((acap == 0) ? 1 : acap), sz.y - 2));
-                int mw = (int)((sz.x - 2) * (long)auth) / ((acap == 0) ? 1 : acap);
+                int mw = (int) ((sz.x - 2) * (long) auth) / ((acap == 0) ? 1 : acap);
                 g.frect(new Coord(1, 1), new Coord(mw, sz.y - 2));
                 g.chcolor();
                 if ((rauth != null) && (aseq != Polity.this.aseq)) {

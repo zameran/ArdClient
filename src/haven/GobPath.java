@@ -1,7 +1,5 @@
 package haven;
 
-import java.awt.Color;
-
 import javax.media.opengl.GL2;
 
 public class GobPath extends Sprite {
@@ -22,7 +20,7 @@ public class GobPath extends Sprite {
         Coord2d mc = MapView.pllastcc;
         if (mc == null)
             return;
-        
+
         Gob gob = (Gob) owner;
         Coord3f pc = gob.getc();
         double lcx = mc.x;

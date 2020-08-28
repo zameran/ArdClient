@@ -69,8 +69,8 @@ public class IDSet<T> {
                 bk.put(ref, ref);
                 return (ob);
             } else {
-        /* Should never return null, since ob is referenced in
-         * this frame during the entirety of the lookup. */
+                /* Should never return null, since ob is referenced in
+                 * this frame during the entirety of the lookup. */
                 return (old.get());
             }
         }

@@ -44,24 +44,24 @@ public class Homing extends Moving {
         Coord2d rc = gob.rc;
         Coord2d tc = this.tc;
         Gob tgt = gob.glob.oc.getgob(this.tgt);
-        if(tgt != null)
+        if (tgt != null)
             tc = tgt.rc;
         Coord2d d = tc.sub(rc);
         double e = d.abs();
-        if(dist > e)
+        if (dist > e)
             rc = tc;
-        else if(e > 0.00001)
+        else if (e > 0.00001)
             rc = rc.add(d.mul(dist / e));
-        return(gob.glob.map.getzp(rc));
+        return (gob.glob.map.getzp(rc));
     }
 
     public double getv() {
-        return(v);
+        return (v);
     }
 
     public Optional<Coord2d> getDest() {
         Gob tgt = gob.glob.oc.getgob(this.tgt);
-        if(tgt != null) {
+        if (tgt != null) {
             return Optional.of(new Coord2d(tgt.getc()));
         } else {
             return Optional.empty();

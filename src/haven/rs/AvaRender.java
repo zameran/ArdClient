@@ -26,14 +26,6 @@
 
 package haven.rs;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 import haven.Callback;
 import haven.Camera;
 import haven.Composited;
@@ -59,6 +51,14 @@ import haven.Rendered;
 import haven.ResData;
 import haven.Resource;
 import haven.Skeleton;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AvaRender {
     public static Composited compose(Resource base, List<MD> mod, List<ED> equ) {
@@ -152,9 +152,9 @@ public class AvaRender {
             for (int i = 0; i < amod.length; i += 2) {
                 Indir<Resource> mr = Resource.local().load((String) amod[i]);
                 Object[] atex = (Object[]) amod[i + 1];
-		    List<ResData> tex = new LinkedList<ResData>();
+                List<ResData> tex = new LinkedList<ResData>();
                 for (int o = 0; o < atex.length; o++)
-			tex.add(new ResData(Resource.local().load((String)atex[o]), Message.nil));
+                    tex.add(new ResData(Resource.local().load((String) atex[o]), Message.nil));
                 mod.add(new MD(mr, tex));
             }
             List<ED> equ = new LinkedList<ED>();
@@ -190,7 +190,7 @@ public class AvaRender {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Indir<Resource> base = Resource.local().load("gfx/borka/body");
-	List<MD> mod = Arrays.asList(new MD(Resource.local().load("gfx/borka/male"), ResData.wrap(Arrays.asList(Resource.local().load("gfx/borka/male")))));
+        List<MD> mod = Arrays.asList(new MD(Resource.local().load("gfx/borka/male"), ResData.wrap(Arrays.asList(Resource.local().load("gfx/borka/male")))));
         List<ED> equ = new LinkedList<ED>();
         BufferedImage img = render(new Coord(512, 512), base, "avacam", mod, equ);
         img = PUtils.convolvedown(img, new Coord(128, 128), new PUtils.Lanczos(2));

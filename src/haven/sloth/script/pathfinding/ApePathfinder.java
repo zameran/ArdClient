@@ -1,8 +1,12 @@
 package haven.sloth.script.pathfinding;
 
 import com.google.common.flogger.FluentLogger;
-import haven.*;
+import haven.Coord;
+import haven.Coord2d;
 import haven.DefSettings;
+import haven.Gob;
+import haven.MCache;
+import haven.UI;
 import haven.sloth.gob.HeldBy;
 
 import java.util.ArrayList;

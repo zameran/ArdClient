@@ -26,12 +26,12 @@
 
 package haven.glsl;
 
-import static haven.glsl.Cons.mul;
-import static haven.glsl.Type.VEC4;
-
 import haven.GLState;
 import haven.GOut;
 import haven.States;
+
+import static haven.glsl.Cons.mul;
+import static haven.glsl.Type.VEC4;
 
 public class BaseColor implements ShaderMacro {
     public static final InstancedUniform u_color = new InstancedUniform.Vec4("color", States.color) {

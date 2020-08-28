@@ -26,6 +26,9 @@
 
 package haven;
 
+import haven.Surface.MeshVertex;
+import haven.Surface.Vertex;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,9 +37,6 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
-
-import haven.Surface.MeshVertex;
-import haven.Surface.Vertex;
 
 public abstract class Tiler {
     public final int id;

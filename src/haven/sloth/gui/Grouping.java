@@ -1,9 +1,13 @@
 package haven.sloth.gui;
 
-import haven.*;
+import haven.Coord;
+import haven.GOut;
+import haven.IBox;
+import haven.Text;
 import haven.Theme;
+import haven.Widget;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class Grouping extends Widget {
     public static final IBox box = new IBox(Theme.fullres("frame"));
@@ -23,20 +27,20 @@ public class Grouping extends Widget {
         final Coord capsz = cap.sz();
         ctl = box.ctloff().add(0, capsz.y);
         sz.x = Math.max(sz.x, capsz.x);
-	this.sz = sz.add(box.cisz().add(0, cap.sz().y));
+        this.sz = sz.add(box.cisz().add(0, cap.sz().y));
     }
 
     @Override
     public void draw(GOut g) {
         box.draw(g, Coord.z, sz);
-        g.aimage(cap.tex(), new Coord(sz.x/2, box.ctloff().y), 0.5, 0);
-	super.draw(g);
+        g.aimage(cap.tex(), new Coord(sz.x / 2, box.ctloff().y), 0.5, 0);
+        super.draw(g);
     }
 
     public Coord xlate(Coord c, boolean in) {
-	if(in)
-	    return(c.add(ctl));
-	else
-	    return(c.sub(ctl));
+        if (in)
+            return (c.add(ctl));
+        else
+            return (c.sub(ctl));
     }
 }

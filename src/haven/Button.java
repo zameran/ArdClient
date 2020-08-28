@@ -76,7 +76,7 @@ public class Button extends SIWidget {
     }
 
     private static boolean largep(int w) {
-	return(w >= (ul.getWidth() + um.getWidth() + ur.getWidth()));
+        return (w >= (ul.getWidth() + um.getWidth() + ur.getWidth()));
     }
 
     private Button(int w, boolean lg) {
@@ -119,8 +119,8 @@ public class Button extends SIWidget {
     }
 
 
-    public void autosize(boolean on){
-        if(autosized != on){
+    public void autosize(boolean on) {
+        if (autosized != on) {
             autosized = on;
             redraw();
         }
@@ -129,17 +129,17 @@ public class Button extends SIWidget {
     public void draw(BufferedImage img) {
         Graphics g = img.getGraphics();
 
-	if(a) {
-	    //down
-	    g.drawImage(dl, 0, 0, null);
-	    g.drawImage(dm, dl.getWidth(), 0, sz.x - dr.getWidth() - dl.getWidth(), sz.y, null);
-	    g.drawImage(dr, sz.x - dr.getWidth(), 0, null);
-	} else {
-	    //up
-	    g.drawImage(ul, 0, 0, null);
-	    g.drawImage(um, ul.getWidth(), 0, sz.x - ur.getWidth() - ul.getWidth(), sz.y, null);
-	    g.drawImage(ur, sz.x - ur.getWidth(), 0, null);
-	}
+        if (a) {
+            //down
+            g.drawImage(dl, 0, 0, null);
+            g.drawImage(dm, dl.getWidth(), 0, sz.x - dr.getWidth() - dl.getWidth(), sz.y, null);
+            g.drawImage(dr, sz.x - dr.getWidth(), 0, null);
+        } else {
+            //up
+            g.drawImage(ul, 0, 0, null);
+            g.drawImage(um, ul.getWidth(), 0, sz.x - ur.getWidth() - ul.getWidth(), sz.y, null);
+            g.drawImage(ur, sz.x - ur.getWidth(), 0, null);
+        }
 
         Coord tc = sz.sub(Utils.imgsz(cont)).div(2);
         g.drawImage(cont, tc.x, tc.y, null);
@@ -149,9 +149,9 @@ public class Button extends SIWidget {
 
     @Override
     public void draw(GOut g) {
-	g.chcolor(DefSettings.BTNCOL.get());
-	super.draw(g);
-	g.chcolor();
+        g.chcolor(DefSettings.BTNCOL.get());
+        super.draw(g);
+        g.chcolor();
     }
 
     public void change(String text, Color col) {

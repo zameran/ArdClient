@@ -29,7 +29,6 @@ package haven;
 import com.jogamp.opengl.util.awt.Screenshot;
 import haven.sloth.util.ObservableCollection;
 import integrations.mapv4.MappingClient;
-import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -389,6 +388,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
             } //TODO: should be a way to close a session that's not logged in
         }
     }
+
     public void closeSession(UI ui) {
         if (ui.gui != null) {
             ui.gui.act("lo");

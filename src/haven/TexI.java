@@ -26,6 +26,8 @@
 
 package haven;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.Graphics;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -37,9 +39,6 @@ import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 public class TexI extends TexGL {
     public static ComponentColorModel glcm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[]{8, 8, 8, 8}, true, false, ComponentColorModel.TRANSLUCENT, DataBuffer.TYPE_BYTE);
@@ -131,7 +130,7 @@ public class TexI extends TexGL {
                 gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0, 0, 0, sz.x, sz.y, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
             }
         } else {
-	    /* System.err.println("Weird: " + this); */
+            /* System.err.println("Weird: " + this); */
             byte[] pixels = convert(back, tdim);
             gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
             if (mipmap)

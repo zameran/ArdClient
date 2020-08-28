@@ -79,7 +79,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
             update();
         }
     }
-    
+
     public boolean contains(double number) {
         for (ColorQuality i : qualityList)
             if (i.number == number) return true;
@@ -121,7 +121,8 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                         a = res.getBoolean(3);
                         if (qualityList == null) qualityList = new ArrayList<>();
                         qualityList.add(new ColorQuality(number, color, a));
-;                    }
+                        ;
+                    }
                 }
             }
         });
@@ -161,8 +162,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                 stmt.setDouble(4, oldNumber);
                 stmt.executeUpdate();
             });
-        }
-        else {
+        } else {
             Storage.dynamic.write(sql -> {
                 final PreparedStatement stmt = Storage.dynamic.prepare("INSERT INTO color_quality VALUES (? , ? , ?)");
                 stmt.setDouble(1, number);
@@ -215,6 +215,7 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
                     a = staticA;
                     canactivate = true;
                 }
+
                 public void set(boolean val) {
                     staticA = val;
                     a = staticA;
@@ -257,38 +258,36 @@ public class CustomQualityList extends WidgetList<CustomQualityList.Item> {
             }, 160, 0);
         }
 
-        /**@Override
-        public boolean mousedown(Coord c, int button) {
-            if (super.mousedown(c, button)) {
-                return true;
-            }
-            if (button != 1)
-                return (false);
-            a = true;
-            grab = ui.grabmouse(this);
-            return (true);
-        }
-
-        @Override
-        public boolean mouseup(Coord c, int button) {
-            if (a && button == 1) {
-                a = false;
-                if (grab != null) {
-                    grab.remove();
-                    grab = null;
-                }
-                if (c.isect(new Coord(0, 0), sz))
-                    click();
-                return (true);
-            }
-            return (false);
-        }**/
+        /**
+         * @Override public boolean mousedown(Coord c, int button) {
+         * if (super.mousedown(c, button)) {
+         * return true;
+         * }
+         * if (button != 1)
+         * return (false);
+         * a = true;
+         * grab = ui.grabmouse(this);
+         * return (true);
+         * }
+         * @Override public boolean mouseup(Coord c, int button) {
+         * if (a && button == 1) {
+         * a = false;
+         * if (grab != null) {
+         * grab.remove();
+         * grab = null;
+         * }
+         * if (c.isect(new Coord(0, 0), sz))
+         * click();
+         * return (true);
+         * }
+         * return (false);
+         * }
+         **/
 
         /*private void click() {
             cb.a = !cb.a;
             wdgmsg("changed", staticNumber, staticColor, staticA);
         }*/
-
         @Override
         public void wdgmsg(Widget sender, String msg, Object... args) {
             switch (msg) {

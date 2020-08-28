@@ -221,7 +221,7 @@ public class ValBlock {
         if (buf.contains(val))
             return;
         if (closed.contains(val)) {
-        /* XXX: Detect early in Value.depend/Value.softdep instead. */
+            /* XXX: Detect early in Value.depend/Value.softdep instead. */
             throw (new RuntimeException("Cyclical value dependencies"));
         }
         closed.add(val);

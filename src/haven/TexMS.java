@@ -26,11 +26,11 @@
 
 package haven;
 
-import static haven.GOut.checkerr;
+import haven.TexGL.TexOb;
 
 import javax.media.opengl.GL3;
 
-import haven.TexGL.TexOb;
+import static haven.GOut.checkerr;
 
 public abstract class TexMS {
     protected TexOb t = null;

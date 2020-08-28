@@ -1,10 +1,6 @@
 package haven.timers;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import haven.Button;
 import haven.CheckBox;
 import haven.Config;
@@ -16,6 +12,10 @@ import haven.Scrollport;
 import haven.Utils;
 import haven.Widget;
 import haven.Window;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TimersWnd extends Window {
     public final GameUI gui;
@@ -37,7 +37,7 @@ public class TimersWnd extends Window {
         add(btna, new Coord(20, 10));
         Button btnb = new Button(50, "Delete All") {
             public void click() {
-                while(Glob.timersThread.getall().size() >0){
+                while (Glob.timersThread.getall().size() > 0) {
                     for (Widget l = port.cont.lchild; l != null; l = l.next) {
                         if (l instanceof TimerWdg) {
                             ((TimerWdg) l).delete();
@@ -100,8 +100,8 @@ public class TimersWnd extends Window {
         resize();
     }
 
-    public void tick(double dt){
-        if(Config.timersort) {
+    public void tick(double dt) {
+        if (Config.timersort) {
             SortTimer++;
             if (SortTimer > 3000) {
                 SortTimer = 0;
@@ -150,7 +150,8 @@ public class TimersWnd extends Window {
         }
         return super.type(key, ev);
     }
-    public void sort (List <TimerWdg> items) {
+
+    public void sort(List<TimerWdg> items) {
         Collections.sort(items, (a, b) -> {
             Long aq = a.duration - a.elapsed;
             Long bq = b.duration - b.elapsed;

@@ -26,8 +26,8 @@
 
 package haven;
 
-import static haven.Utils.c2fa;
-
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import static haven.Utils.c2fa;
 
 public class Material extends GLState {
     public final GLState[] states;
@@ -259,9 +258,9 @@ public class Material extends GLState {
             return (f.create(owner, res, sdt));
         }
         Res mat = res.layer(Material.Res.class);
-        if(mat == null)
-            return(null);
-        return(mat.get());
+        if (mat == null)
+            return (null);
+        return (mat.get());
     }
 
     private static class LegacyOwner implements Owner {
@@ -419,24 +418,24 @@ public class Material extends GLState {
         public Res.Resolver cons(final Resource res, Object... args) {
             final Indir<Resource> lres;
             final int id;
-            if(args[0] instanceof String) {
-                lres = res.pool.load((String)args[0], (Integer)args[1]);
-                id = (args.length > 2)?(Integer)args[2]:-1;
+            if (args[0] instanceof String) {
+                lres = res.pool.load((String) args[0], (Integer) args[1]);
+                id = (args.length > 2) ? (Integer) args[2] : -1;
             } else {
                 lres = res.indir();
-                id = (Integer)args[0];
+                id = (Integer) args[0];
             }
             return (new Res.Resolver() {
                 public void resolve(Collection<GLState> buf) {
                     if (id >= 0) {
                         Res mat = lres.get().layer(Res.class, id);
                         if (mat == null)
-                            throw(new Resource.LoadException("No such material in " + lres.get() + ": " + id, res));
+                            throw (new Resource.LoadException("No such material in " + lres.get() + ": " + id, res));
                         buf.add(mat.get());
                     } else {
-                        Material mat = fromres((Owner)null, lres.get(), Message.nil);
+                        Material mat = fromres((Owner) null, lres.get(), Message.nil);
                         if (mat == null)
-                            throw(new Resource.LoadException("No material in " + lres.get(), res));
+                            throw (new Resource.LoadException("No material in " + lres.get(), res));
                         buf.add(mat);
                     }
                 }
@@ -523,9 +522,9 @@ public class Material extends GLState {
                 String nm = buf.string();
                 Object[] args = buf.list();
                 if (nm.equals("linear")) {
-            /* XXX: These should very much be removed and
-             * specified directly in the texture layer
-		     * instead. */
+                    /* XXX: These should very much be removed and
+                     * specified directly in the texture layer
+                     * instead. */
                     ret.linear = true;
                 } else if (nm.equals("mipmap")) {
                     ret.mipmap = true;

@@ -26,11 +26,11 @@
 
 package haven;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import haven.Sprite.Factory;
 import haven.Sprite.Owner;
+
+import java.util.Arrays;
+import java.util.Map;
 
 @Resource.LayerName("slink")
 public class SpriteLink extends Resource.Layer {

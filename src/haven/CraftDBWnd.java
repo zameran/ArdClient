@@ -174,9 +174,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<M
         Mode[] modes = Mode.values();
         for (int i = 0; i < modes.length; i++) {
             Resource res = modes[i].res.get();
-            tabStrip.insert(i,
-                    new TexI(PUtils.convolvedown(res.layer(Resource.imgc).img, icon_sz, CharWnd.iconfilter)),
-                    paginafor(modes[i].res).act().name, null).tag = modes[i];
+            tabStrip.insert(i, new TexI(PUtils.convolvedown(res.layer(Resource.imgc).img, icon_sz, CharWnd.iconfilter)), paginafor(modes[i].res).act().name).tag = modes[i];
         }
 
         box = add(new RecipeListBox(200, LIST_SIZE) {

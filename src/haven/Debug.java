@@ -26,6 +26,8 @@
 
 package haven;
 
+import javax.media.opengl.GL4bc;
+import javax.media.opengl.TraceGL4bc;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,9 +36,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-
-import javax.media.opengl.GL4bc;
-import javax.media.opengl.TraceGL4bc;
 
 public class Debug {
     public static boolean kf1, kf2, kf3, kf4;
@@ -52,14 +51,14 @@ public class Debug {
 
     public static void dumpimage(BufferedImage img, File path) {
         try {
-	    javax.imageio.ImageIO.write(img, "PNG", path);
+            javax.imageio.ImageIO.write(img, "PNG", path);
         } catch (IOException e) {
             throw (new RuntimeException(e));
         }
     }
 
     public static void dumpimage(BufferedImage img, String fn) {
-	dumpimage(img, new File(fn));
+        dumpimage(img, new File(fn));
     }
 
     public static void dumpimage(BufferedImage img) {
@@ -67,7 +66,7 @@ public class Debug {
     }
 
     public static File somedir(String basename) {
-	    return(new File(basename));
+        return (new File(basename));
     }
 
     public static class DumpGL extends TraceGL4bc {

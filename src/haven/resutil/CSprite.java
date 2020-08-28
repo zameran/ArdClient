@@ -26,10 +26,6 @@
 
 package haven.resutil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import haven.Coord3f;
 import haven.GLState;
 import haven.Glob;
@@ -41,6 +37,10 @@ import haven.Rendered;
 import haven.Resource;
 import haven.Sprite;
 import haven.Transform;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class CSprite extends Sprite {
     private final Coord3f cc;
@@ -73,6 +73,6 @@ public class CSprite extends Sprite {
     }
 
     public Object staticp() {
-	return(CONSTANS);
+        return (CONSTANS);
     }
 }

@@ -26,9 +26,13 @@
 
 package haven;
 
-import haven.glsl.*;
+import haven.glsl.BaseColor;
+import haven.glsl.Expression;
+import haven.glsl.ShaderMacro;
 
-import javax.media.opengl.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import java.awt.Color;
 
 public abstract class States extends GLState {
@@ -99,9 +103,13 @@ public abstract class States extends GLState {
 
     public static final ColState vertexcolor = new ColState(0, 0, 0, 0) {
         private final ShaderMacro shader = new haven.glsl.GLColorVary();
-	    public void apply(GOut g) {}
 
-	    public ShaderMacro shader() {return(shader);}
+        public void apply(GOut g) {
+        }
+
+        public ShaderMacro shader() {
+            return (shader);
+        }
 
         public boolean equals(Object o) {
             return (o == this);
@@ -129,9 +137,14 @@ public abstract class States extends GLState {
         }
 
         static final ShaderMacro shader = ShaderMacro.compose(GLState.Instancer.mkinstanced, new BaseColor());
-	public ShaderMacro shader() {return(shader);}
+
+        public ShaderMacro shader() {
+            return (shader);
         }
-    static {color.instanced(new Instancer<ColState>() {
+    }
+
+    static {
+        color.instanced(new Instancer<ColState>() {
             public ColState inststate(ColState[] in) {
                 if (in[0] == vertexcolor) {
                     for (int i = 1; i < in.length; i++) {
@@ -244,6 +257,7 @@ public abstract class States extends GLState {
     }
 
     public static final Slot<Blending> blend = new Slot<Blending>(Slot.Type.DRAW, Blending.class, HavenPanel.global);
+
     public static class Blending extends GLState {
         public final int csrc, cdst, asrc, adst;
         public final int cfn, afn;
@@ -397,10 +411,15 @@ public abstract class States extends GLState {
             this(ShaderMacro.compose(sh));
         }
 
-	public void apply(GOut g) {}
-	public void unapply(GOut g) {}
+        public void apply(GOut g) {
+        }
 
-	public ShaderMacro shader() {return(sh);}
+        public void unapply(GOut g) {
+        }
+
+        public ShaderMacro shader() {
+            return (sh);
+        }
 
         public void prep(Buffer buf) {
             buf.put(adhoc, this);
@@ -421,10 +440,15 @@ public abstract class States extends GLState {
             this(ShaderMacro.compose(sh));
         }
 
-	public void apply(GOut g) {}
-	public void unapply(GOut g) {}
+        public void apply(GOut g) {
+        }
 
-	public ShaderMacro shader() {return(sh);}
+        public void unapply(GOut g) {
+        }
+
+        public ShaderMacro shader() {
+            return (sh);
+        }
 
         public void prep(Buffer buf) {
             buf.put(adhocg, this);

@@ -26,7 +26,7 @@ public class WidgetVerticalAppender {
         y += child.sz.y + verticalMargin;
     }
 
-    public void addRow(Widget ... children) {
+    public void addRow(Widget... children) {
         int x = this.x;
         int maxHeight = 0;
         for (Widget child : children) {

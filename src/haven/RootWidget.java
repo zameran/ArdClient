@@ -43,7 +43,7 @@ public class RootWidget extends ConsoleHost {
         setfocusctl(true);
         hasfocus = true;
         cursor = defcurs.indir();
-        if(Config.sessiondisplay){
+        if (Config.sessiondisplay) {
             add(sessionDisplay = new SessionDisplay());
         }
     }
@@ -63,17 +63,19 @@ public class RootWidget extends ConsoleHost {
                 }
             } else if (key == ':') {
                 entercmd();
-	    } else if(key != 0 && (last_gk != key || (System.currentTimeMillis() - last_gk_time) >= 500)) {
-		wdgmsg("gk", (int)key);
-		last_gk = key;
-		last_gk_time = System.currentTimeMillis();
+            } else if (key != 0 && (last_gk != key || (System.currentTimeMillis() - last_gk_time) >= 500)) {
+                wdgmsg("gk", (int) key);
+                last_gk = key;
+                last_gk_time = System.currentTimeMillis();
             }
         }
-	return(true);
+        return (true);
     }
 
-   @Override
-    public boolean mousedown(Coord c, int button) { return super.mousedown(c, button); }
+    @Override
+    public boolean mousedown(Coord c, int button) {
+        return super.mousedown(c, button);
+    }
 
     public void draw(GOut g) {
         super.draw(g);

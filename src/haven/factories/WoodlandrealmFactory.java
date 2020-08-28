@@ -1,19 +1,19 @@
 package haven.factories;
 
-import java.awt.image.BufferedImage;
-
 import haven.ItemInfo;
 import haven.Resource;
 import haven.RichText;
 import haven.Text;
+
+import java.awt.image.BufferedImage;
 
 public class WoodlandrealmFactory implements ItemInfo.InfoFactory {
     public WoodlandrealmFactory() {
     }
 
     public ItemInfo build(ItemInfo.Owner var1, Object... var2) {
-        double var3 = ((Number)var2[1]).doubleValue();
-        double var5 = ((Number)var2[2]).doubleValue();
+        double var3 = ((Number) var2[1]).doubleValue();
+        double var5 = ((Number) var2[2]).doubleValue();
         return new Tip(var1, var3, var5);
     }
 

@@ -17,7 +17,8 @@ public class ResizableTextEntry extends TextEntry {
 
     public double getTextWidth(String text) {
         double textWidth;
-        if (text.length() > 0) textWidth = Math.ceil(new TextLayout(text, fnd.font, new FontRenderContext(null, true, true)).getBounds().getWidth());
+        if (text.length() > 0)
+            textWidth = Math.ceil(new TextLayout(text, fnd.font, new FontRenderContext(null, true, true)).getBounds().getWidth());
         else textWidth = 0;
         return (int) textWidth + addWidth;
     }

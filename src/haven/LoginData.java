@@ -10,11 +10,11 @@ public class LoginData {
     }
 
     @Override
-    public boolean equals(Object other){
+    public boolean equals(Object other) {
         if (other == null) return false;
         if (other == this) return true;
-        if (!(other instanceof LoginData))return false;
-        LoginData ol = (LoginData)other;
+        if (!(other instanceof LoginData)) return false;
+        LoginData ol = (LoginData) other;
         return ol.name.equals(name) && ol.pass.equals(pass);
     }
 }

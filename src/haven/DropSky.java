@@ -26,13 +26,6 @@
 
 package haven;
 
-import static haven.glsl.Cons.mul;
-import static haven.glsl.Cons.pick;
-import static haven.glsl.Cons.textureCube;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import haven.glsl.AutoVarying;
 import haven.glsl.Expression;
 import haven.glsl.Macro1;
@@ -42,112 +35,124 @@ import haven.glsl.Type;
 import haven.glsl.Uniform;
 import haven.glsl.VertexContext;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
+import static haven.glsl.Cons.mul;
+import static haven.glsl.Cons.pick;
+import static haven.glsl.Cons.textureCube;
+
 public class DropSky extends Sprite implements Rendered {
     public final TexCube tex;
-    
+
     private static Matrix4f cam = new Matrix4f();
     private static Matrix4f wxf = new Matrix4f();
     private static Matrix4f mv = new Matrix4f();
     private Location.Chain loc;
     private Camera camp;
-    
+
 
     public DropSky(TexCube tex) {
-    	super(null, null);
-    	this.tex = tex;
+        super(null, null);
+        this.tex = tex;
     }
 
     private void vertex(GOut g, BGL gl, Matrix4f ixf, float[] oc, float x, float y) {
-	float[] cc = {x, y, 0.99999f, 1};
-	float[] vc = ixf.mul4(cc);
-	float iw = 1 / vc[3];
-	for(int i = 0; i < 4; i++) vc[i] *= iw;
-	if(g.st.prog == null)
-	    gl.glMultiTexCoord3f(GL.GL_TEXTURE0 + tsky.id, vc[0] - oc[0], vc[1] - oc[1], vc[2] - oc[2]);
-	else
-	    gl.glTexCoord3f(vc[0] - oc[0], vc[1] - oc[1], vc[2] - oc[2]);
-	gl.glVertex4f(vc[0], vc[1], vc[2], vc[3]);
+        float[] cc = {x, y, 0.99999f, 1};
+        float[] vc = ixf.mul4(cc);
+        float iw = 1 / vc[3];
+        for (int i = 0; i < 4; i++) vc[i] *= iw;
+        if (g.st.prog == null)
+            gl.glMultiTexCoord3f(GL.GL_TEXTURE0 + tsky.id, vc[0] - oc[0], vc[1] - oc[1], vc[2] - oc[2]);
+        else
+            gl.glTexCoord3f(vc[0] - oc[0], vc[1] - oc[1], vc[2] - oc[2]);
+        gl.glVertex4f(vc[0], vc[1], vc[2], vc[3]);
     }
 
     public void draw(GOut g) {
-	g.apply();
-	BGL gl = g.gl;
-    Matrix4f mvxf = PView.mvxf(g);;
-	Matrix4f pmvxf = g.st.cur(PView.proj).fin(Matrix4f.id).mul(mvxf);
-	Matrix4f ixf = pmvxf.invert();
-	float[] oc = mvxf.invert().mul4(new float[] {0, 0, 0, 1});
-	float iw = 1 / oc[3];
-	for(int i = 0; i < 4; i++) oc[i] *= iw;
-	gl.glBegin(GL2.GL_QUADS);
-	vertex(g, gl, ixf, oc, -1.05f, -1.05f);
-	vertex(g, gl, ixf, oc,  1.05f, -1.05f);
-	vertex(g, gl, ixf, oc,  1.05f,  1.05f);
-	vertex(g, gl, ixf, oc, -1.05f,  1.05f);
-	gl.glEnd();
+        g.apply();
+        BGL gl = g.gl;
+        Matrix4f mvxf = PView.mvxf(g);
+        ;
+        Matrix4f pmvxf = g.st.cur(PView.proj).fin(Matrix4f.id).mul(mvxf);
+        Matrix4f ixf = pmvxf.invert();
+        float[] oc = mvxf.invert().mul4(new float[]{0, 0, 0, 1});
+        float iw = 1 / oc[3];
+        for (int i = 0; i < 4; i++) oc[i] *= iw;
+        gl.glBegin(GL2.GL_QUADS);
+        vertex(g, gl, ixf, oc, -1.05f, -1.05f);
+        vertex(g, gl, ixf, oc, 1.05f, -1.05f);
+        vertex(g, gl, ixf, oc, 1.05f, 1.05f);
+        vertex(g, gl, ixf, oc, -1.05f, 1.05f);
+        gl.glEnd();
     }
 
     private static final Uniform ssky = new Uniform(Type.SAMPLERCUBE);
     private static final ShaderMacro[] shaders = {
-	new ShaderMacro() {
-	    AutoVarying texcoord = new AutoVarying(Type.VEC3) {
-		    protected Expression root(VertexContext vctx) {
-			return(pick(vctx.gl_MultiTexCoord[0].ref(), "stp"));
-		    }
-		};
-	    public void modify(ProgramContext prog) {
-		prog.fctx.fragcol.mod(new Macro1<Expression>() {
-			public Expression expand(Expression in) {
-			    return(mul(in, textureCube(ssky.ref(), texcoord.ref())));
-			}
-		    }, 0);
-	    }
-	}
+            new ShaderMacro() {
+                AutoVarying texcoord = new AutoVarying(Type.VEC3) {
+                    protected Expression root(VertexContext vctx) {
+                        return (pick(vctx.gl_MultiTexCoord[0].ref(), "stp"));
+                    }
+                };
+
+                public void modify(ProgramContext prog) {
+                    prog.fctx.fragcol.mod(new Macro1<Expression>() {
+                        public Expression expand(Expression in) {
+                            return (mul(in, textureCube(ssky.ref(), texcoord.ref())));
+                        }
+                    }, 0);
+                }
+            }
     };
     private GLState.TexUnit tsky;
     private final GLState st = new States.AdHoc(shaders) {
-	    public boolean reqshaders() {return(false);}
+        public boolean reqshaders() {
+            return (false);
+        }
 
-	    public void reapply(GOut g) {
-		g.gl.glUniform1i(g.st.prog.uniform(ssky), tsky.id);
-	    }
+        public void reapply(GOut g) {
+            g.gl.glUniform1i(g.st.prog.uniform(ssky), tsky.id);
+        }
 
-	    private void papply(GOut g) {
-		reapply(g);
-	    }
+        private void papply(GOut g) {
+            reapply(g);
+        }
 
-	    private void fapply(GOut g) {
-	    g.gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
-		g.gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-	    }
+        private void fapply(GOut g) {
+            g.gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+            g.gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+        }
 
-	    public void apply(GOut g) {
-		(tsky = g.st.texalloc()).act(g);
-		g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, tex.glid(g));
-		if(!g.st.usedprog)
-		    fapply(g);
-		else
-		    papply(g);
-	    }
+        public void apply(GOut g) {
+            (tsky = g.st.texalloc()).act(g);
+            g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, tex.glid(g));
+            if (!g.st.usedprog)
+                fapply(g);
+            else
+                papply(g);
+        }
 
-	    private void funapply(GOut g) {
-		g.gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-	    }
+        private void funapply(GOut g) {
+            g.gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+        }
 
-	    public void unapply(GOut g) {
-		tsky.act(g);
-		if(!g.st.usedprog)
-		    funapply(g);
-		g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, null);
-		tsky.free(); tsky = null;
-	    }
-	};
+        public void unapply(GOut g) {
+            tsky.act(g);
+            if (!g.st.usedprog)
+                funapply(g);
+            g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, null);
+            tsky.free();
+            tsky = null;
+        }
+    };
 
     public boolean setup(RenderList rl) {
-		rl.prepo(st);
+        rl.prepo(st);
         GLState.Buffer buf = rl.state();
         loc = buf.get(PView.loc);
         camp = buf.get(PView.cam);
         wxf = PView.locxf(buf);
-		return(true);
+        return (true);
     }
 }

@@ -1,14 +1,14 @@
 package haven.livestock;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import haven.Resource;
 import haven.Tex;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Pigs extends Animal {
-    private int attributesRequired = columns.size() +1;
+    private int attributesRequired = columns.size() + 1;
     private static final Tex texSow = Resource.loadtex("gfx/livestockava/sow");
     private static final Tex texHog = Resource.loadtex("gfx/livestockava/hog");
 
@@ -24,13 +24,13 @@ public class Pigs extends Animal {
         x = addColumn(columns, "Hide quality:", "Hide", 5, x);
         x = addColumn(columns, "Meat quantity:", "Meat #", 6, x);
         x = addColumn(columns, "Milk quantity:", "Milk #", 7, x);
-        x = addColumn(columns,"Truffle snout:","Snout",8,x);
+        x = addColumn(columns, "Truffle snout:", "Snout", 8, x);
 
         x = addColumn(columns, "Meat quality2:", "Meat Final", 9, x);
         x = addColumn(columns, "Milk quality2:", "Milk Final", 10, x);
         x = addColumn(columns, "Hide quality2:", "Hide Final", 11, x);
 
-            addColumn(columns, "X", "", 12, x);
+        addColumn(columns, "X", "", 12, x);
     }
 
     public Pigs(long wndid, String type) {

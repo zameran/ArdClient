@@ -41,7 +41,7 @@ public class PlantStageSprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= tex.sz().x/2;
+        sc.x -= tex.sz().x / 2;
         sc.y -= 10;
         g.image(tex, sc);
     }
@@ -60,12 +60,12 @@ public class PlantStageSprite extends Sprite {
         this.stg = stg;
         if (multistg && stg == stgmax - 1)
             tex = stghrvtex;
-        else if(offsetmultisg && stg == stgmax - 2)
+        else if (offsetmultisg && stg == stgmax - 2)
             tex = stghrvtex;
         else if (stg == stgmax)
             tex = stgmaxtex;
         else {
-            if(Config.showfreshcropstage)
+            if (Config.showfreshcropstage)
                 tex = stgtexalt[stg];
             else
                 tex = stgtex[stg - 1];

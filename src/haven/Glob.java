@@ -30,9 +30,15 @@ package haven;
 
 import haven.sloth.script.pathfinding.GobHitmap;
 
-import java.awt.*;
+import java.awt.Color;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Observable;
 
 public class Glob {
     //TODO: Glob should honestly make the ui, not have the UI attach onto it.
@@ -71,7 +77,7 @@ public class Glob {
     public Tex mservertimetex;
     public Tex lservertimetex;
     public Tex rservertimetex;
-    public boolean night =false; //true is night
+    public boolean night = false; //true is night
     public Tex bservertimetex;
 
     private static WeakReference<Glob> reference = new WeakReference<>(null);
@@ -127,12 +133,13 @@ public class Glob {
             notifyObservers(null);
             this.comptex = Text.renderstroked(comp + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
         }
+
         public Text.Line compline() {
-            if(compLine == null) {
+            if (compLine == null) {
                 Color c = Color.WHITE;
-                if(comp > base) {
+                if (comp > base) {
                     c = CharWnd.buff;
-                } else if(comp < base) {
+                } else if (comp < base) {
                     c = CharWnd.debuff;
                 }
                 compLine = Text.renderstroked(Integer.toString(comp), c, Color.BLACK, fnd);
@@ -232,12 +239,12 @@ public class Glob {
         if (ast == null)
             return;
 
-        long secs = (long)globtime();
+        long secs = (long) globtime();
         long day = secs / secinday;
         long secintoday = secs % secinday;
         long hours = secintoday / 3600;
         long mins = (secintoday % 3600) / 60;
-        int nextseason = (int)Math.ceil((1 - ast.sp) * (ast.is == 1 ? 30 : ast.is == 3 ? 5 : 10 ));
+        int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 30 : ast.is == 3 ? 5 : 10));
 
         String fmt;
         switch (ast.is) {
@@ -261,7 +268,7 @@ public class Glob {
 
         if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
             servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Dewy Lady's Mantle)");
-        if(night) {
+        if (night) {
             if (moonid == 128)
                 servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (New Moon)");
             else if (moonid == 129)
@@ -278,7 +285,7 @@ public class Glob {
                 servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Last Quarter)");
             else if (moonid == 135)
                 servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Waning Crescent)");
-        }else
+        } else
             servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Daytime)");
         servertimetex = Text.render(servertime).tex();
     }
@@ -301,10 +308,10 @@ public class Glob {
                 double yt = ((Number) a[n++]).doubleValue();
                 boolean night = (Integer) a[n++] != 0;
                 Color mc = (Color) a[n++];
-		int is = (n < a.length) ? ((Number)a[n++]).intValue() : 1;
-		double sp = (n < a.length) ? ((Number)a[n++]).doubleValue() : 0.5;
-		double sd = (n < a.length) ? ((Number)a[n++]).doubleValue() : 0.5;
-		ast = new Astronomy(dt, mp, yt, night, mc, is, sp, sd);
+                int is = (n < a.length) ? ((Number) a[n++]).intValue() : 1;
+                double sp = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
+                double sd = (n < a.length) ? ((Number) a[n++]).doubleValue() : 0.5;
+                ast = new Astronomy(dt, mp, yt, night, mc, is, sp, sd);
             } else if (t == "light") {
                 synchronized (this) {
                     tlightamb = (Color) a[n++];

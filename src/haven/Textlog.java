@@ -87,7 +87,7 @@ public class Textlog extends Widget {
 
     public void append(String line, Color col) {
         Text rl;
-        if(quote){
+        if (quote) {
             line = RichText.Parser.quote(line);
         }
         if (col == null)
@@ -96,7 +96,7 @@ public class Textlog extends Widget {
             rl = fnd.render(line, sz.x - (margin * 2) - sflarp.sz().x, TextAttribute.FOREGROUND, col);
         synchronized (lines) {
             lines.add(rl);
-            if((maxLines > 0)&&(lines.size() > maxLines)){
+            if ((maxLines > 0) && (lines.size() > maxLines)) {
                 Text tl = lines.remove(0);
                 int dy = tl.sz().y;
                 maxy -= dy;
@@ -159,11 +159,12 @@ public class Textlog extends Widget {
         }
         return (false);
     }
-    public void setprog(double a){
-        if(a < 0)
+
+    public void setprog(double a) {
+        if (a < 0)
             a = 0;
-        if(a > 1)
+        if (a > 1)
             a = 1;
-        cury = (int)(a * (maxy - sz.y)) + sz.y;
+        cury = (int) (a * (maxy - sz.y)) + sz.y;
     }
 }

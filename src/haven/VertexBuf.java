@@ -26,12 +26,23 @@
 
 package haven;
 
-import java.nio.*;
-import java.util.*;
-import java.lang.annotation.*;
-import javax.media.opengl.*;
-
 import haven.GLProgram.VarID;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class VertexBuf {
     public static final GLState.Slot<Binding> bound = new GLState.Slot<Binding>(GLState.Slot.Type.GEOM, Binding.class);
@@ -421,8 +432,8 @@ public class VertexBuf {
         }
 
         public Object progid(GOut g) {
-        /* XXX: This is not a good ID, as it doesn't intern
-         * locations in various programs. */
+            /* XXX: This is not a good ID, as it doesn't intern
+             * locations in various programs. */
             return (g.st.prog.cattrib(attr));
         }
     }
@@ -475,58 +486,58 @@ public class VertexBuf {
 
     public static FloatBuffer loadbuf2(FloatBuffer dst, Message buf) {
         int ver = buf.uint8();
-        if(ver != 1)
-            throw(new RuntimeException("Unknown vertex-data version: " + ver));
+        if (ver != 1)
+            throw (new RuntimeException("Unknown vertex-data version: " + ver));
         String fmt = buf.string();
-        switch(fmt) {
+        switch (fmt) {
             case "f4": {
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.float32());
                 break;
             }
             case "f2": {
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, Utils.hfdec((short)buf.int16()));
+                for (int i = 0; i < dst.capacity(); i++)
+                    dst.put(i, Utils.hfdec((short) buf.int16()));
                 break;
             }
             case "f1": {
-                for(int i = 0; i < dst.capacity(); i++)
-                    dst.put(i, Utils.mfdec((byte)buf.int8()));
+                for (int i = 0; i < dst.capacity(); i++)
+                    dst.put(i, Utils.mfdec((byte) buf.int8()));
                 break;
             }
             case "sn4": {
                 float F = buf.float32() / 2147483647.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.int32() * F);
                 break;
             }
             case "sn2": {
                 float F = buf.float32() / 32767.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.int16() * F);
                 break;
             }
             case "sn1": {
                 float F = buf.float32() / 127.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.int8() * F);
                 break;
             }
             case "un4": {
                 float F = buf.float32() / 4294967295.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.uint32() * F);
                 break;
             }
             case "un2": {
                 float F = buf.float32() / 65535.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.uint16() * F);
                 break;
             }
             case "un1": {
                 float F = buf.float32() / 255.0f;
-                for(int i = 0; i < dst.capacity(); i++)
+                for (int i = 0; i < dst.capacity(); i++)
                     dst.put(i, buf.uint8() * F);
                 break;
             }
@@ -534,7 +545,7 @@ public class VertexBuf {
                 int i = 0;
                 float F = 1.0f / 127.0f;
                 float[] vb = new float[3];
-                while(i < dst.capacity()) {
+                while (i < dst.capacity()) {
                     Utils.oct2uvec(vb, buf.int8() * F, buf.int8() * F);
                     dst.put(i++, vb[0]);
                     dst.put(i++, vb[1]);
@@ -546,7 +557,7 @@ public class VertexBuf {
                 int i = 0;
                 float F = 1.0f / 32767.0f;
                 float[] vb = new float[3];
-                while(i < dst.capacity()) {
+                while (i < dst.capacity()) {
                     Utils.oct2uvec(vb, buf.int16() * F, buf.int16() * F);
                     dst.put(i++, vb[0]);
                     dst.put(i++, vb[1]);
@@ -555,9 +566,9 @@ public class VertexBuf {
                 break;
             }
             default:
-                throw(new RuntimeException("Unknown vertex-data format: " + fmt));
+                throw (new RuntimeException("Unknown vertex-data format: " + fmt));
         }
-        return(dst);
+        return (dst);
     }
 
     private static final Map<String, ArrayCons> rnames = new TreeMap<String, ArrayCons>();
@@ -607,27 +618,27 @@ public class VertexBuf {
             List<AttribArray> bufs = new LinkedList<AttribArray>();
             int fl = buf.uint8();
             int ver = (fl & 0xf);
-            if(ver >= 2)
-                throw(new Resource.LoadException(String.format("Unknown vbuf version: %d", ver), res));
-            if((fl & ~0xf) != 0)
-                throw(new Resource.LoadException(String.format("Unknown vbuf flags: %02x", fl), res));
-            if(ver >= 1)
+            if (ver >= 2)
+                throw (new Resource.LoadException(String.format("Unknown vbuf version: %d", ver), res));
+            if ((fl & ~0xf) != 0)
+                throw (new Resource.LoadException(String.format("Unknown vbuf flags: %02x", fl), res));
+            if (ver >= 1)
                 this.id = buf.int16();
             else
                 this.id = 0;
             int num = buf.uint16();
-            while(!buf.eom()) {
+            while (!buf.eom()) {
                 String nm = buf.string();
                 ArrayCons cons = rnames.get(nm);
-                if(cons == null)
-                    throw(new Resource.LoadException("Unknown vertex-array name: " + nm, res));
-                if(ver >= 1) {
+                if (cons == null)
+                    throw (new Resource.LoadException("Unknown vertex-array name: " + nm, res));
+                if (ver >= 1) {
                     Message sub = new LimitMessage(buf, buf.int32());
                     cons.cons(bufs, res, sub, num);
                     sub.skip();
                 } else {
-                cons.cons(bufs, res, buf, num);
-            }
+                    cons.cons(bufs, res, buf, num);
+                }
             }
             this.b = new VertexBuf(bufs.toArray(new AttribArray[0]));
         }

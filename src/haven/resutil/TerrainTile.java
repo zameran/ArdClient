@@ -26,13 +26,32 @@
 
 package haven.resutil;
 
-import haven.*;
-
-import java.util.*;
-import java.awt.Color;
-
+import haven.Config;
+import haven.Coord;
+import haven.Coord3f;
+import haven.GLState;
+import haven.MapMesh;
 import haven.MapMesh.Scan;
+import haven.Material;
+import haven.MeshBuf;
+import haven.Message;
+import haven.Resource;
+import haven.SNoise3;
+import haven.States;
+import haven.Surface;
+import haven.Tex;
+import haven.TexGL;
+import haven.TexSI;
+import haven.Tiler;
+import haven.Tileset;
 import haven.Tileset.Tile;
+
+import java.awt.Color;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
     public final GLState base;
@@ -76,7 +95,7 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
                     }
                 }
             }
-                
+
             setbase(buf1);
             for (int i = 0; i < sr; i++) {
                 float[][] buf2 = new float[var.length + 1][vs.l];
@@ -240,20 +259,20 @@ public class TerrainTile extends Tiler implements Tiler.MCons, Tiler.CTrans {
             GLState base = null;
             Collection<Var> var = new LinkedList<Var>();
             GLState commat = null;
-            for(Object rdesc : set.ta) {
-                Object[] desc = (Object[])rdesc;
-                String p = (String)desc[0];
-                if(p.equals("common-mat")) {
-                    if(desc[1] instanceof Integer) {
-                        int mid = (Integer)desc[1];
+            for (Object rdesc : set.ta) {
+                Object[] desc = (Object[]) rdesc;
+                String p = (String) desc[0];
+                if (p.equals("common-mat")) {
+                    if (desc[1] instanceof Integer) {
+                        int mid = (Integer) desc[1];
                         commat = res.layer(Material.Res.class, mid).get();
-                    } else if(desc[1] instanceof String) {
-                        String mnm = (String)desc[1];
-                        int mver = (Integer)desc[2];
-                        if(desc.length > 3) {
-                            commat = res.pool.load(mnm, mver).get().layer(Material.Res.class, (Integer)desc[3]).get();
+                    } else if (desc[1] instanceof String) {
+                        String mnm = (String) desc[1];
+                        int mver = (Integer) desc[2];
+                        if (desc.length > 3) {
+                            commat = res.pool.load(mnm, mver).get().layer(Material.Res.class, (Integer) desc[3]).get();
                         } else {
-                            commat = Material.fromres((Material.Owner)null, res.pool.load(mnm, mver).get(), Message.nil);
+                            commat = Material.fromres((Material.Owner) null, res.pool.load(mnm, mver).get(), Message.nil);
                         }
                     }
                 }

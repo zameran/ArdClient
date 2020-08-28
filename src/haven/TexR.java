@@ -26,6 +26,8 @@
 
 package haven;
 
+import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -34,9 +36,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-
-import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
 
 @Resource.LayerName("tex")
 public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
@@ -115,7 +114,7 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
             }));
         }
 
-	public BufferedImage fill() {
+        public BufferedImage fill() {
             if (mask == null) {
                 return (rd(TexR.this.img));
             } else {

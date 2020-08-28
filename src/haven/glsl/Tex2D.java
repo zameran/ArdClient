@@ -26,6 +26,8 @@
 
 package haven.glsl;
 
+import haven.glsl.ValBlock.Value;
+
 import static haven.glsl.Cons.l;
 import static haven.glsl.Cons.lt;
 import static haven.glsl.Cons.mul;
@@ -33,8 +35,6 @@ import static haven.glsl.Cons.pick;
 import static haven.glsl.Cons.texture2D;
 import static haven.glsl.Type.VEC2;
 import static haven.glsl.Type.VEC4;
-
-import haven.glsl.ValBlock.Value;
 
 public class Tex2D {
     public static final Uniform tex2d = new Uniform(Type.SAMPLER2D);

@@ -1,9 +1,12 @@
 package haven.sloth.gob;
 
-import haven.*;
-import haven.sloth.gfx.HitboxMesh;
+import haven.Coord;
+import haven.GAttrib;
+import haven.Gob;
+import haven.RenderList;
+import haven.States;
 import haven.Storage;
-import haven.DefSettings;
+import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;
@@ -19,15 +22,16 @@ import java.util.HashSet;
  */
 public class Hidden extends GAttrib {
     private static ObservableCollection<String> hidden = new ObservableCollection<>(new HashSet<>());
+
     public static void init() {
         Storage.dynamic.ensure(sql -> {
-            try(final Statement stmt = sql.createStatement()) {
+            try (final Statement stmt = sql.createStatement()) {
                 stmt.executeUpdate("CREATE TABLE IF NOT EXISTS gob_hidden ( name TEXT PRIMARY KEY )");
             }
         });
         Storage.dynamic.ensure(sql -> {
-            try(final Statement stmt = sql.createStatement()) {
-                try(final ResultSet res = stmt.executeQuery("SELECT name FROM gob_hidden")) {
+            try (final Statement stmt = sql.createStatement()) {
+                try (final ResultSet res = stmt.executeQuery("SELECT name FROM gob_hidden")) {
                     while (res.next()) {
                         hidden.add(res.getString(1));
                     }
@@ -61,6 +65,7 @@ public class Hidden extends GAttrib {
             stmt.executeUpdate();
         });
     }
+
     public static boolean isHidden(final String name) {
         return hidden.contains(name);
     }
@@ -74,7 +79,7 @@ public class Hidden extends GAttrib {
     }
 
     public void setup(RenderList rl) {
-        if(mesh != null) {
+        if (mesh != null) {
             rl.prepo(States.xray);
             rl.add(mesh, null);
         }
@@ -83,16 +88,16 @@ public class Hidden extends GAttrib {
     private void make() {
         gob.res().ifPresent((res) -> {
             final Hitbox hb = Hitbox.hbfor(gob, true);
-            if(hb != null) {
+            if (hb != null) {
                 mesh = HitboxMesh.makehb(hb.size(), hb.offset());
             } else {
-                    mesh = HitboxMesh.makehb(new Coord(11,11), Coord.z);
+                mesh = HitboxMesh.makehb(new Coord(11, 11), Coord.z);
             }
         });
     }
 
     public void tick() {
-        if(mesh != null)
+        if (mesh != null)
             return;
         else
             make();

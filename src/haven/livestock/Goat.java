@@ -31,7 +31,7 @@ public class Goat extends Animal {
         x = addColumn(columns, "Milk quality2:", "Milk Final", 11, x);
         x = addColumn(columns, "Hide quality2:", "Hide Final", 12, x);
 
-            addColumn(columns, "X", "", 13, x);
+        addColumn(columns, "X", "", 13, x);
     }
 
     public Goat(long wndid, String type) {

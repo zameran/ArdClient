@@ -1,11 +1,11 @@
 package haven.livestock;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import haven.Resource;
 import haven.Tex;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Cattle extends Animal {
     private int attributesRequired = columns.size() + 1;
@@ -29,7 +29,7 @@ public class Cattle extends Animal {
         x = addColumn(columns, "Milk quality2:", "Milk Final", 9, x);
         x = addColumn(columns, "Hide quality2:", "Hide Final", 10, x);
 
-            addColumn(columns, "X", "", 11, x);
+        addColumn(columns, "X", "", 11, x);
     }
 
     public Cattle(long wndid, String type) {

@@ -1,14 +1,17 @@
 package haven.sloth.script.pathfinding;
 
 import haven.Coord;
-import haven.UI;
 import haven.DefSettings;
+import haven.UI;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 /**
  * TODO: Impossible path detection. Right now it goes into an infinite loop when it can't figure out how to path to the goal

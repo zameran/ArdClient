@@ -1,7 +1,6 @@
 package haven;
 
 
-
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashMap;

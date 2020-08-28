@@ -2,9 +2,15 @@ package haven;
 
 import modification.configuration;
 
-import java.awt.*;
-import java.io.*;
-import java.net.*;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,7 +87,7 @@ public class StatusWdg extends Widget {
 
                 try {
                     url_ = new URL("http://www.havenandhearth.com/portal/index/status");
-                    conn = (HttpURLConnection)url_.openConnection();
+                    conn = (HttpURLConnection) url_.openConnection();
                     InputStream is = conn.getInputStream();
                     br = new BufferedReader(new InputStreamReader(is));
 
@@ -120,7 +126,7 @@ public class StatusWdg extends Widget {
 
                         if (Thread.interrupted())
                             return;
-                        }
+                    }
                 } catch (SocketException se) {
                     // don't print socket exceptions when network is unreachable to prevent console spamming on bad connections
                     if (!se.getMessage().equals("Network is unreachable"))
@@ -160,7 +166,7 @@ public class StatusWdg extends Widget {
         int w = players.sz().x;
         if (pingtime.sz().x > w)
             w = pingtime.sz().x;
-        this.sz = new Coord(w,  players.sz().y + pingtime.sz().y);
+        this.sz = new Coord(w, players.sz().y + pingtime.sz().y);
     }
 
     @Override

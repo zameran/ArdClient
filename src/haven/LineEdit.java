@@ -351,7 +351,7 @@ public class LineEdit {
         if (ev.getID() == KeyEvent.KEY_TYPED) {
             char c = ev.getKeyChar();
             if (((mod & C) != 0) && (c < 32)) {
-        /* Undo Java's TTY Control-code mangling */
+                /* Undo Java's TTY Control-code mangling */
                 if (ev.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 } else if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
                 } else if (ev.getKeyCode() == KeyEvent.VK_TAB) {

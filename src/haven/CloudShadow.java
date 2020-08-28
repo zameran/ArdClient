@@ -26,6 +26,19 @@
 
 package haven;
 
+import haven.GLProgram.VarID;
+import haven.glsl.Block;
+import haven.glsl.Expression;
+import haven.glsl.If;
+import haven.glsl.MiscLib;
+import haven.glsl.Phong;
+import haven.glsl.ShaderMacro;
+import haven.glsl.Uniform;
+import haven.glsl.ValBlock;
+import haven.glsl.Variable;
+
+import javax.media.opengl.GL;
+
 import static haven.glsl.Cons.add;
 import static haven.glsl.Cons.amul;
 import static haven.glsl.Cons.ass;
@@ -39,19 +52,6 @@ import static haven.glsl.Type.FLOAT;
 import static haven.glsl.Type.SAMPLER2D;
 import static haven.glsl.Type.VEC2;
 import static haven.glsl.Type.VEC4;
-
-import javax.media.opengl.GL;
-
-import haven.GLProgram.VarID;
-import haven.glsl.Block;
-import haven.glsl.Expression;
-import haven.glsl.If;
-import haven.glsl.MiscLib;
-import haven.glsl.Phong;
-import haven.glsl.ShaderMacro;
-import haven.glsl.Uniform;
-import haven.glsl.ValBlock;
-import haven.glsl.Variable;
 
 public class CloudShadow extends GLState {
     public static final Slot<CloudShadow> slot = new Slot<CloudShadow>(Slot.Type.DRAW, CloudShadow.class, Light.lighting);

@@ -26,12 +26,28 @@
 
 package haven.resutil;
 
-import haven.*;
-import haven.glsl.*;
+import haven.GLState;
+import haven.GOut;
+import haven.glsl.Expression;
+import haven.glsl.Function;
+import haven.glsl.LValue;
+import haven.glsl.MiscLib;
+import haven.glsl.Return;
+import haven.glsl.ShaderMacro;
 import haven.glsl.Type;
+import haven.glsl.Uniform;
 
-import static haven.glsl.Cons.*;
-import static haven.glsl.Type.*;
+import static haven.glsl.Cons.add;
+import static haven.glsl.Cons.ass;
+import static haven.glsl.Cons.fract;
+import static haven.glsl.Cons.l;
+import static haven.glsl.Cons.mul;
+import static haven.glsl.Cons.pick;
+import static haven.glsl.Cons.sub;
+import static haven.glsl.Cons.vec3;
+import static haven.glsl.Cons.vec4;
+import static haven.glsl.Type.VEC3;
+import static haven.glsl.Type.VEC4;
 
 public class HueMod extends GLState {
     public static final Slot<HueMod> slot = new Slot<>(Slot.Type.DRAW, HueMod.class);
@@ -56,7 +72,10 @@ public class HueMod extends GLState {
     private static final ShaderMacro shader = prog -> {
         prog.fctx.fragcol.mod(apply::call, 1000);
     };
-    public ShaderMacro shader() {return(shader);}
+
+    public ShaderMacro shader() {
+        return (shader);
+    }
 
     public void reapply(GOut g) {
         g.gl.glUniform3f(g.st.prog.uniform(cxf), tgthue, 1.0f - huemod, satmod);
@@ -66,7 +85,8 @@ public class HueMod extends GLState {
         reapply(g);
     }
 
-    public void unapply(GOut g) {}
+    public void unapply(GOut g) {
+    }
 
     public void prep(Buffer buf) {
         buf.put(slot, this);

@@ -26,16 +26,28 @@
 
 package haven.resutil;
 
-import java.util.*;
-
-import haven.*;
-import haven.MapMesh.Scan;
+import haven.Config;
+import haven.Coord;
+import haven.Coord3f;
+import haven.GLState;
+import haven.Light;
+import haven.MCache;
+import haven.MapMesh;
 import haven.MapMesh.Model;
-import haven.Surface.Vertex;
-import haven.Tiler.MPart;
-import haven.Tiler.SModel;
-import haven.Tiler.VertFactory;
+import haven.MapMesh.Scan;
+import haven.Material;
+import haven.MeshBuf;
+import haven.States;
+import haven.Surface;
 import haven.Surface.MeshVertex;
+import haven.Surface.Vertex;
+import haven.Tiler;
+import haven.Tiler.MPart;
+import haven.Utils;
+
+import java.util.Arrays;
+import java.util.Random;
+
 import static haven.Utils.clip;
 
 public class Ridges extends MapMesh.Hooks {
@@ -639,10 +651,10 @@ public class Ridges extends MapMesh.Hooks {
         } else {
             try {
                 modelcomplex(tc, b);
-            } catch(ArrayIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
                 /* XXX: Just ignore for now, until I can find the
                  * cause of this. */
-            } catch(NegativeArraySizeException e) {
+            } catch (NegativeArraySizeException e) {
             }
             return (true);
         }
@@ -676,17 +688,17 @@ public class Ridges extends MapMesh.Hooks {
         }
 
         public void faces(MapMesh m, MPart mdesc) {
-            RPart desc = (RPart)mdesc;
+            RPart desc = (RPart) mdesc;
             Model mod = Model.get(m, mat);
             MeshBuf.Tex tex = mod.layer(MeshBuf.tex);
             MeshBuf.Vec3Layer tan = mod.layer(BumpMap.ltan);
             MeshBuf.Vec3Layer bit = mod.layer(BumpMap.lbit);
             int[] trn = new int[desc.rh.length];
             float zf = 1.0f / texh;
-            for(int i = 0; i < trn.length; i++)
-                trn[i] = Math.max((int)((desc.rh[i] + (texh * 0.5f)) * zf), 1);
+            for (int i = 0; i < trn.length; i++)
+                trn[i] = Math.max((int) ((desc.rh[i] + (texh * 0.5f)) * zf), 1);
             MeshVertex[] v = new MeshVertex[desc.v.length];
-            for(int i = 0; i < desc.v.length; i++) {
+            for (int i = 0; i < desc.v.length; i++) {
                 v[i] = new MeshVertex(mod, desc.v[i]);
                 /* tex.set(v[i], new Coord3f(desc.rcx[i], desc.v[i].z * zf, 0)); */
                 tex.set(v[i], new Coord3f(desc.rcx[i], desc.rcy[i] * trn[desc.rn[i]], 0));
@@ -694,7 +706,7 @@ public class Ridges extends MapMesh.Hooks {
                 bit.set(v[i], Coord3f.zu);
             }
             int[] f = desc.f;
-            for(int i = 0; i < f.length; i += 3)
+            for (int i = 0; i < f.length; i += 3)
                 mod.new Face(v[f[i]], v[f[i + 1]], v[f[i + 2]]);
         }
     }

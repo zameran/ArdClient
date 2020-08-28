@@ -1,19 +1,19 @@
 package haven.pathfinder;
 
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import haven.Coord;
 import haven.Gob;
 import haven.GobHitbox;
 import haven.MCache;
 import haven.Pair;
 import haven.Resource;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class Map {
 
@@ -86,7 +86,7 @@ public class Map {
 
                 // exclude destination tile
                 if (endc.x < gcx + tbbax + plbbox && endc.x > gcx + tbbax - plbbox &&
-                     endc.y < gcy + tbbby + plbbox && endc.y > gcy + tbbay - plbbox)   {
+                        endc.y < gcy + tbbby + plbbox && endc.y > gcy + tbbay - plbbox) {
                     continue;
                 }
 
@@ -476,22 +476,22 @@ public class Map {
             System.out.println("Vertices Sanitization: " + (double) (System.nanoTime() - start) / 1000000.0 + " ms.");
 
         // clear area around starting position in case char is on the bounding box boundary
-        if (map[origin][origin-1] == CELL_BLK)
-            map[origin][origin-1] = CELL_FREE;
-        if (map[origin-1][origin-1] == CELL_BLK)
-            map[origin-1][origin-1] = CELL_FREE;
-        if (map[origin+1][origin-1] == CELL_BLK)
-            map[origin+1][origin-1] = CELL_FREE;
-        if (map[origin-1][origin] == CELL_BLK)
-            map[origin-1][origin] = CELL_FREE;
-        if (map[origin+1][origin] == CELL_BLK)
-            map[origin+1][origin] = CELL_FREE;
-        if (map[origin-1][origin+1] == CELL_BLK)
-            map[origin-1][origin+1] = CELL_FREE;
-        if (map[origin][origin+1] == CELL_BLK)
-            map[origin][origin+1] = CELL_FREE;
-        if (map[origin+1][origin+1] == CELL_BLK)
-            map[origin+1][origin+1] = CELL_FREE;
+        if (map[origin][origin - 1] == CELL_BLK)
+            map[origin][origin - 1] = CELL_FREE;
+        if (map[origin - 1][origin - 1] == CELL_BLK)
+            map[origin - 1][origin - 1] = CELL_FREE;
+        if (map[origin + 1][origin - 1] == CELL_BLK)
+            map[origin + 1][origin - 1] = CELL_FREE;
+        if (map[origin - 1][origin] == CELL_BLK)
+            map[origin - 1][origin] = CELL_FREE;
+        if (map[origin + 1][origin] == CELL_BLK)
+            map[origin + 1][origin] = CELL_FREE;
+        if (map[origin - 1][origin + 1] == CELL_BLK)
+            map[origin - 1][origin + 1] = CELL_FREE;
+        if (map[origin][origin + 1] == CELL_BLK)
+            map[origin][origin + 1] = CELL_FREE;
+        if (map[origin + 1][origin + 1] == CELL_BLK)
+            map[origin + 1][origin + 1] = CELL_FREE;
 
 
         // test if direct path is clear

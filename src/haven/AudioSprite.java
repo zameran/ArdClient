@@ -32,21 +32,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AudioSprite {
-    public static List<Resource.Audio> clips(Resource res, String id)
-    {
+    public static List<Resource.Audio> clips(Resource res, String id) {
         List<Resource.Audio> cl = new ArrayList<Resource.Audio>();
         for (Resource.Audio clip : res.layers(Resource.audio)) {
             if (clip.id == id)
                 cl.add(clip);
         }
-        return(cl);
+        return (cl);
     }
 
     public static Resource.Audio randoom(Resource res, String id) {
         List<Resource.Audio> cl = clips(res, id);
         if (!cl.isEmpty()) {
             int rnd = (int) (Math.random() * cl.size());
-            if (rnd == 1 && "sfx/items/pickaxe".equals(res.name) )
+            if (rnd == 1 && "sfx/items/pickaxe".equals(res.name))
                 rnd = 0;
             return cl.get(rnd);
         }
@@ -116,17 +115,16 @@ public class AudioSprite {
                 stream = new Audio.VolAdjust(stream, 0.2);
             else if (Config.sfxquernvol != 1.0 && "sfx/terobjs/quern".equals(res.name))
                 stream = new Audio.VolAdjust(stream, Config.sfxquernvol);
-            else if(Config.sfxdoorvol != 1.0 && "sfx/terobjs/arch/door".equals(res.name))
+            else if (Config.sfxdoorvol != 1.0 && "sfx/terobjs/arch/door".equals(res.name))
                 stream = new Audio.VolAdjust(stream, Config.sfxdoorvol);
-            else if(Config.sfxclapvol != 1.0 && "sfx/borka/clap".equals(res.name))
-            	stream = new Audio.VolAdjust(stream, Config.sfxclapvol);
-            else if(Config.sfxchatvol != 1.0 && "sfx/hud/chat".equals(res.name))
+            else if (Config.sfxclapvol != 1.0 && "sfx/borka/clap".equals(res.name))
+                stream = new Audio.VolAdjust(stream, Config.sfxclapvol);
+            else if (Config.sfxchatvol != 1.0 && "sfx/hud/chat".equals(res.name))
                 stream = new Audio.VolAdjust(stream, Config.sfxchatvol);
-            else if(Config.sfxwhistlevol != 1.0 && "sfx/borka/whistle".equals(res.name))
+            else if (Config.sfxwhistlevol != 1.0 && "sfx/borka/whistle".equals(res.name))
                 stream = new Audio.VolAdjust(stream, Config.sfxwhistlevol);
-            else if(Config.sfxdingvol != 1.0 && "sfx/msg".equals(res.name))
-                stream = new Audio.VolAdjust(stream,Config.sfxdingvol);
-
+            else if (Config.sfxdingvol != 1.0 && "sfx/msg".equals(res.name))
+                stream = new Audio.VolAdjust(stream, Config.sfxdingvol);
 
 
             this.clip = new ActAudio.PosClip(new Audio.Monitor(stream) {
@@ -155,7 +153,7 @@ public class AudioSprite {
         }
 
         public Object staticp() {
-            return(CONSTANS);
+            return (CONSTANS);
         }
     }
 
@@ -166,22 +164,22 @@ public class AudioSprite {
         public RepeatSprite(Owner owner, Resource res, final Resource.Audio beg, final List<Resource.Audio> clips, Resource.Audio end) {
             super(owner, res);
             this.end = end;
-                CS rep = new Audio.Repeater() {
-                    private boolean f = true;
+            CS rep = new Audio.Repeater() {
+                private boolean f = true;
 
-                    public CS cons() {
-                        if (f && (beg != null)) {
-                            f = false;
-                            return (beg.stream());
-                        }
-                    return(clips.get((int)(Math.random() * clips.size())).stream());
+                public CS cons() {
+                    if (f && (beg != null)) {
+                        f = false;
+                        return (beg.stream());
                     }
-                };
+                    return (clips.get((int) (Math.random() * clips.size())).stream());
+                }
+            };
             if (Config.sfxbeehivevol != 1.0 && "sfx/kritter/beeswarm".equals(res.name))
                 rep = new Audio.VolAdjust(rep, Config.sfxbeehivevol);
 
             this.clip = new ActAudio.PosClip(rep);
-            }
+        }
 
 
         public boolean setup(RenderList r) {
@@ -207,7 +205,7 @@ public class AudioSprite {
         }
 
         public Object staticp() {
-            return(CONSTANS);
+            return (CONSTANS);
         }
     }
 
@@ -222,7 +220,7 @@ public class AudioSprite {
             } else {
                 if (Config.sfxfirevol != 1.0 && "sfx/fire".equals(res.name))
                     this.amb = new ActAudio.Ambience(res, Config.sfxfirevol);
-                else if(Config.sfxcauldronvol != 1.0 && res.basename().contains("cauldron"))
+                else if (Config.sfxcauldronvol != 1.0 && res.basename().contains("cauldron"))
                     this.amb = new ActAudio.Ambience(res, Config.sfxcauldronvol);
                 else
                     this.amb = new ActAudio.Ambience(res);
@@ -235,7 +233,7 @@ public class AudioSprite {
         }
 
         public Object staticp() {
-            return(CONSTANS);
+            return (CONSTANS);
         }
     }
 }

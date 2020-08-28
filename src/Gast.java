@@ -1,6 +1,11 @@
-import haven.*;
+import haven.GItem;
+import haven.ItemInfo;
 import haven.ItemInfo.Tip;
+import haven.Resource;
+import haven.RichText;
+import haven.Utils;
 import haven.res.ui.tt.Wear;
+
 import java.awt.image.BufferedImage;
 
 public class Gast extends Tip implements GItem.NumberInfo {
@@ -14,7 +19,7 @@ public class Gast extends Tip implements GItem.NumberInfo {
     }
 
     public static ItemInfo mkinfo(Owner var0, Object... var1) {
-        return new Gast(var0, ((Number)var1[1]).doubleValue(), ((Number)var1[2]).doubleValue());
+        return new Gast(var0, ((Number) var1[1]).doubleValue(), ((Number) var1[2]).doubleValue());
     }
 
     public BufferedImage tipimg() {
@@ -31,7 +36,7 @@ public class Gast extends Tip implements GItem.NumberInfo {
     }
 
     public int itemnum() {
-        Wear var1 = (Wear)find(Wear.class, this.owner.info());
+        Wear var1 = (Wear) find(Wear.class, this.owner.info());
         return var1 == null ? 0 : var1.m - var1.d;
     }
 }

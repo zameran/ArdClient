@@ -218,10 +218,10 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
         } while (true);
 
         if (creds != null) {
-            LoginData ld = new LoginData(creds.name(), ((AuthClient.NativeCred)creds).pass);
+            LoginData ld = new LoginData(creds.name(), ((AuthClient.NativeCred) creds).pass);
             synchronized (Config.logins) {
                 if (!Config.logins.contains(ld)) {
-                    Config.logins.add(new LoginData(creds.name(), ((AuthClient.NativeCred)creds).pass));
+                    Config.logins.add(new LoginData(creds.name(), ((AuthClient.NativeCred) creds).pass));
                     Config.saveLogins();
                 }
             }

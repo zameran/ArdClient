@@ -26,11 +26,6 @@
 
 package haven.glsl;
 
-import java.nio.FloatBuffer;
-import java.util.List;
-
-import javax.media.opengl.GL;
-
 import haven.BGL;
 import haven.GLBuffer;
 import haven.GLProgram.VarID;
@@ -38,6 +33,10 @@ import haven.GLState.Buffer;
 import haven.GLState.Slot;
 import haven.GOut;
 import haven.Matrix4f;
+
+import javax.media.opengl.GL;
+import java.nio.FloatBuffer;
+import java.util.List;
 
 public abstract class InstancedUniform {
     public final Slot[] deps;
@@ -47,34 +46,50 @@ public abstract class InstancedUniform {
     public InstancedUniform(Type type, String infix, Slot... deps) {
         this.deps = deps;
         uniform = new Uniform.AutoApply(type, infix, deps) {
-            public void apply(GOut g, VarID location) {InstancedUniform.this.apply(g, location);}
+            public void apply(GOut g, VarID location) {
+                InstancedUniform.this.apply(g, location);
+            }
         };
         attrib = new Attribute.AutoInstanced(type, infix) {
-            public void filliarr(GOut g, List<Buffer> inst, GLBuffer buf) {InstancedUniform.this.filliarr(g, inst, buf);}
-            public void bindiarr(GOut g, GLBuffer buf) {InstancedUniform.this.bindiarr(g, buf);}
-            public void unbindiarr(GOut g, GLBuffer buf) {InstancedUniform.this.unbindiarr(g, buf);}
+            public void filliarr(GOut g, List<Buffer> inst, GLBuffer buf) {
+                InstancedUniform.this.filliarr(g, inst, buf);
+            }
+
+            public void bindiarr(GOut g, GLBuffer buf) {
+                InstancedUniform.this.bindiarr(g, buf);
+            }
+
+            public void unbindiarr(GOut g, GLBuffer buf) {
+                InstancedUniform.this.unbindiarr(g, buf);
+            }
         };
     }
 
     private static final Object refproc = new PostProc.AutoID("refproc", 9000);
+
     public Expression ref() {
-        return(new PostProc.AutoMacro(refproc) {
+        return (new PostProc.AutoMacro(refproc) {
             public Expression expand(Context ctx) {
-                if(!((ShaderContext)ctx).prog.instanced)
-                    return(uniform.ref());
+                if (!((ShaderContext) ctx).prog.instanced)
+                    return (uniform.ref());
                 else
-                    return(attrib.ref());
+                    return (attrib.ref());
             }
         });
     }
 
     protected abstract void apply(GOut g, VarID location);
+
     protected abstract void filliarr(GOut g, List<Buffer> inst, GLBuffer buf);
+
     protected abstract void bindiarr(GOut g, GLBuffer buf);
+
     protected abstract void unbindiarr(GOut g, GLBuffer buf);
 
     public static abstract class Vec4 extends InstancedUniform {
-        public Vec4(String infix, Slot... deps) {super(Type.VEC4, infix, deps);}
+        public Vec4(String infix, Slot... deps) {
+            super(Type.VEC4, infix, deps);
+        }
 
         public abstract float[] forstate(GOut g, Buffer buf);
 
@@ -85,7 +100,7 @@ public abstract class InstancedUniform {
         protected void filliarr(GOut g, List<Buffer> inst, GLBuffer bo) {
             float[] buf = new float[inst.size() * 4];
             int i = 0;
-            for(Buffer st : inst) {
+            for (Buffer st : inst) {
                 System.arraycopy(forstate(g, st), 0, buf, i, 4);
                 i += 4;
             }
@@ -113,7 +128,9 @@ public abstract class InstancedUniform {
     }
 
     public static abstract class Mat4 extends InstancedUniform {
-        public Mat4(String infix, Slot... deps) {super(Type.MAT4, infix, deps);}
+        public Mat4(String infix, Slot... deps) {
+            super(Type.MAT4, infix, deps);
+        }
 
         public abstract Matrix4f forstate(GOut g, Buffer buf);
 
@@ -124,7 +141,7 @@ public abstract class InstancedUniform {
         protected void filliarr(GOut g, List<Buffer> inst, GLBuffer bo) {
             float[] buf = new float[inst.size() * 16];
             int i = 0;
-            for(Buffer st : inst) {
+            for (Buffer st : inst) {
                 System.arraycopy(forstate(g, st).m, 0, buf, i, 16);
                 i += 16;
             }
@@ -137,7 +154,7 @@ public abstract class InstancedUniform {
             BGL gl = g.gl;
             VarID loc = g.st.prog.attrib(attrib);
             gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buf);
-            gl.glVertexAttribPointer(loc, 0, 4, GL.GL_FLOAT, false, 64,  0);
+            gl.glVertexAttribPointer(loc, 0, 4, GL.GL_FLOAT, false, 64, 0);
             gl.glVertexAttribPointer(loc, 1, 4, GL.GL_FLOAT, false, 64, 16);
             gl.glVertexAttribPointer(loc, 2, 4, GL.GL_FLOAT, false, 64, 32);
             gl.glVertexAttribPointer(loc, 3, 4, GL.GL_FLOAT, false, 64, 48);

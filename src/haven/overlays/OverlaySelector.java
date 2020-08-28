@@ -6,7 +6,6 @@ import haven.ColorPreview;
 import haven.Coord;
 import haven.Dropbox;
 import haven.GOut;
-import haven.Gob;
 import haven.Label;
 import haven.ResizableTextEntry;
 import haven.Tex;
@@ -15,7 +14,8 @@ import haven.Widget;
 import haven.WidgetVerticalAppender;
 import haven.Window;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -58,25 +58,31 @@ public class OverlaySelector extends Window {
         } else return gobname;
 
     }
+
     private static final List<String> fontSizes = Arrays.asList("10", "11", "12", "13", "14", "15", "16");
+
     private Dropbox<String> makeFontSizeDropbox(int fontSize) {
         return new Dropbox<String>(fontSizes.size(), fontSizes) {
             {
                 super.change(Integer.toString(fontSize));
                 selectedFontSize = fontSize;
             }
+
             @Override
             protected String listitem(int i) {
                 return fontSizes.get(i);
             }
+
             @Override
             protected int listitems() {
                 return fontSizes.size();
             }
+
             @Override
             protected void drawitem(GOut g, String item, int i) {
                 g.text(item, Coord.z);
             }
+
             @Override
             public void change(String item) {
                 super.change(item);
@@ -84,6 +90,7 @@ public class OverlaySelector extends Window {
             }
         };
     }
+
     private Dropbox<String> makeFontsDropdown(String font) {
         final List<String> fonts = Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
         return new Dropbox<String>(8, fonts) {
@@ -134,16 +141,23 @@ public class OverlaySelector extends Window {
         fontSizeDropbox = makeFontSizeDropbox(fontSize);
         fontDropBox = makeFontsDropdown(font);
 
-        textColorPreview = new ColorPreview(new Coord(16, 16), textColor, val -> { textColor = val; });
-        strokeColorPreview = new ColorPreview(new Coord(16, 16), strokeColor, val -> { strokeColor = val; });
-        highlightColorPreview = new ColorPreview(new Coord(16, 16), highlightColor, val -> { highlightColor = val; });
+        textColorPreview = new ColorPreview(new Coord(16, 16), textColor, val -> {
+            textColor = val;
+        });
+        strokeColorPreview = new ColorPreview(new Coord(16, 16), strokeColor, val -> {
+            strokeColor = val;
+        });
+        highlightColorPreview = new ColorPreview(new Coord(16, 16), highlightColor, val -> {
+            highlightColor = val;
+        });
 
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(this);
         appender2.setX(200);
 
         appender.add(new Label("Select overlays for " + gobname));
-        appender.add(textchbox); int y = appender.getX();
+        appender.add(textchbox);
+        int y = appender.getX();
         appender.addRow(new Label("Text: "), textEntry);
         appender.addRow(new Label("Text color: "), textColorPreview);
         appender.addRow(new Label("Stroke color: "), strokeColorPreview);

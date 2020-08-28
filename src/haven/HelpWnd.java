@@ -52,11 +52,12 @@ public class HelpWnd extends Window {
 
     public void tick(double dt) {
         super.tick(dt);
-        if(res != showing) {
+        if (res != showing) {
             try {
                 text.settext(res.get().layer(Resource.pagina).text);
                 showing = res;
-            } catch(Loading e) {}
+            } catch (Loading e) {
+            }
         }
     }
 }

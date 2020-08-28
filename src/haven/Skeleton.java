@@ -27,7 +27,15 @@
 package haven;
 
 import javax.media.opengl.GL2;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Skeleton {
     public final Map<String, Bone> bones = new HashMap<String, Bone>();
@@ -105,8 +113,8 @@ public class Skeleton {
     private static float[] vqrot(float[] d, float[] v, float[] q) {
         float vx = v[0], vy = v[1], vz = v[2];
         float qw = q[0], qx = q[1], qy = q[2], qz = q[3];
-    /* I dearly wonder how the JIT's common-subexpression
-     * eliminator does on these. */
+        /* I dearly wonder how the JIT's common-subexpression
+         * eliminator does on these. */
         d[0] = (qw * qw * vx) + (2 * qw * qy * vz) - (2 * qw * qz * vy) + (qx * qx * vx) +
                 (2 * qx * qy * vy) + (2 * qx * qz * vz) - (qz * qz * vx) - (qy * qy * vx);
         d[1] = (2 * qx * qy * vx) + (qy * qy * vy) + (2 * qy * qz * vz) + (2 * qw * qz * vx) -
@@ -139,7 +147,7 @@ public class Skeleton {
     }
 
     private static float[] qinv(float[] d, float[] s) {
-    /* Assumes |s| = 1.0 */
+        /* Assumes |s| = 1.0 */
         d[0] = s[0];
         d[1] = -s[1];
         d[2] = -s[2];
@@ -171,8 +179,8 @@ public class Skeleton {
         }
         float d0, d1;
         if (cos > 0.9999f) {
-        /* Reasonable threshold? Is this function even critical
-	     * for performance? */
+            /* Reasonable threshold? Is this function even critical
+             * for performance? */
             d0 = 1.0f - t;
             d1 = t;
         } else {
@@ -334,8 +342,8 @@ public class Skeleton {
         }
 
         public void boneoff(int bone, float[] offtrans) {
-	    /* It would be nice if these "new float"s get
-	     * stack-allocated. */
+            /* It would be nice if these "new float"s get
+             * stack-allocated. */
             float[] rot = new float[4], xlate = new float[3];
             rot = qqmul(rot, grot[bone], qinv(rot, bindpose.grot[bone]));
             xlate = vvadd(xlate, gpos[bone], vqrot(xlate, vinv(xlate, bindpose.gpos[bone]), rot));
@@ -346,8 +354,8 @@ public class Skeleton {
             offtrans[12] = xlate[0];
             offtrans[13] = xlate[1];
             offtrans[14] = xlate[2];
-	    /* I must admit I don't /quite/ understand why the
-	     * rotation needs to be inverted... */
+            /* I must admit I don't /quite/ understand why the
+             * rotation needs to be inverted... */
             float w = -rot[0], x = rot[1], y = rot[2], z = rot[3];
             float xw = x * w * 2, xx = x * x * 2, xy = x * y * 2, xz = x * z * 2;
             float yw = y * w * 2, yy = y * y * 2, yz = y * z * 2;
@@ -402,14 +410,26 @@ public class Skeleton {
 
     public interface ModOwner extends OwnerContext {
         public double getv();
+
         public Coord3f getc();
+
         @Deprecated
-        public default Glob glob() {return(context(Glob.class));}
+        public default Glob glob() {
+            return (context(Glob.class));
+        }
 
         public static final ModOwner nil = new ModOwner() {
-            public double getv() {return(0);}
-            public Coord3f getc() {return(Coord3f.o);}
-            public <T> T context(Class<T> cl) {throw(new NoContext(cl));}
+            public double getv() {
+                return (0);
+            }
+
+            public Coord3f getc() {
+                return (Coord3f.o);
+            }
+
+            public <T> T context(Class<T> cl) {
+                throw (new NoContext(cl));
+            }
         };
     }
 
@@ -664,7 +684,7 @@ public class Skeleton {
                     while (true) {
                         if (++n > 100)
                             throw (new RuntimeException("Cannot find track frame in " + this + " for time " + time));
-			/* c should never be able to be >= frames.length */
+                        /* c should never be able to be >= frames.length */
                         int c = l + ((r - l) >> 1);
                         ct = t.frames[c].time;
                         nt = (c < t.frames.length - 1) ? (t.frames[c + 1].time) : len;
@@ -889,39 +909,39 @@ public class Skeleton {
 
         private Track.Frame[] parseframes(int fmt, Message buf) {
             Track.Frame[] frames = new Track.Frame[buf.uint16()];
-            if(fmt == 0) {
-                for(int i = 0; i < frames.length; i++) {
-                    float tm = (float)buf.cpfloat();
+            if (fmt == 0) {
+                for (int i = 0; i < frames.length; i++) {
+                    float tm = (float) buf.cpfloat();
                     float[] trans = new float[3];
-                    for(int o = 0; o < 3; o++)
-                        trans[o] = (float)buf.cpfloat();
-                    float rang = (float)buf.cpfloat();
+                    for (int o = 0; o < 3; o++)
+                        trans[o] = (float) buf.cpfloat();
+                    float rang = (float) buf.cpfloat();
                     float[] rax = new float[3];
-                    for(int o = 0; o < 3; o++)
-                        rax[o] = (float)buf.cpfloat();
+                    for (int o = 0; o < 3; o++)
+                        rax[o] = (float) buf.cpfloat();
                     frames[i] = new Track.Frame(tm, trans, rotasq(new float[4], rax, rang));
                 }
-            } else if(fmt == 1) {
-                for(int i = 0; i < frames.length; i++) {
+            } else if (fmt == 1) {
+                for (int i = 0; i < frames.length; i++) {
                     float tm = (buf.uint16() / 65535.0f) * len;
                     float[] trans = new float[3];
-                    for(int o = 0; o < 3; o++)
-                        trans[o] = Utils.hfdec((short)buf.int16());
-                    float rang = (buf.uint16() / 65535.0f) * 2 * (float)Math.PI;
+                    for (int o = 0; o < 3; o++)
+                        trans[o] = Utils.hfdec((short) buf.int16());
+                    float rang = (buf.uint16() / 65535.0f) * 2 * (float) Math.PI;
                     float[] rax = new float[3];
                     Utils.oct2uvec(rax, buf.int16() / 32767.0f, buf.int16() / 32767.0f);
                     frames[i] = new Track.Frame(tm, trans, rotasq(new float[4], rax, rang));
                 }
             }
-            return(frames);
+            return (frames);
         }
 
         private FxTrack parsefx(int fmt, Message buf) {
             FxTrack.Event[] events = new FxTrack.Event[buf.uint16()];
-            for(int i = 0; i < events.length; i++) {
-                float tm = (fmt == 0) ? (float)buf.cpfloat() : ((buf.uint16() / 65535.0f) * len);
+            for (int i = 0; i < events.length; i++) {
+                float tm = (fmt == 0) ? (float) buf.cpfloat() : ((buf.uint16() / 65535.0f) * len);
                 int t = buf.uint8();
-                switch(t) {
+                switch (t) {
                     case 0:
                         String resnm = buf.string();
                         int resver = buf.uint16();
@@ -934,10 +954,10 @@ public class Skeleton {
                         events[i] = new FxTrack.Trigger(tm, id);
                         break;
                     default:
-                        throw(new Resource.LoadException("Illegal control event: " + t, getres()));
+                        throw (new Resource.LoadException("Illegal control event: " + t, getres()));
                 }
             }
-            return(new FxTrack(events));
+            return (new FxTrack(events));
         }
 
         public ResPose(Resource res, Message buf) {
@@ -946,22 +966,22 @@ public class Skeleton {
             int fl = buf.uint8();
             int fmt = (fl & 6) >> 1;
             int mode = buf.uint8();
-            if(mode == 0)
+            if (mode == 0)
                 defmode = WrapMode.ONCE;
-            else if(mode == 1)
+            else if (mode == 1)
                 defmode = WrapMode.LOOP;
-            else if(mode == 2)
+            else if (mode == 2)
                 defmode = WrapMode.PONG;
-            else if(mode == 3)
+            else if (mode == 3)
                 defmode = WrapMode.PONGLOOP;
             else
-                throw(new Resource.LoadException("Illegal animation mode: " + mode, getres()));
-            if(fmt == 0)
-                this.len = (float)buf.cpfloat();
+                throw (new Resource.LoadException("Illegal animation mode: " + mode, getres()));
+            if (fmt == 0)
+                this.len = (float) buf.cpfloat();
             else
                 this.len = buf.float32();
-            if((fl & 1) != 0) {
-                if(fmt == 0)
+            if ((fl & 1) != 0) {
+                if (fmt == 0)
                     nspeed = buf.cpfloat();
                 else
                     nspeed = buf.float32();
@@ -970,9 +990,9 @@ public class Skeleton {
             }
             Collection<Track> tracks = new LinkedList<Track>();
             Collection<FxTrack> fx = new LinkedList<FxTrack>();
-            while(!buf.eom()) {
+            while (!buf.eom()) {
                 String bnm = buf.string();
-                if(bnm.equals("{ctl}")) {
+                if (bnm.equals("{ctl}")) {
                     fx.add(parsefx(fmt, buf));
                 } else {
                     tracks.add(new Track(bnm, parseframes(fmt, buf)));
@@ -984,19 +1004,19 @@ public class Skeleton {
 
         private Track[] iaIaCthulhuFhtagn(Skeleton skel) {
             Track[] remap = new Track[skel.blist.length];
-            for(Track t : tracks) {
+            for (Track t : tracks) {
                 Skeleton.Bone b = skel.bones.get(t.bone);
-                if(b == null)
-                    throw(new RuntimeException("Bone \"" + t.bone + "\" in animation reference does not exist in skeleton " + skel));
+                if (b == null)
+                    throw (new RuntimeException("Bone \"" + t.bone + "\" in animation reference does not exist in skeleton " + skel));
                 remap[b.idx] = t;
             }
-            return(remap);
+            return (remap);
         }
 
         public class ResMod extends TrackMod {
             public ResMod(ModOwner owner, Skeleton skel, WrapMode mode) {
                 skel.super(owner, iaIaCthulhuFhtagn(skel), ResPose.this.effects, ResPose.this.len, mode);
-                if(ResPose.this.nspeed > 0) {
+                if (ResPose.this.nspeed > 0) {
                     this.speedmod = true;
                     this.nspeed = ResPose.this.nspeed;
                 }
@@ -1007,29 +1027,30 @@ public class Skeleton {
             }
 
             public String toString() {
-                return(String.format("#<pose %d in %s>", id, getres().name));
+                return (String.format("#<pose %d in %s>", id, getres().name));
             }
         }
 
         public TrackMod forskel(ModOwner owner, Skeleton skel, WrapMode mode) {
-            return(new ResMod(owner, skel, mode));
+            return (new ResMod(owner, skel, mode));
         }
 
         @Deprecated
         public TrackMod forskel(Skeleton skel, WrapMode mode) {
-            return(forskel(ModOwner.nil, skel, mode));
+            return (forskel(ModOwner.nil, skel, mode));
         }
 
         @Deprecated
         public TrackMod forgob(Skeleton skel, WrapMode mode, Gob gob) {
-            return(forskel(gob, skel, mode));
+            return (forskel(gob, skel, mode));
         }
 
         public Integer layerid() {
-            return(id);
+            return (id);
         }
 
-        public void init() {}
+        public void init() {
+        }
     }
 
     @Resource.LayerName("boneoff")

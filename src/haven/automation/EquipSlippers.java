@@ -1,7 +1,11 @@
 package haven.automation;
 
 
-import haven.*;
+import haven.Coord;
+import haven.GameUI;
+import haven.Inventory;
+import haven.WItem;
+import haven.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,7 @@ public class EquipSlippers implements Runnable {
     public EquipSlippers(GameUI gui) {
         this.gui = gui;
     }
+
     String oldShoes = null;
 
     @Override
@@ -24,25 +29,25 @@ public class EquipSlippers implements Runnable {
             Inventory inv = gui.maininv;
 
             List<WItem> items = new ArrayList<>();
-            for(Widget witm = inv.child; witm != null; witm = witm.next) {
-                synchronized(witm) {
-                    if(witm instanceof WItem) {
+            for (Widget witm = inv.child; witm != null; witm = witm.next) {
+                synchronized (witm) {
+                    if (witm instanceof WItem) {
                         WItem witem = (WItem) witm;
                         items.add(witem);
                     }
                 }
             }
 
-            if (oldShoes.contains("Slippers")){
-                for(WItem item: items){
-                    if (item.item.getname().contains("Boot")){
+            if (oldShoes.contains("Slippers")) {
+                for (WItem item : items) {
+                    if (item.item.getname().contains("Boot")) {
                         swap(item);
                         break;
                     }
                 }
             } else {
-                for(WItem item: items){
-                    if (item.item.getname().contains("Slipper")){
+                for (WItem item : items) {
+                    if (item.item.getname().contains("Slipper")) {
                         swap(item);
                         break;
                     }
@@ -50,17 +55,17 @@ public class EquipSlippers implements Runnable {
             }
 
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public void swap(WItem item){
+    public void swap(WItem item) {
         item.item.wdgmsg("transfer", Coord.z);
     }
 
-    public WItem getShoes(){
+    public WItem getShoes() {
         return gui.getequipory().quickslots[15];
     }
 }

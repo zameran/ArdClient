@@ -26,14 +26,14 @@
 
 package haven;
 
+import haven.Audio.CS;
+import haven.Audio.VolAdjust;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import haven.Audio.CS;
-import haven.Audio.VolAdjust;
 
 public class ActAudio extends GLState.Abstract {
     public static final GLState.Slot<ActAudio> slot = new GLState.Slot<ActAudio>(GLState.Slot.Type.SYS, ActAudio.class);

@@ -16,17 +16,17 @@ public class DefName implements InfoFactory {
 
     public ItemInfo build(Owner var1, Object... var2) {
         if (var1 instanceof SpriteOwner) {
-            GSprite var3 = ((SpriteOwner)var1).sprite();
+            GSprite var3 = ((SpriteOwner) var1).sprite();
             if (var3 instanceof DynName) {
-                return new Name(var1, ((DynName)var3).name());
+                return new Name(var1, ((DynName) var3).name());
             }
         }
 
         if (!(var1 instanceof ResOwner)) {
             return null;
         } else {
-            Resource var5 = ((ResOwner)var1).resource();
-            Tooltip var4 = (Tooltip)var5.layer(Resource.tooltip);
+            Resource var5 = ((ResOwner) var1).resource();
+            Tooltip var4 = (Tooltip) var5.layer(Resource.tooltip);
             if (var4 == null) {
                 throw new RuntimeException("Item resource " + var5 + " is missing default tooltip");
             } else {

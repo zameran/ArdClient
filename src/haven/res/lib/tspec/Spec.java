@@ -1,9 +1,18 @@
 package haven.res.lib.tspec;
 
-import haven.*;
+import haven.GSprite;
 import haven.GSprite.Owner;
+import haven.Glob;
+import haven.ItemInfo;
 import haven.ItemInfo.Name;
 import haven.ItemInfo.SpriteOwner;
+import haven.OwnerContext;
+import haven.ResData;
+import haven.Resource;
+import haven.Session;
+import haven.Tex;
+import haven.TexI;
+import haven.UI;
 import haven.res.ui.tt.defn.DefName;
 
 import java.util.List;

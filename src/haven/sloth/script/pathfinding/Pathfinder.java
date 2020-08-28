@@ -1,12 +1,17 @@
 package haven.sloth.script.pathfinding;
 
 import com.google.common.flogger.FluentLogger;
-import haven.*;
+import haven.Coord;
+import haven.Coord2d;
 import haven.DefSettings;
+import haven.Gob;
+import haven.MCache;
+import haven.UI;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Type;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -194,7 +199,7 @@ public abstract class Pathfinder {
 
 
     private void debugl(List<Coord> lines) {
-        if(lines.size() > 0) {
+        if (lines.size() > 0) {
             //find our boundaries
             Coord tl = new Coord(lines.get(0));
             Coord br = new Coord(tl);
@@ -211,7 +216,7 @@ public abstract class Pathfinder {
             }
             final BufferedImage buf = ui.sess.glob.gobhitmap.debug2(tl, br);
 
-            for(final Coord c : lines) {
+            for (final Coord c : lines) {
                 final Coord offset = c.sub(tl);
                 buf.setRGB(offset.x, offset.y, Color.WHITE.getRGB());
             }
@@ -225,7 +230,7 @@ public abstract class Pathfinder {
     }
 
     private void debug(List<Move> moves) {
-        if(moves.size() > 0) {
+        if (moves.size() > 0) {
             //find our boundaries
             Coord tl = new Coord(moves.get(0).dest().floor());
             Coord br = new Coord(tl);
@@ -247,8 +252,8 @@ public abstract class Pathfinder {
 
             for (int i = 0; i < moves.size(); ++i) {
                 final Coord offset = moves.get(i).dest().floor().sub(tl);
-                if(i + 1 < moves.size()) {
-                    final Coord off2 = moves.get(i+1).dest().floor().sub(tl);
+                if (i + 1 < moves.size()) {
+                    final Coord off2 = moves.get(i + 1).dest().floor().sub(tl);
                     g.drawLine(offset.x, offset.y, off2.x, off2.y);
                 }
                 buf.setRGB(offset.x, offset.y, Color.WHITE.getRGB());
@@ -270,16 +275,16 @@ public abstract class Pathfinder {
      * In a way this tries to improve our result since it operates with the assumption that our List<Coord>
      * may not be as optimal as we think or not optimal in the sense of how many clicks we have to do
      * more clicks -> Slowdown -> bad and we'd rather have long straight lines rather than many short
-     *
+     * <p>
      * In the end we'll have
-     *
+     * <p>
      * Start -> X, X -> Y, Y -> Z, ..., U -> Goal
-     *
+     * <p>
      * Our pathfinder guarantees that X -> X+1 is SAFE, but not X -> X+n where n >= 2
      */
     final ArrayList<Move> advreduce(List<Coord> lines) {
         if (lines != null) {
-            if(DefSettings.DEBUG.get())
+            if (DefSettings.DEBUG.get())
                 debugl(lines);
             final ArrayList<Move> blines = new ArrayList<>(lines.size());
             for (int i = 0; i < lines.size() - 1; ++i) {
@@ -290,10 +295,10 @@ public abstract class Pathfinder {
 
                 //Binary search between i -> lines.size()
                 int lower = best;
-                int upper = lines.size()-1;
-                while(lower <= upper) {
+                int upper = lines.size() - 1;
+                while (lower <= upper) {
                     final int half = ((lower + upper) / 2);
-                    if(walk(start, lines.get(half))) {
+                    if (walk(start, lines.get(half))) {
                         lower = half + 1;
                         best = half;
                     } else {
@@ -304,9 +309,9 @@ public abstract class Pathfinder {
                 //Our line is now start -> best
                 blines.add(new Move(new Coord2d(lines.get(best))));
                 //The next line should start from `best`
-                i = best-1;
+                i = best - 1;
             }
-            if(DefSettings.DEBUG.get())
+            if (DefSettings.DEBUG.get())
                 debug(blines);
             return blines;
         } else {

@@ -1,10 +1,9 @@
 package haven;
 
+import javax.media.opengl.GL;
 import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
-import javax.media.opengl.GL;
 
 public class PartyMemberOutline extends Sprite {
     private final GLState mat;
@@ -71,7 +70,7 @@ public class PartyMemberOutline extends Sprite {
         try {
             double z = glob.map.getcz(c);
             for (int j = 0; j < this.posa.size(); j++) {
-                float tz = (float)(glob.map.getcz(c.x + posa.get(j * 3), c.y - posa.get(j * 3 + 1)) - z);
+                float tz = (float) (glob.map.getcz(c.x + posa.get(j * 3), c.y - posa.get(j * 3 + 1)) - z);
                 posa.put(j * 3 + 2, tz + 0.1f);
             }
         } catch (Loading e) {

@@ -1,8 +1,6 @@
 package haven.automation;
 
 
-import static haven.OCache.posres;
-
 import haven.Coord;
 import haven.GItem;
 import haven.GameUI;
@@ -10,6 +8,8 @@ import haven.Gob;
 import haven.Loading;
 import haven.Resource;
 import haven.WItem;
+
+import static haven.OCache.posres;
 
 public class LeashAnimal implements Runnable {
     private GameUI gui;
@@ -33,7 +33,7 @@ public class LeashAnimal implements Runnable {
                 if (res != null && (res.name.startsWith("gfx/kritter/horse/") ||
                         res.name.equals("gfx/kritter/sheep/sheep") ||
                         res.name.equals("gfx/kritter/cattle/cattle") ||
-                        res.name.equals("gfx/kritter/boar/boar") || 
+                        res.name.equals("gfx/kritter/boar/boar") ||
                         res.name.equals("gfx/kritter/goat/wildgoat"))) {
                     if (animal == null)
                         animal = gob;

@@ -41,7 +41,7 @@ public interface ResCache {
 
     public static class StupidJavaCodeContainer {
         private static ResCache makeglobal() {
-	    return(HashDirCache.create());
+            return (HashDirCache.create());
         }
     }
 

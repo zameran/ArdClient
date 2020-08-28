@@ -26,12 +26,19 @@
 
 package haven.resutil;
 
-import haven.*;
-
+import haven.GItem;
+import haven.Glob;
+import haven.ItemData;
+import haven.ItemInfo;
+import haven.QualityList;
+import haven.Resource;
+import haven.RichText;
+import haven.Session;
+import haven.Utils;
 
 import java.awt.image.BufferedImage;
 
-import static haven.QualityList.SingleType.*;
+import static haven.QualityList.SingleType.Quality;
 
 public class Curiosity extends ItemInfo.Tip {
     public final int exp, mw, enc;
@@ -68,28 +75,28 @@ public class Curiosity extends ItemInfo.Tip {
             buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Experience cost: $col[255,255,192]{%d}\n"), enc));
         if (time > 0)
             buf.append(timefmt());
-        if(exp > 0 && mw > 0)
-            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "\nLP/HR/Weight: $col[255,255,192]{%s}\n"), (Math.round(exp / (time / 60))/mw)));
+        if (exp > 0 && mw > 0)
+            buf.append(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "\nLP/HR/Weight: $col[255,255,192]{%s}\n"), (Math.round(exp / (time / 60)) / mw)));
         return (RichText.render(buf.toString(), 0).img);
     }
 
     public static class Data implements ItemData.ITipData {
-	public final int lp, weight, xp, time;
+        public final int lp, weight, xp, time;
 
-	public Data(Curiosity ii, QualityList q) {
-	    QualityList.Quality single = q.single(Quality);
-	    if(single == null) {
-		single = QualityList.DEFAULT;
-	    }
-	    lp = (int) Math.round(ii.exp / single.multiplier);
-	    weight = ii.mw;
-	    xp = ii.enc;
-	    time = (int)ii.time;
-	}
+        public Data(Curiosity ii, QualityList q) {
+            QualityList.Quality single = q.single(Quality);
+            if (single == null) {
+                single = QualityList.DEFAULT;
+            }
+            lp = (int) Math.round(ii.exp / single.multiplier);
+            weight = ii.mw;
+            xp = ii.enc;
+            time = (int) ii.time;
+        }
 
-	@Override
-	public ItemInfo create(Session sess) {
-	    return new Curiosity(null, lp, weight, xp, time);
-	}
+        @Override
+        public ItemInfo create(Session sess) {
+            return new Curiosity(null, lp, weight, xp, time);
+        }
     }
 }

@@ -1,6 +1,10 @@
 package haven;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ActList extends Listbox<ActList.ActItem> {
     private static final Text.Foundry font = new Text.Foundry(Text.serif, 15).aa(true);
@@ -74,7 +78,7 @@ public class ActList extends Listbox<ActList.ActItem> {
             this.pagina = pagina;
             //Text.render(res.layer(Resource.action).name).tex();
             this.name = Text.render(this.pagina.act().name);
-          //  this.name = font.render(this.pagina.act().name);
+            //  this.name = font.render(this.pagina.act().name);
             this.icon = new TexI(PUtils.convolvedown(pagina.res.get().layer(Resource.imgc).img,
                     new Coord(itemh, itemh), CharWnd.iconfilter));
         }

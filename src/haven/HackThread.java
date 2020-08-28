@@ -31,8 +31,8 @@ import java.util.Set;
 
 public class HackThread extends Thread {
     public HackThread(ThreadGroup tg, Runnable target, String name) {
-    /* Hack #1: Override stupid security-managers' whims to move
-     * threads into whimsical thread-groups. */
+        /* Hack #1: Override stupid security-managers' whims to move
+         * threads into whimsical thread-groups. */
         super((tg == null) ? tg() : tg, target, name);
     }
 

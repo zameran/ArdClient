@@ -26,10 +26,9 @@
 
 package haven;
 
+import javax.media.opengl.GL2;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import javax.media.opengl.GL2;
 
 public class BufferBGL extends BGL {
     private Command[] list;

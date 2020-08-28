@@ -1,14 +1,14 @@
 package haven.automation;
 
 
-import static haven.OCache.posres;
-
 import haven.Coord2d;
 import haven.FlowerMenu;
 import haven.GameUI;
 import haven.Gob;
 import haven.Loading;
 import haven.Resource;
+
+import static haven.OCache.posres;
 
 public class Dismount implements Runnable {
     private GameUI gui;

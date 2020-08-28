@@ -26,6 +26,8 @@
 
 package haven;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -33,9 +35,6 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 public class GOut {
     public final static boolean glerror = false;
@@ -183,17 +182,21 @@ public class GOut {
         return (def2d.copy());
     }
 
-    private void render(Tex t, Coord ul, Coord br, Coord3f tul, Coord3f tbr)  {
+    private void render(Tex t, Coord ul, Coord br, Coord3f tul, Coord3f tbr) {
         st.prep(t.draw());
         apply();
 
 
         gl.glBegin(GL2.GL_QUADS);
 
-        gl.glTexCoord2f(tul.x, tul.y); gl.glVertex3i(ul.x, ul.y, 0);
-        gl.glTexCoord2f(tbr.x, tul.y); gl.glVertex3i(br.x, ul.y, 0);
-        gl.glTexCoord2f(tbr.x, tbr.y); gl.glVertex3i(br.x, br.y, 0);
-        gl.glTexCoord2f(tul.x, tbr.y); gl.glVertex3i(ul.x, br.y, 0);
+        gl.glTexCoord2f(tul.x, tul.y);
+        gl.glVertex3i(ul.x, ul.y, 0);
+        gl.glTexCoord2f(tbr.x, tul.y);
+        gl.glVertex3i(br.x, ul.y, 0);
+        gl.glTexCoord2f(tbr.x, tbr.y);
+        gl.glVertex3i(br.x, br.y, 0);
+        gl.glTexCoord2f(tul.x, tbr.y);
+        gl.glVertex3i(ul.x, br.y, 0);
 
         gl.glEnd();
         checkerr(gl);
@@ -201,37 +204,37 @@ public class GOut {
 
     private void crender(TextureAtlas.Img tex, Coord c, Coord sz, Coord ul, Coord br) {
         final Tex texture = tex.tex();
-        if(sz.x == 0 || sz.y == 0)
+        if (sz.x == 0 || sz.y == 0)
             return;
 
-        if((c.x >= br.x) || (c.y >= br.y) ||
+        if ((c.x >= br.x) || (c.y >= br.y) ||
                 (c.x + sz.x <= ul.x) || (c.y + sz.y <= ul.y))
             return;
 
         Coord
-                vul = new Coord(c),		//Upper Left of draw coord
-                vbr = new Coord(c.add(sz));	//Bottom right of draw coord
+                vul = new Coord(c),        //Upper Left of draw coord
+                vbr = new Coord(c.add(sz));    //Bottom right of draw coord
         Coord3f
-                tul = new Coord3f(tex.tul),	//Upper Left coord within the texture
-                tbr = new Coord3f(tex.tbr),	//Bottom right coord within the texture
-                tfsz = tbr.sub(tul);		//The size of this unit within the texture
+                tul = new Coord3f(tex.tul),    //Upper Left coord within the texture
+                tbr = new Coord3f(tex.tbr),    //Bottom right coord within the texture
+                tfsz = tbr.sub(tul);        //The size of this unit within the texture
 
 
-        if(c.x < ul.x) {
+        if (c.x < ul.x) {
             vul.x = ul.x;
-            tul.x = tex.tul.x + (tfsz.x * ((vul.x-c.x)/(float)sz.x));
+            tul.x = tex.tul.x + (tfsz.x * ((vul.x - c.x) / (float) sz.x));
         }
-        if(c.y < ul.y) {
+        if (c.y < ul.y) {
             vul.y = ul.y;
-            tul.y = tex.tul.y + (tfsz.y * ((vul.y-c.y)/(float)sz.y));
+            tul.y = tex.tul.y + (tfsz.y * ((vul.y - c.y) / (float) sz.y));
         }
-        if(c.x + sz.x > br.x) {
+        if (c.x + sz.x > br.x) {
             vbr.x = br.x;
-            tbr.x = tex.tul.x + (tfsz.x * ((vbr.x-c.x)/(float)sz.x));
+            tbr.x = tex.tul.x + (tfsz.x * ((vbr.x - c.x) / (float) sz.x));
         }
-        if(c.y + sz.y > br.y) {
+        if (c.y + sz.y > br.y) {
             vbr.y = br.y;
-            tbr.y = tex.tul.y + (tfsz.y * ((vbr.y-c.y)/(float)sz.y));
+            tbr.y = tex.tul.y + (tfsz.y * ((vbr.y - c.y) / (float) sz.y));
         }
 
 
@@ -239,7 +242,7 @@ public class GOut {
     }
 
     public void image(TextureAtlas.Img tex, Coord c, Coord sz) {
-        if(tex != null) {
+        if (tex != null) {
             st.set(cur2d);
             crender(tex, c.add(tx), sz, ul, ul.add(this.sz));
             checkerr();
@@ -256,7 +259,7 @@ public class GOut {
     }
 
     public void aimage(TextureAtlas.Img tex, Coord c, double ax, double ay) {
-        image(tex, c.add((int)((double)tex.sz.x * -ax), (int)((double)tex.sz.y * -ay)));
+        image(tex, c.add((int) ((double) tex.sz.x * -ax), (int) ((double) tex.sz.y * -ay)));
     }
 
     public void image(BufferedImage img, Coord c) {
@@ -383,13 +386,13 @@ public class GOut {
 
     //Alternative to line, uses GL_POINTS, surprisingly better than lines tbh
     public void dottedline(Coord c1, Coord c2, float w) {
-        final float m = (float)(c2.y - c1.y) / (c2.x - c1.x);
-        if(Float.isFinite(m) && m != 0) {
+        final float m = (float) (c2.y - c1.y) / (c2.x - c1.x);
+        if (Float.isFinite(m) && m != 0) {
             final float b = c2.y - m * c2.x;
             float x = Math.max(c1.x < c2.x ? c1.x : c2.x, 0);
             float y;
             float end = Math.min(c1.x < c2.x ? c2.x : c1.x, sz.x);
-            float step = Math.min(1f, (end-x)/Math.abs((m*x+b) - (m*end+b)));
+            float step = Math.min(1f, (end - x) / Math.abs((m * x + b) - (m * end + b)));
 
 
             st.set(cur2d);
@@ -404,9 +407,9 @@ public class GOut {
             }
             gl.glEnd();
             checkerr();
-        } else if(m == 0) {
+        } else if (m == 0) {
             //Horizontal
-            if(c1.y >= 0 && c1.y <= sz.y) {
+            if (c1.y >= 0 && c1.y <= sz.y) {
                 float x = Math.max(Math.min(c1.x, c2.x), 0);
                 if (x < sz.x) {
                     float mx = Math.min(Math.max(c1.x, c2.x), sz.x);
@@ -424,7 +427,7 @@ public class GOut {
             }
         } else {
             //Vertical
-            if(c1.x >= 0 && c1.x <= sz.x) {
+            if (c1.x >= 0 && c1.x <= sz.x) {
                 float y = Math.max(Math.min(c1.y, c2.y), 0);
                 if (y < sz.x) {
                     float my = Math.min(Math.max(c1.y, c2.y), sz.y);
@@ -581,10 +584,14 @@ public class GOut {
         float r = tl + ((tr - tl) * ((float) brt.x) / ((float) sz.x));
         float b = tt + ((tb - tt) * ((float) brt.y) / ((float) sz.y));
         gl.glBegin(GL2.GL_QUADS);
-        gl.glTexCoord2f(l, 1 - t); gl.glVertex2i(ul.x, ul.y);
-        gl.glTexCoord2f(r, 1 - t); gl.glVertex2i(br.x, ul.y);
-        gl.glTexCoord2f(r, 1 - b); gl.glVertex2i(br.x, br.y);
-        gl.glTexCoord2f(l, 1 - b); gl.glVertex2i(ul.x, br.y);
+        gl.glTexCoord2f(l, 1 - t);
+        gl.glVertex2i(ul.x, ul.y);
+        gl.glTexCoord2f(r, 1 - t);
+        gl.glVertex2i(br.x, ul.y);
+        gl.glTexCoord2f(r, 1 - b);
+        gl.glVertex2i(br.x, br.y);
+        gl.glTexCoord2f(l, 1 - b);
+        gl.glVertex2i(ul.x, br.y);
         gl.glEnd();
         checkerr();
     }
@@ -602,9 +609,9 @@ public class GOut {
         double d = 0.1;
         int i = 0;
         double a = a1;
-        while(true) {
-            vertex(c.add((int)Math.round(Math.cos(a) * r.x), -(int)Math.round(Math.sin(a) * r.y)));
-            if(a >= a2)
+        while (true) {
+            vertex(c.add((int) Math.round(Math.cos(a) * r.x), -(int) Math.round(Math.sin(a) * r.y)));
+            if (a >= a2)
                 break;
             a = Math.min(a + d, a2);
         }
@@ -778,7 +785,7 @@ public class GOut {
             public void run(GL2 gl) {
                 byte[] buf = new byte[4];
                 gl.glReadPixels(c.x + tx.x, root.sz.y - c.y - tx.y, 1, 1, GL.GL_RGBA, GL2.GL_UNSIGNED_BYTE, ByteBuffer.wrap(buf));
-                Color result = new Color(((int)buf[0]) & 0xff, ((int)buf[1]) & 0xff, ((int)buf[2]) & 0xff, ((int)buf[3]) & 0xff);
+                Color result = new Color(((int) buf[0]) & 0xff, ((int) buf[1]) & 0xff, ((int) buf[2]) & 0xff, ((int) buf[3]) & 0xff);
                 checkerr(gl);
                 cb.done(result);
             }

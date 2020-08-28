@@ -26,10 +26,13 @@
 
 package haven;
 
-import haven.glsl.*;
+import haven.glsl.ShaderMacro;
+import haven.glsl.Tex2D;
+import haven.glsl.Varying;
 
-import java.util.*;
-import javax.media.opengl.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import java.util.Collection;
 
 import static haven.GOut.checkerr;
 
@@ -173,7 +176,7 @@ public abstract class TexGL extends Tex {
                 sampler = lbind(g, tex);
             } else {
                 if (draw.tex != this.tex)
-                    throw(new RuntimeException(String.format("TexGL does not support different clip (%s) and draw (%s) textures.", this.tex, draw.tex)));
+                    throw (new RuntimeException(String.format("TexGL does not support different clip (%s) and draw (%s) textures.", this.tex, draw.tex)));
             }
             if (g.gc.pref.alphacov.val) {
                 g.gl.glEnable(GL2.GL_SAMPLE_ALPHA_TO_COVERAGE);
@@ -413,40 +416,40 @@ public abstract class TexGL extends Tex {
             final Indir<Resource> tres;
             final int tid;
             int a = 0;
-            if(args[a] instanceof String) {
-                tres = res.pool.load((String)args[a], (Integer)args[a + 1]);
-                tid = (Integer)args[a + 2];
+            if (args[a] instanceof String) {
+                tres = res.pool.load((String) args[a], (Integer) args[a + 1]);
+                tid = (Integer) args[a + 2];
                 a += 3;
             } else {
                 tres = res.indir();
-                tid = (Integer)args[a];
+                tid = (Integer) args[a];
                 a += 1;
             }
             boolean tclip = defclip;
-            while(a < args.length) {
-                String f = (String)args[a++];
-                if(f.equals("a"))
+            while (a < args.length) {
+                String f = (String) args[a++];
+                if (f.equals("a"))
                     tclip = false;
-                else if(f.equals("c"))
+                else if (f.equals("c"))
                     tclip = true;
             }
             final boolean clip = tclip; /* ¦] */
-            return(new Material.Res.Resolver() {
+            return (new Material.Res.Resolver() {
                 public void resolve(Collection<GLState> buf) {
                     Tex tex;
                     TexR rt = tres.get().layer(TexR.class, tid);
-                    if(rt != null) {
+                    if (rt != null) {
                         tex = rt.tex();
                     } else {
                         Resource.Image img = tres.get().layer(Resource.imgc, tid);
-                        if(img != null) {
+                        if (img != null) {
                             tex = img.tex();
                         } else {
-                            throw(new RuntimeException(String.format("Specified texture %d for %s not found in %s", tid, res, tres)));
+                            throw (new RuntimeException(String.format("Specified texture %d for %s not found in %s", tid, res, tres)));
                         }
                     }
                     buf.add(tex.draw());
-                    if(clip)
+                    if (clip)
                         buf.add(tex.clip());
                 }
             });

@@ -1,6 +1,6 @@
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
 
 
 public class GobCustomSprite extends Sprite {
@@ -26,7 +26,7 @@ public class GobCustomSprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= tex.sz().x/2;
+        sc.x -= tex.sz().x / 2;
         sc.y -= 80;
         g.image(tex, sc);
     }
@@ -34,7 +34,7 @@ public class GobCustomSprite extends Sprite {
     public boolean tick(int dt) {
         super.tick(dt);
         time += dt;
-        if(haslife) {
+        if (haslife) {
             life -= dt;
             return life <= 0;
         } else {

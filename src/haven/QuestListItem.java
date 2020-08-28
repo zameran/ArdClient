@@ -3,7 +3,7 @@ package haven;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class QuestListItem implements Comparable<QuestListItem>{
+public class QuestListItem implements Comparable<QuestListItem> {
     public String name;
     public int status;
     public int parentid;

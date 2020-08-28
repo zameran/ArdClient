@@ -26,22 +26,21 @@
 
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static haven.Gob.SEMISTATIC;
 
 /**
- *
  * TODO: Think of a way to represent the stage in 3D to avoid static/semistatic mess.
  */
 public class GobQuality extends GAttrib {
-    private static final Tex[] gobhp = new Tex[] {
-	    Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
-	    Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
+    private static final Tex[] gobhp = new Tex[]{
+            Text.renderstroked("25%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
+            Text.renderstroked("50%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex(),
+            Text.renderstroked("75%", Color.WHITE, Color.BLACK, Gob.gobhpf).tex()
     };
     public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, Text.cfg.charName);
-    private static Tex gobquality = Text.renderstroked("1",Color.WHITE,Color.BLACK,nfnd).tex();
+    private static Tex gobquality = Text.renderstroked("1", Color.WHITE, Color.BLACK, nfnd).tex();
     public int quality;
 
     Material.Colors fx;
@@ -51,14 +50,14 @@ public class GobQuality extends GAttrib {
         super(g);
         this.quality = quality;
         this.fx = new Material.Colors(new Color(255, 0, 0, 255));
-        gobquality = Text.renderstroked(String.valueOf(quality),Color.WHITE,Color.BLACK,nfnd).tex();
+        gobquality = Text.renderstroked(String.valueOf(quality), Color.WHITE, Color.BLACK, nfnd).tex();
         qualityfx = new PView.Draw2D() {
-	    public void draw2d(GOut g) {
-		if(gob.sc != null && quality > 0) {
-            g.image(gobquality, gob.sc.sub(15, -100));
-		}
-	    }
-	};
+            public void draw2d(GOut g) {
+                if (gob.sc != null && quality > 0) {
+                    g.image(gobquality, gob.sc.sub(15, -100));
+                }
+            }
+        };
     }
 
     public GLState getfx() {
@@ -72,8 +71,8 @@ public class GobQuality extends GAttrib {
     }
 
     public Object staticp() {
-        if(quality > 0)
-	    return super.staticp();
+        if (quality > 0)
+            return super.staticp();
         else
             return SEMISTATIC;
     }

@@ -1,5 +1,8 @@
 package haven;
 
+import haven.resutil.Ridges;
+
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
@@ -10,10 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
-
-import haven.resutil.Ridges;
 
 
 public class MapGridSave {
@@ -52,7 +51,7 @@ public class MapGridSave {
         Long knownId = sessionIds.get(normc);
         if (knownId == null)
             sessionIds.put(normc, g.id);
-        // tiles might arrive out of order, so we defer those until new session has been created
+            // tiles might arrive out of order, so we defer those until new session has been created
         else if (knownId != g.id)
             throw new Loading();
 
@@ -114,7 +113,7 @@ public class MapGridSave {
                 buf.setRGB(c.x, c.y, rgb);
             }
         }
-        
+
         if (blackpxs >= 9500) // if 95% black
             return null;
 

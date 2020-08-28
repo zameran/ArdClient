@@ -29,7 +29,7 @@ package haven;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Map;
 
 public abstract class PView extends Widget {
@@ -226,7 +226,7 @@ public abstract class PView extends Widget {
         try {
             lm.prep(def);
             new Light.LightList().prep(def);
-            try{
+            try {
                 rls.setup(scene, def);
                 if (curf != null)
                     curf.tick("setup");

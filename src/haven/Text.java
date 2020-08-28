@@ -26,7 +26,10 @@
 
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -97,17 +100,21 @@ public class Text {
 
     static {
         // here be localization horrors...
-        
+
         switch (Resource.language) {
             default:
             case "en":
-                cfg = new FontSettings(11, 11, 14, 11, 11, 14, 12, 14, 12, 12, 12, 11); break;
+                cfg = new FontSettings(11, 11, 14, 11, 11, 14, 12, 14, 12, 12, 12, 11);
+                break;
             case "ru":
-                cfg = new FontSettings(11, 11, 13, 11, 11, 14, 12, 14, 12, 12, 12, 11); break;
+                cfg = new FontSettings(11, 11, 13, 11, 11, 14, 12, 14, 12, 12, 12, 11);
+                break;
             case "ko":
-                cfg = new FontSettings(14, 14, 16, 14, 14, 14, 14, 14, 12, 12, 12, 14); break;
+                cfg = new FontSettings(14, 14, 16, 14, 14, 14, 14, 14, 12, 12, 12, 14);
+                break;
             case "zh":
-                cfg = new FontSettings(14, 16, 14, 16, 16, 16, 16, 16, 12, 14, 16, 16); break;
+                cfg = new FontSettings(14, 16, 14, 16, 16, 16, 16, 16, 12, 14, 16, 16);
+                break;
         }
 
         // this mapping is not really needed anymore.
@@ -252,8 +259,8 @@ public class Text {
         }
 
         public int height() {
-        /* XXX: Should leading go into this, when it's mostly
-         * supposed to be used for one-liners? */
+            /* XXX: Should leading go into this, when it's mostly
+             * supposed to be used for one-liners? */
             return (m.getAscent() + m.getDescent());
         }
 
@@ -306,7 +313,7 @@ public class Text {
             g.drawString(text, 0, m.getAscent());
             g.drawString(text, 2, m.getAscent());
             g.drawString(text, 1, m.getAscent() - 1);
-            g.drawString(text,1, m.getAscent() + 1);
+            g.drawString(text, 1, m.getAscent() + 1);
             g.setColor(c);
             g.drawString(text, 1, m.getAscent());
             g.dispose();
@@ -318,6 +325,7 @@ public class Text {
         }
 
     }
+
     public static Line renderstroked(String text) {
         return renderstroked(text, Color.WHITE, Color.BLACK);
     }
@@ -348,7 +356,11 @@ public class Text {
         protected String text(T value) {
             return (String.valueOf(value));
         }
-        protected Text render(String text) {return(fnd.render(text));}
+
+        protected Text render(String text) {
+            return (fnd.render(text));
+        }
+
         protected abstract T value();
 
         public Text get() {
@@ -472,6 +484,6 @@ public class Text {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-       return font;
+        return font;
     }
 }

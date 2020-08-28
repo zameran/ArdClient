@@ -14,7 +14,7 @@ import haven.Sprite;
 import haven.Tex;
 import haven.Text;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class TextOverlay extends Sprite {
     private Tex tex;
@@ -59,7 +59,7 @@ public class TextOverlay extends Sprite {
         Color strokeColor = overlayGob.strokeColor;
         int fontSize = overlayGob.fontSize;
         String font = overlayGob.font;
-        Text.Foundry textFoundry= new Text.Foundry(Text.cfg.font.get(font), fontSize);
+        Text.Foundry textFoundry = new Text.Foundry(Text.cfg.font.get(font), fontSize);
 
         tex = Text.renderstroked(text, textColor, strokeColor, textFoundry).tex();
     }

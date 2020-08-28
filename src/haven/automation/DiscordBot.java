@@ -10,13 +10,13 @@ import net.dv8tion.jda.core.entities.Game;
 public class DiscordBot {
     static JDA jda;
 
-    public static JDA getJda(){
-        if(jda == null){
+    public static JDA getJda() {
+        if (jda == null) {
             try {
                 jda = new JDABuilder(AccountType.BOT).setToken(Config.discordtoken).buildAsync();
                 jda.getPresence().setStatus(OnlineStatus.ONLINE);
                 jda.getPresence().setGame(Game.playing("Revived Bot"));
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println("Invalid Token");
             }
             return jda;

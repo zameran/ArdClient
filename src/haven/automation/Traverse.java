@@ -1,17 +1,23 @@
 package haven.automation;
 
-import haven.*;
-
-import static haven.OCache.posres;
+import haven.Coord;
+import haven.Coord2d;
+import haven.GameUI;
+import haven.Gob;
+import haven.Loading;
+import haven.Resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static haven.OCache.posres;
 
 public class Traverse implements Runnable {
 
     public class doorShiftData {
         public String gobName;
         public ArrayList<doors> doorList;
+
         public doorShiftData(String gn, ArrayList<doors> dl) {
             gobName = gn;
             doorList = dl;
@@ -21,6 +27,7 @@ public class Traverse implements Runnable {
     public class doors {
         public Coord2d meshRC;
         public int meshID;
+
         public doors(Coord2d c, int id) {
             meshRC = c;
             meshID = id;
@@ -86,12 +93,12 @@ public class Traverse implements Runnable {
     @Override
     public void run() {
         Coord2d plc = gui.map.player().rc;
-        target targetDoor = getTarget(gui, buildings, 40*11);
-        Gob targetGob = getGob(gui, gobNameSuffix, 40*11);
+        target targetDoor = getTarget(gui, buildings, 40 * 11);
+        Gob targetGob = getGob(gui, gobNameSuffix, 40 * 11);
         if ((targetDoor == null) && (targetGob == null))
             return;
         if (targetGob != null)
-            if ( (targetDoor == null) || (targetGob.rc.dist(plc) < targetDoor.c.dist(plc)) ) //if no door is found or another gob is closer
+            if ((targetDoor == null) || (targetGob.rc.dist(plc) < targetDoor.c.dist(plc))) //if no door is found or another gob is closer
                 targetDoor = new target(targetGob.rc, targetGob.sc, targetGob.id, -1);
 
         try {
@@ -105,8 +112,8 @@ public class Traverse implements Runnable {
     private target getTarget(GameUI gui, ArrayList<doorShiftData> b, double r) {
         Coord2d plc = gui.map.player().rc;
         target result = null;
-        ArrayList<target> targetList = new ArrayList<target> ();
-        if( r == 0 ) r = 1024.0;
+        ArrayList<target> targetList = new ArrayList<target>();
+        if (r == 0) r = 1024.0;
         synchronized (gui.map.glob.oc) {
             for (Gob gob : gui.map.glob.oc) {
                 try {
@@ -114,11 +121,11 @@ public class Traverse implements Runnable {
 
                     if (res == null)
                         continue;
-                    if ( !res.name.startsWith("gfx/terobjs/arch/") )
+                    if (!res.name.startsWith("gfx/terobjs/arch/"))
                         continue;
 
                     for (doorShiftData bld : b) {
-                        if ( bld.gobName.equals(res.name) ) {
+                        if (bld.gobName.equals(res.name)) {
                             for (doors drs : bld.doorList) {
                                 targetList.add(new target(
                                         gob.rc.add(drs.meshRC.rotate(gob.a)),
@@ -129,8 +136,7 @@ public class Traverse implements Runnable {
                             }
                         }
                     }
-                }
-                catch (Loading l) {
+                } catch (Loading l) {
                     l.printStackTrace();
                 }
             }
@@ -147,10 +153,10 @@ public class Traverse implements Runnable {
         return result;
     }
 
-    private Gob getGob(GameUI gui, ArrayList<String> gobNameAL, double maxrange)   {
+    private Gob getGob(GameUI gui, ArrayList<String> gobNameAL, double maxrange) {
         Coord2d plc = gui.map.player().rc;
         Gob result = null;
-        if( maxrange == 0 ) maxrange = 1024.0;
+        if (maxrange == 0) maxrange = 1024.0;
         synchronized (gui.map.glob.oc) {
             for (Gob gob : gui.map.glob.oc) {
                 try {
@@ -158,13 +164,14 @@ public class Traverse implements Runnable {
                         continue;
                     boolean skipGob = true;
                     for (String n : gobNameAL)
-                        if ( ( gob.getres().name.endsWith(n) ) && ( !gob.getres().name.endsWith("gfx/terobjs/arch/greathall-door") ) )
+                        if ((gob.getres().name.endsWith(n)) && (!gob.getres().name.endsWith("gfx/terobjs/arch/greathall-door")))
                             skipGob = false;
                     if (skipGob) continue;
                     if ((result == null || gob.rc.dist(plc) < result.rc.dist(plc)) && gob.rc.dist(plc) < maxrange)
                         result = gob;
+                } catch (Loading l) {
+                    l.printStackTrace();
                 }
-                catch (Loading l) { l.printStackTrace(); }
             }
         }
         return result;

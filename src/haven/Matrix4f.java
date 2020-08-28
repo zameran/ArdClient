@@ -95,7 +95,7 @@ public class Matrix4f {
     }
 
     public float[] homoc() {
-        return new float[] { m[12], m[13], m[14], 1 };
+        return new float[]{m[12], m[13], m[14], 1};
     }
 
     public Coord3f mul4(Coord3f b) {
@@ -126,7 +126,7 @@ public class Matrix4f {
 
     public Matrix4f mul1(Matrix4f o) {
         int i = 0;
-    /* This should get allocated on the stack unless the JVM sucks. */
+        /* This should get allocated on the stack unless the JVM sucks. */
         float[] n = new float[16];
         for (int x = 0; x < 16; x += 4) {
             for (int y = 0; y < 4; y++) {

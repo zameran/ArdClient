@@ -32,8 +32,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AlchemyService {
-   	public static final String API_ENDPOINT = "https://raw.githubusercontent.com/Cediner/ArdClient/Unstable/";
-   	private static final String ALCHEMY_DATA_URL = "https://raw.githubusercontent.com/Cediner/ArdClient/Unstable/data/alchemy-info.json";
+    public static final String API_ENDPOINT = "https://raw.githubusercontent.com/Cediner/ArdClient/Unstable/";
+    private static final String ALCHEMY_DATA_URL = "https://raw.githubusercontent.com/Cediner/ArdClient/Unstable/data/alchemy-info.json";
     private static final File ALCHEMY_DATA_CACHE_FILE = new File("alchemy_data.json");
 
     private static final Map<String, ParsedAlchemyInfo> cachedItems = new ConcurrentHashMap<>();
@@ -77,7 +77,7 @@ public class AlchemyService {
             if (System.currentTimeMillis() - lastModified > TimeUnit.MINUTES.toMillis(30)) {
                 try {
                     HttpURLConnection connection = (HttpURLConnection) new URL(ALCHEMY_DATA_URL).openConnection();
-					connection.setRequestProperty("User-Agent", "H&H Client");
+                    connection.setRequestProperty("User-Agent", "H&H Client");
                     connection.setRequestProperty("Cache-Control", "no-cache");
                     StringBuilder stringBuilder = new StringBuilder();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
@@ -85,9 +85,9 @@ public class AlchemyService {
                     } finally {
                         connection.disconnect();
                     }
-					String content = stringBuilder.toString();
+                    String content = stringBuilder.toString();
 
-					Files.write(ALCHEMY_DATA_CACHE_FILE.toPath(), Collections.singleton(content), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+                    Files.write(ALCHEMY_DATA_CACHE_FILE.toPath(), Collections.singleton(content), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
                     JSONObject object = new JSONObject(content);
                     object.keySet().forEach(key -> cachedItems.put(key, new ParsedAlchemyInfo()));
                     System.out.println("Updated alchemy data file: " + cachedItems.size() + " entries");
@@ -117,7 +117,7 @@ public class AlchemyService {
 
                 ParsedAlchemyInfo parsedAlchemyInfo = new ParsedAlchemyInfo(); //FIXME look at
                 parsedAlchemyInfo.resourceName = resName;
-                parsedAlchemyInfo.energy = (int)(Math.round(alchemyInfo.end * 100));
+                parsedAlchemyInfo.energy = (int) (Math.round(alchemyInfo.end * 100));
                 parsedAlchemyInfo.hunger = round2Dig(alchemyInfo.glut * 100);
 
                 for (int i = 0; i < alchemyInfo.evs.length; i++) {
@@ -141,11 +141,11 @@ public class AlchemyService {
                         String name = (String) info.getClass().getField("name").get(info);
                         Double value = (Double) info.getClass().getField("val").get(info);
                         parsedAlchemyInfo.ingredients.add(new AlchemyIngredient(name, (int) (value * 100)));
-                    } else if(info.getClass().getName().equals("Smoke")) {
-						String name = (String) info.getClass().getField("name").get(info);
-						Double value = (Double) info.getClass().getField("val").get(info);
-						parsedAlchemyInfo.ingredients.add(new AlchemyIngredient(name, (int) (value * 100)));
-					}
+                    } else if (info.getClass().getName().equals("Smoke")) {
+                        String name = (String) info.getClass().getField("name").get(info);
+                        Double value = (Double) info.getClass().getField("val").get(info);
+                        parsedAlchemyInfo.ingredients.add(new AlchemyIngredient(name, (int) (value * 100)));
+                    }
                 }
 
                 checkAndSend(parsedAlchemyInfo);
@@ -186,10 +186,10 @@ public class AlchemyService {
             try {
                 HttpURLConnection connection =
                         (HttpURLConnection) new URL(API_ENDPOINT + "alchemy").openConnection();
-				connection.setRequestMethod("POST");
+                connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
-				connection.setRequestProperty("User-Agent", "H&H Client");
-				connection.setDoOutput(true);
+                connection.setRequestProperty("User-Agent", "H&H Client");
+                connection.setDoOutput(true);
                 try (OutputStream out = connection.getOutputStream()) {
                     out.write(new JSONArray(toSend.toArray()).toString().getBytes(StandardCharsets.UTF_8));
                 }

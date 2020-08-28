@@ -1,18 +1,21 @@
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 //Ported from mamber, adjusted for public use,  credits to Matias
 
-public class QuestHelper extends Window{
+public class QuestHelper extends Window {
     public boolean active = false;
     public QuestHelper.QuestList questList;
 
     public QuestHelper() {
-        super(Coord.z, "Quest Helper","Quest Helper");
+        super(Coord.z, "Quest Helper", "Quest Helper");
         new Coord(20, 55);
         this.add(new QuestHelper.PButton(80, "Refresh", this.questList), new Coord(100, 20));
         this.questList = new QuestHelper.QuestList(270, 13, this);
@@ -59,7 +62,7 @@ public class QuestHelper extends Window{
         if (this.active) {
             boolean alltrue = true;
 
-            for(int i = 0; i < ncond.size(); ++i) {
+            for (int i = 0; i < ncond.size(); ++i) {
                 QuestListItem qitem = new QuestListItem((ncond.get(i)).desc, (ncond.get(i)).done, id);
                 if (alltrue && i == ncond.size() - 1) {
                     qitem = new QuestListItem("★ " + (ncond.get(i)).desc, 2, id);
@@ -72,8 +75,8 @@ public class QuestHelper extends Window{
                 boolean dontadd = false;
                 Iterator var7 = this.questList.quests.iterator();
 
-                while(var7.hasNext()) {
-                    QuestListItem item = (QuestListItem)var7.next();
+                while (var7.hasNext()) {
+                    QuestListItem item = (QuestListItem) var7.next();
                     if (qitem.name.equals(item.name) && qitem.parentid == item.parentid) {
                         dontadd = true;
                     }
@@ -97,7 +100,9 @@ public class QuestHelper extends Window{
         public List<QuestListItem> quests = new ArrayList(50);
         public boolean refresh = true;
         private long lastUpdateTime = System.currentTimeMillis();
-        private final Comparator<QuestListItem> comp = (a, b) -> { return a.name.compareTo(b.name);};
+        private final Comparator<QuestListItem> comp = (a, b) -> {
+            return a.name.compareTo(b.name);
+        };
         private QuestHelper questHelper;
 
         public QuestList(int w, int h, QuestHelper questHelper) {
@@ -121,8 +126,8 @@ public class QuestHelper extends Window{
                         try {
                             Iterator var6 = this.ui.gui.chrwdg.cqst.quests.iterator();
 
-                            while(var6.hasNext()) {
-                                CharWnd.Quest quest = (CharWnd.Quest)var6.next();
+                            while (var6.hasNext()) {
+                                CharWnd.Quest quest = (CharWnd.Quest) var6.next();
                                 if (quest.id != this.ui.gui.chrwdg.credos.pqid) {
                                     this.ui.gui.chrwdg.wdgmsg("qsel", new Object[]{quest.id});
                                 }
@@ -168,11 +173,12 @@ public class QuestHelper extends Window{
                     g.chcolor(new Color(255, 255, 255));
                 }
 
-                    g.text(item.name, nameoff);
+                g.text(item.name, nameoff);
 
 
                 g.chcolor();
-            } catch (Loading var5) {}
+            } catch (Loading var5) {
+            }
 
         }
 

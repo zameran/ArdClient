@@ -1,6 +1,10 @@
 package haven.sloth.gui;
 
-import haven.*;
+import haven.Button;
+import haven.Coord;
+import haven.MainFrame;
+import haven.UI;
+import haven.Widget;
 import haven.sloth.util.ObservableListener;
 
 import java.util.Collection;

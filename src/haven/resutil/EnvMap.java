@@ -26,6 +26,20 @@
 
 package haven.resutil;
 
+import haven.BGL;
+import haven.GLState;
+import haven.GOut;
+import haven.Material;
+import haven.PView;
+import haven.Resource;
+import haven.TexCube;
+import haven.glsl.MiscLib;
+import haven.glsl.ShaderMacro;
+import haven.glsl.Uniform;
+
+import javax.media.opengl.GL;
+import java.awt.Color;
+
 import static haven.glsl.Cons.add;
 import static haven.glsl.Cons.l;
 import static haven.glsl.Cons.mul;
@@ -37,24 +51,6 @@ import static haven.glsl.Type.MAT3;
 import static haven.glsl.Type.SAMPLERCUBE;
 import static haven.glsl.Type.VEC3;
 
-import java.awt.Color;
-
-import javax.media.opengl.GL;
-
-import haven.BGL;
-import haven.GLState;
-import haven.GOut;
-import haven.Material;
-import haven.PView;
-import haven.Resource;
-import haven.TexCube;
-import haven.glsl.Expression;
-import haven.glsl.Macro1;
-import haven.glsl.MiscLib;
-import haven.glsl.ProgramContext;
-import haven.glsl.ShaderMacro;
-import haven.glsl.Uniform;
-
 @Material.ResName("envref")
 public class EnvMap extends GLState {
     public static final Slot<EnvMap> slot = new Slot<EnvMap>(Slot.Type.DRAW, EnvMap.class);
@@ -64,52 +60,58 @@ public class EnvMap extends GLState {
     private static final TexCube sky = WaterTile.sky;
     public final float[] col;
     private TexUnit tsky;
-    
+
     public EnvMap(Color col) {
-	this.col = new float[] {
-	    col.getRed() / 255.0f,
-	    col.getGreen() / 255.0f,
-	    col.getBlue() / 255.0f,
-	};
+        this.col = new float[]{
+                col.getRed() / 255.0f,
+                col.getGreen() / 255.0f,
+                col.getBlue() / 255.0f,
+        };
     }
 
     public EnvMap(Resource res, Object... args) {
-	this((Color)args[0]);
+        this((Color) args[0]);
     }
 
-	private static final ShaderMacro shader = prog -> {
-		prog.dump = true;
-		prog.fctx.fragcol.mod(in -> {
-			return(add(in, mul(textureCube(csky.ref(), neg(mul(icam.ref(),
-					reflect(MiscLib.fragedir(prog.fctx).depref(),
-							MiscLib.frageyen(prog.fctx).depref())))),
-					vec4(ccol.ref(), l(0.0)))));
-		}, 90);
+    private static final ShaderMacro shader = prog -> {
+        prog.dump = true;
+        prog.fctx.fragcol.mod(in -> {
+            return (add(in, mul(textureCube(csky.ref(), neg(mul(icam.ref(),
+                    reflect(MiscLib.fragedir(prog.fctx).depref(),
+                            MiscLib.frageyen(prog.fctx).depref())))),
+                    vec4(ccol.ref(), l(0.0)))));
+        }, 90);
     };
 
-	public ShaderMacro shader() {return(shader);}
-    public boolean reqshader() {return(true);}
+    public ShaderMacro shader() {
+        return (shader);
+    }
+
+    public boolean reqshader() {
+        return (true);
+    }
 
     public void reapply(GOut g) {
-	g.gl.glUniform1i(g.st.prog.uniform(csky), tsky.id);
-	g.gl.glUniform3fv(g.st.prog.uniform(ccol), 1, col, 0);
-	g.gl.glUniformMatrix3fv(g.st.prog.uniform(icam), 1, false, PView.camxf(g).transpose().trim3(), 0);
+        g.gl.glUniform1i(g.st.prog.uniform(csky), tsky.id);
+        g.gl.glUniform3fv(g.st.prog.uniform(ccol), 1, col, 0);
+        g.gl.glUniformMatrix3fv(g.st.prog.uniform(icam), 1, false, PView.camxf(g).transpose().trim3(), 0);
     }
 
     public void apply(GOut g) {
-	BGL gl = g.gl;
-	(tsky = g.st.texalloc()).act(g);
-	gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, sky.glid(g));
-	reapply(g);
+        BGL gl = g.gl;
+        (tsky = g.st.texalloc()).act(g);
+        gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, sky.glid(g));
+        reapply(g);
     }
 
     public void unapply(GOut g) {
-	tsky.act(g);
-	g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, null);
-	tsky.free(); tsky = null;
+        tsky.act(g);
+        g.gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, null);
+        tsky.free();
+        tsky = null;
     }
 
     public void prep(Buffer buf) {
-	buf.put(slot, this);
+        buf.put(slot, this);
     }
 }

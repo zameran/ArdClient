@@ -26,13 +26,12 @@
 
 package haven;
 
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
 
 public class GPUProfile extends Profile {
     private Collection<Frame> waiting = new LinkedList<Frame>();

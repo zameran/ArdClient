@@ -35,13 +35,13 @@ public class Astronomy {
     public final int is;
 
     public Astronomy(double dt, double mp, double yt, boolean night, Color mc, int is, double sp, double sd) {
-	this.dt = dt;
-	this.mp = mp;
-	this.yt = yt;
-	this.night = night;
-	this.mc = mc;
-	this.is = is;
-	this.sp = sp;
-	this.sd = sd;
+        this.dt = dt;
+        this.mp = mp;
+        this.yt = yt;
+        this.night = night;
+        this.mc = mc;
+        this.is = is;
+        this.sp = sp;
+        this.sd = sd;
     }
 }

@@ -90,9 +90,10 @@ public abstract class Message {
         public FormatError(String message) {
             super(message);
         }
-	public FormatError(String message, Throwable cause) {
-	    super(message, cause);
-	}
+
+        public FormatError(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     public abstract boolean underflow(int hint);
@@ -218,7 +219,7 @@ public abstract class Message {
     }
 
     public Color color() {
-        return(new Color(uint8(), uint8(), uint8(), uint8()));
+        return (new Color(uint8(), uint8(), uint8(), uint8()));
     }
 
     public float float32() {
@@ -378,9 +379,11 @@ public abstract class Message {
     }
 
     public Message addcolor(Color color) {
-        adduint8(color.getRed()); adduint8(color.getGreen());
-        adduint8(color.getBlue()); adduint8(color.getAlpha());
-        return(this);
+        adduint8(color.getRed());
+        adduint8(color.getGreen());
+        adduint8(color.getBlue());
+        adduint8(color.getAlpha());
+        return (this);
     }
 
     public Message addfloat32(float num) {
@@ -396,42 +399,42 @@ public abstract class Message {
     }
 
     public Message addlist(Object... args) {
-        for(Object o : args) {
-            if(o == null) {
+        for (Object o : args) {
+            if (o == null) {
                 adduint8(T_NIL);
-            } else if(o instanceof Integer) {
+            } else if (o instanceof Integer) {
                 adduint8(T_INT);
-                addint32(((Integer)o).intValue());
-            } else if(o instanceof String) {
+                addint32(((Integer) o).intValue());
+            } else if (o instanceof String) {
                 adduint8(T_STR);
-                addstring((String)o);
-            } else if(o instanceof Coord) {
+                addstring((String) o);
+            } else if (o instanceof Coord) {
                 adduint8(T_COORD);
-                addcoord((Coord)o);
-            } else if(o instanceof byte[]) {
-                byte[] b = (byte[])o;
+                addcoord((Coord) o);
+            } else if (o instanceof byte[]) {
+                byte[] b = (byte[]) o;
                 adduint8(T_BYTES);
-                if(b.length < 128) {
+                if (b.length < 128) {
                     adduint8(b.length);
                 } else {
                     adduint8(0x80);
                     addint32(b.length);
                 }
                 addbytes(b);
-            } else if(o instanceof Color) {
+            } else if (o instanceof Color) {
                 adduint8(T_COLOR);
-                addcolor((Color)o);
-            } else if(o instanceof Float) {
+                addcolor((Color) o);
+            } else if (o instanceof Float) {
                 adduint8(T_FLOAT32);
-                addfloat32(((Float)o).floatValue());
-            } else if(o instanceof Double) {
+                addfloat32(((Float) o).floatValue());
+            } else if (o instanceof Double) {
                 adduint8(T_FLOAT64);
-                addfloat64(((Double)o).floatValue());
+                addfloat64(((Double) o).floatValue());
             } else {
-                throw(new RuntimeException("Cannot encode a " + o.getClass() + " as TTO"));
+                throw (new RuntimeException("Cannot encode a " + o.getClass() + " as TTO"));
             }
         }
-        return(this);
+        return (this);
     }
 
     public int peekrbuf(int i) {

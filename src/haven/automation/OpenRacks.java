@@ -1,17 +1,15 @@
 package haven.automation;
 
 
-import haven.*;
-
-import static haven.OCache.posres;
-
-import haven.Window;
-import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.Coord;
+import haven.GameUI;
+import haven.Gob;
 import haven.Inventory;
 
-import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+
+import static haven.OCache.posres;
 
 public class OpenRacks implements Runnable {
     private GameUI gui;
@@ -36,16 +34,16 @@ public class OpenRacks implements Runnable {
             for (Gob gob : gui.ui.sess.glob.oc)
                 allGobs.add(gob);
 
-                try {
-                    for (int i = 0; i < allGobs.size(); i++) {
-                        double distFromPlayer = allGobs.get(i).rc.dist(gui.map.player().rc);
-                        if (distFromPlayer < 14 && allGobs.get(i).getres().name.contains("cheeserack")) {
-                            Racks.add(allGobs.get(i));
-                        }
+            try {
+                for (int i = 0; i < allGobs.size(); i++) {
+                    double distFromPlayer = allGobs.get(i).rc.dist(gui.map.player().rc);
+                    if (distFromPlayer < 14 && allGobs.get(i).getres().name.contains("cheeserack")) {
+                        Racks.add(allGobs.get(i));
                     }
-
-                } catch (NullPointerException e) {
                 }
+
+            } catch (NullPointerException e) {
+            }
 
         }
 

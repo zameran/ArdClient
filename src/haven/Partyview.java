@@ -26,6 +26,9 @@
 
 package haven;
 
+import haven.Party.Member;
+import haven.sloth.gui.MovableWidget;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,9 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import haven.Party.Member;
-import haven.sloth.gui.MovableWidget;
 
 public class Partyview extends Widget {
     public static final String ptkey = "Partyview";
@@ -61,7 +61,7 @@ public class Partyview extends Widget {
     }
 
     protected void added() {
-        if(haven.sloth.gui.MovableWidget.knownPositions.containsKey(ptkey)) {
+        if (haven.sloth.gui.MovableWidget.knownPositions.containsKey(ptkey)) {
             setPosRel(MovableWidget.knownPositions.get(ptkey));
         }
         party = ui.sess.glob.party;

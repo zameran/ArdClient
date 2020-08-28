@@ -26,6 +26,8 @@
 
 package haven.glsl;
 
+import haven.glsl.ValBlock.Value;
+
 import static haven.glsl.Cons.aadd;
 import static haven.glsl.Cons.add;
 import static haven.glsl.Cons.ass;
@@ -56,8 +58,6 @@ import static haven.glsl.Type.FLOAT;
 import static haven.glsl.Type.INT;
 import static haven.glsl.Type.VEC3;
 import static haven.glsl.Type.VOID;
-
-import haven.glsl.ValBlock.Value;
 
 public class Phong extends ValBlock.Group {
     private final ProgramContext prog;
@@ -199,9 +199,9 @@ public class Phong extends ValBlock.Group {
                     stmt(dolight.call(i.ref(), vert, edir, norm, bcol.tgt, scol.tgt))));
         } else {
             for (int i = 0; i < 4; i++) {
-        /* No few drivers seem to be having trouble with the for
-		 * loop. It would be nice to be able to select this code
-		 * path only on those drivers. */
+                /* No few drivers seem to be having trouble with the for
+                 * loop. It would be nice to be able to select this code
+                 * path only on those drivers. */
                 blk.add(new If(gt(nlights.ref(), l(i)),
                         stmt(dolight.call(l(i), vert, edir, norm, bcol.tgt, scol.tgt))));
             }

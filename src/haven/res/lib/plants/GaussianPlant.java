@@ -27,7 +27,7 @@ public class GaussianPlant implements Factory {
         ArrayList<Object> allmeshes = new ArrayList<Object>(res.layers(MeshRes.class));
         CSprite cs = new CSprite(owner, res);
         if (Config.simpleforage) {
-            MeshRes mesh = (MeshRes)allmeshes.get(0);
+            MeshRes mesh = (MeshRes) allmeshes.get(0);
             cs.addpart(0, 0, mesh.mat.get(), mesh.m);
         } else {
             Random rnd = owner.mkrandoom();

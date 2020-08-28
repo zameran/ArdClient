@@ -1,11 +1,10 @@
 package haven;
 
-import static haven.MCache.tilesz;
-
+import javax.media.opengl.GL2;
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL2;
+import static haven.MCache.tilesz;
 
 public class TileOutline implements Rendered {
     private final MCache map;
@@ -15,12 +14,11 @@ public class TileOutline implements Rendered {
             DefSettings.GUIDESCOLOR.get().getRed(),
             DefSettings.GUIDESCOLOR.get().getGreen(),
             DefSettings.GUIDESCOLOR.get().getBlue(),
-            (int)(DefSettings.GUIDESCOLOR.get().getAlpha() * 0.7)
+            (int) (DefSettings.GUIDESCOLOR.get().getAlpha() * 0.7)
     );
     private Location location;
     private Coord ul;
     private int curIndex;
-
 
 
     public TileOutline(MCache map) {

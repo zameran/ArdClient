@@ -1,6 +1,6 @@
 package haven;
 
-import java.awt.*;
+import java.awt.Color;
 
 
 public class GobQualitySprite extends Sprite {
@@ -21,7 +21,7 @@ public class GobQualitySprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= tex.sz().x/2;
+        sc.x -= tex.sz().x / 2;
         sc.y -= 40;
         g.image(tex, sc);
     }
@@ -39,7 +39,7 @@ public class GobQualitySprite extends Sprite {
 
     public void update(int val) {
         this.val = val;
-        hlt0 = Text.renderstroked("Quality "+String.valueOf(val), new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
+        hlt0 = Text.renderstroked("Quality " + String.valueOf(val), new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
         tex = hlt0;
     }
 }

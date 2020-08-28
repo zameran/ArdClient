@@ -68,7 +68,7 @@ public class Projection extends Transform {
         float d = 1 / o[3];
         float nx = o[0] * d;
         float ny = o[1] * d;
-        return new Coord((int)(((nx + 1) / 2) * wndsz.x), (int)(((-ny + 1) / 2) * wndsz.y));
+        return new Coord((int) (((nx + 1) / 2) * wndsz.x), (int) (((-ny + 1) / 2) * wndsz.y));
     }
 
     public static Matrix4f makefrustum(Matrix4f d, float left, float right, float bottom, float top, float near, float far) {

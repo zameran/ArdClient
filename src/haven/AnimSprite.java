@@ -91,9 +91,9 @@ public class AnimSprite extends Sprite {
     }
 
     public Object staticp() {
-        if (owner instanceof  Gob)
+        if (owner instanceof Gob)
             return (((Config.disableAllAnimations && ((Gob) owner).type != Type.HUMAN) || anims.length == 0) ? Gob.STATIC : null);
         else
-        return ((Config.disableAllAnimations || anims.length == 0) ? Gob.STATIC : null);
+            return ((Config.disableAllAnimations || anims.length == 0) ? Gob.STATIC : null);
     }
 }

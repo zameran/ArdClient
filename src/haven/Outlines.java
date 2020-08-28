@@ -26,6 +26,20 @@
 
 package haven;
 
+import haven.glsl.Expression;
+import haven.glsl.For;
+import haven.glsl.Function;
+import haven.glsl.If;
+import haven.glsl.LValue;
+import haven.glsl.MiscLib;
+import haven.glsl.ProgramContext;
+import haven.glsl.Return;
+import haven.glsl.ShaderMacro;
+import haven.glsl.Tex2D;
+import haven.glsl.Uniform;
+
+import java.awt.Color;
+
 import static haven.glsl.Cons.aadd;
 import static haven.glsl.Cons.abs;
 import static haven.glsl.Cons.add;
@@ -58,21 +72,6 @@ import static haven.glsl.Type.INT;
 import static haven.glsl.Type.SAMPLER2D;
 import static haven.glsl.Type.SAMPLER2DMS;
 import static haven.glsl.Type.VEC3;
-
-import java.awt.Color;
-
-import haven.glsl.Expression;
-import haven.glsl.For;
-import haven.glsl.Function;
-import haven.glsl.Function.PDir;
-import haven.glsl.If;
-import haven.glsl.LValue;
-import haven.glsl.MiscLib;
-import haven.glsl.ProgramContext;
-import haven.glsl.Return;
-import haven.glsl.ShaderMacro;
-import haven.glsl.Tex2D;
-import haven.glsl.Uniform;
 
 public class Outlines implements Rendered {
     private boolean symmetric;
@@ -116,11 +115,11 @@ public class Outlines implements Rendered {
                 LValue ret = code.local(FLOAT, l(0.0)).ref();
                 Expression lnrm = code.local(VEC3, mul(sub(pick(sample(true, tc, sample, Coord.z), "rgb"), l(0.5)), l(2.0))).ref();
                 Expression ldep = code.local(FLOAT, pick(sample(false, tc, sample, Coord.z), "z")).ref();
-            /* XXX: Current depth detection doesn't work well
-		     * with frustum projections, perhaps because of
-		     * the lack of precision in the depth buffer
-		     * (though I'm not sure I buy that explanation
-		     * yet). */
+                /* XXX: Current depth detection doesn't work well
+                 * with frustum projections, perhaps because of
+                 * the lack of precision in the depth buffer
+                 * (though I'm not sure I buy that explanation
+                 * yet). */
                 LValue dh = code.local(FLOAT, l(0.0002)).ref(), dl = code.local(FLOAT, l(-0.0002)).ref();
                 for (int i = 0; i < points.length; i++) {
                     Expression cdep = pick(sample(false, tc, sample, points[i]), "z");
@@ -164,8 +163,8 @@ public class Outlines implements Rendered {
     }
 
     static {
-	/* XXX: It would be good to have some kind of more convenient
-	 * shader internation. */
+        /* XXX: It would be good to have some kind of more convenient
+         * shader internation. */
         shaders[0] = shader(false, false);
         shaders[1] = shader(false, true);
         shaders[2] = shader(true, false);

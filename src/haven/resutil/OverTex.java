@@ -26,18 +26,6 @@
 
 package haven.resutil;
 
-import static haven.glsl.Cons.texture2D;
-import static haven.glsl.Type.SAMPLER2D;
-import static haven.glsl.Type.VEC2;
-import static haven.glsl.Type.VEC4;
-
-import java.nio.FloatBuffer;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.media.opengl.GL;
-
 import haven.BGL;
 import haven.Console;
 import haven.Debug;
@@ -61,6 +49,17 @@ import haven.glsl.ShaderMacro;
 import haven.glsl.Uniform;
 import haven.glsl.ValBlock;
 import haven.glsl.VertexContext;
+
+import javax.media.opengl.GL;
+import java.nio.FloatBuffer;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import static haven.glsl.Cons.texture2D;
+import static haven.glsl.Type.SAMPLER2D;
+import static haven.glsl.Type.VEC2;
+import static haven.glsl.Type.VEC4;
 
 public class OverTex extends GLState {
     public static final Slot<OverTex> slot = new Slot<OverTex>(Slot.Type.DRAW, OverTex.class);
@@ -176,9 +175,15 @@ public class OverTex extends GLState {
 
     @VertexBuf.ResName("otex2")
     public static class OTexC extends VertexBuf.Vec2Array {
-        public OTexC(FloatBuffer data) {super(data, otexc);}
-        public OTexC(Resource res, Message buf, int nv) {this(VertexBuf.loadbuf2(Utils.wfbuf(nv * 2), buf));}
+        public OTexC(FloatBuffer data) {
+            super(data, otexc);
+        }
+
+        public OTexC(Resource res, Message buf, int nv) {
+            this(VertexBuf.loadbuf2(Utils.wfbuf(nv * 2), buf));
+        }
     }
+
     @VertexBuf.ResName("otex")
     public static class CDecode implements VertexBuf.ArrayCons {
         public void cons(Collection<VertexBuf.AttribArray> dst, Resource res, Message buf, int nv) {

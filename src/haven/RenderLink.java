@@ -89,7 +89,7 @@ public interface RenderLink {
                     }
                 };
             } else if (t == 1) {
-	        mesh = null;
+                mesh = null;
                 String nm = buf.string();
                 int ver = buf.uint16();
                 final Indir<Resource> amb = res.pool.load(nm, ver);
@@ -99,7 +99,7 @@ public interface RenderLink {
                     }
                 };
             } else if (t == 2) {
-		mesh = null;
+                mesh = null;
                 String nm = buf.string();
                 int ver = buf.uint16();
                 final Indir<Resource> lres = res.pool.load(nm, ver);
@@ -110,9 +110,9 @@ public interface RenderLink {
 
                     public Rendered make() {
                         if (res == null) {
-				ArrayList<Rendered> cl = new ArrayList<>();
+                            ArrayList<Rendered> cl = new ArrayList<>();
                             for (FastMesh.MeshRes mr : lres.get().layers(FastMesh.MeshRes.class)) {
-                                if(((meshid >= 0) && (mr.id < 0)) || ((mr.id & meshmask) == meshid))
+                                if (((meshid >= 0) && (mr.id < 0)) || ((mr.id & meshmask) == meshid))
                                     cl.add(mr.mat.get().apply(mr.m));
                             }
                             final Rendered[] ca = cl.toArray(new Rendered[0]);
@@ -131,18 +131,18 @@ public interface RenderLink {
                     }
                 };
             } else {
-		mesh = null;
+                mesh = null;
                 throw (new Resource.LoadException("Invalid renderlink type: " + t, getres()));
             }
         }
 
-	public Optional<Resource> mesh() {
-	    try {
-	        return mesh != null ? Optional.of(mesh.get()) : Optional.empty();
-	    } catch (Loading l) {
-	        return Optional.empty();
-	    }
-	}
+        public Optional<Resource> mesh() {
+            try {
+                return mesh != null ? Optional.of(mesh.get()) : Optional.empty();
+            } catch (Loading l) {
+                return Optional.empty();
+            }
+        }
 
         public void init() {
         }

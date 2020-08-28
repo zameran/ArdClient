@@ -67,13 +67,14 @@ public class Following extends Moving {
     }
 
     public Optional<Coord2d> getDest() {
-	Gob tgt = gob.glob.oc.getgob(this.tgt);
-	if(tgt != null) {
-	    return Optional.of(new Coord2d(tgt.getc()));
-	} else {
-	    return Optional.empty();
-	}
+        Gob tgt = gob.glob.oc.getgob(this.tgt);
+        if (tgt != null) {
+            return Optional.of(new Coord2d(tgt.getc()));
+        } else {
+            return Optional.empty();
+        }
     }
+
     public Gob tgt() {
         return (gob.glob.oc.getgob(this.tgt));
     }
@@ -94,7 +95,7 @@ public class Following extends Moving {
     private Skeleton.Pose getpose(Gob tgt) {
         if (tgt == null)
             return (null);
-	    return(Skeleton.getpose(tgt.getattr(Drawable.class)));
+        return (Skeleton.getpose(tgt.getattr(Drawable.class)));
     }
 
     public GLState xf() {

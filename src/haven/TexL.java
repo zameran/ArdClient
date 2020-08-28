@@ -26,15 +26,14 @@
 
 package haven;
 
+import haven.Defer.Future;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
-import haven.Defer.Future;
 
 public abstract class TexL extends TexGL {
     protected Mipmapper mipmap = null;

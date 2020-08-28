@@ -30,7 +30,7 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.*;
+import java.util.function.Function;
 
 public abstract class Sprite implements Rendered {
     public static final int GOB_HEALTH_ID = -1001;
@@ -52,9 +52,13 @@ public abstract class Sprite implements Rendered {
 
     public interface Owner extends OwnerContext {
         public Random mkrandoom();
+
         public Resource getres();
+
         @Deprecated
-        public default Glob glob() {return(context(Glob.class));}
+        public default Glob glob() {
+            return (context(Glob.class));
+        }
     }
 
     public static class FactMaker implements Resource.PublishedCode.Instancer {
@@ -63,12 +67,13 @@ public abstract class Sprite implements Rendered {
                 return (cl.asSubclass(Factory.class).newInstance());
             try {
                 Function<Object[], Sprite> make = Utils.smthfun(cl, "mksprite", Sprite.class, Owner.class, Resource.class, Message.class);
-                return(new Factory() {
+                return (new Factory() {
                     public Sprite create(Owner owner, Resource res, Message sdt) {
-                        return(make.apply(new Object[] {owner, res, sdt}));
+                        return (make.apply(new Object[]{owner, res, sdt}));
                     }
                 });
-            } catch(NoSuchMethodException e) {}
+            } catch (NoSuchMethodException e) {
+            }
             if (Sprite.class.isAssignableFrom(cl))
                 return (mkdynfact(cl.asSubclass(Sprite.class)));
             return (null);

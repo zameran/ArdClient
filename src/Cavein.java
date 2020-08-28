@@ -1,19 +1,31 @@
-import haven.*;
+import haven.BGL;
+import haven.Config;
+import haven.Coord;
+import haven.Coord3f;
+import haven.GLState;
+import haven.GOut;
+import haven.Gob;
+import haven.Light;
+import haven.Material;
+import haven.Message;
+import haven.RenderList;
+import haven.Resource;
+import haven.Sprite;
+import haven.Utils;
 
 import java.awt.Color;
-import java.util.Iterator;
 import java.nio.Buffer;
-import java.util.LinkedList;
 import java.nio.FloatBuffer;
-import java.util.Random;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 //
 // Decompiled by Procyon v0.5.30
 //
 
-public class Cavein extends Sprite implements Gob.Overlay.CDel
-{
+public class Cavein extends Sprite implements Gob.Overlay.CDel {
     static final GLState mat;
     List<Boll> bollar;
     Random rnd;
@@ -36,9 +48,9 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel
         this.de = 0.0f;
         this.str = message.uint8();
         this.sz = new Coord(message.uint8(), message.uint8());
-        this.off = new Coord3f(-this.sz.x / 2.0f, -this.sz.y / 2.0f, (float)message.uint8());
+        this.off = new Coord3f(-this.sz.x / 2.0f, -this.sz.y / 2.0f, (float) message.uint8());
         this.life = 60 * Config.caveinduration;//make dust last however many minutes selected in display settings
-               // message.uint8(); default value
+        // message.uint8(); default value
     }
 
     public void draw(final GOut gOut) {
@@ -52,9 +64,9 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel
         this.nrmb.rewind();
         gl.glPointSize(1.1f);
         gl.glEnableClientState(32884);
-        gl.glVertexPointer(3, 5126, 0, (Buffer)this.posb);
+        gl.glVertexPointer(3, 5126, 0, (Buffer) this.posb);
         gl.glEnableClientState(32885);
-        gl.glNormalPointer(5126, 0, (Buffer)this.nrmb);
+        gl.glNormalPointer(5126, 0, (Buffer) this.nrmb);
         gl.glDrawArrays(0, 0, this.bollar.size());
         gl.glDisableClientState(32884);
         gl.glDisableClientState(32885);
@@ -115,19 +127,18 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel
     }
 
     static {
-      if(!Config.colorfulcaveins)
-       mat = (GLState)new Material.Colors(new Color(255, 255, 255), new Color(255, 255, 255), new Color(128, 128, 128), new Color(0, 0, 0), 1.0f);
-      else {
-          Random rnd = new Random();
-          mat = new haven.Material.Colors(new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
-                  new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
-                  new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
-                  new Color(0, 0, 0), 1.0F);
-      }
+        if (!Config.colorfulcaveins)
+            mat = (GLState) new Material.Colors(new Color(255, 255, 255), new Color(255, 255, 255), new Color(128, 128, 128), new Color(0, 0, 0), 1.0f);
+        else {
+            Random rnd = new Random();
+            mat = new haven.Material.Colors(new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
+                    new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
+                    new Color(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)),
+                    new Color(0, 0, 0), 1.0F);
+        }
     }
 
-    class Boll
-    {
+    class Boll {
         Coord3f p;
         Coord3f v;
         Coord3f n;
@@ -147,9 +158,9 @@ public class Cavein extends Sprite implements Gob.Overlay.CDel
             v.z -= n;
             this.v.z = Math.min(0.0f, this.v.z + n * 5.0f * this.v.z * this.v.z / this.sz);
             final Coord3f v2 = this.v;
-            v2.x += n * (float)Cavein.this.rnd.nextGaussian() * 0.1f;
+            v2.x += n * (float) Cavein.this.rnd.nextGaussian() * 0.1f;
             final Coord3f v3 = this.v;
-            v3.y += n * (float)Cavein.this.rnd.nextGaussian() * 0.1f;
+            v3.y += n * (float) Cavein.this.rnd.nextGaussian() * 0.1f;
             final Coord3f p = this.p;
             p.x += this.v.x;
             final Coord3f p2 = this.p;

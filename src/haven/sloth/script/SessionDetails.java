@@ -1,6 +1,14 @@
 package haven.sloth.script;
 
-import haven.*;
+import haven.Charlist;
+import haven.FlowerMenu;
+import haven.GItem;
+import haven.ISBox;
+import haven.Inventory;
+import haven.Session;
+import haven.Speedget;
+import haven.UI;
+import haven.VMeter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -34,7 +42,7 @@ public class SessionDetails {
     private final Object fmlock = new Object();
 
     private WeakReference<Speedget> speed;
-    private final Object speedlock =  new Object();
+    private final Object speedlock = new Object();
 
     private WeakReference<GItem> helditem;
     private final Object heldlock = new Object();
@@ -102,9 +110,9 @@ public class SessionDetails {
         final List<PointerData> ret = new ArrayList<>();
         synchronized (pointers) {
             Iterator<WeakReference<PointerData>> itr = pointers.iterator();
-            while(itr.hasNext()) {
+            while (itr.hasNext()) {
                 final PointerData ptr = itr.next().get();
-                if(ptr != null) {
+                if (ptr != null) {
                     ret.add(ptr);
                 } else {
                     itr.remove();
@@ -133,9 +141,9 @@ public class SessionDetails {
         final List<VMeter> ret = new ArrayList<>();
         synchronized (vmeters) {
             Iterator<WeakReference<VMeter>> itr = vmeters.iterator();
-            while(itr.hasNext()) {
+            while (itr.hasNext()) {
                 final VMeter meter = itr.next().get();
-                if(meter != null) {
+                if (meter != null) {
                     ret.add(meter);
                 } else {
                     //remove broken/gc'd vmeters
@@ -165,9 +173,9 @@ public class SessionDetails {
         final List<ISBox> ret = new ArrayList<>();
         synchronized (stockpiles) {
             Iterator<WeakReference<ISBox>> itr = stockpiles.iterator();
-            while(itr.hasNext()) {
+            while (itr.hasNext()) {
                 final ISBox box = itr.next().get();
-                if(box != null) {
+                if (box != null) {
                     ret.add(box);
                 } else {
                     //remove broken/gc'd isboxes
@@ -293,7 +301,7 @@ public class SessionDetails {
     //Supplemental Only
     public Inventory getInventory(final int i) {
         synchronized (invs) {
-            if(i < invs.size())
+            if (i < invs.size())
                 return invs.get(i).get();
             else
                 return null;

@@ -45,18 +45,19 @@ public class IButton extends SIWidget {
     }
 
     public IButton(BufferedImage up, BufferedImage down, BufferedImage hover, final Runnable action) {
-	super(Utils.imgsz(up));
-	this.up = up;
-	this.down = down;
-	this.hover = hover;
-	this.action = action;
+        super(Utils.imgsz(up));
+        this.up = up;
+        this.down = down;
+        this.hover = hover;
+        this.action = action;
     }
+
     public IButton(BufferedImage up, BufferedImage down, BufferedImage hover) {
         super(Utils.imgsz(up));
         this.up = up;
         this.down = down;
         this.hover = hover;
-	this.action = () -> wdgmsg("activate");
+        this.action = () -> wdgmsg("activate");
     }
 
     public IButton(BufferedImage up, BufferedImage down) {
@@ -64,25 +65,27 @@ public class IButton extends SIWidget {
     }
 
     public IButton(String base, String up, String down, String hover, final Runnable action) {
-	this(Resource.loadimg(base + up), Resource.loadimg(base + down), Resource.loadimg(base + (hover == null?up:hover)), action);
+        this(Resource.loadimg(base + up), Resource.loadimg(base + down), Resource.loadimg(base + (hover == null ? up : hover)), action);
     }
+
     public IButton(String base, String up, String down, String hover) {
         this(Resource.loadimg(base + up), Resource.loadimg(base + down), Resource.loadimg(base + (hover == null ? up : hover)));
     }
 
-    public IButton(final String res,  final Runnable action) {
-	this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
+    public IButton(final String res, final Runnable action) {
+        this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
     }
 
     public IButton(final String res, final String tooltip, final Runnable action) {
-	this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
-    	this.tooltip = tooltip;
+        this(Resource.loadimg(res, 0), Resource.loadimg(res, 1), Resource.loadimg(res, 2), action);
+        this.tooltip = tooltip;
     }
+
     public void draw(BufferedImage buf) {
         Graphics g = buf.getGraphics();
-        if(a)
+        if (a)
             g.drawImage(down, 0, 0, null);
-        else if(h)
+        else if (h)
             g.drawImage(hover, 0, 0, null);
         else
             g.drawImage(up, 0, 0, null);
@@ -92,7 +95,7 @@ public class IButton extends SIWidget {
     public boolean checkhit(Coord c) {
         if (!c.isect(Coord.z, sz))
             return (false);
-        if(recthit)return true;
+        if (recthit) return true;
         if (up.getRaster().getNumBands() < 4)
             return (true);
         return (up.getRaster().getSample(c.x, c.y, 3) >= 128);
@@ -101,6 +104,7 @@ public class IButton extends SIWidget {
     private void activate() {
         action.run();
     }
+
     public void click() {
         action.run();
     }

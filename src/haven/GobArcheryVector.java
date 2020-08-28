@@ -1,8 +1,7 @@
 package haven;
 
-import java.awt.Color;
-
 import javax.media.opengl.GL2;
+import java.awt.Color;
 
 public class GobArcheryVector extends Sprite {
     private static final float[] friend = Utils.c2fa(new Color(78, 154, 6));

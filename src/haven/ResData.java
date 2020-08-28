@@ -65,10 +65,10 @@ public class ResData {
     }
 
     public String toString() {
-	    return(String.format("(%s, %s)", res, sdt));
+        return (String.format("(%s, %s)", res, sdt));
     }
 
     public int hashCode() {
-        return(Objects.hash(res, sdt));
+        return (Objects.hash(res, sdt));
     }
 }

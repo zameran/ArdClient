@@ -48,21 +48,21 @@ public class Scrollbar extends Widget {
 
     public void draw(GOut g) {
         if (vis()) {
-	    g.chcolor(DefSettings.SLIDERCOL.get());
-	    //x offset incase sflarp.sz.x > schain.sz.x
-	    int cx = (sflarp.sz().x / 2) - (schaint.sz().x / 2);
-	    //Top
-	    g.image(schaint, new Coord(cx, 0));
-	    //middle
-	    for(int y = schainb.sz().y; y < sz.y - schaint.sz().y; y += schainm.sz().y)
-		g.image(schainm, new Coord(cx, y));
-	    //bottom
-	    g.image(schainb, new Coord(cx, sz.y - schainb.sz().y));
-	    //slider
+            g.chcolor(DefSettings.SLIDERCOL.get());
+            //x offset incase sflarp.sz.x > schain.sz.x
+            int cx = (sflarp.sz().x / 2) - (schaint.sz().x / 2);
+            //Top
+            g.image(schaint, new Coord(cx, 0));
+            //middle
+            for (int y = schainb.sz().y; y < sz.y - schaint.sz().y; y += schainm.sz().y)
+                g.image(schainm, new Coord(cx, y));
+            //bottom
+            g.image(schainb, new Coord(cx, sz.y - schainb.sz().y));
+            //slider
             double a = (double) val / (double) (max - min);
             int fy = (int) ((sz.y - sflarp.sz().y) * a);
             g.image(sflarp, new Coord(0, fy));
-	    g.chcolor();
+            g.chcolor();
         }
     }
 
@@ -98,7 +98,8 @@ public class Scrollbar extends Widget {
         return (true);
     }
 
-    public void changed() {}
+    public void changed() {
+    }
 
     public void ch(int a) {
         int val = this.val + a;

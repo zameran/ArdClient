@@ -26,11 +26,11 @@
 
 package haven.glsl;
 
-import java.util.List;
-
 import haven.GLBuffer;
 import haven.GLState.Buffer;
 import haven.GOut;
+
+import java.util.List;
 
 public class Attribute extends Variable.Global {
     public Attribute(Type type, Symbol name) {
@@ -74,7 +74,9 @@ public class Attribute extends Variable.Global {
         }
 
         public abstract void filliarr(GOut g, List<Buffer> inst, GLBuffer buf);
+
         public abstract void bindiarr(GOut g, GLBuffer buf);
+
         public abstract void unbindiarr(GOut g, GLBuffer buf);
     }
 }

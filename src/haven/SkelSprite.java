@@ -26,15 +26,14 @@
 
 package haven;
 
+import haven.MorphedMesh.Morpher;
+import haven.Skeleton.Pose;
+import haven.Skeleton.PoseMod;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import haven.MorphedMesh.Morpher;
-import haven.Skeleton.Pose;
-import haven.Skeleton.PoseMod;
-import haven.DefSettings;
 
 public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.HasPose {
     public static final GLState
@@ -185,22 +184,22 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     public boolean setup(RenderList rl) {
         for (Rendered p : parts)
             rl.add(p, null);
-    /* rl.add(pose.debug, null); */
+        /* rl.add(pose.debug, null); */
         return (false);
     }
 
     public boolean tick(int idt) {
         float dt = idt / 1000.0f;
-        if(!stat || (ipold > 0)) {
+        if (!stat || (ipold > 0)) {
             boolean done = true;
-            for(PoseMod m : mods) {
+            for (PoseMod m : mods) {
                 m.tick(dt);
                 done = done && m.done();
             }
-            if(done)
+            if (done)
                 stat = true;
-            if(ipold > 0) {
-                if((ipold -= (dt / ipollen)) < 0) {
+            if (ipold > 0) {
+                if ((ipold -= (dt / ipollen)) < 0) {
                     ipold = 0;
                     oldpose = null;
                 }
@@ -215,17 +214,17 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     public Object staticp() {
         if (!Config.disableAllAnimations) {
             if (!stat || (manims.length > 0) || (ipold > 0)) {
-            return(null);
+                return (null);
             } else {
-        return(Gob.SemiStatic.class);
-    }
+                return (Gob.SemiStatic.class);
+            }
         } else {
             return Gob.STATIC;
         }
     }
 
     public Pose getpose() {
-	    return(pose);
+        return (pose);
     }
 
     static {

@@ -26,8 +26,6 @@
 
 package haven;
 
-import java.awt.image.BufferedImage;
-
 public class HSlider extends Widget {
     private static final Tex schainl = Theme.tex("scroll/horizontal", 0);
     private static final Tex schainm = Theme.tex("scroll/horizontal", 1);
@@ -46,20 +44,20 @@ public class HSlider extends Widget {
     }
 
     public void draw(GOut g) {
-	g.chcolor(DefSettings.SLIDERCOL.get());
-	//y offset incase sflarp.sz.y > schain.sz.y
-	int cy = (sflarp.sz().y / 2) - (schainl.sz().y / 2);
-	//Top
-	g.image(schainl, new Coord(0, cy));
-	//middle
-	for(int x = schainl.sz().x; x < sz.x - schainr.sz().x; x += schainm.sz().x)
-	    g.image(schainm, new Coord(x, cy));
-	//bottom
-	g.image(schainr, new Coord(sz.x-schainr.sz().x, cy));
-	//slider
+        g.chcolor(DefSettings.SLIDERCOL.get());
+        //y offset incase sflarp.sz.y > schain.sz.y
+        int cy = (sflarp.sz().y / 2) - (schainl.sz().y / 2);
+        //Top
+        g.image(schainl, new Coord(0, cy));
+        //middle
+        for (int x = schainl.sz().x; x < sz.x - schainr.sz().x; x += schainm.sz().x)
+            g.image(schainm, new Coord(x, cy));
+        //bottom
+        g.image(schainr, new Coord(sz.x - schainr.sz().x, cy));
+        //slider
         int fx = ((sz.x - sflarp.sz().x) * (val - min)) / (max - min);
         g.image(sflarp, new Coord(fx, 0));
-	g.chcolor();
+        g.chcolor();
     }
 
     public boolean mousedown(Coord c, int button) {
@@ -92,7 +90,8 @@ public class HSlider extends Widget {
         return (true);
     }
 
-    public void changed() {}
+    public void changed() {
+    }
 
     public void resize(int w) {
         super.resize(new Coord(w, sflarp.sz().y));

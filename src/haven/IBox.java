@@ -26,8 +26,6 @@
 
 package haven;
 
-import java.awt.*;
-
 public class IBox {
     public final Tex ctl, ctr, cbl, cbr;
     public final Tex bl, br, bt, bb;
@@ -56,14 +54,15 @@ public class IBox {
 
     public IBox(final String res) {
         this(Resource.loadtex(res, 0),
-		Resource.loadtex(res, 1),
-		Resource.loadtex(res, 2),
-		Resource.loadtex(res, 3),
-		Resource.loadtex(res, 4),
-		Resource.loadtex(res, 5),
-		Resource.loadtex(res, 6),
-		Resource.loadtex(res, 7));
+                Resource.loadtex(res, 1),
+                Resource.loadtex(res, 2),
+                Resource.loadtex(res, 3),
+                Resource.loadtex(res, 4),
+                Resource.loadtex(res, 5),
+                Resource.loadtex(res, 6),
+                Resource.loadtex(res, 7));
     }
+
     public Coord btloff() {
         return (new Coord(bl.sz().x, bt.sz().y));
     }
@@ -100,6 +99,6 @@ public class IBox {
         g.image(ctr, tl.add(sz.x - ctr.sz().x, 0));
         g.image(cbl, tl.add(0, sz.y - cbl.sz().y));
         g.image(cbr, new Coord(sz.x - cbr.sz().x + tl.x, sz.y - cbr.sz().y + tl.y));
-	g.chcolor();
+        g.chcolor();
     }
 }

@@ -2,7 +2,13 @@ package integrations.mapv4;
 
 import haven.Config;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,6 +16,7 @@ import java.net.URLConnection;
 /**
  * This utility class provides an abstraction layer for sending multipart HTTP
  * POST requests to a web server.
+ *
  * @author www.codejava.net
  */
 public class MultipartUtility {
@@ -23,6 +30,7 @@ public class MultipartUtility {
     /**
      * This constructor initializes a new HTTP POST request with content type
      * is set to multipart/form-data
+     *
      * @param requestURL
      * @param charset
      * @throws IOException
@@ -49,7 +57,8 @@ public class MultipartUtility {
 
     /**
      * Adds a form field to the request
-     * @param name field name
+     *
+     * @param name  field name
      * @param value field value
      */
     public void addFormField(String name, String value) {
@@ -92,7 +101,8 @@ public class MultipartUtility {
 
     /**
      * Adds a header field to the request.
-     * @param name - name of the header field
+     *
+     * @param name  - name of the header field
      * @param value - value of the header field
      */
     public void addHeaderField(String name, String value) {
@@ -102,6 +112,7 @@ public class MultipartUtility {
 
     /**
      * Completes the request and receives response from the server.
+     *
      * @return a list of Strings as response in case the server returned
      * status OK, otherwise an exception is thrown.
      * @throws IOException

@@ -1,8 +1,9 @@
 package haven;
 
-import java.awt.Color;
 import haven.sloth.gob.Type;
+
 import javax.media.opengl.GL2;
+import java.awt.Color;
 
 public class GobHitbox extends Sprite {
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
@@ -16,15 +17,15 @@ public class GobHitbox extends Sprite {
         super(gob, null);
 
         if (fill) {
-            mode =  GL2.GL_QUADS;
+            mode = GL2.GL_QUADS;
             clrstate = fillclrstate;
-        } else if (gob.type != Type.WALLSEG){
-            mode =  GL2.GL_LINE_LOOP;
+        } else if (gob.type != Type.WALLSEG) {
+            mode = GL2.GL_LINE_LOOP;
             clrstate = bbclrstate;
-        } else{
-            if(Config.flatwalls)
-                 wall = true;
-            mode =  GL2.GL_LINE_LOOP;
+        } else {
+            if (Config.flatwalls)
+                wall = true;
+            mode = GL2.GL_LINE_LOOP;
             clrstate = bbclrstate;
         }
 
@@ -36,7 +37,7 @@ public class GobHitbox extends Sprite {
 
     public boolean setup(RenderList rl) {
         rl.prepo(clrstate);
-        if (mode ==  GL2.GL_LINE_LOOP)
+        if (mode == GL2.GL_LINE_LOOP)
             rl.prepo(States.xray);
         return true;
     }
@@ -44,20 +45,20 @@ public class GobHitbox extends Sprite {
     public void draw(GOut g) {
         g.apply();
         BGL gl = g.gl;
-        if (mode ==  GL2.GL_LINE_LOOP && !wall) {
+        if (mode == GL2.GL_LINE_LOOP && !wall) {
             gl.glLineWidth(2.0F);
             gl.glBegin(mode);
             gl.glVertex3f(a.x, a.y, 1);
             gl.glVertex3f(b.x, b.y, 1);
             gl.glVertex3f(c.x, c.y, 1);
             gl.glVertex3f(d.x, d.y, 1);
-        } else if (!wall){
+        } else if (!wall) {
             gl.glBegin(mode);
             gl.glVertex3f(a.x, a.y, 1);
             gl.glVertex3f(d.x, d.y, 1);
             gl.glVertex3f(c.x, c.y, 1);
             gl.glVertex3f(b.x, b.y, 1);
-        }else {
+        } else {
             gl.glBegin(mode);
             gl.glVertex3f(a.x, a.y, 11);
             gl.glVertex3f(d.x, d.y, 11);
@@ -81,7 +82,7 @@ public class GobHitbox extends Sprite {
     private static final BBox bboxLamb = new BBox(new Coord(-6, -2), new Coord(6, 2));
     private static final BBox bboxGoat = new BBox(new Coord(-6, -2), new Coord(6, 2));
     private static final BBox bboxPig = new BBox(new Coord(-6, -3), new Coord(6, 3));
-    private static final BBox bboxCattle  = new BBox(new Coord(-12, -4), new Coord(12, 4));
+    private static final BBox bboxCattle = new BBox(new Coord(-12, -4), new Coord(12, 4));
     private static final BBox bboxHorse = new BBox(new Coord(-8, -4), new Coord(8, 4));
     private static final BBox bboxSmelter = new BBox(new Coord(-12, -12), new Coord(12, 20));
     private static final BBox bboxWallseg = new BBox(new Coord(-5, -6), new Coord(6, 5));
