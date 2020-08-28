@@ -209,9 +209,11 @@ public class TabStrip<T> extends Widget {
             } else {
                 if (pagina != null) {
                     try {
-                        return pagina.button().rendertt(true);
+                        BufferedImage bi = pagina.button().rendertt(true);
+                        if (bi != null) return bi;
+                        else return (Text.render("...").tex());
                     } catch (Loading e) {
-                        return ("...");
+                        return (Text.render("...").tex());
                     }
                 } else {
                     return text;
