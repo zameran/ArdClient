@@ -398,12 +398,14 @@ public abstract class ItemInfo {
         return (ret);
     }
 
-    public static BufferedImage longtip(List<ItemInfo> info) {
+    public synchronized static BufferedImage longtip(List<ItemInfo> info) {
         Layout l = new Layout();
-        for (ItemInfo ii : info) {
-            if (ii instanceof Tip) {
-                Tip tip = (Tip) ii;
-                l.add(tip);
+        synchronized (info) {
+            for (ItemInfo ii : info) {
+                if (ii instanceof Tip) {
+                    Tip tip = (Tip) ii;
+                    l.add(tip);
+                }
             }
         }
         if (l.tips.size() < 1)

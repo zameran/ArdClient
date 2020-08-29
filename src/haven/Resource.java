@@ -988,7 +988,6 @@ public class Resource implements Serializable {
             if (img == null)
                 throw (new LoadException("Invalid image data in " + name, Resource.this));
             sz = Utils.imgsz(img);
-            System.out.println("Image " + z + " " + subz + " " + nooff + " " + id + " " + o + " " + img + " " + sz + " ");
         }
 
         public synchronized Tex tex() {
@@ -1065,7 +1064,6 @@ public class Resource implements Serializable {
                     return;
                 }
                 this.t = locText;
-                System.out.println("Tooltip " + t);
             } catch (Exception e) {
                 this.t = text;
                 System.out.println("Tooltip res " + e);
@@ -1097,7 +1095,6 @@ public class Resource implements Serializable {
                 for (int o = 0; o < cn; o++)
                     ep[epid][o] = cdec(buf);
             }
-            System.out.println("Neg " + cc + " " + bc + " " + bs + " " + sz + " " + ep + " ");
         }
 
         public void init() {
@@ -1480,7 +1477,6 @@ public class Resource implements Serializable {
         public Audio(byte[] coded, String id) {
             this.coded = coded;
             this.id = id.intern();
-            configuration.resourceLog("Audio " + coded + " " + id);
         }
 
         public Audio(Message buf) {
@@ -1528,7 +1524,6 @@ public class Resource implements Serializable {
         public Music(Message buf) {
             try {
                 seq = javax.sound.midi.MidiSystem.getSequence(new MessageInputStream(buf));
-                configuration.resourceLog("Music " + seq);
             } catch (javax.sound.midi.InvalidMidiDataException e) {
                 throw (new LoadException("Invalid MIDI data", Resource.this));
             } catch (IOException e) {
@@ -1551,7 +1546,6 @@ public class Resource implements Serializable {
                 if (type == 0) {
                     try {
                         this.font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new MessageInputStream(buf));
-                        configuration.resourceLog("Font " + font);
                     } catch (Exception e) {
                         throw (new RuntimeException(e));
                     }
