@@ -199,7 +199,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
                     dropItMaybe();
                     postProcessed = true;
                 }
-                IconService.checkIcon(info(), spr);
+                //IconService.checkIcon(info(), spr);
             } catch (Loading l) {
             }
         }

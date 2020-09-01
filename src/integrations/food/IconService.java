@@ -44,25 +44,28 @@ public class IconService {
     }
 
     public static void checkIcon(List<ItemInfo> infos, GSprite sprite) {
-        if (ItemInfo.find(FoodInfo.class, infos) == null)
-            return;
-        String name = null;
-        for (ItemInfo info : infos) {
-            if (info instanceof ItemInfo.Name) {
-                name = ((ItemInfo.Name) info).str.text;
+        try {
+            if (ItemInfo.find(FoodInfo.class, infos) == null)
+                return;
+            String name = null;
+            for (ItemInfo info : infos) {
+                if (info instanceof ItemInfo.Name) {
+                    name = ((ItemInfo.Name) info).str.text;
+                }
             }
-        }
-        if (name != null && !sentIcons.contains(name)) {
-            try {
-                BufferedImage img = ((GSprite.ImageSprite) sprite).image();
-                if (img != null)
-                    sendIcon(name, img);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (name != null && !sentIcons.contains(name)) {
+                try {
+                    BufferedImage img = ((GSprite.ImageSprite) sprite).image();
+                    if (img != null)
+                        sendIcon(name, img);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                sentIcons.add(name);
             }
-            sentIcons.add(name);
-        }
+        } catch (Exception e) {
 
+        }
     }
 
     private static void sendIcon(String name, BufferedImage icon) {
