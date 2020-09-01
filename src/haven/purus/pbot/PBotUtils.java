@@ -95,6 +95,19 @@ public class PBotUtils {
         return pfRightClick(PBotAPI.modeui(), gob, mod);
     }
 
+    public static void pfGobClick(UI ui, Gob gob, int btn, int mod) {
+        ui.gui.map.purusPfRightClick(gob, -1, btn, mod, "");
+        try {
+            ui.gui.map.pastaPathfinder.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void pfGobClick(Gob gob, int btn, int mod) {
+        pfGobClick(PBotAPI.modeui(), gob, btn, mod);
+    }
+
     //new boshaw pf right clicks.
     public static void PathfinderRightClick(UI ui, Gob gob, int mod) {
         ui.gui.map.pathtoRightClick(gob, mod);
@@ -236,6 +249,19 @@ public class PBotUtils {
 
     public static boolean pfLeftClick(double x, double y) {
         return pfLeftClick(PBotAPI.modeui(), x, y);
+    }
+
+    public static void pfLeftClick(UI ui, Coord mc) {
+        ui.gui.map.purusPfLeftClick(mc, "");
+        try {
+            ui.gui.map.pastaPathfinder.join();
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void pfLeftClick(Coord mc) {
+        pfLeftClick(PBotAPI.modeui(), mc);
     }
 
     /**

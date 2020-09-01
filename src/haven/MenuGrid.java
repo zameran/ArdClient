@@ -60,6 +60,7 @@ import haven.automation.TakeTrays;
 import haven.automation.TrellisDestroy;
 import haven.automation.TrellisHarvest;
 import haven.purus.Farmer;
+import haven.purus.Farmer2;
 import haven.purus.StockpileFiller;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
@@ -820,6 +821,21 @@ public class MenuGrid extends Widget {
 
                     if (ui.gui != null) {
                         Farmer f = new Farmer();
+                        Window w = f;
+                        ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 200));
+                        synchronized (GobSelectCallback.class) {
+                            ui.gui.map.registerAreaSelect(f);
+                            ui.gui.map.registerGobSelect(f);
+                        }
+                    }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::farmer",
+                Resource.local().load("paginae/purus/farmer2"),
+                (pag) -> {
+
+                    if (ui.gui != null) {
+                        Farmer2 f = new Farmer2();
                         Window w = f;
                         ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 200));
                         synchronized (GobSelectCallback.class) {

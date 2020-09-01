@@ -515,8 +515,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
         appender.add(lettuceBtn);
         appender.addRow(trelHarBtn, trelDesBtn, trelPlantBtn);
 
-        this.pack();
-
+        pack();
     }
 
     private class selectingarea implements Runnable {
