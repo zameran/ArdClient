@@ -239,6 +239,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar" />
                 <include name="bcprov-jdk15on-160.jar"/>
                 <include name="abcl.jar"/>
                 <include name="abcl-contrib.jar"/>
+                <include name="l10n.jar"/>
             </fileset>
             <fileset dir="lib/jogl-natives" />
             <fileset dir="build">
