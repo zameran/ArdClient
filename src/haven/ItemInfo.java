@@ -400,7 +400,7 @@ public abstract class ItemInfo {
 
     public synchronized static BufferedImage longtip(List<ItemInfo> info) {
         Layout l = new Layout();
-        synchronized (info) {
+        synchronized (Collections.unmodifiableList(info)) {
             for (ItemInfo ii : info) {
                 if (ii instanceof Tip) {
                     Tip tip = (Tip) ii;

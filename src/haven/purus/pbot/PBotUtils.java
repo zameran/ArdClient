@@ -950,6 +950,31 @@ public class PBotUtils {
 
 
     // Takes item in hand
+    public static void takeItem(UI ui, Widget item, int limit) {
+        int cycles = 0;
+        int sleeptime = 10;
+        item.wdgmsg("take", Coord.z);
+        while (getItemAtHand(ui) == null) {
+            if (cycles == limit) {
+                break;
+            } else {
+                sleep(sleeptime);
+                cycles += sleeptime;
+            }
+        }
+    }
+
+    public static void takeItem(UI ui, Widget item, boolean waiting) {
+        item.wdgmsg("take", Coord.z);
+        if (waiting) {
+            while (getItemAtHand(ui) == null) {
+                sleep(10);
+            }
+        } else {
+            sleep(200);
+        }
+    }
+
     public static void takeItem(UI ui, Widget item) {
         item.wdgmsg("take", Coord.z);
         while (getItemAtHand(ui) == null) {
@@ -959,6 +984,14 @@ public class PBotUtils {
 
     public static void takeItem(Widget item) {
         takeItem(PBotAPI.modeui(), item);
+    }
+
+    public static void takeItem(Widget item, int limit) {
+        takeItem(PBotAPI.modeui(), item, limit);
+    }
+
+    public static void takeItem(Widget item, boolean waiting) {
+        takeItem(PBotAPI.modeui(), item, waiting);
     }
 
     // Finds the nearest crop with a name and stage

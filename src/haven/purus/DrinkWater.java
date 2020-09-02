@@ -88,6 +88,7 @@ public class DrinkWater implements Runnable {
                             menu.destroy();
                         }
                     }
+                    sleep(50);
                     while (drinkPose()) {
                         sleep(50);
                     }
@@ -126,7 +127,6 @@ public class DrinkWater implements Runnable {
                 Composite comp = (Composite) d;
                 if (comp.oldposes != null) {
                     for (ResData res : comp.oldposes) {
-                        System.out.println("drinkPose " + player.rnm(res.res));
                         if (player.rnm(res.res).equals("gfx/borka/drinkan")) return true;
                     }
                 }

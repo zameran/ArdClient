@@ -129,25 +129,29 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                         }
                         PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                         Gob g = PBotUtils.findObjectByNames(ui, 5000, terobj);
-                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
+                        PBotUtils.pfGobClick(g, 3,1);
+//                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
                         PBotUtils.sleep(1000);
 
-                        while (PBotUtils.getItemAtHand(ui) == null && PBotUtils.findObjectByNames(ui, 5000, terobj) != null && PBotUtils.isMoving(ui)) {
-                            setInfo("waiting for item on  hand");
-                            PBotUtils.sleep(10);
+                        while (/*PBotUtils.getItemAtHand(ui) == null && PBotUtils.findObjectByNames(ui, 5000, terobj) != null && */PBotUtils.isMoving(ui)) {
+//                            setInfo("waiting for item on  hand");
+                            setInfo("moving");
+                            PBotUtils.sleep(100);
                         }
                         setInfo("inv free slots : " + PBotUtils.invFreeSlots(ui));
                     }
 
-                    if (PBotUtils.getItemAtHand(ui) != null)
+                    if (PBotUtils.getItemAtHand(ui) != null) {
+                        setInfo("dropping item");
                         PBotUtils.dropItem(ui, 0);
+                    }
 
                     PBotUtils.sysLogAppend(ui, "Done Grabbing stuff.", "white");
                     if (stop)
                         break;
                     while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).size() != 0 && !stop) {
                         setInfo("In stockpile loop");
-                        PBotUtils.sleep(1000);
+                        PBotUtils.sleep(100);
                         if (PBotUtils.getItemAtHand(ui) != null)
                             PBotUtils.dropItem(ui, 0);
                         if (stockpiles.isEmpty()) {

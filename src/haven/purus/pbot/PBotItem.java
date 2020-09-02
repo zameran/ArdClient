@@ -60,6 +60,20 @@ public class PBotItem {
         }
     }
 
+    public void takeItem(int limit) {
+        int cycles = 0;
+        int sleeptime = 25;
+        gitem.wdgmsg("take", getInvLoc());
+        while (PBotUtils.getItemAtHand(ui) == null) {
+            if (cycles == limit) {
+                break;
+            } else {
+                PBotUtils.sleep(sleeptime);
+                cycles += sleeptime;
+            }
+        }
+    }
+
 
     /**
      * Transfer an item to the active inventory, does not wait for item to transfer
