@@ -42,15 +42,7 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
         }
 
         private void close() {
-            if (ui.sess != null) {
-                ui.sess.close();
-            }
-            synchronized (MainFrame.instance.p.sessions) {
-                System.out.println(MainFrame.instance.p.sessions.size());
-                if (MainFrame.instance.p.sessions.size() > 1) {
-                    MainFrame.instance.p.removeUI(ui);
-                }
-            }
+            MainFrame.instance.p.removeUI(ui);
         }
     }
 

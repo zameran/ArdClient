@@ -12,12 +12,12 @@ public class ObservableMap<K, V> {
         this.base = base;
     }
 
-    public void put(K key, V val) {
+    public synchronized void put(K key, V val) {
         base.put(key, val);
         listeners.forEach((lst) -> lst.put(key, val));
     }
 
-    public void remove(K key) {
+    public synchronized void remove(K key) {
         base.remove(key);
         listeners.forEach((lst) -> lst.remove(key));
     }
