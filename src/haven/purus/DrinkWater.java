@@ -83,8 +83,8 @@ public class DrinkWater implements Runnable {
                             menu.destroy();
                         }
                     }
-                    while (PBotUtils.getHourglass(gui.ui) != -1) {
-                        sleep(50);
+                    while (PBotUtils.getHourglass(gui.ui) != -1 && PBotUtils.getHourglass(gui.ui) != 0) {
+                        sleep(1);
                     }
                 }
             } else {

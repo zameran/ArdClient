@@ -34,7 +34,7 @@ public abstract class GAttrib {
 
     public GAttrib(Gob gob) {
         this.gob = gob;
-        this.ui = gob.glob.ui.get() != null ? gob.glob.ui.get() : PBotAPI.ui();
+        this.ui = PBotAPI.ui(); //gob.glob.ui.get()
     }
 
     public void tick() {
