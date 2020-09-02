@@ -106,6 +106,8 @@ public class configuration {
         });
     }};
     public static String autoDrinkLiquid = Utils.getpref("autoDrinkLiquid", "Water");
+    public static boolean drinkorsip = Utils.getprefb("drinkorsip", false);
+    public static int autosipthreshold = Utils.getprefi("autosipthreshold", 100);
     public static boolean autoDrinkWhatever = Utils.getprefb("autoDrinkWhatever", false);
 
     public static Tex invsq = Resource.loadtex("gfx/hud/invsq");

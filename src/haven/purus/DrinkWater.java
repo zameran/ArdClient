@@ -11,6 +11,7 @@ import haven.Loading;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 
 import java.util.regex.Pattern;
@@ -63,21 +64,46 @@ public class DrinkWater implements Runnable {
             }
         }
         if (drinkFromThis != null) {
-            drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
-            FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
-            int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
-            while (menu == null) {
-                if (retries++ > 100) {
-                    gui.drinkingWater = false;
-                    return;
+            if (configuration.drinkorsip) {
+                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
+                    drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
+                    FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
+                    int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
+                    while (menu == null) {
+                        if (retries++ > 100) {
+                            gui.drinkingWater = false;
+                            return;
+                        }
+                        sleep(50);
+                        menu = gui.ui.root.findchild(FlowerMenu.class);
+                    }
+                    for (FlowerMenu.Petal opt : menu.opts) {
+                        if (opt.name.equals("Sip")) {
+                            menu.choose(opt);
+                            menu.destroy();
+                        }
+                    }
+                    while (PBotUtils.getHourglass(gui.ui) != -1) {
+                        sleep(50);
+                    }
                 }
-                sleep(50);
-                menu = gui.ui.root.findchild(FlowerMenu.class);
-            }
-            for (FlowerMenu.Petal opt : menu.opts) {
-                if (opt.name.equals("Drink")) {
-                    menu.choose(opt);
-                    menu.destroy();
+            } else {
+                drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
+                FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
+                int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
+                while (menu == null) {
+                    if (retries++ > 100) {
+                        gui.drinkingWater = false;
+                        return;
+                    }
+                    sleep(50);
+                    menu = gui.ui.root.findchild(FlowerMenu.class);
+                }
+                for (FlowerMenu.Petal opt : menu.opts) {
+                    if (opt.name.equals("Drink")) {
+                        menu.choose(opt);
+                        menu.destroy();
+                    }
                 }
             }
             gui.lastDrinkingSucessful = true;

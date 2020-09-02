@@ -1892,6 +1892,35 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, makeSelectAutoDrinkLiquid());
+        appender.addRow(new CheckBox("Drink or sip (off/on)") {
+            {
+                a = configuration.drinkorsip;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("drinkorsip", val);
+                configuration.drinkorsip = val;
+                a = val;
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("New type of drinking so as not to drink everything like wine").tex();
+            }
+        }, new Label("Autosip before threshold: "), new HSlider(130, 0, 100, configuration.autosipthreshold) {
+            protected void attach(UI ui) {
+                super.attach(ui);
+                val = (configuration.autosipthreshold);
+            }
+
+            public void changed() {
+                Utils.setprefi("autosipthreshold", val);
+                configuration.autosipthreshold = val;
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render(val + "").tex();
+            }
+        });
         appender.add(new CheckBox("Autodrink whatever i find") {
             {
                 a = configuration.autoDrinkWhatever;
