@@ -77,11 +77,11 @@ public class WItem extends Widget implements DTarget {
         spr.draw(g);
     }
 
-    public static BufferedImage shorttip(List<ItemInfo> info) {
+    public synchronized static BufferedImage shorttip(List<ItemInfo> info) {
         return (ItemInfo.shorttip(info));
     }
 
-    public static BufferedImage longtip(GItem item, List<ItemInfo> info) {
+    public synchronized static BufferedImage longtip(GItem item, List<ItemInfo> info) {
         BufferedImage img = ItemInfo.longtip(info);
         if (img == null) {
             img = ItemInfo.shorttip(info);
