@@ -768,7 +768,7 @@ public class OptWnd extends Window {
                     ui.gui.act("lo");
                     if (ui.gui != null & ui.gui.map != null)
                         ui.gui.map.canceltasks();
-                    MainFrame.instance.p.removeUI(ui);
+                    MainFrame.instance.p.closeSession(ui);
                 }
             }, new Coord(210, 330));
         }

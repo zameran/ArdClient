@@ -69,16 +69,15 @@ public class DrinkWater implements Runnable {
             }
         }
         if (drinkFromThis != null) {
-            boolean sipsuccess = true;
             if (configuration.drinkorsip) {
-//                int stamina = PBotUtils.getStamina(gui.ui);
-//                int sips = (configuration.autosipthreshold - stamina) / 10;
-                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
-//                for (int i = 0; i < sips; i++) {
-//                    if (!canDrinkFrom(drinkFromThis)) {
-//                        sipsuccess = false;
-//                        break;
-//                    }
+                int stamina = PBotUtils.getStamina(gui.ui);
+                int sips = (configuration.autosipthreshold - stamina) / 10;
+//                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
+                for (int i = 0; i < sips; i++) {
+                    if (!canDrinkFrom(drinkFromThis)) {
+                        gui.drinkingWater = false;
+                        return;
+                    }
                     drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
                     FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
                     int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
@@ -102,8 +101,8 @@ public class DrinkWater implements Runnable {
                         }
                     else {
                         PBotUtils.sysMsg(gui.ui, "Timeout expired. Sip failed.", Color.RED);
-                        sipsuccess = false;
-                        break;
+                        gui.drinkingWater = false;
+                        return;
                     }
                 }
             } else {
@@ -125,10 +124,7 @@ public class DrinkWater implements Runnable {
                     }
                 }
             }
-            if (!configuration.drinkorsip || sipsuccess)
-                gui.lastDrinkingSucessful = true;
-            else
-                gui.lastDrinkingSucessful = false;
+            gui.lastDrinkingSucessful = true;
         } else {
             gui.lastDrinkingSucessful = false;
         }
@@ -144,8 +140,7 @@ public class DrinkWater implements Runnable {
             sleep(sleep);
             cycles += sleep;
         }
-        if (drinkPose()) return true;
-        else return false;
+        return drinkPose();
     }
 
     private boolean drinkPose() {
