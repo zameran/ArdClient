@@ -2,7 +2,6 @@ package haven.purus;
 
 import haven.AltBeltWnd;
 import haven.Composite;
-import haven.Composited;
 import haven.Coord;
 import haven.Drawable;
 import haven.Equipory;
@@ -19,6 +18,7 @@ import haven.Window;
 import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 
+import java.awt.Color;
 import java.util.regex.Pattern;
 
 public class DrinkWater implements Runnable {
@@ -69,8 +69,16 @@ public class DrinkWater implements Runnable {
             }
         }
         if (drinkFromThis != null) {
+            boolean sipsuccess = true;
             if (configuration.drinkorsip) {
+//                int stamina = PBotUtils.getStamina(gui.ui);
+//                int sips = (configuration.autosipthreshold - stamina) / 10;
                 while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
+//                for (int i = 0; i < sips; i++) {
+//                    if (!canDrinkFrom(drinkFromThis)) {
+//                        sipsuccess = false;
+//                        break;
+//                    }
                     drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
                     FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
                     int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
@@ -88,9 +96,14 @@ public class DrinkWater implements Runnable {
                             menu.destroy();
                         }
                     }
-                    sleep(50);
-                    while (drinkPose()) {
-                        sleep(50);
+                    if (waitDrinkPose())
+                        while (drinkPose()) {
+                            sleep(50);
+                        }
+                    else {
+                        PBotUtils.sysMsg(gui.ui, "Timeout expired. Sip failed.", Color.RED);
+                        sipsuccess = false;
+                        break;
                     }
                 }
             } else {
@@ -112,11 +125,27 @@ public class DrinkWater implements Runnable {
                     }
                 }
             }
-            gui.lastDrinkingSucessful = true;
+            if (!configuration.drinkorsip || sipsuccess)
+                gui.lastDrinkingSucessful = true;
+            else
+                gui.lastDrinkingSucessful = false;
         } else {
             gui.lastDrinkingSucessful = false;
         }
         gui.drinkingWater = false;
+    }
+
+    private boolean waitDrinkPose() {
+        int limit = 2000;
+        int sleep = 10;
+        int cycles = 0;
+        while (!drinkPose()) {
+            if (cycles >= limit) break;
+            sleep(sleep);
+            cycles += sleep;
+        }
+        if (drinkPose()) return true;
+        else return false;
     }
 
     private boolean drinkPose() {
