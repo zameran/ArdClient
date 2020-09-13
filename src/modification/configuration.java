@@ -97,7 +97,7 @@ public class configuration {
 
     public static boolean pbotmode = Utils.getprefb("pbotmode", false); //off - latest ui, on - current ui
 
-    public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead")) {{
+    public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead")) {{
         sort(new Comparator<String>() {
             @Override
             public int compare(String l1, String l2) {
@@ -109,6 +109,8 @@ public class configuration {
     public static boolean drinkorsip = Utils.getprefb("drinkorsip", false);
     public static int autosipthreshold = Utils.getprefi("autosipthreshold", 100);
     public static boolean autoDrinkWhatever = Utils.getprefb("autoDrinkWhatever", false);
+    public static boolean siponce = Utils.getprefb("siponce", false);
+    public static int sipwaiting = Utils.getprefi("sipwaiting", 2000);
 
     public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
 

@@ -71,12 +71,27 @@ public class DrinkWater implements Runnable {
         if (drinkFromThis != null) {
             if (configuration.drinkorsip) {
                 int stamina = PBotUtils.getStamina(gui.ui);
-                int sips = (configuration.autosipthreshold - stamina) / 10;
+                int sips = configuration.siponce ? 1 : (configuration.autosipthreshold - stamina) / 10;
 //                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
                 for (int i = 0; i < sips; i++) {
                     if (!canDrinkFrom(drinkFromThis)) {
                         gui.drinkingWater = false;
                         return;
+                    }
+                    if (PBotUtils.petalExists()) {
+                        int limit = configuration.sipwaiting;
+                        int sleep = 10;
+                        int cycles = 0;
+                        while (PBotUtils.petalExists()) {
+                            if (cycles >= limit) break;
+                            sleep(sleep);
+                            cycles += sleep;
+                        }
+                        if (PBotUtils.petalExists()) {
+                            PBotUtils.sysMsg(gui.ui, "Petal exist. Timeout expired. Sip failed.", Color.RED);
+                            gui.drinkingWater = false;
+                            return;
+                        }
                     }
                     drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
                     FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
@@ -100,7 +115,7 @@ public class DrinkWater implements Runnable {
                             sleep(50);
                         }
                     else {
-                        PBotUtils.sysMsg(gui.ui, "Timeout expired. Sip failed.", Color.RED);
+                        PBotUtils.sysMsg(gui.ui, "Drink pose not found. Timeout expired. Sip failed.", Color.RED);
                         gui.drinkingWater = false;
                         return;
                     }
@@ -132,7 +147,7 @@ public class DrinkWater implements Runnable {
     }
 
     private boolean waitDrinkPose() {
-        int limit = 2000;
+        int limit = configuration.sipwaiting;
         int sleep = 10;
         int cycles = 0;
         while (!drinkPose()) {
@@ -166,7 +181,7 @@ public class DrinkWater implements Runnable {
                 //	String.join("|", new String[] { "Water", "Piping Hot Tea", "Tea" }), Pattern.CASE_INSENSITIVE));
                 String.join("|", configuration.liquids), Pattern.CASE_INSENSITIVE));
         ItemInfo.Contents contents = getContents(item);
-        if (contents != null && contents.sub != null) {
+        if (contents != null && contents.sub != null && contents.content >= 0.05) {
             synchronized (item.item.ui) {
                 for (ItemInfo info : contents.sub) {
                     if (info instanceof ItemInfo.Name) {

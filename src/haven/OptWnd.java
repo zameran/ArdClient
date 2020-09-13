@@ -96,6 +96,7 @@ public class OptWnd extends Window {
     private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
     public static final int VERTICAL_AUDIO_MARGIN = 5;
     public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
+    public Panel waterPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
     CheckBox sm = null, rm = null, lt = null, bt = null, ltl, discordrole, discorduser;
@@ -569,6 +570,7 @@ public class OptWnd extends Window {
         discord = add(new Panel());
         mapping = add(new Panel());
         modification = add(new Panel());
+        waterPanel = add(new Panel());
 
         initMain(gopts);
         initAudio();
@@ -591,6 +593,7 @@ public class OptWnd extends Window {
         initMapping();
         initDiscord();
         initModification();
+        initWater();
 
         chpanel(main);
     }
@@ -1882,81 +1885,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new CheckBox("Autodrink below threshold") {
-            {
-                a = Config.autodrink;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("autodrink", val);
-                Config.autodrink = val;
-                a = val;
-            }
-        }, makeSelectAutoDrinkLiquid());
-        appender.addRow(new CheckBox("Drink or sip (off/on)") {
-            {
-                a = configuration.drinkorsip;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("drinkorsip", val);
-                configuration.drinkorsip = val;
-                a = val;
-            }
-
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("New type of drinking so as not to drink everything like wine").tex();
-            }
-        }, new Label("Autosip before threshold: "), new HSlider(130, 0, 100, configuration.autosipthreshold) {
-            protected void attach(UI ui) {
-                super.attach(ui);
-                val = (configuration.autosipthreshold);
-            }
-
-            public void changed() {
-                Utils.setprefi("autosipthreshold", val);
-                configuration.autosipthreshold = val;
-            }
-
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render(val + "").tex();
-            }
-        });
-        appender.add(new CheckBox("Autodrink whatever i find") {
-            {
-                a = configuration.autoDrinkWhatever;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("autoDrinkWhatever", val);
-                configuration.autoDrinkWhatever = val;
-                a = val;
-            }
-        });
-        Label AutodrinkThreshold;
-        AutodrinkThreshold = new Label("Autodrink Threshold: " + Config.autodrinkthreshold);
-        appender.add(AutodrinkThreshold);
-        appender.add(new HSlider(130, 0, 100, Config.autodrinkthreshold) {
-            public void added() {
-                updateLabel();
-            }
-
-            protected void attach(UI ui) {
-                super.attach(ui);
-                val = (Config.autodrinkthreshold);
-            }
-
-            public void changed() {
-                Utils.setprefi("autodrinkthreshold", val);
-                Config.autodrinkthreshold = val;
-                updateLabel();
-            }
-
-            private void updateLabel() {
-                AutodrinkThreshold.settext(String.format("Autodrink Threshold : %d Percent", val));
-            }
-        });
-        appender.addRow(new Label("Autodrink check frequency (Seconds)"), makeAutoDrinkTimeDropdown());
         appender.add(new CheckBox("Repeat Starvation Alert Warning/Sound") {
             {
                 a = Config.StarveAlert;
@@ -3159,6 +3087,8 @@ public class OptWnd extends Window {
         appender2.setHorizontalMargin(5);
         appender2.setX(400);
 
+        appender.add(new PButton(50, "Water", 'w', waterPanel));
+
         appender.add(new Label("Strange or unreal modifications"));
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
@@ -3463,6 +3393,111 @@ public class OptWnd extends Window {
 
         modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         modification.pack();
+    }
+
+    private void initWater() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(370, 350)));
+        appender.setVerticalMargin(5);
+        appender.setHorizontalMargin(5);
+
+        appender.addRow(new CheckBox("Autodrink below threshold") {
+            {
+                a = Config.autodrink;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autodrink", val);
+                Config.autodrink = val;
+                a = val;
+            }
+        }, new CheckBox("Drink or sip (off/on)") {
+            {
+                a = configuration.drinkorsip;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("drinkorsip", val);
+                configuration.drinkorsip = val;
+                a = val;
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("New type of drinking so as not to drink everything like wine").tex();
+            }
+        }, new CheckBox("Sip once") {
+            {
+                a = configuration.siponce;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("siponce", val);
+                configuration.siponce = val;
+                a = val;
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Sip once instead of drinking a lot").tex();
+            }
+        });
+
+        appender.addRow(new Label("Liquid"), makeSelectAutoDrinkLiquid(), new CheckBox("Autodrink whatever i find") {
+            {
+                a = configuration.autoDrinkWhatever;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoDrinkWhatever", val);
+                configuration.autoDrinkWhatever = val;
+                a = val;
+            }
+        });
+
+        appender.addRow(new Label("Autodrink Threshold"), new HSlider(130, 0, 100, Config.autodrinkthreshold) {
+            protected void attach(UI ui) {
+                super.attach(ui);
+                val = (Config.autodrinkthreshold);
+            }
+            public void changed() {
+                Utils.setprefi("autodrinkthreshold", val);
+                Config.autodrinkthreshold = val;
+            }
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Autodrink Threshold : " + val + " Percent").tex();
+            }
+        });
+
+        appender.addRow(new Label("Autodrink check frequency (Seconds)"), makeAutoDrinkTimeDropdown());
+
+        appender.addRow(new Label("Autosip Threshold to this position"), new HSlider(130, 0, 100, configuration.autosipthreshold) {
+            protected void attach(UI ui) {
+                super.attach(ui);
+                val = (configuration.autosipthreshold);
+            }
+            public void changed() {
+                Utils.setprefi("autosipthreshold", val);
+                configuration.autosipthreshold = val;
+            }
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Autosip Threshold : " + val + " Percent").tex();
+            }
+        });
+
+        appender.addRow(new Label("Error waiting time"), new HSlider(130, 0, 10000, configuration.sipwaiting) {
+            protected void attach(UI ui) {
+                super.attach(ui);
+                val = (configuration.sipwaiting);
+            }
+            public void changed() {
+                Utils.setprefi("sipwaiting", val);
+                configuration.sipwaiting = val;
+            }
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Autosip time waiting before error : " + val + " ms").tex();
+            }
+        });
+
+        waterPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        waterPanel.pack();
     }
 
     private void initFlowermenus() {
