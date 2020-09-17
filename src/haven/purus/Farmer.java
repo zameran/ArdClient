@@ -500,7 +500,12 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
         //add(stockpileChkbox, new Coord(85, y));
         y -= 20;
 
-        appender.addRow(areaSelBtn, stockpilearea);
+        appender.addRow(areaSelBtn, stockpilearea, new Button(140, "Water Settings") {
+            @Override
+            public void click() {
+                ui.gui.toggleWaterSettings();
+            }
+        });
         appender.addRow(replantChkbox, replantBarrelChkbox, fillContainerChkbox, stockpileChkbox);
         appender.add(new Label(""));
         appender.addRow(carrotBtn, carrotseedBtn);

@@ -413,6 +413,18 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    public void toggleWaterSettings() {
+        if (!opts.visible) {
+            opts.show();
+            opts.raise();
+            fitwdg(opts);
+            setfocus(opts);
+            opts.chpanel(opts.waterPanel);
+        } else {
+            opts.show(false);
+        }
+    }
+
     public void toggleGridLines() {
         if (map != null)
             map.togglegrid();
@@ -1195,7 +1207,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             if (!drinkingWater && Config.autodrink && (DrinkThread == null || !DrinkThread.isAlive()) && stam.a < Config.autodrinkthreshold) {
                 if (System.currentTimeMillis() - DrinkTimer >= Config.autodrinktime * 1000) {
                     DrinkTimer = System.currentTimeMillis();
-                    new Thread(new DrinkWater(this)).start();
+                    Drink();
                 }
             }
             int energy = getmeter("nrj", 0).a;

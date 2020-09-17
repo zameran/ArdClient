@@ -109,8 +109,8 @@ public class SeedCropFarmer extends Window implements Runnable {
                 IMeter.Meter stam = gui.getmeter("stam", 0);
                 while (stam.a <= 60) {
                     lblProg2.settext("Drinking");
-                    PBotUtils.drink(ui, false);
-                    PBotUtils.sleep(3000);//sleep while drinking
+                    PBotUtils.drink(ui, true);
+//                    PBotUtils.sleep(3000);//sleep while drinking
                 }
 
                 if (stopThread)

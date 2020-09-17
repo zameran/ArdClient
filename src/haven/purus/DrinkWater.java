@@ -78,19 +78,18 @@ public class DrinkWater implements Runnable {
                         gui.drinkingWater = false;
                         return;
                     }
-                    if (PBotUtils.petalExists()) {
+                    if (PBotUtils.petalExists(gui.ui)) {
                         int limit = configuration.sipwaiting;
                         int sleep = 10;
                         int cycles = 0;
-                        while (PBotUtils.petalExists()) {
-                            if (cycles >= limit) break;
+                        while (PBotUtils.petalExists(gui.ui)) {
+                            if (cycles >= limit) {
+                                PBotUtils.sysMsg(gui.ui, "Petal exist. Timeout expired. Sip failed.", Color.RED);
+                                gui.drinkingWater = false;
+                                return;
+                            }
                             sleep(sleep);
                             cycles += sleep;
-                        }
-                        if (PBotUtils.petalExists()) {
-                            PBotUtils.sysMsg(gui.ui, "Petal exist. Timeout expired. Sip failed.", Color.RED);
-                            gui.drinkingWater = false;
-                            return;
                         }
                     }
                     drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
