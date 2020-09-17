@@ -106,8 +106,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 // Check if stamina is under 30%, drink if so
                 //GameUI gui = this.parent.findchild(GameUI.class);
                 GameUI gui = ui.gui;
-                IMeter.Meter stam = gui.getmeter("stam", 0);
-                while (stam.a <= 60) {
+                if (PBotUtils.getStamina(ui) <= 60) {
                     lblProg2.settext("Drinking");
                     PBotUtils.drink(ui, true);
 //                    PBotUtils.sleep(3000);//sleep while drinking

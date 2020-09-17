@@ -441,6 +441,30 @@ public class PBotUtils {
         return drink(PBotAPI.modeui(), wait);
     }
 
+    public static boolean drink(UI ui, String liquid, boolean wait) {
+        if (!ui.gui.drinkingWater) {
+            Thread t = new Thread(new DrinkWater(ui.gui, liquid));
+            t.start();
+            if (wait) {
+                try {
+                    t.join();
+                    if (!ui.gui.lastDrinkingSucessful) {
+                        sysMsg(ui, "PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
+                        return false;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                waitForHourglass(ui);
+            }
+        }
+        return true;
+    }
+
+    public static boolean drink(String liquid, boolean wait) {
+        return drink(PBotAPI.modeui(), liquid, wait);
+    }
+
     /**
      * Opens the crafting window for given item
      *

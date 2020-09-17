@@ -15,6 +15,7 @@ import haven.ResData;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 
@@ -24,9 +25,15 @@ import java.util.regex.Pattern;
 public class DrinkWater implements Runnable {
 
     GameUI gui;
+    String liquid;
 
     public DrinkWater(GameUI gui) {
         this.gui = gui;
+    }
+
+    public DrinkWater(GameUI gui, String liquid) {
+        this.gui = gui;
+        this.liquid = liquid;
     }
 
     @Override
@@ -159,17 +166,7 @@ public class DrinkWater implements Runnable {
 
     private boolean drinkPose() {
         try {
-            Gob player = PBotUtils.player(gui.ui);
-            Drawable d = player.getattr(Drawable.class);
-            if (d instanceof Composite) {
-                Composite comp = (Composite) d;
-                if (comp.oldposes != null) {
-                    for (ResData res : comp.oldposes) {
-                        if (player.rnm(res.res).equals("gfx/borka/drinkan")) return true;
-                    }
-                }
-            }
-            return false;
+            return PBotGobAPI.player(gui.ui).getPoses().contains("gfx/borka/drinkan");
         } catch (Exception e) {
             return false;
         }
@@ -186,7 +183,9 @@ public class DrinkWater implements Runnable {
                     if (info instanceof ItemInfo.Name) {
                         ItemInfo.Name name = (ItemInfo.Name) info;
                         if (name.str != null)
-                            if (configuration.autoDrinkWhatever && liquidPattern.matcher(name.str.text).matches())
+                            if (liquid != null)
+                                if (name.str.text.contains(liquid));
+                            else if (configuration.autoDrinkWhatever && liquidPattern.matcher(name.str.text).matches())
                                 return true;
                             else if (name.str.text.contains(configuration.autoDrinkLiquid)) //"Water"
                                 return true;
