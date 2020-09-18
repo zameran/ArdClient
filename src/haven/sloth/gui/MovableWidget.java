@@ -19,7 +19,7 @@ public abstract class MovableWidget extends Widget {
     public static final Map<String, Coord2d> knownPositions = new HashMap<>();
     private static final Map<String, Boolean> knownLocks = new HashMap<>();
 
-    public static void initialization() {
+    static {
         //These settings are stored in dynamic.sqlite under `widget_position`
         Storage.dynamic.ensure(sql -> {
             try (final Statement stmt = sql.createStatement()) {

@@ -350,7 +350,7 @@ public class DefSettings {
             HiddenWndData.init();
             OverlayData.init();
             CustomQualityList.init();
-            MovableWidget.initialization();
+//            MovableWidget.initialization();
             //Internal lookups are no longer needed
             optint.get().close();
         } else {
