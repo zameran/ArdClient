@@ -3082,7 +3082,7 @@ public class OptWnd extends Window {
     }
 
     private void initModification() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(370, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(400, 400)));
         final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(modification);
         appender2.setHorizontalMargin(5);
         appender2.setX(400);
@@ -3396,7 +3396,7 @@ public class OptWnd extends Window {
     }
 
     private void initWater() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(370, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(620, 400)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
@@ -3437,6 +3437,20 @@ public class OptWnd extends Window {
 
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Sip once instead of drinking a lot").tex();
+            }
+        }, new CheckBox("Auto drink'o'sip") {
+            {
+                a = configuration.autodrinkosip;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autodrinkosip", val);
+                configuration.autodrinkosip = val;
+                a = val;
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Automatically choose to drink or sip (Water = Drink, Other = Sip)").tex();
             }
         });
 

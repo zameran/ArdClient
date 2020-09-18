@@ -830,7 +830,7 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::farmer",
+        addSpecial(new SpecialPagina(this, "paginae::amber::farmer2",
                 Resource.local().load("paginae/purus/farmer2"),
                 (pag) -> {
 

@@ -25,10 +25,11 @@ import java.util.regex.Pattern;
 public class DrinkWater implements Runnable {
 
     GameUI gui;
-    String liquid;
+    final String liquid;
 
     public DrinkWater(GameUI gui) {
         this.gui = gui;
+        liquid = null;
     }
 
     public DrinkWater(GameUI gui, String liquid) {
@@ -43,8 +44,24 @@ public class DrinkWater implements Runnable {
 
     private void drink() {
         // Don't attempt to drink if flower menu is already open or we are already drinking
-        if (gui.ui.root.findchild(FlowerMenu.class) != null || gui.drinkingWater)
+        if (gui.drinkingWater) {
             return;
+        }
+        if (PBotUtils.petalExists(gui.ui)) {
+            int limit = 1000;
+            int sleep = 10;
+            int cycles = 0;
+            while (PBotUtils.petalExists(gui.ui)) {
+                if (cycles >= limit) {
+                    PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Timeout expired.", Color.RED);
+                    gui.lastDrinkingSucessful = false;
+                    gui.drinkingWater = false;
+                    return;
+                }
+                sleep(sleep);
+                cycles += sleep;
+            }
+        }
         gui.drinkingWater = true;
         WItem drinkFromThis = null;
         Equipory e = gui.getequipory();
@@ -67,7 +84,6 @@ public class DrinkWater implements Runnable {
                     }
                 }
             } else if (w instanceof AltBeltWnd) { // Alternate belt must be separately enabled
-
                 AltBeltWnd invBelt = (AltBeltWnd) w;
                 for (WItem item : invBelt.children(WItem.class)) {
                     if (canDrinkFrom(item))
@@ -75,81 +91,120 @@ public class DrinkWater implements Runnable {
                 }
             }
         }
+        boolean success = false;
         if (drinkFromThis != null) {
-            if (configuration.drinkorsip) {
-                int stamina = PBotUtils.getStamina(gui.ui);
-                int sips = configuration.siponce ? 1 : (configuration.autosipthreshold - stamina) / 10;
+            if (configuration.autodrinkosip) {
+                if (getLiquid(drinkFromThis) != null && getLiquid(drinkFromThis).equals("Water")) success = drinkMode(drinkFromThis);
+                else success = sipMode(drinkFromThis);
+            } else {
+                if (configuration.drinkorsip) {
+                    success = sipMode(drinkFromThis);
+                } else {
+                    success = drinkMode(drinkFromThis);
+                }
+            }
+        }
+        gui.lastDrinkingSucessful = success;
+        gui.drinkingWater = false;
+    }
+
+    private boolean drinkMode(WItem drinkFromThis) {
+//        drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
+//                FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
+//                int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
+//                while (menu == null) {
+//                    if (retries++ > 100) {
+//                        gui.drinkingWater = false;
+//                        gui.lastDrinkingSucessful = false;
+//                        return;
+//                    }
+//                    sleep(50);
+//                    menu = gui.ui.root.findchild(FlowerMenu.class);
+//                }
+//                for (FlowerMenu.Petal opt : menu.opts) {
+//                    if (opt.name.equals("Drink")) {
+//                        menu.choose(opt);
+//                        menu.destroy();
+//                    }
+//                }
+        PBotUtils.activateItem(drinkFromThis);
+
+        if (!PBotUtils.waitForFlowerMenu(gui.ui,5000)) {
+            PBotUtils.sysMsg(gui.ui, "Flower not found. Timeout expired. Sip failed.", Color.RED);
+            return false;
+        }
+        if (PBotUtils.choosePetal(gui.ui, "Drink"))
+            PBotUtils.waitFlowermenuClose(gui.ui);
+        else {
+            PBotUtils.closeFlowermenu(gui.ui);
+            PBotUtils.sysMsg(gui.ui, "Petal not found. Timeout expired. Sip failed.", Color.RED);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean sipMode(WItem drinkFromThis) {
+        int stamina = PBotUtils.getStamina(gui.ui);
+        int sips = configuration.siponce ? 1 : (configuration.autosipthreshold - stamina) / 10;
 //                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
-                for (int i = 0; i < sips; i++) {
-                    if (!canDrinkFrom(drinkFromThis)) {
-                        gui.drinkingWater = false;
-                        return;
+        for (int i = 0; i < sips; i++) {
+            if (!canDrinkFrom(drinkFromThis)) {
+                return false;
+            }
+            if (PBotUtils.petalExists(gui.ui)) {
+                int limit = configuration.sipwaiting;
+                int sleep = 10;
+                int cycles = 0;
+                while (PBotUtils.petalExists(gui.ui)) {
+                    if (cycles >= limit) {
+                        PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Timeout expired. Sip failed.", Color.RED);
+                        return false;
                     }
-                    if (PBotUtils.petalExists(gui.ui)) {
-                        int limit = configuration.sipwaiting;
-                        int sleep = 10;
-                        int cycles = 0;
-                        while (PBotUtils.petalExists(gui.ui)) {
-                            if (cycles >= limit) {
-                                PBotUtils.sysMsg(gui.ui, "Petal exist. Timeout expired. Sip failed.", Color.RED);
-                                gui.drinkingWater = false;
-                                return;
-                            }
-                            sleep(sleep);
-                            cycles += sleep;
-                        }
-                    }
-                    drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
-                    FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
-                    int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
-                    while (menu == null) {
-                        if (retries++ > 100) {
-                            gui.drinkingWater = false;
-                            return;
-                        }
-                        sleep(50);
-                        menu = gui.ui.root.findchild(FlowerMenu.class);
-                    }
-                    for (FlowerMenu.Petal opt : menu.opts) {
+                    sleep(sleep);
+                    cycles += sleep;
+                }
+            }
+//                    drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
+//                    FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
+//                    int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
+//                    while (menu == null) {
+//                        if (retries++ > 100) {
+//
+//                        }
+//                        sleep(50);
+//                        menu = gui.ui.root.findchild(FlowerMenu.class);
+//                    }
+                    /*for (FlowerMenu.Petal opt : menu.opts) {
                         if (opt.name.equals("Sip")) {
                             menu.choose(opt);
                             menu.destroy();
                         }
-                    }
-                    if (waitDrinkPose())
-                        while (drinkPose()) {
-                            sleep(50);
-                        }
-                    else {
-                        PBotUtils.sysMsg(gui.ui, "Drink pose not found. Timeout expired. Sip failed.", Color.RED);
-                        gui.drinkingWater = false;
-                        return;
-                    }
-                }
-            } else {
-                drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
-                FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
-                int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
-                while (menu == null) {
-                    if (retries++ > 100) {
-                        gui.drinkingWater = false;
-                        return;
-                    }
-                    sleep(50);
-                    menu = gui.ui.root.findchild(FlowerMenu.class);
-                }
-                for (FlowerMenu.Petal opt : menu.opts) {
-                    if (opt.name.equals("Drink")) {
-                        menu.choose(opt);
-                        menu.destroy();
-                    }
-                }
+                    }*/
+
+            PBotUtils.activateItem(drinkFromThis);
+
+            if (!PBotUtils.waitForFlowerMenu(gui.ui,5000)) {
+                return false;
             }
-            gui.lastDrinkingSucessful = true;
-        } else {
-            gui.lastDrinkingSucessful = false;
+
+            if (PBotUtils.choosePetal(gui.ui, "Sip"))
+                PBotUtils.waitFlowermenuClose(gui.ui);
+            else {
+                PBotUtils.closeFlowermenu(gui.ui);
+                PBotUtils.sysMsg(gui.ui, "Petal not found. Timeout expired. Sip failed.", Color.RED);
+                return false;
+            }
+
+            if (waitDrinkPose())
+                while (drinkPose()) {
+                    sleep(50);
+                }
+            else {
+                PBotUtils.sysMsg(gui.ui, "Drink pose not found. Timeout expired. Sip failed.", Color.RED);
+                return false;
+            }
         }
-        gui.drinkingWater = false;
+        return true;
     }
 
     private boolean waitDrinkPose() {
@@ -182,18 +237,39 @@ public class DrinkWater implements Runnable {
                 for (ItemInfo info : contents.sub) {
                     if (info instanceof ItemInfo.Name) {
                         ItemInfo.Name name = (ItemInfo.Name) info;
-                        if (name.str != null)
-                            if (liquid != null)
-                                if (name.str.text.contains(liquid));
-                            else if (configuration.autoDrinkWhatever && liquidPattern.matcher(name.str.text).matches())
+                        if (name.str != null) {
+                            if (liquid != null) {
+                                if (name.str.text.contains(liquid))
+                                    return true;
+                            }
+                            if (name.str.text.contains(configuration.autoDrinkLiquid)) {
                                 return true;
-                            else if (name.str.text.contains(configuration.autoDrinkLiquid)) //"Water"
+                            }
+                            if (configuration.autoDrinkWhatever && liquidPattern.matcher(name.str.text).matches()) {
                                 return true;
+                            }
+                        }
                     }
                 }
             }
         }
         return false;
+    }
+
+    private String getLiquid(WItem item) {
+        ItemInfo.Contents contents = getContents(item);
+        if (contents != null && contents.sub != null) {
+            synchronized (item.item.ui) {
+                for (ItemInfo info : contents.sub) {
+                    if (info instanceof ItemInfo.Name) {
+                        ItemInfo.Name name = (ItemInfo.Name) info;
+                        if (name.str != null)
+                            return name.str.text;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void sleep(int timeInMs) {

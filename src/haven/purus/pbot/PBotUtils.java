@@ -301,21 +301,23 @@ public class PBotUtils {
         waitForFlowerMenu(PBotAPI.modeui());
     }
 
-    public static void waitForFlowerMenu(UI ui, int limit) {
+    public static boolean waitForFlowerMenu(UI ui, int limit) {
         int cycles = 0;
+        int sleep = 10;
         while (ui.root.findchild(FlowerMenu.class) == null) {
             if (cycles == limit) {
-                break;
+                return false;
             } else {
-                sleep(1000);
-                cycles++;
-                PBotUtils.sysMsg(ui, "Cycles: " + cycles);
+                sleep(sleep);
+                cycles += sleep;
+//                PBotUtils.sysMsg(ui, "Cycles: " + cycles);
             }
         }
+        return true;
     }
 
-    public static void waitForFlowerMenu(int limit) {
-        waitForFlowerMenu(PBotAPI.modeui(), limit);
+    public static boolean waitForFlowerMenu(int limit) {
+        return waitForFlowerMenu(PBotAPI.modeui(), limit);
     }
 
     /**
@@ -1127,25 +1129,25 @@ public class PBotUtils {
     }
 
     // Returns witems with specific names from inventory
-    public static java.util.List<WItem> getInventoryItemsByNames(Inventory invwdg, java.util.List<String> items) {
-        java.util.List<WItem> witems = new ArrayList<WItem>();
+    public static java.util.List<PBotItem> getInventoryItemsByNames(Inventory invwdg, java.util.List<String> items) {
+        java.util.List<PBotItem> witems = new ArrayList<PBotItem>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             for (String s : items) {
                 if (resname.equals(s))
-                    witems.add(wi);
+                    witems.add(new PBotItem(wi));
             }
         }
         return witems;
     }
 
     // Returns witems with specific name from inventory
-    public static java.util.List<WItem> getInventoryItemsByName(Inventory invwdg, String item) {
-        java.util.List<WItem> witems = new ArrayList<WItem>();
+    public static java.util.List<PBotItem> getInventoryItemsByName(Inventory invwdg, String item) {
+        java.util.List<PBotItem> witems = new ArrayList<PBotItem>();
         for (WItem wi : getInventoryContents(invwdg)) {
             String resname = wi.item.resource().name;
             if (resname.equals(item))
-                witems.add(wi);
+                witems.add(new PBotItem(wi));
         }
         return witems;
     }
