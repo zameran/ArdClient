@@ -14,6 +14,7 @@ import haven.Text;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 
@@ -247,14 +248,14 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
             PBotUtils.sysMsg(ui, "Started", Color.white);
             PBotUtils.pfRightClick(ui, barrel, 0);
             PBotUtils.waitForWindow(ui, "Barrel");
-            GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList("gfx/invobjs/seed-flax")).get(0).item;
+            GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList("gfx/invobjs/seed-flax")).get(0).gitem;
             PBotUtils.takeItem(ui, item);
             while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/seed-flax").size() > 0) {
                 if (PBotUtils.getItemAtHand(ui) == null) {
                     System.out.println("Hand null, breaking");
                     break;
                 }
-                List<WItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/seed-flax");
+                List<PBotItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/seed-flax");
                 ui.gui.map.wdgmsg("itemact", Coord.z, barrel.rc.floor(posres), 1, 0, (int) barrel.id, barrel.rc.floor(posres), 0, -1);
                 while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/seed-flax").size() == list.size()) {
                     System.out.println("Waiting for lists to update");

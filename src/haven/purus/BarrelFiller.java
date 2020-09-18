@@ -77,7 +77,7 @@ public class BarrelFiller extends Window implements GobSelectCallback {
                 while (PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).size() != 0) {
                     if (stop)
                         break main;
-                    GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).get(0).item;
+                    GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).get(0).gitem;
                     PBotUtils.takeItem(ui, item);
 
                     ui.gui.map.wdgmsg("itemact", Coord.z, barrel.rc.floor(posres), 0, 0, (int) barrel.id,

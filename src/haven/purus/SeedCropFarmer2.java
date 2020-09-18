@@ -203,7 +203,7 @@ public class SeedCropFarmer2 extends Window implements Runnable {
                             while (PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).size() != 0) {
                                 if (stopThread)
                                     break;
-                                item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).get(0).item;
+                                item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).get(0).gitem;
                                 PBotUtils.takeItem(ui, item);
 
                                 ui.gui.map.wdgmsg("itemact", Coord.z, barrel.rc.floor(posres), 0, 0, (int) barrel.id,
@@ -231,7 +231,7 @@ public class SeedCropFarmer2 extends Window implements Runnable {
                 while (PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).size() != 0) {
                     if (stopThread)
                         break;
-                    GItem item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory().inv, Arrays.asList(seedName)).get(0).item;
+                    GItem item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory().inv, Arrays.asList(seedName)).get(0).gitem;
                     PBotUtils.takeItem(ui, item);
 
                     ui.gui.map.wdgmsg("itemact", Coord.z, barrel.rc.floor(posres), 0, 0, (int) barrel.id,

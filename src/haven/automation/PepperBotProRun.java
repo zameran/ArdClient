@@ -13,6 +13,7 @@ import haven.VMeter;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -125,9 +126,9 @@ public class PepperBotProRun extends Window implements Runnable {
                         break;
                     try {
                         if (PBotUtils.getEnergy(ui) < 50) {
-                            List<WItem> porridge = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/porridge");
+                            List<PBotItem> porridge = PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/porridge");
                             if (porridge.size() > 0) {
-                                porridge.get(0).item.wdgmsg("iact", Coord.z, -1);
+                                porridge.get(0).witem.wdgmsg("iact", Coord.z, -1);
                                 FlowerMenu.setNextSelection("Eat");
                                 PBotUtils.sleep(2000);
                             } else {

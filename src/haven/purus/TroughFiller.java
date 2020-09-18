@@ -13,6 +13,7 @@ import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.automation.GobSelectCallback;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -137,7 +138,7 @@ public class TroughFiller extends Window implements GobSelectCallback {
                             return;
                         }
                         if (PBotUtils.getItemAtHand(ui) == null) {
-                            GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).get(0).item;
+                            GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).get(0).gitem;
                             PBotUtils.takeItem(ui, item);
                             PBotUtils.sleep(100);
                         }
@@ -145,7 +146,7 @@ public class TroughFiller extends Window implements GobSelectCallback {
                             System.out.println("Hand null, breaking");
                             break;
                         }
-                        List<WItem> list = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs);
+                        List<PBotItem> list = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs);
                         ui.gui.map.wdgmsg("itemact", Coord.z, trough.rc.floor(posres), 1, 0, (int) trough.id, trough.rc.floor(posres), 0, -1);
                         int i = 0;
                         while (PBotUtils.getInventoryItemsByNames(ui.gui.maininv, invobjs).size() == list.size()) {

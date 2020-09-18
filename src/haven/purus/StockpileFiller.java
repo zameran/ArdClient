@@ -193,7 +193,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                         setInfo("clicking stockpile");
                         try {
                             while (PBotUtils.getItemAtHand(ui) == null)
-                                PBotUtils.takeItem(ui, PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).get(0).item);
+                                PBotUtils.takeItem(ui, PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).get(0).witem);
                         } catch (NullPointerException q) {
                             //break on null pointer here, bot is prob done
                             stop = true;
