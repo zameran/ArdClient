@@ -40,7 +40,7 @@ main = () => {
 		PBotGobAPI.makePile();
 		while(PBotUtils.getItemAtHand() != null)
 			PBotUtils.sleep(15);
-		if(!PBotUtils.pfLeftClick(location.x+11, location.y) && !PBotUtils.pfLeftClick(location.x-11, location.y) && !PBotUtils.pfLeftClick(location.x, location.y+11) && !PBotUtils.pfLeftClick(location.x, location.y-11)) { // Couldn't find path next to the stockpile that we want to make next
+		if(!PBotUtils.pfLeftClick(location.x+11, location.y) && !PBotUtils.pfLeftClick(location.x-11, location.y) && !PBotUtils.pfLeftClick(location.x, location.y+11) && !PBotUtils.pfLeftClick(location.x, location.y-11)) { // Couldn't find path next to the stockpile that we want to make next
 			items.push(item);
 			PBotUtils.sysMsg("QAQ");
 			continue;
