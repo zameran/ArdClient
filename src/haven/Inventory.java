@@ -62,7 +62,7 @@ public class Inventory extends Widget implements DTarget {
     };
 
     public boolean locked = false;
-    Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
+    public Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
 
     @RName("inv")
     public static class $_ implements Factory {

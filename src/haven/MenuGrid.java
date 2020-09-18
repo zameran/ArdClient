@@ -61,6 +61,7 @@ import haven.automation.TrellisDestroy;
 import haven.automation.TrellisHarvest;
 import haven.purus.Farmer;
 import haven.purus.Farmer2;
+import haven.purus.FlowerPicker;
 import haven.purus.StockpileFiller;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
@@ -843,6 +844,12 @@ public class MenuGrid extends Widget {
                             ui.gui.map.registerGobSelect(f);
                         }
                     }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::flowerpicker",
+                Resource.local().load("paginae/purus/flowerPicker"),
+                (pag) -> {
+                    new Thread(new FlowerPicker(ui.gui)).start();
                 }
         ));
         addSpecial(new SpecialPagina(this, "paginae::amber::troughfill",
