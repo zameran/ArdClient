@@ -107,13 +107,13 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
     </target>
 
     <target name="custom-encode" depends="build-env">
-        <mkdir dir="build/custom-res"/>
         <java jar="lib/LayerUtil.jar" fork="true">
             <arg line="-re custom_res custom-res"/>
         </java>
     </target>
 
     <target name="custom-jar" depends="custom-encode">
+        <mkdir dir="custom-res"/>
         <copy todir="build/custom-res">
             <fileset dir="custom-res"/>
         </copy>
@@ -122,17 +122,16 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
     </target>
 
     <target name="scripts" depends="build-env">
-        <mkdir dir="build/scripts"/>
+        <mkdir dir="scripts"/>
         <copy todir="build/scripts">
-            <fileset dir="scripts/" includes="*">
-            </fileset>
+            <fileset dir="scripts"/>
         </copy>
     </target>
 
     <target name="modification" depends="build-env">
-        <mkdir dir="build/modification"/>
-        <copy todir="build/modification">
-            <fileset dir="modification/"/>
+        <mkdir dir="modification"/>W
+        <copy todir="modification">
+            <fileset dir="modification"/>
         </copy>
     </target>
 
