@@ -130,7 +130,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
 
     <target name="modification" depends="build-env">
         <mkdir dir="modification"/>
-        <copy todir="modification">
+        <copy todir="build/modification">
             <fileset dir="modification"/>
         </copy>
     </target>
