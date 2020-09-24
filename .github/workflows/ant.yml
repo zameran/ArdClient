@@ -25,4 +25,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.1.4
       with:
-        java-version: 1.8
+        name: build
+        path: /home/runner/work/ArdClient/ArdClient/build/
