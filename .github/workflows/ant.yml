@@ -27,3 +27,9 @@ jobs:
       with:
         name: build
         path: /home/runner/work/ArdClient/ArdClient/build/
+    
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build
+        path: /home/runner/work/ArdClient/ArdClient/build/
