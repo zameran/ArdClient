@@ -238,7 +238,7 @@ public class TrellisFarmer extends Window implements Runnable {
                     if (!pathTo(g)) continue;
                     lblProg2.settext("Destroy");
                     PBotUtils.destroyGob(ui, g);
-                    PBotCharacterAPI.cancelAct();
+                    PBotCharacterAPI.cancelAct(ui);
 
                     // Wait until the gob is gone = destroyed
                     lblProg2.settext("Wait destroyed");
