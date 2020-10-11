@@ -12,6 +12,9 @@ import haven.Label;
 import haven.Resource;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotCharacterAPI;
+import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -87,6 +90,13 @@ public class TrellisFarmer2 extends Window implements Runnable {
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
 
                 for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
+
+                    if (PBotUtils.findObjectById(ui, g.id) == null
+                            || PBotUtils.findObjectById(ui, g.id).getStage() != getMaxStage(g)) continue;
+
                     if (stopThread) // Checks if aborted
                         return;
 
@@ -101,7 +111,8 @@ public class TrellisFarmer2 extends Window implements Runnable {
                     int stageBefore = g.getStage();
 
                     // Right click the crop
-                    if (!pathTo(g)) continue;
+                    if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
+                        if (!pathTo(g)) continue;
                     PBotUtils.doClick(ui, g, 3, 0);
 
                     // Wait for harvest menu to appear
@@ -116,15 +127,15 @@ public class TrellisFarmer2 extends Window implements Runnable {
 
                     // Select the harvest option
                     PBotUtils.choosePetal(ui, "Harvest");
-                    FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
-                    if (menu != null) {
-                        for (FlowerMenu.Petal opt : menu.opts) {
-                            if (opt.name.equals("Harvest")) {
-                                menu.choose(opt);
-                                menu.destroy();
-                            }
-                        }
-                    }
+//                    FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
+//                    if (menu != null) {
+//                        for (FlowerMenu.Petal opt : menu.opts) {
+//                            if (opt.name.equals("Harvest")) {
+//                                menu.choose(opt);
+//                                menu.destroy();
+//                            }
+//                        }
+//                    }
 
                     // Wait until stage has changed = harvested
                     while (true) {
@@ -149,10 +160,6 @@ public class TrellisFarmer2 extends Window implements Runnable {
                             }
                         }
                     }
-
-                    // Update progression
-                    cropsHarvested++;
-                    lblProg.settext(cropsHarvested + "/" + totalCrops);
                 }
             } // End of harvest
 
@@ -165,6 +172,12 @@ public class TrellisFarmer2 extends Window implements Runnable {
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
 
                 for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
+
+                    if (PBotUtils.findObjectById(ui, g.id) == null) continue;
+
                     if (stopThread) // Checks if aborted
                         return;
 
@@ -177,8 +190,10 @@ public class TrellisFarmer2 extends Window implements Runnable {
                         return;
 
                     // Click destroy on gob
-                    if (!pathTo(g)) continue;
+                    if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
+                        if (!pathTo(g)) continue;
                     PBotUtils.destroyGob(ui, g);
+                    PBotCharacterAPI.cancelAct();
 
                     // Wait until the gob is gone = destroyed
                     while (PBotUtils.findObjectById(ui, g.id) != null) {
@@ -186,10 +201,6 @@ public class TrellisFarmer2 extends Window implements Runnable {
                         if (stopThread)
                             return;
                     }
-
-                    // Update progression
-                    cropsHarvested++;
-                    lblProg.settext(cropsHarvested + "/" + totalCrops);
                 }
             } // End of destroy
 
@@ -201,6 +212,9 @@ public class TrellisFarmer2 extends Window implements Runnable {
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
 
                 for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
 
                     // Take a seed from inventory to hand
                     GItem item = null;
@@ -220,13 +234,16 @@ public class TrellisFarmer2 extends Window implements Runnable {
                         return;
 
                     // Right click trellis with the seed
-                    if (!pathTo(g)) continue;
+                    if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
+                        if (!pathTo(g)) continue;
+                    int amount = PBotUtils.getItemAtHand(ui).getAmount();
                     PBotUtils.itemClick(ui, g, 0);
 
                     // Wait until item is gone from hand = Planted
                     int retry = 0; // IF no success for 10 seconds skip
                     while (PBotUtils.getItemAtHand(ui) != null) {
-                        PBotUtils.playerInventory(ui).dropItemToInventory(PBotUtils.playerInventory(ui).freeSpaceForItem(PBotUtils.getItemAtHand(ui)));
+                        if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getAmount() < amount)
+                            break;
                         PBotUtils.sleep(10);
                         if (stopThread)
                             return;
@@ -234,10 +251,6 @@ public class TrellisFarmer2 extends Window implements Runnable {
                         if (retry > 1000)
                             break;
                     }
-
-                    // Update progression
-                    cropsHarvested++;
-                    lblProg.settext(cropsHarvested + "/" + totalCrops);
                 }
             }
 
@@ -246,6 +259,16 @@ public class TrellisFarmer2 extends Window implements Runnable {
         } catch (Resource.Loading l) {
 
         }
+    }
+
+    public int getMaxStage(Gob gob) {
+        int cropstgmaxval = 0;
+        for (FastMesh.MeshRes layer : gob.getres().layers(FastMesh.MeshRes.class)) {
+            int stg = layer.id / 10;
+            if (stg > cropstgmaxval)
+                cropstgmaxval = stg;
+        }
+        return cropstgmaxval;
     }
 
     public ArrayList<Gob> Crops(boolean checkStage) {
@@ -261,13 +284,7 @@ public class TrellisFarmer2 extends Window implements Runnable {
                         && gob.rc.y >= smallY && cropName.contains(gob.getres().name)) {
                     // Add to list if its max stage
                     if (checkStage) {
-                        int cropstgmaxval = 0;
-                        for (FastMesh.MeshRes layer : gob.getres().layers(FastMesh.MeshRes.class)) {
-                            int stg = layer.id / 10;
-                            if (stg > cropstgmaxval)
-                                cropstgmaxval = stg;
-                        }
-                        if (gob.getStage() == cropstgmaxval) {
+                        if (gob.getStage() == getMaxStage(gob)) {
                             gobs.add(gob);
                         }
                     } else
@@ -335,10 +352,20 @@ public class TrellisFarmer2 extends Window implements Runnable {
     public boolean pathTo(Gob g) {
         Coord2d gCoord = g.rc;
 
-        if (PBotUtils.pfLeftClick(ui, gCoord.x, gCoord.y)) return true;
+        if (PBotUtils.pfLeftClick(ui, gCoord.x, gCoord.y)) {
+            PBotUtils.sysMsg(ui, "Find path to " + gCoord + " from " + PBotUtils.player(ui).rc + ". Distance: " +
+                    Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - gCoord.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - gCoord.y, 2)));
+            return true;
+        } else PBotUtils.sysMsg(ui, "Did't find path to " + gCoord + " from " + PBotUtils.player(ui).rc + ". Distance: " +
+            Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - gCoord.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - gCoord.y, 2)));
 
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) return true;
+            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
+                PBotUtils.sysMsg(ui, "Find path to " + c2d + " from " + PBotUtils.player(ui).rc + ". Distance: " +
+                        Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - c2d.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - c2d.y, 2)));
+                return true;
+            } else PBotUtils.sysMsg(ui, "Did't find path to " + c2d + " from " + PBotUtils.player(ui).rc + ". Distance: " +
+                    Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - c2d.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - c2d.y, 2)));
         }
 
         return false;
@@ -346,14 +373,22 @@ public class TrellisFarmer2 extends Window implements Runnable {
 
     public List<Coord2d> near(Coord2d coord2d) {
         List<Coord2d> coord2ds = new ArrayList<>();
-        coord2ds.add(new Coord2d(coord2d.x + 11, coord2d.y));
-        coord2ds.add(new Coord2d(coord2d.x - 11, coord2d.y));
-        coord2ds.add(new Coord2d(coord2d.x, coord2d.y + 11));
-        coord2ds.add(new Coord2d(coord2d.x, coord2d.y - 11));
+        double distance = 11;
+        coord2ds.add(new Coord2d(coord2d.x + distance, coord2d.y));
+        coord2ds.add(new Coord2d(coord2d.x - distance, coord2d.y));
+        coord2ds.add(new Coord2d(coord2d.x, coord2d.y + distance));
+        coord2ds.add(new Coord2d(coord2d.x, coord2d.y - distance));
 
         coord2ds.sort(Comparator.comparingDouble(a ->
                 Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - a.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - a.y, 2))));
 
         return coord2ds;
+    }
+
+    public boolean isSeed(GItem gItem) {
+        if (gItem == null) return false;
+        if (gItem.res.get().name.equals("gfx/invobjs/seed-cucumber") && gItem.res.get().name.equals("gfx/invobjs/seed-grape")) {
+            return true;
+        } else return false;
     }
 }
