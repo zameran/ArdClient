@@ -255,7 +255,7 @@ public class PBotUtils {
         ui.gui.map.purusPfLeftClick(mc, "");
         try {
             ui.gui.map.pastaPathfinder.join();
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -1830,28 +1830,48 @@ public class PBotUtils {
         item.item.wdgmsg("transfer", Coord.z);
     }
 
-    public static void pfmove(UI ui, int x, int y) {
-        ui.gui.map.pathto(new Coord2d(x, y));
+    public static boolean pfmove(UI ui, int x, int y) {
+        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
     }
 
-    public static void pfmove(int x, int y) {
-        pfmove(PBotAPI.modeui(), x, y);
+    public static boolean pfmove(int x, int y) {
+        return pfmove(PBotAPI.modeui(), x, y);
     }
 
-    public static void pfmovegob(UI ui, PBotGob gob) {
-        ui.gui.map.pathto(gob.gob);
+    public static boolean pfmove(UI ui, double x, double y) {
+        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
     }
 
-    public static void pfmovegob(PBotGob gob) {
-        pfmovegob(PBotAPI.modeui(), gob);
+    public static boolean pfmove(double x, double y) {
+        return pfmove(PBotAPI.modeui(), x, y);
     }
 
-    public static void pfmovegob(UI ui, Gob gob) {
-        ui.gui.map.pathto(gob);
+    public static boolean pfmovegob(UI ui, PBotGob gob) {
+        boolean yea = ui.gui.map.pathto(gob.gob);
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
     }
 
-    public static void pfmovegob(Gob gob) {
-        pfmovegob(PBotAPI.modeui(), gob);
+    public static boolean pfmovegob(PBotGob gob) {
+        return pfmovegob(PBotAPI.modeui(), gob);
+    }
+
+    public static boolean pfmovegob(UI ui, Gob gob) {
+        boolean yea = ui.gui.map.pathto(gob);
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
+    }
+
+    public static boolean pfmovegob(Gob gob) {
+        return pfmovegob(PBotAPI.modeui(), gob);
     }
 
     public static String getRes(PBotGob gob) {

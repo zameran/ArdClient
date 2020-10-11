@@ -21,13 +21,19 @@ import java.util.List;
 import static haven.OCache.posres;
 
 public class TrellisFarmer extends Window implements Runnable {
+
     private Coord rc1, rc2;
+
     private ArrayList<Gob> crops = new ArrayList<Gob>();
+
     private boolean stopThread = false;
-    private Label lblProg;
+
+    private Label lblProg, lblProg2;
+
     private ArrayList<String> cropName = new ArrayList<String>();
     private ArrayList<String> seedName = new ArrayList<String>();
     private String trellis = "gfx/terobjs/plants/trellis";
+
     private boolean harvest = false;
     private boolean destroy = false;
     private boolean replant = false;
@@ -59,6 +65,8 @@ public class TrellisFarmer extends Window implements Runnable {
         add(lblstxt, new Coord(15, 35));
         lblProg = new Label("Initialising...");
         add(lblProg, new Coord(65, 35));
+        lblProg2 = new Label("Info");
+        add(lblProg2, new Coord(15, 55));
 
         Button stopBtn = new Button(120, "Stop") {
             @Override
@@ -79,6 +87,7 @@ public class TrellisFarmer extends Window implements Runnable {
             int totalCrops = crops.size();
             int cropsHarvested = 0;
             lblProg.settext(cropsHarvested + "/" + totalCrops);
+            lblProg2.settext("Harvest");
 
             for (Gob g : crops) {
                 // Update progression
@@ -94,9 +103,9 @@ public class TrellisFarmer extends Window implements Runnable {
                 // Check if stamina is under 30%, drink if needed
                 //GameUI gui = this.parent.findchild(GameUI.class);
                 if (PBotUtils.getStamina(ui) <= 30) {
+                    lblProg2.settext("Drink");
                     PBotUtils.drink(ui, true);
                 }
-
 
                 if (stopThread)
                     return;
@@ -104,8 +113,8 @@ public class TrellisFarmer extends Window implements Runnable {
                 int stageBefore = g.getStage();
 
                 // Right click the crop
-                if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
-                    if (!pathTo(g)) continue;
+                if (!pathTo(g)) continue;
+                lblProg2.settext("Right Click");
                 PBotUtils.doClick(ui, g, 3, 0);
 
                 // Wait for harvest menu to appear
@@ -119,6 +128,7 @@ public class TrellisFarmer extends Window implements Runnable {
 //                }
 
                 // Select the harvest option
+                lblProg2.settext("Harvest");
                 PBotUtils.choosePetal(ui, "Harvest");
 //                FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
 //                if (menu != null) {
@@ -132,6 +142,7 @@ public class TrellisFarmer extends Window implements Runnable {
 
                 // Wait until stage has changed = harvested
                 while (true) {
+                    lblProg2.settext("Wait harvested");
                     if (PBotUtils.findObjectById(ui, g.id) == null
                             || PBotUtils.findObjectById(ui, g.id).getStage() != stageBefore)
                         break;
@@ -143,6 +154,7 @@ public class TrellisFarmer extends Window implements Runnable {
                 try {
                     GItem dropitem;
                     for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
+                        lblProg2.settext("Droping");
                         if (w instanceof GItem && ((GItem) w).resource().name.contains("grape")) {
                             dropitem = (GItem) w;
 
@@ -199,6 +211,7 @@ public class TrellisFarmer extends Window implements Runnable {
             int totalCrops = crops.size();
             int cropsHarvested = 0;
             lblProg.settext(cropsHarvested + "/" + totalCrops);
+            lblProg2.settext("Destroy");
 
             for (Gob g : crops) {
                 // Update progression
@@ -207,27 +220,30 @@ public class TrellisFarmer extends Window implements Runnable {
 
                 if (PBotUtils.findObjectById(ui, g.id) == null) continue;
 
-                if (stopThread) // Checks if aborted
-                    return;
-
-                // Check if stamina is under 30%, drink if needed
-                //GameUI gui = this.parent.findchild(GameUI.class);
-                if (PBotUtils.getStamina(ui) <= 30) {
-                    PBotUtils.drink(ui, true);
-                }
-
-                if (stopThread)
-                    return;
-
-                // Click destroy on gob
-                if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
-                    if (!pathTo(g)) continue;
-                PBotUtils.destroyGob(ui, g);
-                PBotCharacterAPI.cancelAct();
-
-                // Wait until the gob is gone = destroyed
                 while (PBotUtils.findObjectById(ui, g.id) != null) {
-                    PBotUtils.sleep(10);
+                    if (stopThread) // Checks if aborted
+                        return;
+
+                    // Check if stamina is under 30%, drink if needed
+                    //GameUI gui = this.parent.findchild(GameUI.class);
+                    if (PBotUtils.getStamina(ui) <= 30) {
+                        lblProg2.settext("Drink");
+                        PBotUtils.drink(ui, true);
+                    }
+
+                    if (stopThread)
+                        return;
+
+                    // Click destroy on gob
+                    if (!pathTo(g)) continue;
+                    lblProg2.settext("Destroy");
+                    PBotUtils.destroyGob(ui, g);
+                    PBotCharacterAPI.cancelAct();
+
+                    // Wait until the gob is gone = destroyed
+                    lblProg2.settext("Wait destroyed");
+                    PBotUtils.waitForHourglass(ui);
+
                     if (stopThread)
                         return;
                 }
@@ -240,6 +256,7 @@ public class TrellisFarmer extends Window implements Runnable {
             int totalCrops = crops.size();
             int cropsHarvested = 0;
             lblProg.settext(cropsHarvested + "/" + totalCrops);
+            lblProg2.settext("Replant");
 
             for (Gob g : crops) {
                 // Update progression
@@ -249,6 +266,7 @@ public class TrellisFarmer extends Window implements Runnable {
                 // Take a seed from inventory to hand
                 GItem item = null;
                 while (PBotUtils.getItemAtHand(ui) == null) {
+                    lblProg2.settext("Wait item in inventory");
                     Inventory inv = ui.gui.maininv;
                     for (Widget w = inv.child; w != null; w = w.next) {
                         if (w instanceof GItem && seedName.contains(((GItem) w).resource().name)) {
@@ -264,14 +282,15 @@ public class TrellisFarmer extends Window implements Runnable {
                     return;
 
                 // Right click trellis with the seed
-                if (Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - g.rc.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - g.rc.y, 2)) > 11)
-                    if (!pathTo(g)) continue;
+                if (!pathTo(g)) continue;
                 int amount = PBotUtils.getItemAtHand(ui).getAmount();
+                lblProg2.settext("Plant");
                 PBotUtils.itemClick(ui, g, 0);
 
                 // Wait until item is gone from hand = Planted
                 int retry = 0; // IF no success for 10 seconds skip
                 while (PBotUtils.getItemAtHand(ui) != null) {
+                    lblProg2.settext("Wait planted");
                     if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getAmount() < amount)
                         break;
                     PBotUtils.sleep(10);
@@ -376,20 +395,11 @@ public class TrellisFarmer extends Window implements Runnable {
     public boolean pathTo(Gob g) {
         Coord2d gCoord = g.rc;
 
-        if (PBotUtils.pfLeftClick(ui, gCoord.x, gCoord.y)) {
-            PBotUtils.sysMsg(ui, "Find path to " + gCoord + " from " + PBotUtils.player(ui).rc + ". Distance: " +
-                    Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - gCoord.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - gCoord.y, 2)));
-            return true;
-        } else PBotUtils.sysMsg(ui, "Did't find path to " + gCoord + " from " + PBotUtils.player(ui).rc + ". Distance: " +
-                Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - gCoord.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - gCoord.y, 2)));
-
+        lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
-                PBotUtils.sysMsg(ui, "Find path to " + c2d + " from " + PBotUtils.player(ui).rc + ". Distance: " +
-                        Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - c2d.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - c2d.y, 2)));
+            if (PBotUtils.pfmove(ui, c2d.x, c2d.y)) {
                 return true;
-            } else PBotUtils.sysMsg(ui, "Did't find path to " + c2d + " from " + PBotUtils.player(ui).rc + ". Distance: " +
-                    Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - c2d.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - c2d.y, 2)));
+            }
         }
 
         return false;
@@ -403,8 +413,7 @@ public class TrellisFarmer extends Window implements Runnable {
         coord2ds.add(new Coord2d(coord2d.x, coord2d.y + distance));
         coord2ds.add(new Coord2d(coord2d.x, coord2d.y - distance));
 
-        coord2ds.sort(Comparator.comparing(a ->
-                Math.sqrt(Math.pow(PBotUtils.player(ui).rc.x - a.x, 2) + Math.pow(PBotUtils.player(ui).rc.y - a.y, 2))));
+        coord2ds.sort(Comparator.comparingDouble(a -> PBotUtils.player(ui).rc.dist(a)));
 
         return coord2ds;
     }

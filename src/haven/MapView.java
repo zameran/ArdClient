@@ -1818,7 +1818,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 final Coord2d plc = new Coord2d(pl.getc());
                 final double left = plc.dist(movingto) / mspeed;
                 //Only predictive models can trigger here
-                return movingto.dist(pl.rc) <= 5 || left == 0;
+                return movingto.dist(pl.rc) <= 5 && left == 0;
             } else if (movingto == null || movingto.dist(pl.rc) <= 5) {
                 return true;
             } else {
@@ -1829,6 +1829,28 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else {
             return false;
         }
+    }
+
+    public boolean isfinishmovequeue() {
+        final Gob pl = PBotUtils.player(ui);
+        if (pl != null) {
+            if (movequeue.size() > 0) {
+                return false;
+            }
+            if (!pl.isMoving()) {
+                if (movingto != null)
+                    return movingto.dist(pl.rc) <= 5;
+                else
+                    return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean isclearmovequeue() {
+        return pathfindGob == null && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
     }
 
     public void clearmovequeue() {
@@ -1871,29 +1893,34 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         return moves;
     }
 
-    public void pathto(final Coord2d c) {
+    public boolean pathto(final Coord2d c) {
         final Move[] moves = findpath(c);
         if (moves != null) {
             clearmovequeue();
             for (final Move m : moves) {
                 queuemove(m.dest());
             }
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public void pathto(final Gob g) {
+    public boolean pathto(final Gob g) {
         g.updatePathfindingBlackout(true);
-        pathto(new Coord2d(g.getc()));
+        boolean yea = pathto(new Coord2d(g.getc()));
         g.updatePathfindingBlackout(false);
+        return yea;
     }
 
-    public void pathtoRightClick(final Gob g, int mod) {
+    public boolean pathtoRightClick(final Gob g, int mod) {
         //	PBotAPI.gui.map.purusPfRightClick(gob.gob, -1, 3, mod, null);
         g.updatePathfindingBlackout(true);
-        pathto(new Coord2d(g.getc()));
+        boolean yea = pathto(new Coord2d(g.getc()));
         pathfindGob = g;
         pathfindGobMod = mod;
         g.updatePathfindingBlackout(false);
+        return yea;
     }
 
     public void moveto(final Coord2d c) {
@@ -1947,6 +1974,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
             pathfindGob = null;
             pathfindGobMod = 0;
+        }
+        if (isfinishmovequeue() && !isclearmovequeue()) {
+            clearmovequeue();
         }
         partyHighlight.update();
     }
