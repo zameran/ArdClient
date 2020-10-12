@@ -267,8 +267,9 @@ public class TrellisFarmer2 extends Window implements Runnable {
 
             PBotUtils.sysMsg(ui, "Trellis Farmer finished!", Color.white);
             this.destroy();
-        } catch (Resource.Loading l) {
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            PBotUtils.sysMsg(ui, e.getMessage());
         }
     }
 

@@ -78,149 +78,26 @@ public class TrellisFarmer extends Window implements Runnable {
     }
 
     public void run() {
-        PBotUtils.sysMsg(ui, "Trellis Farmer started!", Color.white);
-        if (harvest) {
-            // Initialise crop list
-            crops = Crops(true);
+        try {
+            PBotUtils.sysMsg(ui, "Trellis Farmer started!", Color.white);
+            if (harvest) {
+                // Initialise crop list
+                crops = Crops(true);
 
-            // Initialize progression label on window
-            int totalCrops = crops.size();
-            int cropsHarvested = 0;
-            lblProg.settext(cropsHarvested + "/" + totalCrops);
-            lblProg2.settext("Harvest");
-
-            for (Gob g : crops) {
-                // Update progression
-                cropsHarvested++;
+                // Initialize progression label on window
+                int totalCrops = crops.size();
+                int cropsHarvested = 0;
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
-
-                if (PBotUtils.findObjectById(ui, g.id) == null
-                        || PBotUtils.findObjectById(ui, g.id).getStage() != getMaxStage(g)) continue;
-
-                if (stopThread) // Checks if aborted
-                    return;
-
-                // Check if stamina is under 30%, drink if needed
-                //GameUI gui = this.parent.findchild(GameUI.class);
-                if (PBotUtils.getStamina(ui) <= 30) {
-                    lblProg2.settext("Drink");
-                    PBotUtils.drink(ui, true);
-                }
-
-                if (stopThread)
-                    return;
-
-                int stageBefore = g.getStage();
-
-                // Right click the crop
-                if (!pathTo(g)) continue;
-                lblProg2.settext("Right Click");
-                PBotUtils.doClick(ui, g, 3, 0);
-
-                // Wait for harvest menu to appear
-                PBotUtils.waitForFlowerMenu(ui, 3);
-                if (!PBotUtils.petalExists(ui)) continue;
-                if (stopThread) return;
-//                while (ui.root.findchild(FlowerMenu.class) == null) {
-//                    PBotUtils.sleep(10);
-//                    if (stopThread)
-//                        return;
-//                }
-
-                // Select the harvest option
                 lblProg2.settext("Harvest");
-                PBotUtils.choosePetal(ui, "Harvest");
-//                FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
-//                if (menu != null) {
-//                    for (FlowerMenu.Petal opt : menu.opts) {
-//                        if (opt.name.equals("Harvest")) {
-//                            menu.choose(opt);
-//                            menu.destroy();
-//                        }
-//                    }
-//                }
 
-                // Wait until stage has changed = harvested
-                while (true) {
-                    lblProg2.settext("Wait harvested");
+                for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
+
                     if (PBotUtils.findObjectById(ui, g.id) == null
-                            || PBotUtils.findObjectById(ui, g.id).getStage() != stageBefore)
-                        break;
-                    else
-                        PBotUtils.sleep(20);
-                    if (stopThread)
-                        return;
-                }
-                try {
-                    GItem dropitem;
-                    for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
-                        lblProg2.settext("Droping");
-                        if (w instanceof GItem && ((GItem) w).resource().name.contains("grape")) {
-                            dropitem = (GItem) w;
+                            || PBotUtils.findObjectById(ui, g.id).getStage() != getMaxStage(g)) continue;
 
-                            dropitem.wdgmsg("drop", Coord.z);
-                        }
-                    }
-                } catch (Exception e) {
-                }
-
-                if (PBotUtils.invFreeSlots(ui) < 4 && chest != null) {
-                    PBotUtils.pfRightClick(ui, chest, 0);
-                    try {
-                        while (ui.gui.getwnd("Exquisite Chest") == null) {
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException iqp) {
-                            }
-                        }
-                    } catch (NullPointerException ipo) {
-                    }
-                    PBotUtils.waitForWindow(ui, "Exquisite Chest");
-                    for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
-                        if (w instanceof GItem && ((GItem) w).res.get().name.contains("pepper")) {
-                            GItem item = (GItem) w;
-                            try {
-                                item.wdgmsg("transfer", Coord.z);
-
-                            } catch (NullPointerException qip) {
-                                PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
-                            }
-                        }
-                    }
-                    if (PBotUtils.invFreeSlots(ui) < 20)
-                        for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
-                            if (w instanceof GItem && ((GItem) w).res.get().name.contains("pepper")) {
-                                GItem item = (GItem) w;
-                                try {
-                                    item.wdgmsg("drop", Coord.z);
-
-                                } catch (NullPointerException qip) {
-                                    PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
-                                }
-                            }
-                        }
-                }
-            }
-        }
-
-
-        if (destroy) {
-            crops = Crops(false);
-
-            // Initialize progression label on window
-            int totalCrops = crops.size();
-            int cropsHarvested = 0;
-            lblProg.settext(cropsHarvested + "/" + totalCrops);
-            lblProg2.settext("Destroy");
-
-            for (Gob g : crops) {
-                // Update progression
-                cropsHarvested++;
-                lblProg.settext(cropsHarvested + "/" + totalCrops);
-
-                if (PBotUtils.findObjectById(ui, g.id) == null) continue;
-
-                while (PBotUtils.findObjectById(ui, g.id) != null) {
                     if (stopThread) // Checks if aborted
                         return;
 
@@ -234,77 +111,205 @@ public class TrellisFarmer extends Window implements Runnable {
                     if (stopThread)
                         return;
 
-                    // Click destroy on gob
+                    int stageBefore = g.getStage();
+
+                    // Right click the crop
                     if (!pathTo(g)) continue;
-                    lblProg2.settext("Destroy");
-                    PBotUtils.destroyGob(ui, g);
-                    PBotCharacterAPI.cancelAct(ui);
+                    lblProg2.settext("Right Click");
+                    PBotUtils.doClick(ui, g, 3, 0);
 
-                    // Wait until the gob is gone = destroyed
-                    lblProg2.settext("Wait destroyed");
-                    PBotUtils.waitForHourglass(ui);
+                    // Wait for harvest menu to appear
+                    PBotUtils.waitForFlowerMenu(ui, 3);
+                    if (!PBotUtils.petalExists(ui)) continue;
+                    if (stopThread) return;
+//                while (ui.root.findchild(FlowerMenu.class) == null) {
+//                    PBotUtils.sleep(10);
+//                    if (stopThread)
+//                        return;
+//                }
 
-                    if (stopThread)
-                        return;
-                }
-            }
-        } // End of destroy
+                    // Select the harvest option
+                    lblProg2.settext("Harvest");
+                    PBotUtils.choosePetal(ui, "Harvest");
+//                FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
+//                if (menu != null) {
+//                    for (FlowerMenu.Petal opt : menu.opts) {
+//                        if (opt.name.equals("Harvest")) {
+//                            menu.choose(opt);
+//                            menu.destroy();
+//                        }
+//                    }
+//                }
 
-        if (replant) {
-            crops = trellisWithOutPlant(Trellises(), Crops(false)); // in this case crops = trellis
-            // Initialise progression label on window
-            int totalCrops = crops.size();
-            int cropsHarvested = 0;
-            lblProg.settext(cropsHarvested + "/" + totalCrops);
-            lblProg2.settext("Replant");
-
-            for (Gob g : crops) {
-                // Update progression
-                cropsHarvested++;
-                lblProg.settext(cropsHarvested + "/" + totalCrops);
-
-                // Take a seed from inventory to hand
-                GItem item = null;
-                while (PBotUtils.getItemAtHand(ui) == null) {
-                    lblProg2.settext("Wait item in inventory");
-                    Inventory inv = ui.gui.maininv;
-                    for (Widget w = inv.child; w != null; w = w.next) {
-                        if (w instanceof GItem && seedName.contains(((GItem) w).resource().name)) {
-                            item = (GItem) w;
+                    // Wait until stage has changed = harvested
+                    while (true) {
+                        lblProg2.settext("Wait harvested");
+                        if (PBotUtils.findObjectById(ui, g.id) == null
+                                || PBotUtils.findObjectById(ui, g.id).getStage() != stageBefore)
                             break;
-                        }
+                        else
+                            PBotUtils.sleep(20);
+                        if (stopThread)
+                            return;
                     }
-                    if (item != null)
-                        PBotUtils.takeItem(ui, item);
-                }
+                    try {
+                        GItem dropitem;
+                        for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
+                            lblProg2.settext("Droping");
+                            if (w instanceof GItem && ((GItem) w).resource().name.contains("grape")) {
+                                dropitem = (GItem) w;
 
-                if (stopThread)
-                    return;
+                                dropitem.wdgmsg("drop", Coord.z);
+                            }
+                        }
+                    } catch (Exception e) {
+                    }
 
-                // Right click trellis with the seed
-                if (!pathTo(g)) continue;
-                int amount = PBotUtils.getItemAtHand(ui).getAmount();
-                lblProg2.settext("Plant");
-                PBotUtils.itemClick(ui, g, 0);
+                    if (PBotUtils.invFreeSlots(ui) < 4 && chest != null) {
+                        PBotUtils.pfRightClick(ui, chest, 0);
+                        try {
+                            while (ui.gui.getwnd("Exquisite Chest") == null) {
+                                try {
+                                    Thread.sleep(10);
+                                } catch (InterruptedException iqp) {
+                                }
+                            }
+                        } catch (NullPointerException ipo) {
+                        }
+                        PBotUtils.waitForWindow(ui, "Exquisite Chest");
+                        for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
+                            if (w instanceof GItem && ((GItem) w).res.get().name.contains("pepper")) {
+                                GItem item = (GItem) w;
+                                try {
+                                    item.wdgmsg("transfer", Coord.z);
 
-                // Wait until item is gone from hand = Planted
-                int retry = 0; // IF no success for 10 seconds skip
-                while (PBotUtils.getItemAtHand(ui) != null) {
-                    lblProg2.settext("Wait planted");
-                    if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getAmount() < amount)
-                        break;
-                    PBotUtils.sleep(10);
-                    if (stopThread)
-                        return;
-                    retry++;
-                    if (retry > 1000)
-                        break;
+                                } catch (NullPointerException qip) {
+                                    PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
+                                }
+                            }
+                        }
+                        if (PBotUtils.invFreeSlots(ui) < 20)
+                            for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
+                                if (w instanceof GItem && ((GItem) w).res.get().name.contains("pepper")) {
+                                    GItem item = (GItem) w;
+                                    try {
+                                        item.wdgmsg("drop", Coord.z);
+
+                                    } catch (NullPointerException qip) {
+                                        PBotUtils.sysMsg(ui, "Null Pointer on line 142", Color.white);
+                                    }
+                                }
+                            }
+                    }
                 }
             }
-        }
 
-        PBotUtils.sysMsg(ui, "Trellis Farmer finished!", Color.white);
-        this.destroy();
+
+            if (destroy) {
+                crops = Crops(false);
+
+                // Initialize progression label on window
+                int totalCrops = crops.size();
+                int cropsHarvested = 0;
+                lblProg.settext(cropsHarvested + "/" + totalCrops);
+                lblProg2.settext("Destroy");
+
+                for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
+
+                    if (PBotUtils.findObjectById(ui, g.id) == null) continue;
+
+                    while (PBotUtils.findObjectById(ui, g.id) != null) {
+                        if (stopThread) // Checks if aborted
+                            return;
+
+                        // Check if stamina is under 30%, drink if needed
+                        //GameUI gui = this.parent.findchild(GameUI.class);
+                        if (PBotUtils.getStamina(ui) <= 30) {
+                            lblProg2.settext("Drink");
+                            PBotUtils.drink(ui, true);
+                        }
+
+                        if (stopThread)
+                            return;
+
+                        // Click destroy on gob
+                        if (!pathTo(g)) continue;
+                        lblProg2.settext("Destroy");
+                        PBotUtils.destroyGob(ui, g);
+                        PBotCharacterAPI.cancelAct(ui);
+
+                        // Wait until the gob is gone = destroyed
+                        lblProg2.settext("Wait destroyed");
+                        PBotUtils.waitForHourglass(ui);
+
+                        if (stopThread)
+                            return;
+                    }
+                }
+            } // End of destroy
+
+            if (replant) {
+                crops = trellisWithOutPlant(Trellises(), Crops(false)); // in this case crops = trellis
+                // Initialise progression label on window
+                int totalCrops = crops.size();
+                int cropsHarvested = 0;
+                lblProg.settext(cropsHarvested + "/" + totalCrops);
+                lblProg2.settext("Replant");
+
+                for (Gob g : crops) {
+                    // Update progression
+                    cropsHarvested++;
+                    lblProg.settext(cropsHarvested + "/" + totalCrops);
+
+                    // Take a seed from inventory to hand
+                    GItem item = null;
+                    while (PBotUtils.getItemAtHand(ui) == null) {
+                        lblProg2.settext("Wait item in inventory");
+                        Inventory inv = ui.gui.maininv;
+                        for (Widget w = inv.child; w != null; w = w.next) {
+                            if (w instanceof GItem && seedName.contains(((GItem) w).resource().name)) {
+                                item = (GItem) w;
+                                break;
+                            }
+                        }
+                        if (item != null)
+                            PBotUtils.takeItem(ui, item);
+                    }
+
+                    if (stopThread)
+                        return;
+
+                    // Right click trellis with the seed
+                    if (!pathTo(g)) continue;
+                    int amount = PBotUtils.getItemAtHand(ui).getAmount();
+                    lblProg2.settext("Plant");
+                    PBotUtils.itemClick(ui, g, 0);
+
+                    // Wait until item is gone from hand = Planted
+                    int retry = 0; // IF no success for 10 seconds skip
+                    while (PBotUtils.getItemAtHand(ui) != null) {
+                        lblProg2.settext("Wait planted");
+                        if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getAmount() < amount)
+                            break;
+                        PBotUtils.sleep(10);
+                        if (stopThread)
+                            return;
+                        retry++;
+                        if (retry > 1000)
+                            break;
+                    }
+                }
+            }
+
+            PBotUtils.sysMsg(ui, "Trellis Farmer finished!", Color.white);
+            this.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+            PBotUtils.sysMsg(ui, e.getMessage());
+        }
     }
 
     public int getMaxStage(Gob gob) {
