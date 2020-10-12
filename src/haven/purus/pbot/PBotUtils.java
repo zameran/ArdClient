@@ -108,16 +108,6 @@ public class PBotUtils {
         pfGobClick(PBotAPI.modeui(), gob, btn, mod);
     }
 
-    //new boshaw pf right clicks.
-    public static void PathfinderRightClick(UI ui, Gob gob, int mod) {
-        ui.gui.map.pathtoRightClick(gob, mod);
-    }
-
-    public static void PathfinderRightClick(Gob gob, int mod) {
-        PathfinderRightClick(PBotAPI.modeui(), gob, mod);
-    }
-
-
     /**
      * Chooses a petal with given label from a flower menu that is currently open
      *
@@ -1872,6 +1862,29 @@ public class PBotUtils {
 
     public static boolean pfmovegob(Gob gob) {
         return pfmovegob(PBotAPI.modeui(), gob);
+    }
+
+    //new boshaw pf right clicks.
+    public static boolean PathfinderRightClick(UI ui, Gob gob, int mod) {
+        boolean yea = ui.gui.map.pathtoRightClick(gob, mod);
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
+    }
+
+    public static boolean PathfinderRightClick(Gob gob, int mod) {
+        return PathfinderRightClick(PBotAPI.modeui(), gob, mod);
+    }
+
+    public static boolean PathfinderRightClick(UI ui, PBotGob gob, int mod) {
+        boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
+        while (!ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+        return yea;
+    }
+
+    public static boolean PathfinderRightClick(PBotGob gob, int mod) {
+        return PathfinderRightClick(PBotAPI.modeui(), gob.gob, mod);
     }
 
     public static String getRes(PBotGob gob) {

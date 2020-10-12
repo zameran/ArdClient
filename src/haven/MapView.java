@@ -1818,7 +1818,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 final Coord2d plc = new Coord2d(pl.getc());
                 final double left = plc.dist(movingto) / mspeed;
                 //Only predictive models can trigger here
-                return movingto.dist(pl.rc) <= 5 && left == 0;
+                return movingto.dist(pl.rc) <= 5 || left == 0;
             } else if (movingto == null || movingto.dist(pl.rc) <= 5) {
                 return true;
             } else {
@@ -1837,20 +1837,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (movequeue.size() > 0) {
                 return false;
             }
-            if (!pl.isMoving()) {
-                if (movingto != null)
-                    return movingto.dist(pl.rc) <= 5;
-                else
-                    return true;
-            } else {
-                return false;
-            }
+            return !pl.isMoving();
         }
         return false;
     }
 
     public boolean isclearmovequeue() {
-        return pathfindGob == null && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
+        return pathfindGob == null && pathfindGobMod == 0 && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
     }
 
     public void clearmovequeue() {
