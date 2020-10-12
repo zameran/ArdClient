@@ -1823,7 +1823,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 return true;
             } else {
                 //Way off target and not moving, cancel
-                clearmovequeue();
+                //clearmovequeue();
                 return false;
             }
         } else {
@@ -1831,13 +1831,25 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
+    int finishTimes = 0;
     public boolean isfinishmovequeue() {
+        finishTimes++;
         final Gob pl = PBotUtils.player(ui);
         if (pl != null) {
             if (movequeue.size() > 0) {
                 return false;
             }
-            return !pl.isMoving();
+            if (movingto != null && ui.gui.pointer.tc != null) {
+                if (!pl.isMoving()) {
+                    if (finishTimes > 10) {
+                        return movingto.dist(pl.rc) <= 5;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
         }
         return false;
     }
@@ -1847,6 +1859,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void clearmovequeue() {
+        finishTimes = 0;
         if (pathfindGob != null) {
             pathfindGob = null; //set pathfind gob back to null incase pathfinding was interrupted in the middle of a pathfind right click.
             pathfindGobMod = 0;
@@ -1934,6 +1947,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public Iterator<Coord2d> movequeue() {
+        configuration.sysPrintStackTrace("movequeue");
         return movequeue.iterator();
     }
 
