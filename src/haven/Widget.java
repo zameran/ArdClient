@@ -462,6 +462,15 @@ public class Widget {
                     } else {
                         throw (new RuntimeException("Invalid division operands: " + a + " - " + b));
                     }
+                } else if (op == 'S') {
+                    Object a = st.pop();
+                    if (a instanceof Integer) {
+                        st.push(UI.scale((Integer) a));
+                    } else if (a instanceof Coord) {
+                        st.push(UI.scale((Coord) a));
+                    } else {
+                        throw (new RuntimeException("Invalid scaling operand: " + a));
+                    }
                 } else if (Character.isWhitespace(op)) {
                 } else {
                     throw (new RuntimeException("Unknown position operation: " + op));

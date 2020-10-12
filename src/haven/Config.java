@@ -301,6 +301,7 @@ public class Config {
     public static boolean splitskills = Utils.getprefb("splitskills", true);
     public static boolean pf = false;
     public static String playerposfile;
+    public static Double uiscale = getfloat("haven.uiscale", null);
     public static byte[] authck = null;
     public static String prefspec = "hafen";
     //public static String version;
@@ -1443,6 +1444,13 @@ public class Config {
 
     public static String userpath() {
         return String.format("%s/%s", username, playername);
+    }
+
+    private static Double getfloat(String name, Double def) {
+        String val = getprop(name, null);
+        if (val == null)
+            return (def);
+        return (Double.parseDouble(val));
     }
 
 
