@@ -25,14 +25,14 @@ public class TrellisFarmer2 extends Window implements Runnable {
 
     private Coord rc1, rc2;
 
-    private ArrayList<Gob> crops = new ArrayList<Gob>();
+    private List<Gob> crops = new ArrayList<Gob>();
 
     private boolean stopThread = false;
 
     private Label lblProg, lblProg2;
 
-    private ArrayList<String> cropName = new ArrayList<String>();
-    private ArrayList<String> seedName = new ArrayList<String>();
+    private List<String> cropName = new ArrayList<String>();
+    private List<String> seedName = new ArrayList<String>();
     private String trellis = "gfx/terobjs/plants/trellis";
 
     private boolean harvest = false;
@@ -213,7 +213,7 @@ public class TrellisFarmer2 extends Window implements Runnable {
             } // End of destroy
 
             if (replant) {
-                crops = Trellises(); // in this case crops = trellis
+                crops = trellisWithOutPlant(Trellises(), Crops(false)); // in this case crops = trellis
                 // Initialise progression label on window
                 int totalCrops = crops.size();
                 int cropsHarvested = 0;
@@ -347,6 +347,21 @@ public class TrellisFarmer2 extends Window implements Runnable {
             } else
                 return Double.compare(a.rc.x, b.rc.x);
         }
+    }
+
+    public List<Gob> trellisWithOutPlant(List<Gob> trellises, List<Gob> plants) {
+        List<Gob> result = new ArrayList<>();
+
+        for (Gob trellis : trellises) {
+            boolean isplanted = false;
+            for (Gob plant : plants) {
+                if (trellis.rc.equals(plant.rc))
+                    isplanted = true;
+            }
+            if (!isplanted) result.add(trellis);
+        }
+
+        return result;
     }
 
     public void stop() {
