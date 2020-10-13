@@ -43,69 +43,76 @@ public class DrinkWater implements Runnable {
     }
 
     private void drink() {
-        // Don't attempt to drink if flower menu is already open or we are already drinking
-        if (gui.drinkingWater) {
-            return;
-        }
-        if (PBotUtils.petalExists(gui.ui)) {
-            int limit = 1000;
-            int sleep = 10;
-            int cycles = 0;
-            while (PBotUtils.petalExists(gui.ui)) {
-                if (cycles >= limit) {
-                    PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Timeout expired.", Color.RED);
-                    gui.lastDrinkingSucessful = false;
-                    gui.drinkingWater = false;
-                    return;
-                }
-                sleep(sleep);
-                cycles += sleep;
+        try {
+            // Don't attempt to drink if flower menu is already open or we are already drinking
+            if (gui.drinkingWater) {
+                return;
             }
-        }
-        gui.drinkingWater = true;
-        WItem drinkFromThis = null;
-        Equipory e = gui.getequipory();
-        WItem l = e.quickslots[6];
-        WItem r = e.quickslots[7];
-        if (canDrinkFrom(l))
-            drinkFromThis = l;
-        if (canDrinkFrom(r))
-            drinkFromThis = r;
-        for (Widget w = gui.lchild; w != null; w = w.prev) {
-            if (w instanceof Window) {
-                Window wnd = (Window) w;
-                for (Widget wdg = wnd.lchild; wdg != null; wdg = wdg.prev) {
-                    if (wdg instanceof Inventory) {
-                        Inventory inv = (Inventory) wdg;
-                        for (WItem item : inv.children(WItem.class)) {
-                            if (canDrinkFrom(item))
-                                drinkFromThis = item;
+            if (PBotUtils.petalExists(gui.ui)) {
+                int limit = 1000;
+                int sleep = 10;
+                int cycles = 0;
+                while (PBotUtils.petalExists(gui.ui)) {
+                    if (cycles >= limit) {
+                        PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Timeout expired.", Color.RED);
+                        gui.lastDrinkingSucessful = false;
+                        gui.drinkingWater = false;
+                        return;
+                    }
+                    sleep(sleep);
+                    cycles += sleep;
+                }
+            }
+            gui.drinkingWater = true;
+            WItem drinkFromThis = null;
+            Equipory e = gui.getequipory();
+            WItem l = e.quickslots[6];
+            WItem r = e.quickslots[7];
+            if (canDrinkFrom(l))
+                drinkFromThis = l;
+            if (canDrinkFrom(r))
+                drinkFromThis = r;
+            for (Widget w = gui.lchild; w != null; w = w.prev) {
+                if (w instanceof Window) {
+                    Window wnd = (Window) w;
+                    for (Widget wdg = wnd.lchild; wdg != null; wdg = wdg.prev) {
+                        if (wdg instanceof Inventory) {
+                            Inventory inv = (Inventory) wdg;
+                            for (WItem item : inv.children(WItem.class)) {
+                                if (canDrinkFrom(item))
+                                    drinkFromThis = item;
+                            }
                         }
                     }
-                }
-            } else if (w instanceof AltBeltWnd) { // Alternate belt must be separately enabled
-                AltBeltWnd invBelt = (AltBeltWnd) w;
-                for (WItem item : invBelt.children(WItem.class)) {
-                    if (canDrinkFrom(item))
-                        drinkFromThis = item;
+                } else if (w instanceof AltBeltWnd) { // Alternate belt must be separately enabled
+                    AltBeltWnd invBelt = (AltBeltWnd) w;
+                    for (WItem item : invBelt.children(WItem.class)) {
+                        if (canDrinkFrom(item))
+                            drinkFromThis = item;
+                    }
                 }
             }
-        }
-        boolean success = false;
-        if (drinkFromThis != null) {
-            if (configuration.autodrinkosip) {
-                if (getLiquid(drinkFromThis) != null && getLiquid(drinkFromThis).equals("Water")) success = drinkMode(drinkFromThis);
-                else success = sipMode(drinkFromThis);
-            } else {
-                if (configuration.drinkorsip) {
-                    success = sipMode(drinkFromThis);
+            boolean success = false;
+            if (drinkFromThis != null) {
+                if (configuration.autodrinkosip) {
+                    if (getLiquid(drinkFromThis) != null && getLiquid(drinkFromThis).equals("Water"))
+                        success = drinkMode(drinkFromThis);
+                    else success = sipMode(drinkFromThis);
                 } else {
-                    success = drinkMode(drinkFromThis);
+                    if (configuration.drinkorsip) {
+                        success = sipMode(drinkFromThis);
+                    } else {
+                        success = drinkMode(drinkFromThis);
+                    }
                 }
             }
+            gui.lastDrinkingSucessful = success;
+            gui.drinkingWater = false;
+        } catch (Exception e) {
+            gui.lastDrinkingSucessful = false;
+            gui.drinkingWater = false;
+            e.printStackTrace();
         }
-        gui.lastDrinkingSucessful = success;
-        gui.drinkingWater = false;
     }
 
     private boolean drinkMode(WItem drinkFromThis) {
@@ -129,7 +136,7 @@ public class DrinkWater implements Runnable {
 //                }
         PBotUtils.activateItem(drinkFromThis);
 
-        if (!PBotUtils.waitForFlowerMenu(gui.ui,5000)) {
+        if (!PBotUtils.waitForFlowerMenu(gui.ui, 5000)) {
             PBotUtils.sysMsg(gui.ui, "Flower not found. Timeout expired. Sip failed.", Color.RED);
             return false;
         }
@@ -183,7 +190,7 @@ public class DrinkWater implements Runnable {
 
             PBotUtils.activateItem(drinkFromThis);
 
-            if (!PBotUtils.waitForFlowerMenu(gui.ui,5000)) {
+            if (!PBotUtils.waitForFlowerMenu(gui.ui, 5000)) {
                 return false;
             }
 

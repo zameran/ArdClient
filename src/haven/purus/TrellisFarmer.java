@@ -156,10 +156,14 @@ public class TrellisFarmer extends Window implements Runnable {
                         GItem dropitem;
                         for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
                             lblProg2.settext("Droping");
-                            if (w instanceof GItem && ((GItem) w).resource().name.contains("grape")) {
+                            if (w instanceof GItem && (((GItem) w).resource().name.contains("grape")
+                                    || ((GItem) w).resource().name.contains("peppercorn"))) {
                                 dropitem = (GItem) w;
-
-                                dropitem.wdgmsg("drop", Coord.z);
+                                try {
+                                    dropitem.wdgmsg("drop", Coord.z);
+                                } catch (Exception e) {
+                                    // Shouldnt matter
+                                }
                             }
                         }
                     } catch (Exception e) {

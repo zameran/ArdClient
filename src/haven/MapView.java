@@ -1832,25 +1832,35 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     int finishTimes = 0;
+    int maxfinish = 100;
+    boolean isclickongob = false;
+
     public boolean isfinishmovequeue() {
-        finishTimes++;
         final Gob pl = PBotUtils.player(ui);
         if (pl != null) {
-            if (movequeue.size() > 0) {
+            if (!pl.isMoving()) {
+                finishTimes++;
+                if (finishTimes > maxfinish) {
+                    return true;
+                } else if (movequeue.size() > 0) {
+                    return false;
+                } else if (movingto != null) {
+                    if (pathfindGob != null) {
+                        GobHitbox.BBox box = GobHitbox.getBBox(pathfindGob);
+                        GobHitbox.BBox pbox = GobHitbox.getBBox(pl);
+                        if (box != null && pbox != null) {
+                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box.a.x, box.a.y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox.a.x, pbox.a.y), 2) * 2);
+                        } else
+                            return movingto.dist(pl.rc) <= 5;
+                    } else
+                        return movingto.dist(pl.rc) <= 5;
+                }
+            } else {
+                finishTimes = 0;
                 return false;
             }
-            if (movingto != null && ui.gui.pointer.tc != null) {
-                if (!pl.isMoving()) {
-                    if (finishTimes > 10) {
-                        return movingto.dist(pl.rc) <= 5;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
         }
+        finishTimes = 0;
         return false;
     }
 
@@ -1863,6 +1873,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (pathfindGob != null) {
             pathfindGob = null; //set pathfind gob back to null incase pathfinding was interrupted in the middle of a pathfind right click.
             pathfindGobMod = 0;
+            isclickongob = false;
         }
         movequeue.clear();
         movingto = null;
@@ -1977,10 +1988,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
             lastMove = System.currentTimeMillis();
         }
-        if (movequeue.size() == 0 && pathfindGob != null) {
+        if (movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
             wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
-            pathfindGob = null;
-            pathfindGobMod = 0;
+            isclickongob = true;
         }
         if (isfinishmovequeue() && !isclearmovequeue()) {
             clearmovequeue();

@@ -363,13 +363,15 @@ public class UI {
     private void removeid(Widget wdg) {
         //System.out.println("Removing widget "+wdg.toString());
         wdg.removed();
-        if (rwidgets.containsKey(wdg)) {
-            int id = rwidgets.get(wdg);
-            widgets.remove(id);
-            rwidgets.remove(wdg);
+        synchronized (rwidgets) {
+            if (rwidgets.containsKey(wdg)) {
+                int id = rwidgets.get(wdg);
+                widgets.remove(id);
+                rwidgets.remove(wdg);
+            }
+            for (Widget child = wdg.child; child != null; child = child.next)
+                removeid(child);
         }
-        for (Widget child = wdg.child; child != null; child = child.next)
-            removeid(child);
     }
 
     public void destroy(Widget wdg) {

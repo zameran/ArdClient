@@ -146,16 +146,18 @@ public class Inventory extends Widget implements DTarget {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         if (msg.equals("drop-identical")) {
             Color colorIdentical = null;
-            for (WItem item : getIdenticalItems((GItem) args[0])) {
+            for (WItem item : getIdenticalItems((GItem) args[0], false)) {
                 try {
                     if (Config.dropcolor) {
                         GItem g = (GItem) args[0];
-                        if (g.quality().color != null) {
-                            if (colorIdentical == null) {
-                                colorIdentical = g.quality().color;
-                            }
-                            if (item.qq.color != colorIdentical) {
-                                continue;
+                        if (g.quality() != null) {
+                            if (g.quality().color != null) {
+                                if (colorIdentical == null) {
+                                    colorIdentical = g.quality().color;
+                                }
+                                if (item.qq.color != colorIdentical) {
+                                    continue;
+                                }
                             }
                         }
                         item.item.wdgmsg("drop", Coord.z);
@@ -171,31 +173,37 @@ public class Inventory extends Widget implements DTarget {
             Window smelter = ui.gui.getwnd("Ore Smelter");
             Window kiln = ui.gui.getwnd("Kiln");
             if (stockpile == null || smelter != null || kiln != null) {
-                List<WItem> items = getIdenticalItems((GItem) args[0]);
-                Collections.sort(items, (a, b) -> {
-                    QBuff aq = a.item.quality();
-                    QBuff bq = b.item.quality();
-                    if (aq == null || bq == null)
-                        return 0;
-                    else if (aq.q == bq.q)
-                        return 0;
-                    else if (aq.q > bq.q)
-                        return msg.endsWith("asc") ? 1 : -1;
-                    else
-                        return msg.endsWith("asc") ? -1 : 1;
-                });
+                boolean eq = msg.endsWith("eq");
+                List<WItem> items = getIdenticalItems((GItem) args[0], eq);
+                if (!eq) {
+                    int asc = msg.endsWith("asc") ? 1 : -1;
+                    items.sort((a, b) -> {
+                        QBuff aq = a.item.quality();
+                        QBuff bq = b.item.quality();
+                        if (aq == null || bq == null)
+                            return 0;
+                        else if (aq.q == bq.q)
+                            return 0;
+                        else if (aq.q > bq.q)
+                            return asc;
+                        else
+                            return -asc;
+                    });
+                }
 
                 Color colorIdentical = null;
-                for (WItem item : getIdenticalItems((GItem) args[0])) {
+                for (WItem item : items) {
                     try {
                         if (Config.transfercolor) {
                             GItem g = (GItem) args[0];
-                            if (g.quality().color != null) {
-                                if (colorIdentical == null) {
-                                    colorIdentical = g.quality().color;
-                                }
-                                if (item.qq.color != colorIdentical) {
-                                    continue;
+                            if (g.quality() != null) {
+                                if (g.quality().color != null) {
+                                    if (colorIdentical == null) {
+                                        colorIdentical = g.quality().color;
+                                    }
+                                    if (item.qq.color != colorIdentical) {
+                                        continue;
+                                    }
                                 }
                             }
                             item.item.wdgmsg("transfer", Coord.z);
@@ -235,11 +243,52 @@ public class Inventory extends Widget implements DTarget {
             String resname = item.resource().name;
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
                 if (wdg instanceof WItem) {
-                    sprite = ((WItem) wdg).item.spr();
-                    if (sprite != null) {
-                        Resource res = ((WItem) wdg).item.resource();
-                        if (res != null && res.name.equals(resname) && (name == null || name.equals(sprite.getname())))
-                            items.add((WItem) wdg);
+                    if (!((WItem) wdg).locked()) {
+                        sprite = ((WItem) wdg).item.spr();
+                        if (sprite != null) {
+                            Resource res = ((WItem) wdg).item.resource();
+                            if (res != null && res.name.equals(resname) && (name == null || name.equals(sprite.getname())))
+                                items.add((WItem) wdg);
+                        }
+                    }
+                }
+            }
+        }
+        return items;
+    }
+
+    public List<WItem> getIdenticalItems(GItem item, boolean quality) {
+        List<WItem> items = new ArrayList<WItem>();
+        double q0 = 0;
+        if (quality) {
+            QBuff aq = item.quality();
+            if (aq != null)
+                q0 = aq.q;
+        }
+        GSprite sprite = item.spr();
+        if (sprite != null) {
+            String name = sprite.getname();
+            String resname = item.resource().name;
+            for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+                if (wdg instanceof WItem) {
+                    if (!((WItem) wdg).locked()) {
+                        GItem it = ((WItem) wdg).item;
+                        sprite = it.spr();
+                        if (sprite != null) {
+                            Resource res = it.resource();
+                            if (res != null && res.name.equals(resname) && (name == null || name.equals(sprite.getname()))) {
+                                if (quality) {
+                                    QBuff bq = it.quality();
+                                    if (bq != null) {
+                                        double q1 = bq.q - q0;
+                                        if (q1 < 0.1 && q1 > -0.1)
+                                            items.add((WItem) wdg);
+                                    }
+                                } else {
+                                    items.add((WItem) wdg);
+                                }
+                            }
+                        }
                     }
                 }
             }
