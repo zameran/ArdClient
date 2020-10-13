@@ -86,7 +86,7 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
                                 done = true;
                                 ErrorGui.this.notifyAll();
                             }
-                            //System.exit(1);
+                            System.exit(1);
                         }
                     });
                 }});
