@@ -255,8 +255,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     @Override
-    protected void attach(UI ui) {
-        super.attach(ui);
+    protected void attached() {
+        super.attached();
         ui.gui = this;
     }
 

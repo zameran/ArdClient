@@ -144,8 +144,8 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<M
     }
 
     @Override
-    protected void attach(UI ui) {
-        super.attach(ui);
+    protected void attached() {
+        super.attached();
         init();
     }
 

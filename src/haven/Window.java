@@ -555,8 +555,8 @@ public class Window extends MovableWidget implements DTarget {
                             updateLabel();
                         }
 
-                        protected void attach(UI ui) {
-                            super.attach(ui);
+                        protected void attached() {
+                            super.attached();
                             val = (Config.curiotimetarget);
                         }
 

@@ -39,8 +39,8 @@ public class SoundSelector extends Window {
         final Button preview = new Button(50, "Preview", this::preview);
         final Label volume = new Label("Volume");
         volslider = new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (.8 * 1000);
             }
         };

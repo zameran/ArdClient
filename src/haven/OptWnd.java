@@ -247,8 +247,8 @@ public class OptWnd extends Window {
                 Label fpsBackgroundLimitLbl = new Label("Background FPS limit: " + (Config.fpsBackgroundLimit == -1 ? "unlimited" : Config.fpsBackgroundLimit));
                 appender.add(fpsBackgroundLimitLbl);
                 appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void attach(UI ui) {
-                        super.attach(ui);
+                    protected void attached() {
+                        super.attached();
                         if (Config.fpsBackgroundLimit == -1) {
                             val = 49;
                         } else {
@@ -277,8 +277,8 @@ public class OptWnd extends Window {
                 Label fpsLimitLbl = new Label("FPS limit: " + (Config.fpsLimit == -1 ? "unlimited" : Config.fpsLimit));
                 appender.add(fpsLimitLbl);
                 appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void attach(UI ui) {
-                        super.attach(ui);
+                    protected void attached() {
+                        super.attached();
                         if (Config.fpsLimit == -1) {
                             val = 49;
                         } else {
@@ -803,8 +803,8 @@ public class OptWnd extends Window {
         appender.add(new Label("In-game event volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (ui.audio.pos.volume * 1000);
             }
 
@@ -816,8 +816,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Ambient volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (ui.audio.amb.volume * 1000);
             }
 
@@ -828,8 +828,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Cleave Sound"), makeDropdownCleave());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.cleavesoundvol * 1000);
             }
 
@@ -843,8 +843,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Timers alarm volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.timersalarmvol * 1000);
             }
 
@@ -858,8 +858,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Alerted gobs sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.alertsvol * 1000);
             }
 
@@ -873,8 +873,8 @@ public class OptWnd extends Window {
         appender.add(new Label("'Chip' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxchipvol * 1000);
             }
 
@@ -887,8 +887,8 @@ public class OptWnd extends Window {
         appender.add(new Label("'Ding' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxdingvol * 1000);
             }
 
@@ -902,8 +902,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Quern sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxquernvol * 1000);
             }
 
@@ -917,8 +917,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Door close sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxdoorvol * 1000);
             }
 
@@ -932,8 +932,8 @@ public class OptWnd extends Window {
         appender.add(new Label("'Whip' sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxwhipvol * 1000);
             }
 
@@ -947,8 +947,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Fireplace sound volume (req. restart)"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxfirevol * 1000);
             }
 
@@ -962,8 +962,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Clapping sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxclapvol * 1000);
             }
 
@@ -977,8 +977,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Cauldron sound volume - Changes are not immediate, will trigger on next cauldon sound start."));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxcauldronvol * 1000);
             }
 
@@ -992,8 +992,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Whistling sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxwhistlevol * 1000);
             }
 
@@ -1007,8 +1007,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Beehive sound volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxbeehivevol * 1000);
             }
 
@@ -1022,8 +1022,8 @@ public class OptWnd extends Window {
         appender.add(new Label("Chat message volume"));
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.sfxchatvol * 1000);
             }
 
@@ -1595,8 +1595,8 @@ public class OptWnd extends Window {
         }, new HSlider(200, 0, 255, configuration.scaletreeint) {
 
             @Override
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
             }
 
             @Override
@@ -2044,8 +2044,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Combat Start Sound"), makeDropdownCombat());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.attackedvol * 1000);
             }
 
@@ -2178,8 +2178,8 @@ public class OptWnd extends Window {
 
         appender.addRow(new Label("Bad camera scrolling sensitivity"),
                 new HSlider(200, 0, 50, Config.badcamsensitivity) {
-                    protected void attach(UI ui) {
-                        super.attach(ui);
+                    protected void attached() {
+                        super.attached();
                         val = Config.badcamsensitivity;
                     }
 
@@ -3374,8 +3374,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Minimal distance for free camera"),
                 new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
                     @Override
-                    protected void attach(UI ui) {
-                        super.attach(ui);
+                    protected void attached() {
+                        super.attached();
                     }
 
                     @Override
@@ -3467,8 +3467,8 @@ public class OptWnd extends Window {
         });
 
         appender.addRow(new Label("Autodrink Threshold"), new HSlider(130, 0, 100, Config.autodrinkthreshold) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (Config.autodrinkthreshold);
             }
             public void changed() {
@@ -3483,8 +3483,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Autodrink check frequency (Seconds)"), makeAutoDrinkTimeDropdown());
 
         appender.addRow(new Label("Autosip Threshold to this position"), new HSlider(130, 0, 100, configuration.autosipthreshold) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (configuration.autosipthreshold);
             }
             public void changed() {
@@ -3497,8 +3497,8 @@ public class OptWnd extends Window {
         });
 
         appender.addRow(new Label("Error waiting time"), new HSlider(130, 0, 10000, configuration.sipwaiting) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (configuration.sipwaiting);
             }
             public void changed() {
@@ -4008,8 +4008,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Unknown Player Alarm"), makeAlarmDropdownUnknown());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.alarmunknownvol * 1000);
             }
 
@@ -4023,8 +4023,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Red Player Alarm"), makeAlarmDropdownRed());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.alarmredvol * 1000);
             }
 
@@ -4048,8 +4048,8 @@ public class OptWnd extends Window {
         });
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.chatalarmvol * 1000);
             }
 
@@ -4063,8 +4063,8 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Study Finish Alarm"), makeAlarmDropdownStudy());
         appender.setVerticalMargin(VERTICAL_AUDIO_MARGIN);
         appender.add(new HSlider(200, 0, 1000, 0) {
-            protected void attach(UI ui) {
-                super.attach(ui);
+            protected void attached() {
+                super.attached();
                 val = (int) (Config.studyalarmvol * 1000);
             }
 

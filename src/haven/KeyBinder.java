@@ -393,8 +393,8 @@ public class KeyBinder {
         }
 
         @Override
-        protected void attach(UI ui) {
-            super.attach(ui);
+        protected void attached() {
+            super.attached();
             keygrab = ui.grabkeys(this);
             mousegrab = ui.grabmouse(this);
         }

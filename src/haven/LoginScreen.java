@@ -410,6 +410,7 @@ public class LoginScreen extends Widget {
     }
 
     protected void added() {
+        lower();
         presize();
         parent.setfocus(this);
     }
