@@ -84,6 +84,7 @@ public class DefSettings {
     public static final IndirSetting<Boolean> QUICKERMENU = new IndirSetting<>(global, "gameplay.quicker-flowermenu");           //[Bool] Toggle quick-er flowermenu will autoselect items if so selected without even popping up flowermenu
     public static final IndirSetting<Boolean> AMBERMENU = new IndirSetting<>(global, "gameplay.amber-flowermenu");           //[Bool] Use amber flowermenu
     public static final IndirSetting<Boolean> BUGGEDMENU = new IndirSetting<>(global, "gameplay.bugged-flowermenu");         //[Bool] Whether not flowermenu should close on clicks outside of it
+    public static final IndirSetting<Boolean> CLOSEFORMENU = new IndirSetting<>(global, "gameplay.close-flowermenu");         //[Bool] Adds a close button to each flowermenu
     public static final IndirSetting<Boolean> SIMPLECROPS = new IndirSetting<>(global, "gameplay.simple-crops");             //[Bool] Toggle simple crop meshes
     public static final IndirSetting<Boolean> SHOWCROPSTAGE = new IndirSetting<>(global, "gameplay.show-crop-stage");        //[Bool] Toggle crop stages off/on
     public static final IndirSetting<Boolean> SHOWGOBHP = new IndirSetting<>(global, "gameplay.show-gob-hp");                //[Bool] Toggle gob hp visibility
@@ -236,6 +237,7 @@ public class DefSettings {
         QUICKERMENU.ensure(false);
         AMBERMENU.ensure(true);
         BUGGEDMENU.ensure(false);
+        CLOSEFORMENU.ensure(false);
         SIMPLECROPS.ensure(false);
         SHOWCROPSTAGE.ensure(false);
         AUTOHEARTH.ensure(false);

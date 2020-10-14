@@ -61,7 +61,9 @@ import static haven.DefSettings.ANIMALDANGERCOLOR;
 import static haven.DefSettings.ANIMALPATHCOL;
 import static haven.DefSettings.BEEHIVECOLOR;
 import static haven.DefSettings.BTNCOL;
+import static haven.DefSettings.BUGGEDMENU;
 import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
+import static haven.DefSettings.CLOSEFORMENU;
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DEEPWATERCOL;
 import static haven.DefSettings.ERRORTEXTCOLOR;
@@ -3295,6 +3297,8 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
+        appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
 
         appender2.add(new Label("Choose/add item quality color:"));
         appender2.add(new CheckBox("Custom quality below") {
@@ -3471,10 +3475,12 @@ public class OptWnd extends Window {
                 super.attached();
                 val = (Config.autodrinkthreshold);
             }
+
             public void changed() {
                 Utils.setprefi("autodrinkthreshold", val);
                 Config.autodrinkthreshold = val;
             }
+
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Autodrink Threshold : " + val + " Percent").tex();
             }
@@ -3487,10 +3493,12 @@ public class OptWnd extends Window {
                 super.attached();
                 val = (configuration.autosipthreshold);
             }
+
             public void changed() {
                 Utils.setprefi("autosipthreshold", val);
                 configuration.autosipthreshold = val;
             }
+
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Autosip Threshold : " + val + " Percent").tex();
             }
@@ -3501,10 +3509,12 @@ public class OptWnd extends Window {
                 super.attached();
                 val = (configuration.sipwaiting);
             }
+
             public void changed() {
                 Utils.setprefi("sipwaiting", val);
                 configuration.sipwaiting = val;
             }
+
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Autosip time waiting before error : " + val + " ms").tex();
             }
