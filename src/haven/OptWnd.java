@@ -90,6 +90,7 @@ import static haven.DefSettings.SUPPORTDANGERCOLOR;
 import static haven.DefSettings.THEMES;
 import static haven.DefSettings.TROUGHCOLOR;
 import static haven.DefSettings.TXBCOL;
+import static haven.DefSettings.WIREFRAMEMODE;
 import static haven.DefSettings.WNDCOL;
 
 
@@ -429,6 +430,7 @@ public class OptWnd extends Window {
                         a = val;
                     }
                 });
+                appender.add(new IndirCheckBox("Wireframe mode", WIREFRAMEMODE));
                 appender.add(new CheckBox("Hide flavor objects but keep sounds (requires logout)") {
                     {
                         a = Config.hideflovisual;
