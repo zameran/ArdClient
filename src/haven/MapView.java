@@ -681,7 +681,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         this.plgob = plgob;
         plgobid = plgob;
         this.gobs = new Gobs();
-        this.gridol = new TileOutline(glob.map);
+        this.gridol = new TileOutline(this);
         this.partyHighlight = new PartyHighlight(glob.party, plgob);
         setcanfocus(true);
         markedGobs.clear();
