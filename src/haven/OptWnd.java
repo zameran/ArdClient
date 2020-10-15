@@ -66,6 +66,7 @@ import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
 import static haven.DefSettings.CLOSEFORMENU;
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DEEPWATERCOL;
+import static haven.DefSettings.DRAWGRIDRADIUS;
 import static haven.DefSettings.ERRORTEXTCOLOR;
 import static haven.DefSettings.GARDENPOTDONECOLOR;
 import static haven.DefSettings.GOBPATHCOL;
@@ -358,18 +359,24 @@ public class OptWnd extends Window {
                         a = val;
                     }
                 });
-                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
-                    {
-                        a = Config.lowerterraindistance;
+//                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
+//                    {
+//                        a = Config.lowerterraindistance;
+//                    }
+//
+//                    public void set(boolean val) {
+//                        Config.lowerterraindistance = val;
+//                        Utils.setprefb("lowerterraindistance", val);
+//                        a = val;
+//                    }
+//                });
+                appender.addRow(new IndirLabel(() -> String.format("Map View Distance: %d",
+                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 5, DRAWGRIDRADIUS, val -> {
+                    if (ui.gui != null && ui.gui.map != null) {
+                        ui.gui.map.view = val;
                     }
-
-                    public void set(boolean val) {
-                        Config.lowerterraindistance = val;
-                        Utils.setprefb("lowerterraindistance", val);
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Disable biome tile transitions (requires logout)") {
+                }));
+                appender.add(new CheckBox("Disable biome tile transitions") {
                     {
                         a = Config.disabletiletrans;
                     }
@@ -378,6 +385,9 @@ public class OptWnd extends Window {
                         Config.disabletiletrans = val;
                         Utils.setprefb("disabletiletrans", val);
                         a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
                     }
                 });
                 appender.add(new CheckBox("Disable terrain smoothing (requires logout)") {
@@ -389,9 +399,12 @@ public class OptWnd extends Window {
                         Config.disableterrainsmooth = val;
                         Utils.setprefb("disableterrainsmooth", val);
                         a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
                     }
                 });
-                appender.add(new CheckBox("Disable terrain elevation (requires logout)") {
+                appender.add(new CheckBox("Disable terrain elevation") {
                     {
                         a = Config.disableelev;
                     }
@@ -400,6 +413,9 @@ public class OptWnd extends Window {
                         Config.disableelev = val;
                         Utils.setprefb("disableelev", val);
                         a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
                     }
                 });
                 appender.add(new CheckBox("Disable flavor objects including ambient sounds") {
@@ -3237,6 +3253,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Skip exceptions") {
+            {
+                a = configuration.skipexceptions;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("skipexceptions", val);
+                configuration.skipexceptions = val;
+                a = val;
+            }
+        });
 
         appender.add(new CheckBox("Mode for PBot") {
             {
@@ -3980,6 +4007,17 @@ public class OptWnd extends Window {
                 ui.sess.glob.oc.changeAllGobs();
             }
         }));
+        appender.add(new CheckBox("New grid type") {
+            {
+                a = Config.slothgrid;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("slothgrid", val);
+                Config.slothgrid = val;
+                a = val;
+            }
+        });
         appender.add(new Button(200, "New Hidden System", false) {
             public void click() {
                 if (ui.gui != null)

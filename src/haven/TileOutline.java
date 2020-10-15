@@ -23,7 +23,7 @@ public class TileOutline implements Rendered {
 
     public TileOutline(MCache map) {
         this.map = map;
-        this.area = (MCache.cutsz.x * 5) * (MCache.cutsz.y * 5);
+        this.area = (MCache.cutsz.x * 5) * (MCache.cutsz.y * 5) * 10;
         this.color = new States.ColState(255, 255, 255, 64);
         // double-buffer to prevent flickering
         vertexBuffers = new FloatBuffer[2];
@@ -60,7 +60,7 @@ public class TileOutline implements Rendered {
             this.location = Location.xlate(new Coord3f((float) (ul.x * tilesz.x), (float) (-ul.y * tilesz.y), 0.0F));
             curIndex = (curIndex + 1) % 2; // swap buffers
             Coord c = new Coord();
-            Coord size = ul.add(MCache.cutsz.mul(5));
+            Coord size = ul.add(MCache.cutsz.mul(25));
             for (c.y = ul.y; c.y < size.y; c.y++)
                 for (c.x = ul.x; c.x < size.x; c.x++)
                     addLineStrip(mapToScreen(c), mapToScreen(c.add(1, 0)), mapToScreen(c.add(1, 1)));

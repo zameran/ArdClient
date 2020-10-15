@@ -79,6 +79,7 @@ import java.util.TreeMap;
 import java.util.WeakHashMap;
 
 import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DRAWGRIDRADIUS;
 import static haven.DefSettings.NIGHTVISION;
 import static haven.DefSettings.NVAMBIENTCOL;
 import static haven.DefSettings.NVDIFFUSECOL;
@@ -98,7 +99,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public Coord2d cc;
     public String curcamera;
     public final Glob glob;
-    private int view = (Config.lowerterraindistance ? 1 : 2);
+    public int view = DRAWGRIDRADIUS.get();//(Config.lowerterraindistance ? 1 : 2);
     private Collection<Delayed> delayed = new LinkedList<Delayed>();
     private Collection<Delayed> delayed2 = new LinkedList<Delayed>();
     private Collection<Rendered> extradraw = new LinkedList<Rendered>();
@@ -1269,8 +1270,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (rl.cfg.pref.outline.val)
             rl.add(outlines, null);
         rl.add(map, null);
-        if (showgrid)
-            rl.add(gridol, null);
+        if (showgrid) {
+            rl.add(Config.slothgrid ? grid : gridol, null);
+        }
         rl.add(mapol, null);
         rl.add(gobs, null);
         if (placing != null)

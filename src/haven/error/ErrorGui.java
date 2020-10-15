@@ -51,7 +51,7 @@ import java.awt.event.WindowEvent;
 
 public abstract class ErrorGui extends JDialog implements ErrorStatus {
     private JPanel details;
-    private JButton closebtn, cbbtn;
+    private JButton closebtn, cbbtn, hidebtn;
     private JTextArea exbox;
     private JScrollPane infoc, exboxc;
     private Thread reporter;
@@ -87,6 +87,18 @@ public abstract class ErrorGui extends JDialog implements ErrorStatus {
                                 ErrorGui.this.notifyAll();
                             }
                             System.exit(1);
+                        }
+                    });
+                }});
+                add(hidebtn = new JButton("Hide") {{
+                    addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent ev) {
+                            ErrorGui.this.dispose();
+                            synchronized (ErrorGui.this) {
+                                done = true;
+                                ErrorGui.this.notifyAll();
+                            }
+                            //System.exit(1);
                         }
                     });
                 }});

@@ -216,8 +216,14 @@ public class UI {
             wdg.attach(this);
             if (parent != 65535) {
                 Widget pwdg = widgets.get(parent);
-                if (pwdg == null)
-                    throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
+                if (pwdg == null) {
+                    if (configuration.skipexceptions) {
+                        System.out.println("Null parent widget " + parent + " for " + id);
+                        return;
+                    } else
+                        throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
+                }
+
                 pwdg.addchild(wdg, pargs);
 
                 if (pwdg instanceof Window) {
@@ -257,11 +263,21 @@ public class UI {
     public void addwidget(int id, int parent, Object[] pargs) {
         synchronized (this) {
             Widget wdg = widgets.get(id);
-            if (wdg == null)
-                throw (new UIException("Null child widget " + id + " added to " + parent, null, pargs));
+            if (wdg == null) {
+                if (configuration.skipexceptions) {
+                    System.out.println("Null child widget " + id + " added to " + parent);
+                    return;
+                } else
+                    throw (new UIException("Null child widget " + id + " added to " + parent, null, pargs));
+            }
             Widget pwdg = widgets.get(parent);
-            if (pwdg == null)
-                throw (new UIException("Null parent widget " + parent + " for " + id, null, pargs));
+            if (pwdg == null) {
+                if (configuration.skipexceptions) {
+                    System.out.println("Null parent widget " + parent + " for " + id);
+                    return;
+                } else
+                    throw (new UIException("Null parent widget " + parent + " for " + id, null, pargs));
+            }
             pwdg.addchild(wdg, pargs);
         }
     }
@@ -457,7 +473,13 @@ public class UI {
             if (wdg != null) {
                 // try { for(Object obj:args) if(!wdg.toString().contains("CharWnd")) System.out.println("UI Wdg : " + wdg + " msg : "+msg+" id = " + id + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException qq){}
                 wdg.uimsg(msg.intern(), args);
-            } else throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
+            } else {
+                if (configuration.skipexceptions) {
+                    System.out.println("Uimsg to non-existent widget " + id);
+                    return;
+                } else
+                    throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
+            }
             configuration.Syslog(configuration.serverSender, wdg, id, msg, args);
         }
     }
