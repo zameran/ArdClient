@@ -66,4 +66,3 @@ const btnClick = () => {
 	}
 	PBotUtils.sysMsg(ui, "Finished digging the cellar!");
 };
-
