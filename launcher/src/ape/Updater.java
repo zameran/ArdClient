@@ -52,9 +52,11 @@ public class Updater {
 		ArrayList<String> download = new ArrayList<String>(files.length);
 		String[] kv;
 
-		//check if already updated
-		//if(files[0].equals(old[0]))
-		//    return null;
+//		check if already updated
+		if(files[0].equals(old[0])) {
+			Logging.log("No update required");
+			return null;
+		}
 
 		//find different files
 		for(int i = 1;i < files.length;++i) {
