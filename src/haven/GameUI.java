@@ -242,7 +242,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             histbelt.hide();
 
 
-        PBotAPI.gui = this;
+//        PBotAPI.gui = this;
         if (Config.showTroughrad && Config.showBeehiverad)
             saferadius = 4;
         else if (Config.showTroughrad && Config.showBeehiverad)
@@ -252,12 +252,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         else if (!Config.showTroughrad && !Config.showBeehiverad)
             saferadius = 1;
         fixAlarms();
-    }
-
-    @Override
-    protected void attached() {
-        super.attached();
-        ui.gui = this;
     }
 
     protected void added() {

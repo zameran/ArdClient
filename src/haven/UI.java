@@ -135,7 +135,7 @@ public class UI {
         widgets.put(0, root);
         rwidgets.put(root, 0);
         setSession(sess);
-        PBotAPI.ui = this;
+//        PBotAPI.ui = this;
     }
 
     public UI(Context uictx, Coord sz) {
