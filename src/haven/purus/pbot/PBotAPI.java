@@ -11,8 +11,8 @@ import java.util.List;
 
 public class PBotAPI {
 
-    public static GameUI gui;  //old gui init => just last new session
-    public static UI ui;       //old new ui init => just last new session
+//    public static GameUI gui;  //old gui init => just last new session
+//    public static UI ui;       //old new ui init => just last new session
 
     /**
      * Get the current UI in a multisession
@@ -23,18 +23,18 @@ public class PBotAPI {
         return MainFrame.instance.p.ui;
     }
 
-    /**
-     * Get UI in a monosession
-     * For lazy users who don't want to change scripts
-     *
-     * @return UI
-     */
-    public static UI modeui() {
-        return configuration.pbotmode ? ui : MainFrame.instance.p.ui;
-    }
+//    /**
+//     * Get UI in a monosession
+//     * For lazy users who don't want to change scripts
+//     *
+//     * @return UI
+//     */
+//    public static UI modeui() {
+//        return configuration.pbotmode ? ui : MainFrame.instance.p.ui;
+//    }
 
     /**
-     * Get GameUI in a monosession
+     * Get GameUI in a multisession
      *
      * @return GameUI
      */

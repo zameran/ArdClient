@@ -24,9 +24,9 @@ public class PBotCharacterAPI {
         return ui.gui.getmeter("stam", 0).a;
     }
 
-    public static int getStamina() {
-        return getStamina(PBotAPI.modeui());
-    }
+//    public static int getStamina() {
+//        return getStamina(PBotAPI.modeui());
+//    }
 
     /**
      * Get the player energy
@@ -37,9 +37,9 @@ public class PBotCharacterAPI {
         return ui.gui.getmeter("nrj", 0).a;
     }
 
-    public static int getEnergy() {
-        return getEnergy(PBotAPI.modeui());
-    }
+//    public static int getEnergy() {
+//        return getEnergy(PBotAPI.modeui());
+//    }
 
     /**
      * Get the player hp
@@ -50,9 +50,9 @@ public class PBotCharacterAPI {
         return ui.gui.getmeter("hp", 0).a;
     }
 
-    public static int getShp() {
-        return getShp(PBotAPI.modeui());
-    }
+//    public static int getShp() {
+//        return getShp(PBotAPI.modeui());
+//    }
 
     /**
      * Get the player hp
@@ -63,9 +63,9 @@ public class PBotCharacterAPI {
         return ui.gui.getmeter("hp", 0).a;
     }
 
-    public static int getHp() {
-        return getHp(PBotAPI.modeui());
-    }
+//    public static int getHp() {
+//        return getHp(PBotAPI.modeui());
+//    }
 
     /**
      * Send act message to server
@@ -79,9 +79,9 @@ public class PBotCharacterAPI {
         ui.gui.menu.wdgmsg("act", act);
     }
 
-    public static void doAct(String... act) {
-        doAct(PBotAPI.modeui(), act);
-    }
+//    public static void doAct(String... act) {
+//        doAct(PBotAPI.modeui(), act);
+//    }
 
     /**
      * Cancels the current act by clicking
@@ -90,9 +90,9 @@ public class PBotCharacterAPI {
         ui.gui.map.wdgmsg("click", PBotUtils.getCenterScreenCoord(ui), new Coord2d(0, 0).floor(posres), 3, 0);
     }
 
-    public static void cancelAct() {
-        cancelAct(PBotAPI.modeui());
-    }
+//    public static void cancelAct() {
+//        cancelAct(PBotAPI.modeui());
+//    }
 
     public static void logout(UI ui) {
         if (haven.automation.Discord.jdalogin != null)
@@ -100,9 +100,9 @@ public class PBotCharacterAPI {
         ui.gui.act("lo");
     }
 
-    public static void logout() {
-        logout(PBotAPI.modeui());
-    }
+//    public static void logout() {
+//        logout(PBotAPI.modeui());
+//    }
 
     public static void logoutChar(UI ui) {
         if (Discord.jdalogin != null)
@@ -111,9 +111,9 @@ public class PBotCharacterAPI {
 
     }
 
-    public static void logoutChar() {
-        logoutChar(PBotAPI.modeui());
-    }
+//    public static void logoutChar() {
+//        logoutChar(PBotAPI.modeui());
+//    }
 
 
     /**
@@ -125,9 +125,9 @@ public class PBotCharacterAPI {
         ui.charlist.wdgmsg("play", charname);
     }
 
-    public static void loginChar(String charname) {
-        loginChar(PBotAPI.modeui(), charname);
-    }
+//    public static void loginChar(String charname) {
+//        loginChar(PBotAPI.modeui(), charname);
+//    }
 
     /**
      * Set player speed setting
@@ -138,9 +138,9 @@ public class PBotCharacterAPI {
         ui.gui.speed.set(speed);
     }
 
-    public static void setSpeed(int speed) {
-        setSpeed(PBotAPI.modeui(), speed);
-    }
+//    public static void setSpeed(int speed) {
+//        setSpeed(PBotAPI.modeui(), speed);
+//    }
 
     /**
      * Get current speed setting of player
@@ -151,9 +151,9 @@ public class PBotCharacterAPI {
         return ui.gui.speed.cur;
     }
 
-    public static int getSpeed() {
-        return getSpeed(PBotAPI.modeui());
-    }
+//    public static int getSpeed() {
+//        return getSpeed(PBotAPI.modeui());
+//    }
 
     /**
      * Get maximum speed setting that player can be set to
@@ -164,9 +164,9 @@ public class PBotCharacterAPI {
         return ui.gui.speed.max;
     }
 
-    public static int getMaxSpeed() {
-        return getMaxSpeed(PBotAPI.modeui());
-    }
+//    public static int getMaxSpeed() {
+//        return getMaxSpeed(PBotAPI.modeui());
+//    }
 
     /**
      * Send message to given chat
@@ -184,7 +184,7 @@ public class PBotCharacterAPI {
         }
     }
 
-    public static void msgToChat(String chatName, String msg) {
-        msgToChat(PBotAPI.modeui(), chatName, msg);
-    }
+//    public static void msgToChat(String chatName, String msg) {
+//        msgToChat(PBotAPI.modeui(), chatName, msg);
+//    }
 }

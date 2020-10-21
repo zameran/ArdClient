@@ -91,9 +91,9 @@ public class PBotUtils {
         }
     }
 
-    public static boolean pfRightClick(PBotGob gob, int mod) {
-        return pfRightClick(PBotAPI.modeui(), gob, mod);
-    }
+//    public static boolean pfRightClick(PBotGob gob, int mod) {
+//        return pfRightClick(PBotAPI.modeui(), gob, mod);
+//    }
 
     public static void pfGobClick(UI ui, Gob gob, int btn, int mod) {
         ui.gui.map.purusPfRightClick(gob, -1, btn, mod, "");
@@ -104,9 +104,9 @@ public class PBotUtils {
         }
     }
 
-    public static void pfGobClick(Gob gob, int btn, int mod) {
-        pfGobClick(PBotAPI.modeui(), gob, btn, mod);
-    }
+//    public static void pfGobClick(Gob gob, int btn, int mod) {
+//        pfGobClick(PBotAPI.modeui(), gob, btn, mod);
+//    }
 
     /**
      * Chooses a petal with given label from a flower menu that is currently open
@@ -128,9 +128,21 @@ public class PBotUtils {
         return false;
     }
 
-    public static boolean choosePetal(String name) {
-        return choosePetal(PBotAPI.modeui(), name);
+    public static FlowerMenu.Petal getPetal(UI ui, String name) {
+        FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
+        if (menu != null) {
+            for (FlowerMenu.Petal opt : menu.opts) {
+                if (opt.name.equals(name)) {
+                    return opt;
+                }
+            }
+        }
+        return null;
     }
+
+//    public static boolean choosePetal(String name) {
+//        return choosePetal(PBotAPI.modeui(), name);
+//    }
 
     public static boolean petalExists(UI ui) {
         FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
@@ -140,9 +152,9 @@ public class PBotUtils {
         return false;
     }
 
-    public static boolean petalExists() {
-        return petalExists(PBotAPI.modeui());
-    }
+//    public static boolean petalExists() {
+//        return petalExists(PBotAPI.modeui());
+//    }
 
     /**
      * Closes flowermenu, if it is open
@@ -152,9 +164,9 @@ public class PBotUtils {
             sleep(25);
     }
 
-    public static void waitFlowermenuClose() {
-        waitFlowermenuClose(PBotAPI.modeui());
-    }
+//    public static void waitFlowermenuClose() {
+//        waitFlowermenuClose(PBotAPI.modeui());
+//    }
 
     /**
      * Click some place on map
@@ -168,9 +180,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
     }
 
-    public static void mapClick(int x, int y, int btn, int mod) {
-        mapClick(PBotAPI.modeui(), x, y, btn, mod);
-    }
+//    public static void mapClick(int x, int y, int btn, int mod) {
+//        mapClick(PBotAPI.modeui(), x, y, btn, mod);
+//    }
 
     /**
      * Click some place on map
@@ -184,9 +196,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
     }
 
-    public static void mapClick(double x, double y, int btn, int mod) {
-        mapClick(PBotAPI.modeui(), x, y, btn, mod);
-    }
+//    public static void mapClick(double x, double y, int btn, int mod) {
+//        mapClick(PBotAPI.modeui(), x, y, btn, mod);
+//    }
 
     /**
      * Use item in hand to ground below player, for example, to plant carrot
@@ -213,9 +225,9 @@ public class PBotUtils {
         return sc;
     }
 
-    public static Coord getCenterScreenCoord() {
-        return getCenterScreenCoord(PBotAPI.modeui());
-    }
+//    public static Coord getCenterScreenCoord() {
+//        return getCenterScreenCoord(PBotAPI.modeui());
+//    }
 
 
     /**
@@ -237,9 +249,9 @@ public class PBotUtils {
         }
     }
 
-    public static boolean pfLeftClick(double x, double y) {
-        return pfLeftClick(PBotAPI.modeui(), x, y);
-    }
+//    public static boolean pfLeftClick(double x, double y) {
+//        return pfLeftClick(PBotAPI.modeui(), x, y);
+//    }
 
     public static void pfLeftClick(UI ui, Coord mc) {
         ui.gui.map.purusPfLeftClick(mc, "");
@@ -250,9 +262,9 @@ public class PBotUtils {
         }
     }
 
-    public static void pfLeftClick(Coord mc) {
-        pfLeftClick(PBotAPI.modeui(), mc);
-    }
+//    public static void pfLeftClick(Coord mc) {
+//        pfLeftClick(PBotAPI.modeui(), mc);
+//    }
 
     /**
      * Starts crafting item with the given name
@@ -274,9 +286,9 @@ public class PBotUtils {
         }
     }
 
-    public static void craftItem(String name, int makeAll) {
-        craftItem(PBotAPI.modeui(), name, makeAll);
-    }
+//    public static void craftItem(String name, int makeAll) {
+//        craftItem(PBotAPI.modeui(), name, makeAll);
+//    }
 
     /**
      * Waits for flower menu to appear
@@ -287,9 +299,9 @@ public class PBotUtils {
         }
     }
 
-    public static void waitForFlowerMenu() {
-        waitForFlowerMenu(PBotAPI.modeui());
-    }
+//    public static void waitForFlowerMenu() {
+//        waitForFlowerMenu(PBotAPI.modeui());
+//    }
 
     public static boolean waitForFlowerMenu(UI ui, int limit) {
         int cycles = 0;
@@ -306,9 +318,9 @@ public class PBotUtils {
         return true;
     }
 
-    public static boolean waitForFlowerMenu(int limit) {
-        return waitForFlowerMenu(PBotAPI.modeui(), limit);
-    }
+//    public static boolean waitForFlowerMenu(int limit) {
+//        return waitForFlowerMenu(PBotAPI.modeui(), limit);
+//    }
 
     /**
      * Waits for the flower menu to disappear
@@ -324,9 +336,9 @@ public class PBotUtils {
         }
     }
 
-    public static void closeFlowermenu() {
-        closeFlowermenu(PBotAPI.modeui());
-    }
+//    public static void closeFlowermenu() {
+//        closeFlowermenu(PBotAPI.modeui());
+//    }
 
     /**
      * Waits for the hourglass timer when crafting or drinking for example
@@ -343,9 +355,9 @@ public class PBotUtils {
         }
     }
 
-    public static void waitForHourglass() {
-        waitForHourglass(PBotAPI.modeui());
-    }
+//    public static void waitForHourglass() {
+//        waitForHourglass(PBotAPI.modeui());
+//    }
 
     /**
      * Waits for the hourglass timer when crafting or drinking for example
@@ -370,9 +382,9 @@ public class PBotUtils {
         return true;
     }
 
-    public static boolean waitForHourglass(int timeout) {
-        return waitForHourglass(PBotAPI.modeui(), timeout);
-    }
+//    public static boolean waitForHourglass(int timeout) {
+//        return waitForHourglass(PBotAPI.modeui(), timeout);
+//    }
 
     //will send a message to the selected channel with message text if discord is connected ingame.
     public static void sendDiscordMsg(UI ui, String channel, String text) {
@@ -385,9 +397,9 @@ public class PBotUtils {
         }
     }
 
-    public static void sendDiscordMsg(String channel, String text) {
-        sendDiscordMsg(PBotAPI.modeui(), channel, text);
-    }
+//    public static void sendDiscordMsg(String channel, String text) {
+//        sendDiscordMsg(PBotAPI.modeui(), channel, text);
+//    }
 
     /**
      * Returns value of hourglass, -1 = no hourglass, else the value between 0.0 and 1.0
@@ -398,9 +410,9 @@ public class PBotUtils {
         return ui.gui.prog;
     }
 
-    public static double getHourglass() {
-        return getHourglass(PBotAPI.modeui());
-    }
+//    public static double getHourglass() {
+//        return getHourglass(PBotAPI.modeui());
+//    }
 
     // TODO: Return false if drinking was not successful (no water found for example)
 
@@ -429,9 +441,9 @@ public class PBotUtils {
         return true;
     }
 
-    public static boolean drink(boolean wait) {
-        return drink(PBotAPI.modeui(), wait);
-    }
+//    public static boolean drink(boolean wait) {
+//        return drink(PBotAPI.modeui(), wait);
+//    }
 
     public static boolean drink(UI ui, String liquid, boolean wait) {
         if (!ui.gui.drinkingWater) {
@@ -453,9 +465,9 @@ public class PBotUtils {
         return true;
     }
 
-    public static boolean drink(String liquid, boolean wait) {
-        return drink(PBotAPI.modeui(), liquid, wait);
-    }
+//    public static boolean drink(String liquid, boolean wait) {
+//        return drink(PBotAPI.modeui(), liquid, wait);
+//    }
 
     /**
      * Opens the crafting window for given item
@@ -472,9 +484,9 @@ public class PBotUtils {
         PBotWindowAPI.waitForWindow(ui, "Crafting", 1000 * 1000);
     }
 
-    public static void openCraftingWnd(String name) {
-        openCraftingWnd(PBotAPI.modeui(), name);
-    }
+//    public static void openCraftingWnd(String name) {
+//        openCraftingWnd(PBotAPI.modeui(), name);
+//    }
 
     /**
      * Send a system message to the user
@@ -485,9 +497,9 @@ public class PBotUtils {
         ui.gui.msg(str, Color.WHITE);
     }
 
-    public static void sysMsg(String str) {
-        sysMsg(PBotAPI.modeui(), str, Color.WHITE);
-    }
+//    public static void sysMsg(String str) {
+//        sysMsg(PBotAPI.modeui(), str, Color.WHITE);
+//    }
 
     /**
      * Send a system message to the user
@@ -499,9 +511,9 @@ public class PBotUtils {
         ui.gui.msg(str, col);
     }
 
-    public static void sysMsg(String str, Color col) {
-        sysMsg(PBotAPI.modeui(), str, col);
-    }
+//    public static void sysMsg(String str, Color col) {
+//        sysMsg(PBotAPI.modeui(), str, col);
+//    }
 
     /**
      * Send a system message to the user
@@ -515,9 +527,9 @@ public class PBotUtils {
         ui.gui.msg(str, new Color(r, g, b));
     }
 
-    public static void sysMsg(String str, int r, int g, int b) {
-        sysMsg(PBotAPI.modeui(), str, r, g, b);
-    }
+//    public static void sysMsg(String str, int r, int g, int b) {
+//        sysMsg(PBotAPI.modeui(), str, r, g, b);
+//    }
 
     /**
      * Returns the players inventory
@@ -528,9 +540,9 @@ public class PBotUtils {
         return new PBotInventory(ui.gui.maininv);
     }
 
-    public static PBotInventory playerInventory() {
-        return playerInventory(PBotAPI.modeui());
-    }
+//    public static PBotInventory playerInventory() {
+//        return playerInventory(PBotAPI.modeui());
+//    }
 
     /**
      * Returns all open inventories
@@ -551,9 +563,9 @@ public class PBotUtils {
         return ret;
     }
 
-    public static ArrayList<PBotInventory> getAllInventories() {
-        return getAllInventories(PBotAPI.modeui());
-    }
+//    public static ArrayList<PBotInventory> getAllInventories() {
+//        return getAllInventories(PBotAPI.modeui());
+//    }
 
     /**
      * Create a PBotWindow object, See PBotWindow for usage
@@ -570,9 +582,9 @@ public class PBotUtils {
         return window;
     }
 
-    public static PBotWindow PBotWindow(String title, int height, int width, String id) {
-        return PBotWindow(PBotAPI.modeui(), title, height, width, id);
-    }
+//    public static PBotWindow PBotWindow(String title, int height, int width, String id) {
+//        return PBotWindow(PBotAPI.modeui(), title, height, width, id);
+//    }
 
     /**
      * Returns the item currently in the hand
@@ -586,9 +598,9 @@ public class PBotUtils {
             return new PBotItem(ui.gui.vhand);
     }
 
-    public static PBotItem getItemAtHand() {
-        return getItemAtHand(PBotAPI.modeui());
-    }
+//    public static PBotItem getItemAtHand() {
+//        return getItemAtHand(PBotAPI.modeui());
+//    }
 
 
     /**
@@ -602,9 +614,9 @@ public class PBotUtils {
         return null;
     }
 
-    public static GItem getGItemAtHand() {
-        return getGItemAtHand(PBotAPI.modeui());
-    }
+//    public static GItem getGItemAtHand() {
+//        return getGItemAtHand(PBotAPI.modeui());
+//    }
 
 
     /**
@@ -618,9 +630,9 @@ public class PBotUtils {
             sleep(25);
     }
 
-    public static void dropItemFromHand(int mod) {
-        dropItemFromHand(PBotAPI.modeui(), mod);
-    }
+//    public static void dropItemFromHand(int mod) {
+//        dropItemFromHand(PBotAPI.modeui(), mod);
+//    }
 
     /**
      * Activate area selection by dragging.
@@ -635,9 +647,9 @@ public class PBotUtils {
         }
     }
 
-    public static void selectArea() {
-        selectArea(PBotAPI.modeui());
-    }
+//    public static void selectArea() {
+//        selectArea(PBotAPI.modeui());
+//    }
 
     /**
      * Next click to item in inventory returns the item, the function will wait until this happens
@@ -655,9 +667,9 @@ public class PBotUtils {
         return selectedItem;
     }
 
-    public static PBotItem selectItem() {
-        return selectItem(PBotAPI.modeui());
-    }
+//    public static PBotItem selectItem() {
+//        return selectItem(PBotAPI.modeui());
+//    }
 
     private static class ItemCb implements ItemClickCallback {
 
@@ -699,9 +711,9 @@ public class PBotUtils {
         sysMsg(ui, "Area selected!", Color.ORANGE);
     }
 
-    public static void areaSelect(Coord a, Coord b) {
-        areaSelect(PBotAPI.modeui(), a, b);
-    }
+//    public static void areaSelect(Coord a, Coord b) {
+//        areaSelect(PBotAPI.modeui(), a, b);
+//    }
 
     /**
      * Returns a list of gobs in the rectangle between A and B points
@@ -729,9 +741,9 @@ public class PBotUtils {
         return gobs;
     }
 
-    public static ArrayList<PBotGob> gobsInArea(Coord a, Coord b) {
-        return gobsInArea(PBotAPI.modeui(), a, b);
-    }
+//    public static ArrayList<PBotGob> gobsInArea(Coord a, Coord b) {
+//        return gobsInArea(PBotAPI.modeui(), a, b);
+//    }
 
     /**
      * Resource name of the tile in the given location
@@ -755,9 +767,9 @@ public class PBotUtils {
         return null;
     }
 
-    public static String tileResnameAt(int x, int y) {
-        return tileResnameAt(PBotAPI.modeui(), x, y);
-    }
+//    public static String tileResnameAt(int x, int y) {
+//        return tileResnameAt(PBotAPI.modeui(), x, y);
+//    }
 
     // Sorts coordinate array to efficient zig-zag-like sequence for farming etc.
     private static class CoordSort implements Comparator<PBotGob> {
@@ -783,17 +795,17 @@ public class PBotUtils {
                 -1);
     }
 
-    public static void doClick(Gob gob, int button, int mod) {
-        doClick(PBotAPI.modeui(), gob, button, mod);
-    }
+//    public static void doClick(Gob gob, int button, int mod) {
+//        doClick(PBotAPI.modeui(), gob, button, mod);
+//    }
 
     public static void doClickCrop(UI ui, Gob gob) {
         ui.gui.map.wdgmsg("click", gob.sc, gob.rc.floor(posres), 3, 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
     }
 
-    public static void doClickCrop(Gob gob) {
-        doClickCrop(PBotAPI.modeui(), gob);
-    }
+//    public static void doClickCrop(Gob gob) {
+//        doClickCrop(PBotAPI.modeui(), gob);
+//    }
 
     public static int getAmount(GItem item) {
         int ret = -1;
@@ -847,9 +859,9 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findObjectByNames(int radius, String... names) {
-        return findObjectByNames(PBotAPI.modeui(), radius, names);
-    }
+//    public static Gob findObjectByNames(int radius, String... names) {
+//        return findObjectByNames(PBotAPI.modeui(), radius, names);
+//    }
 
     // Finds nearest objects and returns closest one
     public static Gob findObjectContains(UI ui, int radius, String... names) {
@@ -877,9 +889,9 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findObjectContains(int radius, String... names) {
-        return findObjectContains(PBotAPI.modeui(), radius, names);
-    }
+//    public static Gob findObjectContains(int radius, String... names) {
+//        return findObjectContains(PBotAPI.modeui(), radius, names);
+//    }
 
     public static Gob findNearestBarrel(UI ui, int radius, java.util.List<Gob> blacklist) {
         Coord2d plc = player(ui).rc;
@@ -910,18 +922,18 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findNearestBarrel(int radius, java.util.List<Gob> blacklist) {
-        return findNearestBarrel(PBotAPI.modeui(), radius, blacklist);
-    }
+//    public static Gob findNearestBarrel(int radius, java.util.List<Gob> blacklist) {
+//        return findNearestBarrel(PBotAPI.modeui(), radius, blacklist);
+//    }
 
     // Find object by ID, returns null if not found
     public static Gob findObjectById(UI ui, long id) {
         return ui.sess.glob.oc.getgob(id);
     }
 
-    public static Gob findObjectById(long id) {
-        return findObjectById(PBotAPI.modeui(), id);
-    }
+//    public static Gob findObjectById(long id) {
+//        return findObjectById(PBotAPI.modeui(), id);
+//    }
 
     // true if player moving
     public static boolean isMoving(UI ui) {
@@ -931,18 +943,18 @@ public class PBotUtils {
             return true;
     }
 
-    public static boolean isMoving() {
-        return isMoving(PBotAPI.modeui());
-    }
+//    public static boolean isMoving() {
+//        return isMoving(PBotAPI.modeui());
+//    }
 
     // Chooses option from flower menu
     public static void Choose(UI ui, FlowerMenu.Petal option) {
         ui.gui.wdgmsg("cl", option.num, ui.modflags());
     }
 
-    public static void Choose(FlowerMenu.Petal option) {
-        Choose(PBotAPI.modeui(), option);
-    }
+//    public static void Choose(FlowerMenu.Petal option) {
+//        Choose(PBotAPI.modeui(), option);
+//    }
 
     // Finds an item from inventory that contains liquids that can be consumed
     public static WItem findDrink(UI ui, Inventory inv) {
@@ -998,17 +1010,17 @@ public class PBotUtils {
         }
     }
 
-    public static void takeItem(Widget item) {
-        takeItem(PBotAPI.modeui(), item);
-    }
+//    public static void takeItem(Widget item) {
+//        takeItem(PBotAPI.modeui(), item);
+//    }
 
-    public static void takeItem(Widget item, int limit) {
-        takeItem(PBotAPI.modeui(), item, limit);
-    }
+//    public static void takeItem(Widget item, int limit) {
+//        takeItem(PBotAPI.modeui(), item, limit);
+//    }
 
-    public static void takeItem(Widget item, boolean waiting) {
-        takeItem(PBotAPI.modeui(), item, waiting);
-    }
+//    public static void takeItem(Widget item, boolean waiting) {
+//        takeItem(PBotAPI.modeui(), item, waiting);
+//    }
 
     // Finds the nearest crop with a name and stage
     public static Gob findNearestStageCrop(UI ui, int radius, int stage, String... names) {
@@ -1042,9 +1054,9 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findNearestStageCrop(int radius, int stage, String... names) {
-        return findNearestStageCrop(PBotAPI.modeui(), radius, stage, names);
-    }
+//    public static Gob findNearestStageCrop(int radius, int stage, String... names) {
+//        return findNearestStageCrop(PBotAPI.modeui(), radius, stage, names);
+//    }
 
     public static Gob findNearestGob(UI ui, int radius, java.util.List<Gob> blacklist, String... names) {
         Coord2d plc = player(ui).rc;
@@ -1077,9 +1089,9 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findNearestGob(int radius, java.util.List<Gob> blacklist, String... names) {
-        return findNearestGob(PBotAPI.modeui(), radius, blacklist, names);
-    }
+//    public static Gob findNearestGob(int radius, java.util.List<Gob> blacklist, String... names) {
+//        return findNearestGob(PBotAPI.modeui(), radius, blacklist, names);
+//    }
 
     // Checks if the object's name can be found from resources
     public static boolean isObjectName(Gob gob, String name) {
@@ -1096,17 +1108,17 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 3, ui.modflags());
     }
 
-    public static void mapInteractClick() {
-        mapInteractClick(PBotAPI.modeui());
-    }
+//    public static void mapInteractClick() {
+//        mapInteractClick(PBotAPI.modeui());
+//    }
 
     public static void mapInteractLeftClick(UI ui, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 1, ui.modflags());
     }
 
-    public static void mapInteractLeftClick(int mod) {
-        mapInteractLeftClick(PBotAPI.modeui(), mod);
-    }
+//    public static void mapInteractLeftClick(int mod) {
+//        mapInteractLeftClick(PBotAPI.modeui(), mod);
+//    }
 
     // Destroys the given gob
     public static void destroyGob(UI ui, Gob gob) {
@@ -1114,9 +1126,9 @@ public class PBotUtils {
         doClick(ui, gob, 1, 0);
     }
 
-    public static void destroyGob(Gob gob) {
-        destroyGob(PBotAPI.modeui(), gob);
-    }
+//    public static void destroyGob(Gob gob) {
+//        destroyGob(PBotAPI.modeui(), gob);
+//    }
 
     // Returns witems with specific names from inventory
     public static java.util.List<PBotItem> getInventoryItemsByNames(Inventory invwdg, java.util.List<String> items) {
@@ -1166,9 +1178,9 @@ public class PBotUtils {
         return allSlots - takenSlots;
     }
 
-    public static int invFreeSlots() {
-        return invFreeSlots(PBotAPI.modeui());
-    }
+//    public static int invFreeSlots() {
+//        return invFreeSlots(PBotAPI.modeui());
+//    }
 
     public static void sysLogAppend(UI ui, String msg, String clr) {
         try {
@@ -1179,9 +1191,9 @@ public class PBotUtils {
         }
     }
 
-    public static void sysLogAppend(String msg, String clr) {
-        sysLogAppend(PBotAPI.modeui(), msg, clr);
-    }
+//    public static void sysLogAppend(String msg, String clr) {
+//        sysLogAppend(PBotAPI.modeui(), msg, clr);
+//    }
 
     public static int getState(Fightview fv, int relation) {
         return fv.lsrel.get(relation).give.state;
@@ -1196,9 +1208,9 @@ public class PBotUtils {
         return ui.sess.glob.map.gettile(new Coord(x, y));
     }
 
-    public static int getTile(int x, int y) {
-        return getTile(PBotAPI.modeui(), x, y);
-    }
+//    public static int getTile(int x, int y) {
+//        return getTile(PBotAPI.modeui(), x, y);
+//    }
 
     /* Teleport to you hearthfire
      */
@@ -1206,9 +1218,9 @@ public class PBotUtils {
         ui.gui.act("travel", "hearth");
     }
 
-    public static void travelHearth() {
-        travelHearth(PBotAPI.modeui());
-    }
+//    public static void travelHearth() {
+//        travelHearth(PBotAPI.modeui());
+//    }
 
 
     //Will set player speed to whatever int you send it.
@@ -1218,9 +1230,9 @@ public class PBotUtils {
             speedwdg.set(speed);
     }
 
-    public static void setSpeed(int speed) {
-        setSpeed(PBotAPI.modeui(), speed);
-    }
+//    public static void setSpeed(int speed) {
+//        setSpeed(PBotAPI.modeui(), speed);
+//    }
 
     //should return current max move speed? maybe?
     public static int maxSpeed(UI ui) {
@@ -1231,9 +1243,9 @@ public class PBotUtils {
             return 0;
     }
 
-    public static int maxSpeed() {
-        return maxSpeed(PBotAPI.modeui());
-    }
+//    public static int maxSpeed() {
+//        return maxSpeed(PBotAPI.modeui());
+//    }
 
     /**
      * Get an amount of something such as seeds in a stack
@@ -1282,9 +1294,9 @@ public class PBotUtils {
         return nearest;
     }
 
-    public static Gob findObjectByNames(double radius, String... names) {
-        return findObjectByNames(PBotAPI.modeui(), radius, names);
-    }
+//    public static Gob findObjectByNames(double radius, String... names) {
+//        return findObjectByNames(PBotAPI.modeui(), radius, names);
+//    }
 
     /**
      * Get object id
@@ -1318,9 +1330,9 @@ public class PBotUtils {
         return ui.gui.getmeter("stam", 0).a;
     }
 
-    public static int getStamina() {
-        return getStamina(PBotAPI.modeui());
-    }
+//    public static int getStamina() {
+//        return getStamina(PBotAPI.modeui());
+//    }
 
     /**
      * Get the player energy
@@ -1331,9 +1343,9 @@ public class PBotUtils {
         return ui.gui.getmeter("nrj", 0).a;
     }
 
-    public static int getEnergy() {
-        return getEnergy(PBotAPI.modeui());
-    }
+//    public static int getEnergy() {
+//        return getEnergy(PBotAPI.modeui());
+//    }
 
     /**
      * Get the player hp
@@ -1344,9 +1356,9 @@ public class PBotUtils {
         return ui.gui.getmeter("hp", 0).a;
     }
 
-    public static int getShp() {
-        return getShp(PBotAPI.modeui());
-    }
+//    public static int getShp() {
+//        return getShp(PBotAPI.modeui());
+//    }
 
     /**
      * Check if the object is moving
@@ -1371,9 +1383,9 @@ public class PBotUtils {
         ui.gui.map.purusPfRightClick(gob, -1, 3, mod, null);
     }
 
-    public static void pfRightClick(Gob gob, int mod) {
-        pfRightClick(PBotAPI.modeui(), gob, mod);
-    }
+//    public static void pfRightClick(Gob gob, int mod) {
+//        pfRightClick(PBotAPI.modeui(), gob, mod);
+//    }
 
     /**
      * Itemact with gob, to fill trough with item in hand for example
@@ -1385,9 +1397,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), mod, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
     }
 
-    public static void itemClick(Gob gob, int mod) {
-        itemClick(PBotAPI.modeui(), gob, mod);
-    }
+//    public static void itemClick(Gob gob, int mod) {
+//        itemClick(PBotAPI.modeui(), gob, mod);
+//    }
 
     /**
      * Returns the player gob
@@ -1404,9 +1416,9 @@ public class PBotUtils {
             return null;
     }
 
-    public static Gob player() {
-        return player(PBotAPI.modeui());
-    }
+//    public static Gob player() {
+//        return player(PBotAPI.modeui());
+//    }
 
     /**
      * Returns contents of an item
@@ -1452,9 +1464,9 @@ public class PBotUtils {
         }
     }
 
-    public static void takeItem(WItem item) {
-        takeItem(PBotAPI.modeui(), item);
-    }
+//    public static void takeItem(WItem item) {
+//        takeItem(PBotAPI.modeui(), item);
+//    }
 
     /**
      * Get stage of the crop
@@ -1473,9 +1485,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 0);
     }
 
-    public static void makePile() {
-        makePile(PBotAPI.modeui());
-    }
+//    public static void makePile() {
+//        makePile(PBotAPI.modeui());
+//    }
 
     /**
      * Use to place something, for example, a stockpile
@@ -1488,9 +1500,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
     }
 
-    public static void placeThing(int x, int y) {
-        placeThing(PBotAPI.modeui(), x, y);
-    }
+//    public static void placeThing(int x, int y) {
+//        placeThing(PBotAPI.modeui(), x, y);
+//    }
 
     /**
      * Destroys the given gob
@@ -1502,9 +1514,9 @@ public class PBotUtils {
         doClick(ui, gob, 1, 0);
     }
 
-    public static void liftGob(Gob gob) {
-        liftGob(PBotAPI.modeui(), gob);
-    }
+//    public static void liftGob(Gob gob) {
+//        liftGob(PBotAPI.modeui(), gob);
+//    }
 
     /**
      * Drops an item from the hand
@@ -1515,9 +1527,9 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("drop", Coord.z, ui.gui.map.player().rc.floor(posres), mod);
     }
 
-    public static void dropItem(int mod) {
-        dropItem(PBotAPI.modeui(), mod);
-    }
+//    public static void dropItem(int mod) {
+//        dropItem(PBotAPI.modeui(), mod);
+//    }
 
     /**
      * Drops the given item from the inventory
@@ -1539,9 +1551,9 @@ public class PBotUtils {
         }
     }
 
-    public static void waitForWindow(String windowName) {
-        waitForWindow(PBotAPI.modeui(), windowName);
-    }
+//    public static void waitForWindow(String windowName) {
+//        waitForWindow(PBotAPI.modeui(), windowName);
+//    }
 
     /**
      * Get a window with name
@@ -1553,9 +1565,9 @@ public class PBotUtils {
         return ui.gui.getwnd(name);
     }
 
-    public static Window getWindow(String name) {
-        return getWindow(PBotAPI.modeui(), name);
-    }
+//    public static Window getWindow(String name) {
+//        return getWindow(PBotAPI.modeui(), name);
+//    }
 
     /**
      * Close the window
@@ -1617,9 +1629,9 @@ public class PBotUtils {
         return witems;
     }
 
-    public static List<WItem> getallInventoryContents() {
-        return getallInventoryContents(PBotAPI.modeui());
-    }
+//    public static List<WItem> getallInventoryContents() {
+//        return getallInventoryContents(PBotAPI.modeui());
+//    }
 
     //same as above for returns a list of all WItems from all inventories seen on screen
     public static List<WItem> getallInventoryContentsbyString(UI ui, String witem) {
@@ -1642,9 +1654,9 @@ public class PBotUtils {
         return finallist;
     }
 
-    public static List<WItem> getallInventoryContentsbyString(String witem) {
-        return getallInventoryContentsbyString(PBotAPI.modeui(), witem);
-    }
+//    public static List<WItem> getallInventoryContentsbyString(String witem) {
+//        return getallInventoryContentsbyString(PBotAPI.modeui(), witem);
+//    }
 
     public static List<WItem> getPlayerInvContentsPartial(UI ui, String witem) {
         List<WItem> witems = new ArrayList<>();
@@ -1658,9 +1670,9 @@ public class PBotUtils {
         return finallist;
     }
 
-    public static List<WItem> getPlayerInvContentsPartial(String witem) {
-        return getPlayerInvContentsPartial(PBotAPI.modeui(), witem);
-    }
+//    public static List<WItem> getPlayerInvContentsPartial(String witem) {
+//        return getPlayerInvContentsPartial(PBotAPI.modeui(), witem);
+//    }
 
     public static List<WItem> getPlayerInvContentsExact(UI ui, String witem) {
         List<WItem> finallist = new ArrayList<>();
@@ -1673,9 +1685,9 @@ public class PBotUtils {
         return finallist;
     }
 
-    public static List<WItem> getPlayerInvContentsExact(String witem) {
-        return getPlayerInvContentsExact(PBotAPI.modeui(), witem);
-    }
+//    public static List<WItem> getPlayerInvContentsExact(String witem) {
+//        return getPlayerInvContentsExact(PBotAPI.modeui(), witem);
+//    }
 
     /**
      * Log out to character selection
@@ -1689,9 +1701,9 @@ public class PBotUtils {
         ui.gui.act("lo");
     }
 
-    public static void logout() {
-        logout(PBotAPI.modeui());
-    }
+//    public static void logout() {
+//        logout(PBotAPI.modeui());
+//    }
 
     public static void logoutChar(UI ui) {
         if (Discord.jdalogin != null)
@@ -1699,9 +1711,9 @@ public class PBotUtils {
         ui.gui.act("lo", "cs");
     }
 
-    public static void logoutChar() {
-        logoutChar(PBotAPI.modeui());
-    }
+//    public static void logoutChar() {
+//        logoutChar(PBotAPI.modeui());
+//    }
 
     /**
      * Check if stockpile is full
@@ -1781,9 +1793,9 @@ public class PBotUtils {
         return list;
     }
 
-    public static java.util.List<Gob> getGobs() {
-        return getGobs(PBotAPI.modeui());
-    }
+//    public static java.util.List<Gob> getGobs() {
+//        return getGobs(PBotAPI.modeui());
+//    }
 
     /**
      * Send act message to server
@@ -1797,9 +1809,9 @@ public class PBotUtils {
         ui.gui.menu.wdgmsg("act", act);
     }
 
-    public static void doAct(String act) {
-        doAct(PBotAPI.modeui(), act);
-    }
+//    public static void doAct(String act) {
+//        doAct(PBotAPI.modeui(), act);
+//    }
 
     /**
      * Returns coords of the gob
@@ -1827,9 +1839,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean pfmove(int x, int y) {
-        return pfmove(PBotAPI.modeui(), x, y);
-    }
+//    public static boolean pfmove(int x, int y) {
+//        return pfmove(PBotAPI.modeui(), x, y);
+//    }
 
     public static boolean pfmove(UI ui, double x, double y) {
         boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
@@ -1838,9 +1850,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean pfmove(double x, double y) {
-        return pfmove(PBotAPI.modeui(), x, y);
-    }
+//    public static boolean pfmove(double x, double y) {
+//        return pfmove(PBotAPI.modeui(), x, y);
+//    }
 
     public static boolean pfmovegob(UI ui, PBotGob gob) {
         boolean yea = ui.gui.map.pathto(gob.gob);
@@ -1849,9 +1861,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean pfmovegob(PBotGob gob) {
-        return pfmovegob(PBotAPI.modeui(), gob);
-    }
+//    public static boolean pfmovegob(PBotGob gob) {
+//        return pfmovegob(PBotAPI.modeui(), gob);
+//    }
 
     public static boolean pfmovegob(UI ui, Gob gob) {
         boolean yea = ui.gui.map.pathto(gob);
@@ -1860,9 +1872,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean pfmovegob(Gob gob) {
-        return pfmovegob(PBotAPI.modeui(), gob);
-    }
+//    public static boolean pfmovegob(Gob gob) {
+//        return pfmovegob(PBotAPI.modeui(), gob);
+//    }
 
     //new boshaw pf right clicks.
     public static boolean PathfinderRightClick(UI ui, Gob gob, int mod) {
@@ -1872,9 +1884,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean PathfinderRightClick(Gob gob, int mod) {
-        return PathfinderRightClick(PBotAPI.modeui(), gob, mod);
-    }
+//    public static boolean PathfinderRightClick(Gob gob, int mod) {
+//        return PathfinderRightClick(PBotAPI.modeui(), gob, mod);
+//    }
 
     public static boolean PathfinderRightClick(UI ui, PBotGob gob, int mod) {
         boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
@@ -1883,9 +1895,9 @@ public class PBotUtils {
         return yea;
     }
 
-    public static boolean PathfinderRightClick(PBotGob gob, int mod) {
-        return PathfinderRightClick(PBotAPI.modeui(), gob.gob, mod);
-    }
+//    public static boolean PathfinderRightClick(PBotGob gob, int mod) {
+//        return PathfinderRightClick(PBotAPI.modeui(), gob.gob, mod);
+//    }
 
     public static String getRes(PBotGob gob) {
         return gob.gob.getres().name;

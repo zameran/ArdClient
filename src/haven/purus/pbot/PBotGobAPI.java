@@ -64,9 +64,9 @@ public class PBotGobAPI {
         return list;
     }
 
-    public static List<PBotGob> getAllGobs() {
-        return getAllGobs(PBotAPI.modeui());
-    }
+//    public static List<PBotGob> getAllGobs() {
+//        return getAllGobs(PBotAPI.modeui());
+//    }
 
     /**
      * Waits for any gob to appear at the precisely given coordinates, excluding player
@@ -85,9 +85,9 @@ public class PBotGobAPI {
         }
     }
 
-    public static void waitForGob(double x, double y) {
-        waitForGob(PBotAPI.modeui(), x, y);
-    }
+//    public static void waitForGob(double x, double y) {
+//        waitForGob(PBotAPI.modeui(), x, y);
+//    }
 
     /**
      * Finds the closest object that matches one of the given names
@@ -128,9 +128,9 @@ public class PBotGobAPI {
             return new PBotGob(nearest);
     }
 
-    public static PBotGob findGobByNames(double radius, String... pattern) {
-        return findGobByNames(PBotAPI.modeui(), radius, pattern);
-    }
+//    public static PBotGob findGobByNames(double radius, String... pattern) {
+//        return findGobByNames(PBotAPI.modeui(), radius, pattern);
+//    }
 
     /**
      * Returns gob with exactly the given coords or null if not found
@@ -148,9 +148,9 @@ public class PBotGobAPI {
         return null;
     }
 
-    public static PBotGob getGobWithCoords(Coord2d c) {
-        return getGobWithCoords(PBotAPI.modeui(), c);
-    }
+//    public static PBotGob getGobWithCoords(Coord2d c) {
+//        return getGobWithCoords(PBotAPI.modeui(), c);
+//    }
 
     /**
      * Returns the player gob
@@ -161,9 +161,9 @@ public class PBotGobAPI {
         return new PBotGob(ui.gui.map.player());
     }
 
-    public static PBotGob player() {
-        return player(PBotAPI.modeui());
-    }
+//    public static PBotGob player() {
+//        return player(PBotAPI.modeui());
+//    }
 
 
     /**
@@ -180,9 +180,9 @@ public class PBotGobAPI {
             return new PBotGob(ui.sess.glob.oc.getgob(id));
     }
 
-    public static PBotGob findGobById(long id) {
-        return findGobById(PBotAPI.modeui(), id);
-    }
+//    public static PBotGob findGobById(long id) {
+//        return findGobById(PBotAPI.modeui(), id);
+//    }
 
 
     /**
@@ -200,9 +200,9 @@ public class PBotGobAPI {
         return new PBotGob(selectedGob);
     }
 
-    public static PBotGob selectGob() {
-        return selectGob(PBotAPI.modeui());
-    }
+//    public static PBotGob selectGob() {
+//        return selectGob(PBotAPI.modeui());
+//    }
 
     private static class GobCb implements GobSelectCallback {
 
@@ -223,9 +223,9 @@ public class PBotGobAPI {
         ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(ui), player(ui).getRcCoords().floor(posres), 0);
     }
 
-    public static void makePile() {
-        makePile(PBotAPI.modeui());
-    }
+//    public static void makePile() {
+//        makePile(PBotAPI.modeui());
+//    }
 
     /**
      * Use to place something, for example, a stockpile
@@ -237,9 +237,9 @@ public class PBotGobAPI {
         ui.gui.map.wdgmsg("place", new Coord2d(x, y).floor(posres), 0, 1, 0);
     }
 
-    public static void placeThing(double x, double y) {
-        placeThing(PBotAPI.modeui(), x, y);
-    }
+//    public static void placeThing(double x, double y) {
+//        placeThing(PBotAPI.modeui(), x, y);
+//    }
 
     /**
      * Use to cancel stockpile placing for example
@@ -248,7 +248,7 @@ public class PBotGobAPI {
         ui.gui.map.wdgmsg("place", new Coord2d(0, 0).floor(posres), 0, 3, 0);
     }
 
-    public static void cancelPlace() {
-        cancelPlace(PBotAPI.modeui());
-    }
+//    public static void cancelPlace() {
+//        cancelPlace(PBotAPI.modeui());
+//    }
 }
