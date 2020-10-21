@@ -26,15 +26,11 @@
 
 package haven;
 
-import haven.purus.pbot.PBotAPI;
-
 public abstract class GAttrib {
     public final Gob gob;
-    public final UI ui;
 
     public GAttrib(Gob gob) {
         this.gob = gob;
-        this.ui = PBotAPI.ui(); //gob.glob.ui.get()
     }
 
     public void tick() {

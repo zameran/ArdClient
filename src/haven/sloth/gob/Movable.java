@@ -11,6 +11,7 @@ import haven.Moving;
 import haven.RenderList;
 import haven.States;
 import haven.Storage;
+import haven.UI;
 import haven.sloth.gfx.GobPathSprite;
 
 import java.sql.ResultSet;
@@ -84,6 +85,11 @@ public class Movable extends GAttrib implements Rendered {
                     mv.getDest().ifPresent((t) -> {
                         final Coord2d grc = new Coord2d(gob.getc());
                         if (pathol == null || (pathol.dest != t || pathol.rc != grc)) {
+
+                            UI ui = null;
+                            while (ui == null)
+                                ui = gob.glob.ui.get();
+
                             //We need a new path setup
                             final States.ColState col;
                             if (gob.type == Type.VEHICLE) {
