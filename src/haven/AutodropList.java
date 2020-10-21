@@ -149,5 +149,48 @@ public class AutodropList extends WidgetList<AutodropList.Item> {
                     break;
             }
         }
+
+        public void update(boolean a) {
+            this.a = a;
+        }
+    }
+
+    public void tick(double dt) {
+        super.tick(dt);
+        synchro();
+    }
+
+    private void synchro() {
+        synchronized (autodroplist) {
+            for (Map.Entry<String, Boolean> entry : autodroplist.entrySet()) {
+                if (contains(entry.getKey())) {
+                    Item item = getItem(entry.getKey());
+                    if (item != null) {
+                        if (item.a ^ entry.getValue()) {
+                            item.update(entry.getValue());
+                        }
+                    } else {
+                        additem(new Item(entry.getKey()));
+                        update();
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean contains(String name) {
+        for (Item item : list) {
+            if (item.name.equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public Item getItem(String name) {
+        for (Item item : list) {
+            if (item.name.equals(name))
+                return item;
+        }
+        return null;
     }
 }
