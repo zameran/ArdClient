@@ -391,6 +391,9 @@ public class FlowerMenu extends Widget {
     protected void added() {
         if (c.equals(-1, -1))
             c = parent.ui.lcc;
+        if (c.equals(0, 0)) {
+            move(parent.sz.div(2), 0.5, 0.5);
+        }
         mg = ui.grabmouse(this);
         kg = ui.grabkeys(this);
         organize(opts);
