@@ -1123,20 +1123,21 @@ public class Config {
         String p;
         if ((p = getprop("haven.authck", null)) != null)
             authck = Utils.hex2byte(p);
-        try {
-            InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
-            try {
-                if (in != null) {
-                    java.util.Scanner s = new java.util.Scanner(in);
-                    String[] binfo = s.next().split(",");
-                    gitrev = binfo[0];
-                    version = binfo[1];
-                }
-            } finally {
-                in.close();
-            }
-        } catch (Exception e) {
-        }
+//        try {
+//            InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
+//            try {
+//                if (in != null) {
+//                    java.util.Scanner s = new java.util.Scanner(in);
+//                    String[] binfo = s.next().split(",");
+//                    gitrev = binfo[0];
+//                    version = binfo[1];
+//                    System.out.println(gitrev + " " + version);
+//                }
+//            } finally {
+//                in.close();
+//            }
+//        } catch (Exception e) {
+//        }
         loadBuildVersion();
 
         isUpdate = (!version.equals(newversion)) || !getFile("CHANGELOG.txt").exists();
