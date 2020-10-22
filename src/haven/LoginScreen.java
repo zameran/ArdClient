@@ -88,9 +88,9 @@ public class LoginScreen extends Widget {
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
-            InputStream in = LoginScreen.class.getResourceAsStream("/changelog.txt");
+            InputStream in = LoginScreen.class.getResourceAsStream("/CHANGELOG.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            File f = Config.getFile("changelog.txt");
+            File f = Config.getFile("CHANGELOG.txt");
             FileOutputStream out = new FileOutputStream(f);
             String strLine;
             int count = 0;
@@ -413,6 +413,9 @@ public class LoginScreen extends Widget {
         lower();
         presize();
         parent.setfocus(this);
+        if(Config.isUpdate){
+            showChangeLog();
+        }
     }
 
     Coord oldsz;

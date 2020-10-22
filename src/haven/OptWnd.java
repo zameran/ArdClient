@@ -39,7 +39,12 @@ import modification.configuration;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -768,13 +773,13 @@ public class OptWnd extends Window {
                 }
             }, new Coord(210, 240));
             */
-            /*
-            main.add(new Button(200, "Show Client Changelog") {
+
+            main.add(new Button(200, "Changelog") {
                 public void click() {
                    showChangeLog();
                 }
             }, new Coord(210, 270));
-            */
+
             main.add(new Button(200, "Switch character") {
                 public void click() {
                     if (Discord.jdalogin != null)
@@ -4572,7 +4577,7 @@ public class OptWnd extends Window {
         chpanel(main);
         super.show();
     }
-    /*
+
     private void showChangeLog() {
         Window log = ui.root.add(new Window(new Coord(50, 50), "Changelog"), new Coord(100, 50));
         log.justclose = true;
@@ -4581,9 +4586,9 @@ public class OptWnd extends Window {
         int maxlines = txt.maxLines = 200;
         log.pack();
         try {
-            InputStream in = LoginScreen.class.getResourceAsStream("/changelog.txt");
+            InputStream in = LoginScreen.class.getResourceAsStream("/CHANGELOG.txt");
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            File f = Config.getFile("changelog.txt");
+            File f = Config.getFile("CHANGELOG.txt");
             FileOutputStream out = new FileOutputStream(f);
             String strLine;
             int count = 0;
@@ -4599,7 +4604,6 @@ public class OptWnd extends Window {
         }
         txt.setprog(0);
     }
-    */
 
     private Dropbox<String> makeAlarmDropdownUnknown() {
         final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());

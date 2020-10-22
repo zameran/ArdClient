@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
     <property name="name" value="ArdClient"/>
-    <property name="version" value="1.00.165"/>
+    <property name="version" value="20201022"/>
 
     <target name="build-env">
         <mkdir dir="build"/>
@@ -18,7 +18,7 @@
             <arg line="rev-parse HEAD"/>
         </exec>
         <copy todir="build/classes">
-            <fileset dir="${basedir}" includes="changelog.txt"/>
+            <fileset dir="${basedir}" includes="CHANGELOG.txt"/>
         </copy>
         <echo file="build/classes/buildinfo">
             git-rev = ${gitrev}
@@ -83,7 +83,7 @@
         <jar destfile="build/hafen.jar" update="true">
             <fileset dir="build/classes"/>
             <fileset dir="build/classes-lib"/>
-            <fileset file="changelog.txt"/>
+            <fileset file="CHANGELOG.txt"/>
             <manifest>
                 <attribute name="Main-Class" value="haven.MainFrame"/>
                 <attribute name="Class-Path" value="jogl.jar gluegen-rt.jar amber-res.jar custom-res.jar builtin-res.jar hafen-res.jar l10n.jar HavenDiscord.jar rxjava-1.1.5.jar rxjava-1.1.5-javadoc.jar sqlite-jdbc-3.26.0.jar flogger-0.3.1.jar flogger-system-backend-0.3.1.jar
@@ -164,13 +164,13 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
     <target name="dist" depends="rebuild">
         <zip destfile="${basedir}/${name}-${version}.zip" update="false">
             <fileset dir="build" includes="*.jar,grid_ids.txt" excludes="*natives*.jar"/>
-            <fileset dir="${basedir}" includes="README, CHANGELOG, changelog.txt"/>
+            <fileset dir="${basedir}" includes="README, CHANGELOG.txt"/>
             <fileset dir="lib/jogl-natives" includes="*.jar"/>
             <fileset dir="etc" includes="*.bat,run.sh,run.command"/>
         </zip>
         <zip destfile="${basedir}/${name}-${version}-upd.zip" update="false">
             <fileset dir="build" includes="amber-res.jar, hafen.jar, l10n.jar, builtin-res.jar, grid_ids.txt"/>
-            <fileset dir="${basedir}" includes="CHANGELOG, changelog.txt"/>
+            <fileset dir="${basedir}" includes="CHANGELOG.txt"/>
         </zip>
     </target>
 
@@ -179,10 +179,10 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
         <delete file="D:\GithubFolder\Ardenneslol.github.io\Hafen\hafen.jar"/>
         <delete file="D:\GithubFolder\Ardenneslol.github.io\Hafen\ArdClient.rar"/>
         <copy todir="${basedir}">
-            <fileset dir="build/classes" includes="changelog.txt"/>
+            <fileset dir="build/classes" includes="CHANGELOG.txt"/>
         </copy>
         <zip destfile="D:\GithubFolder\Ardenneslol.github.io\Hafen\ArdClient.rar" update="true">
-            <fileset dir="build" includes="*.jar,grid_ids.txt, *.bat, changelog.txt, static.sqlite"
+            <fileset dir="build" includes="*.jar,grid_ids.txt, *.bat, CHANGELOG.txt, static.sqlite"
                      excludes="chatlog.txt, *.log, *.dat"/>
         </zip>
         <copy todir="D:\GithubFolder\Ardenneslol.github.io\Hafen">
@@ -194,7 +194,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
         <delete file="D:\GithubFolder\Ardenneslol.github.io\Hafen-Beta\amber-res.jar"/>
         <delete file="D:\GithubFolder\Ardenneslol.github.io\Hafen-Beta\hafen.jar"/>
         <copy todir="${basedir}">
-            <fileset dir="build/classes" includes="changelog.txt"/>
+            <fileset dir="build/classes" includes="CHANGELOG.txt"/>
         </copy>
         <copy todir="D:\GithubFolder\Ardenneslol.github.io\Hafen-Beta">
             <fileset dir="build" includes="amber-res.jar, hafen.jar"/>
@@ -256,9 +256,9 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
                 <include name="static.sqlite"/>
                 <include name="grid_ids.txt"/>
             </fileset>
-<!--            <fileset dir="build/classes">-->
-<!--                <include name="changelog.txt"/>-->
-<!--            </fileset>-->
+            <fileset dir="build/classes">
+                <include name="CHANGELOG.txt"/>
+            </fileset>
         </copy>
         <copy todir="update/scripts">
             <fileset dir="scripts/" includes="**"/>

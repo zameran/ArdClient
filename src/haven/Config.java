@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.error.ErrorHandler;
 import haven.purus.Iconfinder;
 import haven.sloth.util.ObservableMap;
 import integrations.mapv4.MappingClient;
@@ -329,7 +330,7 @@ public class Config {
     public static int smatSupportsblue = Utils.getprefi("smatSupportsblue", 0);
     public static String confid = "ArdClient";
     public static boolean elitecombatanimal = Utils.getprefb("disableAllAnimations", true);
-    // public static final boolean isUpdate;
+    public static final boolean isUpdate;
     private static String username, playername;
     public static boolean showPBot = Utils.getprefb("showPBot", true);
     public static boolean showPBotOld = Utils.getprefb("showPBotOld", true);
@@ -1122,51 +1123,50 @@ public class Config {
         String p;
         if ((p = getprop("haven.authck", null)) != null)
             authck = Utils.hex2byte(p);
-      /*  try {
+        try {
             InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
             try {
                 if (in != null) {
                     java.util.Scanner s = new java.util.Scanner(in);
                     String[] binfo = s.next().split(",");
-                   // version = binfo[0];
-                    gitrev = binfo[1];
+                    gitrev = binfo[0];
+                    version = binfo[1];
                 }
             } finally {
                 in.close();
             }
-        } catch (Exception e) {}*/
+        } catch (Exception e) {
+        }
         loadBuildVersion();
-        /*
-        isUpdate = (!version.equals(newversion)) || !getFile("changelog.txt").exists();
+
+        isUpdate = (!version.equals(newversion)) || !getFile("CHANGELOG.txt").exists();
         if (isUpdate) {
-         //   Config.version = newversion;
-            Utils.setpref("version",newversion);
+            Config.version = newversion;
+            Utils.setpref("version", newversion);
             Config.version = newversion;
         }
-        */
 
-        /*
+
         try {
-            InputStream in = ErrorHandler.class.getResourceAsStream("/CHANGELOG");
+            InputStream in = ErrorHandler.class.getResourceAsStream("/CHANGELOG.txt");
             try {
                 if (in != null) {
                     java.util.Scanner s = new java.util.Scanner(in);
                     Changelogbuffer = new StringBuffer();
-                    while(s.hasNextLine()) {
+                    while (s.hasNextLine()) {
                         Changelogbuffer.append("-");
                         Changelogbuffer.append(s.nextLine());
                     }
-                    //  }
                     Changelog = Changelogbuffer.toString();
                 }
             } finally {
                 in.close();
             }
-        } catch (Exception e) {}
-        */
+        } catch (Exception e) {
+        }
+
 
         // populate grid ids map
-//  TODO remember to add Oddimap in
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader("grid_ids.txt"));
