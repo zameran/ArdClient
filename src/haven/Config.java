@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.Iconfinder;
+import haven.sloth.util.ObservableMap;
 import integrations.mapv4.MappingClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -352,7 +353,7 @@ public class Config {
     public static String attackedsfx = Utils.getpref("attackedsfx", "None");
     public static double attackedvol = Utils.getprefd("attackedvol", 0.8);
     public static HashMap<String, Boolean> curioslist = null;
-    public static HashMap<String, Boolean> autodroplist = null;
+    public static ObservableMap<String, Boolean> autodroplist = null;
 
     public final static String chatfile = "chatlog.txt";
     public static PrintWriter chatlog = null;

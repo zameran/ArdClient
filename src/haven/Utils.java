@@ -29,6 +29,7 @@ package haven;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import haven.sloth.util.ObservableMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -368,23 +369,25 @@ public class Utils {
     public static void saveAutodropList() {
         synchronized (Config.autodroplist) {
             Gson gson = (new GsonBuilder()).create();
-            Config.saveFile("autodroplist.json", gson.toJson(Config.autodroplist));
+            Config.saveFile("autodroplist.json", gson.toJson(Config.autodroplist.base));
         }
     }
 
     public static void loadAutodropList() {
         String json = Config.loadFile("autodroplist.json");
+        if (Config.autodroplist == null) {
+            Config.autodroplist = new ObservableMap<>(new HashMap<>());
+        }
         if (json != null) {
             try {
                 Gson gson = (new GsonBuilder()).create();
                 Type collectionType = new TypeToken<HashMap<String, Boolean>>() {
                 }.getType();
-                Config.autodroplist = gson.fromJson(json, collectionType);
+                Config.autodroplist.putAll(gson.fromJson(json, collectionType));
             } catch (Exception ignored) {
             }
         }
-        if (Config.autodroplist == null) {
-            Config.autodroplist = new HashMap<>();
+        if (Config.autodroplist.size() == 0) {
             Config.autodroplist.put("Intestines", false);
             Config.autodroplist.put("Bone Material", false);
             Config.autodroplist.put("Cat Gold", false);

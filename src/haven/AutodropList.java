@@ -1,12 +1,14 @@
 package haven;
 
+import haven.sloth.util.ObservableMapListener;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
 import static haven.Config.autodroplist;
 
-public class AutodropList extends WidgetList<AutodropList.Item> {
+public class AutodropList extends WidgetList<AutodropList.Item> implements ObservableMapListener<String, Boolean> {
 
     public static final Comparator<Item> ITEM_COMPARATOR = new Comparator<Item>() {
         @Override
@@ -17,12 +19,7 @@ public class AutodropList extends WidgetList<AutodropList.Item> {
 
     public AutodropList() {
         super(new Coord(200, 25), 10);
-
-        for (Map.Entry<String, Boolean> entry : autodroplist.entrySet()) {
-            additem(new Item(entry.getKey()));
-        }
-
-        update();
+        autodroplist.addListener(this);
     }
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
@@ -74,7 +71,36 @@ public class AutodropList extends WidgetList<AutodropList.Item> {
         }
     }
 
-    protected static class Item extends Widget {
+    @Override
+    public void init(Map<String, Boolean> base) {
+        for (Map.Entry<String, Boolean> entry : autodroplist.entrySet()) {
+            additem(new Item(entry.getKey()));
+        }
+
+        update();
+    }
+
+    @Override
+    public void put(String key, Boolean val) {
+        Item item = getItem(key);
+        if (item != null) {
+            if (item.cb.a != val) {
+                item.update(val);
+            }
+        } else {
+            add(key);
+        }
+    }
+
+    @Override
+    public void remove(String key) {
+        Item item = getItem(key);
+        if (item != null) {
+            list.remove(item);
+        }
+    }
+
+    public static class Item extends Widget {
 
         public final String name;
         private final CheckBox cb;
@@ -151,30 +177,7 @@ public class AutodropList extends WidgetList<AutodropList.Item> {
         }
 
         public void update(boolean a) {
-            this.a = a;
-        }
-    }
-
-    public void tick(double dt) {
-        super.tick(dt);
-        synchro();
-    }
-
-    private void synchro() {
-        synchronized (autodroplist) {
-            for (Map.Entry<String, Boolean> entry : autodroplist.entrySet()) {
-                if (contains(entry.getKey())) {
-                    Item item = getItem(entry.getKey());
-                    if (item != null) {
-                        if (item.a ^ entry.getValue()) {
-                            item.update(entry.getValue());
-                        }
-                    } else {
-                        additem(new Item(entry.getKey()));
-                        update();
-                    }
-                }
-            }
+            this.cb.a = a;
         }
     }
 
