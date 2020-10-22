@@ -29,13 +29,12 @@ package haven;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import integrations.food.FoodService;
-import integrations.food.IconService;
-import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static haven.Text.num10Fnd;
@@ -328,8 +327,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
             Resource curs = ui.root.getcurs(Coord.z);
             String name = this.resource().basename();
             String invname = this.getname();
-            for (String itm : Config.autodroplist.keySet()) {
-                if (itm.equals(invname) && Config.autodroplist.get(itm)) {
+            for (Map.Entry<String, Boolean> entry : Config.autodroplist.entrySet()) {
+                if (entry.getKey().equals(invname) && entry.getValue()) {
                     this.wdgmsg("drop", Coord.z);
                 }
             }
