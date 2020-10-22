@@ -132,8 +132,8 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
         {
             vollabel = add(new Label("Selected Alert Volume"), new Coord(c.copy().x + 40, c.copy().y + 20));
             volslider = add(new HSlider(200, 0, 1000, 0) {
-                protected void attached() {
-                    super.attached();
+                protected void added() {
+                    super.added();
                     val = (int) (.8 * 1000);
                 }
 

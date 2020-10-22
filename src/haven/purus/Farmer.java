@@ -30,6 +30,9 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
 
     public Farmer() {
         super(new Coord(350, 410), "Farming Bots", "Farming Bots");
+    }
+
+    public void added() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
         int y = 0;
         PBotUtils.sysMsg(ui, "Hold alt and left click containers to select them.", Color.white);

@@ -152,21 +152,21 @@ public class SeedCropFarmer2 extends Window implements Runnable {
                             if (w instanceof GItem && ((GItem) w).resource().name.equals(seedName)) {
                                 item = (GItem) w;
                                 if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getAmount(item) < 50) {
-                                    int handAmount = PBotUtils.getAmount(PBotUtils.getItemAtHand().witem);
+                                    int handAmount = PBotUtils.getAmount(PBotUtils.getItemAtHand(ui).witem);
                                     try {
                                         item.wdgmsg("itemact", 0);
                                     } catch (Exception e) {
                                     }
-                                    while (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getAmount(PBotUtils.getItemAtHand().witem) == handAmount)
+                                    while (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getAmount(PBotUtils.getItemAtHand(ui).witem) == handAmount)
                                         PBotUtils.sleep(50);
                                 }
                             }
                         }
                         if (PBotUtils.getItemAtHand(ui) != null) {
-                            Coord slot = PBotUtils.getFreeInvSlot(PBotUtils.playerInventory().inv);
+                            Coord slot = PBotUtils.getFreeInvSlot(PBotUtils.playerInventory(ui).inv);
                             if (slot != null) {
                                 int freeSlots = PBotUtils.invFreeSlots(ui);
-                                PBotUtils.dropItemToInventory(slot, PBotUtils.playerInventory().inv);
+                                PBotUtils.dropItemToInventory(slot, PBotUtils.playerInventory(ui).inv);
                                 while (PBotUtils.getItemAtHand(ui) != null)
                                     PBotUtils.sleep(50);
                             }
@@ -225,13 +225,13 @@ public class SeedCropFarmer2 extends Window implements Runnable {
             if (container) {
                 if (PBotUtils.getItemAtHand(ui) != null)
                     PBotUtils.dropItem(ui, 0);
-                PBotUtils.pfGobClick(barrel, 3, 0);
-                PBotUtils.waitForWindow("Barrel");
+                PBotUtils.pfGobClick(ui, barrel, 3, 0);
+                PBotUtils.waitForWindow(ui, "Barrel");
 
                 while (PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).size() != 0) {
                     if (stopThread)
                         break;
-                    GItem item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory().inv, Arrays.asList(seedName)).get(0).gitem;
+                    GItem item = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, Arrays.asList(seedName)).get(0).gitem;
                     PBotUtils.takeItem(ui, item);
 
                     ui.gui.map.wdgmsg("itemact", Coord.z, barrel.rc.floor(posres), 0, 0, (int) barrel.id,

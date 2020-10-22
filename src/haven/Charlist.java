@@ -61,7 +61,6 @@ public class Charlist extends Widget {
     public Charlist(int height) {
         super(Coord.z);
         this.height = height;
-        ui.charlist = this;
         y = 0;
         setcanfocus(true);
         sau = adda(new IButton("gfx/hud/buttons/csau", "u", "d", "o") {
@@ -81,6 +80,7 @@ public class Charlist extends Widget {
 
     protected void added() {
         parent.setfocus(this);
+        ui.charlist = this;
         Button btn = new Button(90, "Log out") {
             @Override
             public void click() {

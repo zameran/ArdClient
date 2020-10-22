@@ -54,6 +54,10 @@ public class DrinkWater implements Runnable {
                 int cycles = 0;
                 while (PBotUtils.petalExists(gui.ui)) {
                     if (cycles >= limit) {
+                        if (PBotUtils.getPetal(gui.ui, "Empty") != null) {
+                            PBotUtils.closeFlowermenu(gui.ui);
+                            break;
+                        }
                         PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Timeout expired.", Color.RED);
                         gui.lastDrinkingSucessful = false;
                         gui.drinkingWater = false;

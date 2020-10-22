@@ -1113,7 +1113,7 @@ public class Resource implements Serializable {
             ids = new int[buf.uint16()];
             for (int i = 0; i < ids.length; i++)
                 ids[i] = buf.int16();
-            configuration.resourceLog("Anim " + id + " " + d + " " + ids);
+//            configuration.resourceLog("Anim " + id + " " + d + " " + ids);
         }
 
         public void init() {
@@ -1127,7 +1127,7 @@ public class Resource implements Serializable {
                 }
                 f[i] = buf.toArray(typeinfo);
             }
-            configuration.resourceLog("Anim init " + f);
+//            configuration.resourceLog("Anim init " + f);
         }
     }
 
@@ -1138,7 +1138,7 @@ public class Resource implements Serializable {
         public Pagina(Message buf) {
             String text = new String(buf.bytes(), Utils.utf8);
             this.text = Resource.getLocString(Resource.BUNDLE_PAGINA, super.getres(), text);
-            configuration.resourceLog("Pagina " + text);
+//            configuration.resourceLog("Pagina " + text);
         }
 
         public void init() {
@@ -1212,7 +1212,7 @@ public class Resource implements Serializable {
         public Code(Message buf) {
             name = buf.string();
             data = buf.bytes();
-            configuration.resourceLog("Code " + name + " " + data);
+//            configuration.resourceLog("Code " + name + " " + data);
             if (configuration.decodeCode)
                 try {
                     decode();

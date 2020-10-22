@@ -35,12 +35,15 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
 
     public StockpileFiller() {
         super(new Coord(270, 200), "Stockpile Filler");
+    }
+
+    public void added() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
         PBotUtils.sysMsg(ui, "Alt + Click to select stockpiles", Color.GREEN);
         Button gobselectBtn = new Button(140, "Choose gob area") {
             @Override
             public void click() {
-                PBotUtils.sysMsg("Click and Drag over 2 wide area for stockpiles", Color.WHITE);
+                PBotUtils.sysMsg(ui, "Click and Drag over 2 wide area for stockpiles", Color.WHITE);
                 StockpileFiller.this.selectingarea = new Thread((Runnable) new selectingarea(), "Farming Bots");
                 StockpileFiller.this.selectingarea.start();
             }
@@ -129,7 +132,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                         }
                         PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                         Gob g = PBotUtils.findObjectByNames(ui, 5000, terobj);
-                        PBotUtils.pfGobClick(g, 3,1);
+                        PBotUtils.PathfinderRightClick(ui, g, 1);
 //                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
                         PBotUtils.sleep(1000);
 
@@ -173,7 +176,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                             stop = true;
                             stop();
                         }
-                        PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                        PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                         int retry = 0;
                         while (ui.gui.getwnd("Stockpile") == null) {
                             if (!PBotUtils.isMoving(ui))
@@ -185,7 +188,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                                 setInfo("Retry : " + retry);
                                 PBotUtils.sysLogAppend(ui, "Retrying stockpile interaction", "white");
                                 PBotUtils.dropItem(ui, 0);
-                                PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                                PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                             }
                             PBotUtils.sleep(10);
                         }
@@ -226,8 +229,8 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
     public void areaselect(Coord a, Coord b) {
         this.a = a.mul(MCache.tilesz2);
         this.b = b.mul(MCache.tilesz2).add(11, 11);
-        PBotUtils.sysMsg("Area selected!", Color.WHITE);
-        PBotAPI.gui.map.unregisterAreaSelect();
+        PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
+        ui.gui.map.unregisterAreaSelect();
     }
 
     private class selectingarea
@@ -238,17 +241,17 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         @Override
         public void run() {
             if (StockpileFiller.this.stockpiles.size() == 0) {
-                PBotUtils.sysMsg("Please select a first stockpile Alt + Click - try again.");
+                PBotUtils.sysMsg(ui, "Please select a first stockpile Alt + Click - try again.");
                 return;
             }
-            PBotUtils.selectArea();
+            PBotUtils.selectArea(ui);
             Coord aPnt = PBotUtils.getSelectedAreaA();
             Coord bPnt = PBotUtils.getSelectedAreaB();
             if (Math.abs(aPnt.x - bPnt.x) > 22 && Math.abs(aPnt.y - bPnt.y) > 22) {
-                PBotUtils.sysMsg("Please select an area at least 2 tiles wide - try again.");
+                PBotUtils.sysMsg(ui, "Please select an area at least 2 tiles wide - try again.");
                 return;
             }
-            ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(aPnt, bPnt);
+            ArrayList<PBotGob> gobs = PBotUtils.gobsInArea(ui, aPnt, bPnt);
             int i = 0;
             while (i < gobs.size()) {
                 if (gobs.get((int) i).gob.getres().basename().equals(((Gob) StockpileFiller.this.stockpiles.get(0)).getres().basename())) {

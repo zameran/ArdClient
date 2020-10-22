@@ -12,8 +12,8 @@ import haven.ResData;
 import haven.Resource;
 import haven.RichText;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
-import haven.purus.pbot.PBotAPI;
 import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.defn.DefName;
 
@@ -97,10 +97,11 @@ public class ISlots extends Tip implements NumberInfo {
             BufferedImage totalString = RichText.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Total:")).img;
             layout.cmp.add(totalString, new Coord(0, layout.cmp.sz.y));
 
-            GItem[] gItems = new GItem[]{(GItem) owner}; //FIXME I don't like the way it looks
+            GItem gItem = (GItem) owner; //FIXME I don't like the way it looks
+            setui(gItem.ui);
             Map<Resource, Integer> totalAttrs = new HashMap<>();
 
-            totalAttrs = Arrays.stream(gItems)
+            totalAttrs = Arrays.stream(new GItem[]{gItem})
                     .map(GItem::info)
                     .map(ItemInfo::getBonuses)
                     .map(Map::entrySet)
@@ -108,7 +109,7 @@ public class ISlots extends Tip implements NumberInfo {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
             List<ItemInfo> info = null;
             if (totalAttrs != null) {
-                ItemInfo compiled = make(totalAttrs.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList()));
+                ItemInfo compiled = make(getui(), totalAttrs.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList()));
                 info = compiled != null ? Collections.singletonList(compiled) : null;
             }
 
@@ -121,7 +122,17 @@ public class ISlots extends Tip implements NumberInfo {
         }
     }
 
-    private ItemInfo make(Collection<Map.Entry<Resource, Integer>> mods) {
+    private UI ui;
+
+    private void setui(UI ui) {
+        this.ui = ui;
+    }
+
+    private UI getui() {
+        return this.ui;
+    }
+
+    private ItemInfo make(UI ui, Collection<Map.Entry<Resource, Integer>> mods) {
         if (mods.isEmpty()) {
             return null;
         }
@@ -130,7 +141,7 @@ public class ISlots extends Tip implements NumberInfo {
         Object[] args = new Object[mods.size() * 2 + 1];
         int i = 1;
         for (Map.Entry<Resource, Integer> entry : mods) {
-            args[i] = PBotAPI.ui().sess.getresid(entry.getKey());
+            args[i] = ui.sess.getresid(entry.getKey());
             args[i + 1] = entry.getValue();
             i += 2;
         }
@@ -141,8 +152,8 @@ public class ISlots extends Tip implements NumberInfo {
         Resource r1 = o1.getKey();
         Resource r2 = o2.getKey();
 
-        if (PBotAPI.ui().gui.chrwdg != null) {
-            return PBotAPI.ui().gui.chrwdg.BY_PRIORITY(r1, r2);
+        if (getui().gui.chrwdg != null) {
+            return getui().gui.chrwdg.BY_PRIORITY(r1, r2);
         }
         return r1.name.compareTo(r2.name);
     }

@@ -78,7 +78,7 @@ public class TrellisFarmer2 extends Window implements Runnable {
 
     public void run() {
         try {
-            PBotUtils.sysMsg("Trellis Farmer started!", Color.white);
+            PBotUtils.sysMsg(ui, "Trellis Farmer started!", Color.white);
             if (harvest) {
                 // Initialise crop list
                 crops = Crops(true);

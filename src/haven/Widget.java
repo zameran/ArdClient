@@ -243,7 +243,6 @@ public class Widget {
     }
 
     public Widget(Coord sz) {
-        this.ui = PBotAPI.ui();
         this.c = Coord.z;
         this.sz = sz;
     }
@@ -267,8 +266,10 @@ public class Widget {
 
     protected void attached() {
         attached = true;
-        for (Widget ch = child; ch != null; ch = ch.next)
+        for (Widget ch = child; ch != null; ch = ch.next) {
+            ch.attach(this.ui);
             ch.attached();
+        }
     }
 
 

@@ -286,7 +286,7 @@ public class Farmer2 extends Window implements AreaSelectCallback, GobSelectCall
                     new Thread(bf).start();
                     this.parent.destroy();
                 } else {
-                    PBotUtils.sysMsg("Area not selected!", Color.WHITE);
+                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
                 }
             }
         };

@@ -118,7 +118,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 // Right click the crop
                 lblProg2.settext("Harvesting");
                 try {
-                    PBotUtils.doClick(ui, g, 1, 0);
+                    PBotUtils.pfmovegob(ui, g);
                     //BotUtils.pfRightClick(g,0);
                 } catch (NullPointerException ii) {
                     continue;
@@ -126,35 +126,36 @@ public class SeedCropFarmer extends Window implements Runnable {
                 //	BotUtils.gui.map.wdgmsg("click", Coord.z, g.rc.floor(posres), 1, 0);
                 int retryharvest = 0;
                 int retrycount = 0;
-                while (PBotUtils.player(ui) != null && (PBotUtils.player(ui).rc.x != g.rc.x || PBotUtils.player(ui).rc.y != g.rc.y)) {
-                    if (stopThread)
-                        return;
-                    lblProg2.settext("Moving to Harvest");
-                    retryharvest++;
-                    while (PBotUtils.isMoving(ui))
-                        PBotUtils.sleep(10);//if we're moving, sleep and dont trigger unstucking
-                    if (retryharvest > 300) {
-                        lblProg2.settext("Unstucking");
-                        PBotUtils.sysLogAppend(ui, "Moving char", "white");
-                        Gob player = gui.map.player();
-                        Coord location = player.rc.floor(posres);
-                        int x = location.x + getrandom();
-                        int y = location.y + getrandom();
-                        Coord finalloc = new Coord(x, y);
-                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-                        PBotUtils.sleep(1000);
-                        PBotUtils.doClick(ui, g, 1, 0);
-                        retryharvest = 0;
-                        retrycount++;
-                    }
-                    if (retrycount > 5) {
-                        PBotUtils.sysLogAppend(ui, "Tried to move to crop 3 times, skipping left click loop", "white");
-                        //super stuck, fuck it skip this wait
-                        break;
-                    }
-                    PBotUtils.sleep(10);
-                }
-                PBotUtils.doClick(ui, g, 3, 0);
+                lblProg2.settext("Moving to Harvest");
+//                while (PBotUtils.player(ui) != null && (PBotUtils.player(ui).rc.x != g.rc.x || PBotUtils.player(ui).rc.y != g.rc.y)) {
+//                    if (stopThread)
+//                        return;
+//                    lblProg2.settext("Moving to Harvest");
+//                    retryharvest++;
+//                    while (PBotUtils.isMoving(ui))
+//                        PBotUtils.sleep(10);//if we're moving, sleep and dont trigger unstucking
+//                    if (retryharvest > 300) {
+//                        lblProg2.settext("Unstucking");
+//                        PBotUtils.sysLogAppend(ui, "Moving char", "white");
+//                        Gob player = gui.map.player();
+//                        Coord location = player.rc.floor(posres);
+//                        int x = location.x + getrandom();
+//                        int y = location.y + getrandom();
+//                        Coord finalloc = new Coord(x, y);
+//                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+//                        PBotUtils.sleep(1000);
+//                        PBotUtils.doClick(ui, g, 1, 0);
+//                        retryharvest = 0;
+//                        retrycount++;
+//                    }
+//                    if (retrycount > 5) {
+//                        PBotUtils.sysLogAppend(ui, "Tried to move to crop 3 times, skipping left click loop", "white");
+//                        //super stuck, fuck it skip this wait
+//                        break;
+//                    }
+//                    PBotUtils.sleep(10);
+//                };
+                PBotUtils.PathfinderRightClick(ui, g, 0);
                 ui.wdgmsg(ui.next_predicted_id, "cl", 0, 0);
                 retryharvest = 0;
                 while (PBotUtils.findObjectById(ui, g.id) != null) {
@@ -165,7 +166,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     if (retryharvest > 500) {
                         lblProg2.settext("Retry harvest");
                         //PBotUtils.pfRightClick(g,0);
-                        PBotUtils.doClick(ui, g, 3, 0);
+                        PBotUtils.PathfinderRightClick(ui, g, 0);
                         ui.wdgmsg(ui.next_predicted_id, "cl", 0, 0);
                         retryharvest = 0;
                     }
@@ -210,14 +211,14 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 PBotUtils.sleep(10);
                             }
                             pumpkin = PBotUtils.findObjectByNames(ui, 10, "gfx/terobjs/items/pumpkin");
-                            PBotUtils.pfRightClick(ui, pumpkin, 0);
+                            PBotUtils.PathfinderRightClick(ui, pumpkin, 0);
                             int retrypumpkinpickup = 0;
                             while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, "gfx/invobjs/pumpkin").size() == 0) {
                                 retrypumpkinpickup++;
                                 if (retrypumpkinpickup > 50) {
                                     lblProg2.settext("Retry Pickup");
                                     retrypumpkinpickup = 0;
-                                    PBotUtils.pfRightClick(ui, pumpkin, 0);
+                                    PBotUtils.PathfinderRightClick(ui, pumpkin, 0);
                                 }
                                 PBotUtils.sleep(50);
                             }
@@ -446,7 +447,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             lblProg2.settext("Barreling");
                             if (PBotUtils.getItemAtHand(ui) != null)
                                 PBotUtils.dropItem(ui, 0);
-                            PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                            PBotUtils.PathfinderRightClick(ui, containers.get(0), 0);
                             if (containers.get(0).getres().basename().contains("barrel"))
                                 PBotUtils.waitForWindow(ui, "Barrel");
                             else
@@ -477,7 +478,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                         PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
                                         PBotUtils.sleep(250);
                                         containers.remove(0);
-                                        PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                                        PBotUtils.PathfinderRightClick(ui, containers.get(0), 0);
                                         if (containers.get(0).getres().basename().contains("barrel"))
                                             PBotUtils.waitForWindow(ui, "Barrel");
                                         else
@@ -517,7 +518,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             GItem item;
                             if (PBotUtils.invFreeSlots(ui) == 0) {
                                 lblProg2.settext("Barreling");
-                                PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                                PBotUtils.PathfinderRightClick(ui, containers.get(0), 0);
                                 PBotUtils.waitForWindow(ui, "Barrel");
                                 item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
                                 PBotUtils.takeItem(ui, item, 1000);
@@ -548,7 +549,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                                 PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
                                                 PBotUtils.sleep(250);
                                                 containers.remove(0);
-                                                PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                                                PBotUtils.PathfinderRightClick(ui, containers.get(0), 0);
                                                 if (containers.get(0).getres().basename().contains("barrel"))
                                                     PBotUtils.waitForWindow(ui, "Barrel");
                                                 else
@@ -590,7 +591,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 lblProg2.settext("Barreling");
                 if (PBotUtils.getItemAtHand(ui) != null)
                     PBotUtils.dropItem(ui, 0);
-                PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                PBotUtils.PathfinderRightClick(ui, containers.get(0), 0);
                 if (containers.get(0).getres().basename().contains("barrel"))
                     PBotUtils.waitForWindow(ui, "Barrel");
                 else
@@ -656,7 +657,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                     PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                     Gob g = PBotUtils.findObjectByNames(ui, 5000, groundname);
-                    PBotUtils.pfGobClick(g, 3, 1);
+                    PBotUtils.PathfinderRightClick(ui, g, 1);
 //                    ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
                     PBotUtils.sleep(1000);
 
@@ -692,7 +693,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     while (PBotUtils.getItemAtHand(ui) != null) {
                         PBotUtils.sleep(15);
                     }
-                    if (!PBotUtils.pfLeftClick(ui, location.x + 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x - 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x, location.y + 11) && !PBotUtils.pfLeftClick(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
+                    if (!PBotUtils.pfmove(ui, location.x, location.y) && !PBotUtils.pfmove(ui, location.x - 11, location.y) && !PBotUtils.pfmove(ui, location.x, location.y + 11) && !PBotUtils.pfmove(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
                         items.remove(item);
                         stockpileLocs.remove(location);
                         continue;
@@ -727,7 +728,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         int retry = 0;
                         if (pathfind) {
                             pathfind = false;
-                            ui.gui.map.pathto(g);
+                            PBotUtils.pfmovegob(ui, g);
                             while (g.rc.dist(ui.gui.map.player().rc) > 11) { //get within one tile of the target
                                 if (stopThread)
                                     return;
@@ -746,7 +747,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     Coord finalloc = new Coord(x, y);
                                     ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
                                     PBotUtils.sleep(1000);
-                                    ui.gui.map.pathto(g);
+                                    PBotUtils.pfmovegob(ui, g);
                                 }
                                 PBotUtils.sleep(10);
                             }
@@ -792,7 +793,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             stop = true;
                             stop();
                         }
-                        PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                        PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                         int retry = 0;
                         while (ui.gui.getwnd("Stockpile") == null) {
                             if (!PBotUtils.isMoving(ui))
@@ -804,7 +805,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 System.out.println("Retry : " + retry);
                                 PBotUtils.sysLogAppend(ui, "Retrying stockpile interaction", "white");
                                 PBotUtils.dropItem(ui, 0);
-                                PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                                PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                             }
                             PBotUtils.sleep(10);
                         }
@@ -857,7 +858,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         stop = true;
                         stop();
                     }
-                    PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                    PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                     int retry = 0;
                     while (ui.gui.getwnd("Stockpile") == null) {
                         if (stopThread)
@@ -871,7 +872,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             System.out.println("Retry : " + retry);
                             PBotUtils.sysLogAppend(ui, "Retrying stockpile interaction", "white");
                             PBotUtils.dropItem(ui, 0);
-                            PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
+                            PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
                         }
                         PBotUtils.sleep(10);
                     }

@@ -96,6 +96,7 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<M
     @Override
     protected void added() {
         super.added();
+        init();
         ui.gui.menu.paginae.addListener(this);
     }
 
@@ -126,7 +127,6 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<M
     public CraftDBWnd() {
         //  super(WND_SZ.add(0, 20), "Craft window", "Craft window");
         super(Coord.z, "Craft window", "Craft window");
-        init();
         // CFG.REAL_TIME_CURIO.observe(cfg -> updateDescription(descriptionPagina));
         // CFG.SHOW_CURIO_LPH.observe(cfg -> updateDescription(descriptionPagina));
     }
@@ -141,12 +141,6 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<M
                 .map(ui.gui.menu::paginafor)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(() -> Favourites.items));
-    }
-
-    @Override
-    protected void attached() {
-        super.attached();
-        init();
     }
 
     @Override
