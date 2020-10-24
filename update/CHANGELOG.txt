@@ -1,3 +1,7 @@
+20201024a
+Fix pathfinding incomprehensible thing
+~
+
 20201024
 Added AutoDrink error message.
 ~

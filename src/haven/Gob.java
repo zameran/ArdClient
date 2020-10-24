@@ -1338,7 +1338,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             return true;
 
         Following follow = getattr(Following.class);
-        if (follow != null && follow.tgt().getattr(LinMove.class) != null)
+        if (follow != null && follow.tgt() != null && follow.tgt().getattr(LinMove.class) != null)
             return true;
 
         return false;

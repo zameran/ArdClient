@@ -1994,7 +1994,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
             isclickongob = true;
         }
-        if (isfinishmovequeue() && !isclearmovequeue()) {
+        if (!isclearmovequeue() && isfinishmovequeue()) {
             clearmovequeue();
         }
         partyHighlight.update();
