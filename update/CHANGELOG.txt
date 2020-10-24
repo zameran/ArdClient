@@ -1,3 +1,7 @@
+20201024
+Added AutoDrink error message.
+~
+
 20201022
 Fixed some bugs. Fixed flowermenu positions for coordinates (0, 0). Now it is screen center. Fixed overlay paginae res. Remove old PBot functions. AutodropList fix. I couldn't check everything, so NullPointerException errors are expected. Please let me know, I'll fix it instantly.
 ~

@@ -112,6 +112,7 @@ public class configuration {
     public static boolean autoDrinkWhatever = Utils.getprefb("autoDrinkWhatever", false);
     public static boolean siponce = Utils.getprefb("siponce", false);
     public static int sipwaiting = Utils.getprefi("sipwaiting", 2000);
+    public static boolean drinkmessage = Utils.getprefb("drinkmessage", false);
 
     public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
 

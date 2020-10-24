@@ -3553,6 +3553,17 @@ public class OptWnd extends Window {
                 return Text.render("Autosip time waiting before error : " + val + " ms").tex();
             }
         });
+        appender.add(new CheckBox("Show error message") {
+            {
+                a = configuration.drinkmessage;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("drinkmessage", val);
+                configuration.drinkmessage = val;
+                a = val;
+            }
+        });
 
         waterPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         waterPanel.pack();
