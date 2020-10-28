@@ -13,7 +13,7 @@ public class ObservableCollection<T> implements Iterable<T> {
         this.base = base;
     }
 
-    public synchronized boolean add(T item) {
+    public boolean add(T item) {
         if (base.add(item)) {
             listeners.forEach((lst) -> lst.added(item));
             return true;
@@ -22,7 +22,7 @@ public class ObservableCollection<T> implements Iterable<T> {
         }
     }
 
-    public synchronized boolean remove(T item) {
+    public boolean remove(T item) {
         if (base.remove(item)) {
             listeners.forEach((lst) -> lst.remove(item));
             return true;

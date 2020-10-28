@@ -88,7 +88,7 @@ public class Charlist extends Widget {
                 synchronized (sess) {
                     sess.close();
                 }
-                MainFrame.instance.p.removeUI(ui);
+//                MainFrame.instance.p.removeUI(ui);
             }
         };
         parent.add(btn, 120, 553);

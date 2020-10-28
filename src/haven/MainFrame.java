@@ -343,7 +343,8 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                 }
             } catch (InterruptedException e) {
             } finally {
-                p.removeUI(lui);
+                //p.removeUI(lui);
+                p.removeUIS();
             }
             savewndstate();
         } finally {

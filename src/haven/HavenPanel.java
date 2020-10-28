@@ -29,6 +29,7 @@ package haven;
 import com.jogamp.opengl.util.awt.Screenshot;
 import haven.sloth.util.ObservableCollection;
 import integrations.mapv4.MappingClient;
+import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -84,6 +85,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
     double uidle = 0.0, ridle = 0.0;
     Queue<InputEvent> events = new LinkedList<InputEvent>();
     private String cursmode = "tex";
+    private String lastcursmode = null;
     private Resource lastcursor = null;
     public Coord mousepos = new Coord(0, 0);
     private MouseEvent mousemv = null;
@@ -121,8 +123,8 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
         setSize(this.w = w, this.h = h);
         MappingClient.getInstance();
         initgl();
-        if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
-            cursmode = "awt";
+        /*if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
+            cursmode = "awt";*/
     }
 
     private void initgl() {
@@ -379,6 +381,16 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
         }
     }
 
+    public boolean isMasterUI(UI lui) {
+        synchronized (sessions) {
+            Iterator<UI> itr = sessions.iterator();
+            if (itr.hasNext())
+                return itr.next() == lui;
+            else
+                return false;
+        }
+    }
+
     public void closeCurrentSession() {
         if (this.ui.gui != null) {
             this.ui.gui.act("lo");
@@ -414,12 +426,13 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     setActiveUI(itr.next());
             }
         }
+    }
 
+    public void removeUIS() {
         synchronized (sessions) {
-            if (sessions.size() == 0) {
-                MainFrame.instance.makeNewSession();
-                setActiveUI(ui);
-            }
+            Iterator<UI> itr = sessions.iterator();
+            if (itr.hasNext())
+                removeUI(itr.next());
         }
     }
 
@@ -535,8 +548,9 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
         synchronized (ui) {
             curs = ui.getcurs(mousepos);
         }
+        cursmode = configuration.nocursor ? "no" : (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor) ? "awt" : "tex";
         if (cursmode == "awt") {
-            if (curs != lastcursor) {
+            if (curs != lastcursor || cursmode != lastcursmode) {
                 try {
                     if (curs == null)
                         setCursor(null);
@@ -548,15 +562,19 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
             }
         } else if (cursmode == "tex") {
             if (curs == null) {
-                if (lastcursor != null)
+                if (lastcursor != null && cursmode != lastcursmode)
                     setCursor(null);
             } else {
-                if (lastcursor == null)
+                if (lastcursor == null || cursmode != lastcursmode)
                     setCursor(emptycurs);
                 Coord dc = mousepos.add(curs.layer(Resource.negc).cc.inv());
                 g.image(curs.layer(Resource.imgc), dc);
             }
+        } else if (cursmode == "no") {
+            if (cursmode != lastcursmode)
+                setCursor(null);
         }
+        lastcursmode = cursmode;
         lastcursor = curs;
         state.clean();
         GLObject.disposeall(state.cgl, gl);

@@ -131,6 +131,8 @@ public class configuration {
     public static float badcamelevdefault = Utils.getpreff("badcamelevdefault", (float) Math.PI / 4.0f);
     public static float badcamangldefault = Utils.getpreff("badcamangldefault", 0.0f);
 
+    public static boolean nocursor = Utils.getprefb("nocursor", false);
+
 
     public static String[] customMenuGrid = new String[]{Utils.getpref("customMenuGrid0", "6"), Utils.getpref("customMenuGrid1", "4")};
 

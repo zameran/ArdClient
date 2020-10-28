@@ -44,7 +44,7 @@ public class RootWidget extends ConsoleHost {
         hasfocus = true;
         cursor = defcurs.indir();
         if (Config.sessiondisplay) {
-            add(sessionDisplay = new SessionDisplay());
+            add(sessionDisplay);
         }
     }
 

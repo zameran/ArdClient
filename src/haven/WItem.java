@@ -183,17 +183,19 @@ public class WItem extends Widget implements DTarget {
         return (name != null && name.str != null && name.str.text != null) ? name.str.text : "";
     }));
 
-    private List<ItemInfo> info() {
+    private synchronized List<ItemInfo> info() {
         return (item.info());
     }
 
     public final AttrCache<Color> olcol = new AttrCache<>(this::info, info -> {
         Color ret = null;
-        for (ItemInfo inf : info) {
-            if (inf instanceof GItem.ColorInfo) {
-                Color c = ((GItem.ColorInfo) inf).olcol();
-                if (c != null)
-                    ret = (ret == null) ? c : Utils.preblend(ret, c);
+        synchronized (info) {
+            for (ItemInfo inf : info) {
+                if (inf instanceof GItem.ColorInfo) {
+                    Color c = ((GItem.ColorInfo) inf).olcol();
+                    if (c != null)
+                        ret = (ret == null) ? c : Utils.preblend(ret, c);
+                }
             }
         }
         Color fret = ret;
@@ -202,9 +204,11 @@ public class WItem extends Widget implements DTarget {
 
     public final AttrCache<GItem.InfoOverlay<?>[]> itemols = new AttrCache<>(this::info, info -> {
         ArrayList<GItem.InfoOverlay<?>> buf = new ArrayList<>();
-        for (ItemInfo inf : info) {
-            if (inf instanceof GItem.OverlayInfo)
-                buf.add(GItem.InfoOverlay.create((GItem.OverlayInfo<?>) inf));
+        synchronized (info) {
+            for (ItemInfo inf : info) {
+                if (inf instanceof GItem.OverlayInfo)
+                    buf.add(GItem.InfoOverlay.create((GItem.OverlayInfo<?>) inf));
+            }
         }
         GItem.InfoOverlay<?>[] ret = buf.toArray(new GItem.InfoOverlay<?>[0]);
         return (() -> ret);

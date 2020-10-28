@@ -1121,6 +1121,13 @@ public class OptWnd extends Window {
                 Utils.setprefb("sessiondisplay", val);
                 Config.sessiondisplay = val;
                 a = val;
+
+                ui.root.sessionDisplay.unlink();
+                if (Config.sessiondisplay)
+                    if (ui.gui != null)
+                        ui.gui.add(ui.root.sessionDisplay);
+                    else
+                        ui.root.add(ui.root.sessionDisplay);
             }
         });
 
@@ -2252,7 +2259,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Force hardware cursor (req. restart)") {
+        appender.add(new CheckBox("Force hardware cursor") {
             {
                 a = Config.hwcursor;
             }
@@ -2260,6 +2267,17 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("hwcursor", val);
                 Config.hwcursor = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Disable game cursors") {
+            {
+                a = configuration.nocursor;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("nocursor", val);
+                configuration.nocursor = val;
                 a = val;
             }
         });

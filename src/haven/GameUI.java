@@ -329,8 +329,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
         if (!Config.autowindows.get("Timers").selected)
             timerswnd.hide();
+        ui.root.sessionDisplay.unlink();
         if (Config.sessiondisplay) {
-            ui.root.sessionDisplay.unlink();
             add(ui.root.sessionDisplay);
         }
     }
@@ -340,7 +340,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (statuswindow != null) {//seems to be a bug that occasionally keeps the status window thread alive.
             statuswindow.reqdestroy();
         }
-        ui.root.add(ui.root.sessionDisplay = new SessionDisplay());
+        ui.root.sessionDisplay.unlink();
+        if (Config.sessiondisplay) {
+            ui.root.add(ui.root.sessionDisplay);
+        }
         super.destroy();
         ui.gui = null;
     }
