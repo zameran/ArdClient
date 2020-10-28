@@ -49,6 +49,8 @@ public class TimersWnd extends Window {
             }
         };
         add(btnb, new Coord(80, 10));
+        Button btns = new Button(50, "Sort", this::sort);
+        add(btns, new Coord(btnb.c.x + btnb.sz.x + 10, 10));
 
         CheckBox chksort = new CheckBox("Auto sort (30sec)") {
             {
@@ -104,22 +106,26 @@ public class TimersWnd extends Window {
         if (Config.timersort) {
             SortTimer++;
             if (SortTimer > 3000) {
-                SortTimer = 0;
-                Glob.timersThread.save();
-                timers = Glob.timersThread.getall();
-                for (int i = 0; i < timers.size(); i++) {
-                    for (Widget l = port.cont.lchild; l != null; l = l.next) {
-                        if (l instanceof TimerWdg) {
-                            l.reqdestroy();
-                        }
-                    }
-                }
-                sort(timers);
-                for (int i = 0; i < timers.size(); i++)
-                    port.cont.add(timers.get(i), new Coord(0, i * TimerWdg.height));
-                resize();
+                sort();
             }
         }
+    }
+
+    public void sort() {
+        SortTimer = 0;
+        Glob.timersThread.save();
+        timers = Glob.timersThread.getall();
+        for (int i = 0; i < timers.size(); i++) {
+            for (Widget l = port.cont.lchild; l != null; l = l.next) {
+                if (l instanceof TimerWdg) {
+                    l.reqdestroy();
+                }
+            }
+        }
+        sort(timers);
+        for (int i = 0; i < timers.size(); i++)
+            port.cont.add(timers.get(i), new Coord(0, i * TimerWdg.height));
+        resize();
     }
 
     public void resize() {
@@ -152,7 +158,7 @@ public class TimersWnd extends Window {
     }
 
     public void sort(List<TimerWdg> items) {
-        Collections.sort(items, (a, b) -> {
+        items.sort((a, b) -> {
             Long aq = a.duration - a.elapsed;
             Long bq = b.duration - b.elapsed;
             if (aq == null || bq == null)
