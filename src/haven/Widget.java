@@ -518,10 +518,12 @@ public class Widget {
             next.prev = prev;
         if (prev != null)
             prev.next = next;
-        if (parent.child == this)
-            parent.child = next;
-        if (parent.lchild == this)
-            parent.lchild = prev;
+        if (parent != null) {
+            if (parent.child == this)
+                parent.child = next;
+            if (parent.lchild == this)
+                parent.lchild = prev;
+        }
         next = null;
         prev = null;
     }

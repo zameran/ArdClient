@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
     <property name="name" value="ArdClient"/>
-    <property name="version" value="20201024a"/>
+    <property name="version" value="20201028a"/>
 
     <target name="build-env">
         <mkdir dir="build"/>
