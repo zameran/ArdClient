@@ -1,3 +1,7 @@
+20201028
+Multisession master UI fix. Timer now has a sort button. Added option to remove game cursor: "Option-Control-Disable game cursors"
+~
+
 20201024a
 Fix pathfinding incomprehensible thing
 ~
