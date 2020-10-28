@@ -154,14 +154,18 @@ public class TrellisFarmer2 extends Window implements Runnable {
                     // Drop excess seeds
                     for (Widget w = PBotUtils.playerInventory(ui).inv.child; w != null; w = w.next) {
                         lblProg2.settext("Droping");
-                        if (w instanceof GItem && (seedName.contains(((GItem) w).res.get().name)
-                                || ((GItem) w).res.get().name.equals("gfx/invobjs/grapes"))) {
-                            GItem item = (GItem) w;
-                            try {
-                                item.wdgmsg("drop", Coord.z);
-                            } catch (Exception e) {
-                                // Shouldnt matter
+                        try {
+                            if (w instanceof GItem && (seedName.contains(((GItem) w).res.get().name)
+                                    || ((GItem) w).res.get().name.equals("gfx/invobjs/grapes"))) {
+                                GItem item = (GItem) w;
+                                try {
+                                    item.wdgmsg("drop", Coord.z);
+                                } catch (Exception e) {
+                                    // Shouldnt matter
+                                }
                             }
+                        } catch (Resource.Loading e) {
+
                         }
                     }
                 }

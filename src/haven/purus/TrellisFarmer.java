@@ -8,6 +8,7 @@ import haven.GItem;
 import haven.Gob;
 import haven.Inventory;
 import haven.Label;
+import haven.Resource;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotCharacterAPI;
@@ -156,14 +157,18 @@ public class TrellisFarmer extends Window implements Runnable {
                         GItem dropitem;
                         for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
                             lblProg2.settext("Droping");
-                            if (w instanceof GItem && (((GItem) w).resource().name.contains("grape")
-                                    || ((GItem) w).resource().name.contains("peppercorn"))) {
-                                dropitem = (GItem) w;
-                                try {
-                                    dropitem.wdgmsg("drop", Coord.z);
-                                } catch (Exception e) {
-                                    // Shouldnt matter
+                            try {
+                                if (w instanceof GItem && (((GItem) w).resource().name.contains("grape")
+                                        || ((GItem) w).resource().name.contains("peppercorn"))) {
+                                    dropitem = (GItem) w;
+                                    try {
+                                        dropitem.wdgmsg("drop", Coord.z);
+                                    } catch (Exception e) {
+                                        // Shouldnt matter
+                                    }
                                 }
+                            } catch (Resource.Loading e) {
+
                             }
                         }
                     } catch (Exception e) {
