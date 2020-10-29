@@ -1,3 +1,7 @@
+20201029
+Small fix StockpileFiller
+~
+
 20201028a
 Fixed unlink NPE.
 ~

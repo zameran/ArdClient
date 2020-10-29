@@ -222,6 +222,9 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                 startBtn.show();
                 reqdestroy();
             } catch (Loading | NullPointerException q) {
+            } catch (Exception e) {
+                PBotUtils.sysMsg(ui, "Something went wrong. Restart", Color.RED);
+                System.err.println("Something went wrong. Restart");
             }
         }
     });
