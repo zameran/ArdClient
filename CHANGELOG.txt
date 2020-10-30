@@ -1,3 +1,7 @@
+20201030
+Remove inactive log string
+~
+
 20201029
 Small fix StockpileFiller
 ~

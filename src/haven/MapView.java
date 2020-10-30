@@ -1960,7 +1960,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public Iterator<Coord2d> movequeue() {
-        configuration.sysPrintStackTrace("movequeue");
         return movequeue.iterator();
     }
 
