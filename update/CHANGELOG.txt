@@ -1,3 +1,7 @@
+20201102
+Fixed "Timer going off while you're on character select screen"
+~
+
 20201030
 Remove inactive log string
 ~

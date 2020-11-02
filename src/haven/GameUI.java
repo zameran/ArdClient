@@ -321,6 +321,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         PBotScriptlist.hide();
         PBotScriptlistold = add(new PBotScriptlistOld());
         PBotScriptlistold.hide();
+        Glob.timersThread = new haven.timers.TimersThread();
+        Glob.timersThread.start();
         timerswnd = add(new haven.timers.TimersWnd(this));
         try {
             PBotDiscord.initalize();

@@ -86,11 +86,6 @@ public class Glob {
         return reference.get();
     }
 
-    static {
-        timersThread = new haven.timers.TimersThread();
-        timersThread.start();
-    }
-
     public Glob(Session sess) {
         this.sess = sess;
         gobhitmap = new GobHitmap();
