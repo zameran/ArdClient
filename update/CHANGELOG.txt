@@ -1,3 +1,7 @@
+20201102.1
+Fixed "Timer going off while you're on character select screen"x2
+~
+
 20201102
 Fixed "Timer going off while you're on character select screen"
 ~

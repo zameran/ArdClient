@@ -346,6 +346,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (Config.sessiondisplay) {
             ui.root.add(ui.root.sessionDisplay);
         }
+        Glob.timersThread.kill();
         super.destroy();
         ui.gui = null;
     }

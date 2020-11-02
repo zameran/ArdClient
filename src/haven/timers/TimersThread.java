@@ -11,9 +11,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TimersThread extends Thread {
     private List<TimerWdg> timers = new ArrayList<TimerWdg>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     public TimersThread() {
         super("Timers Thread");
@@ -21,7 +23,8 @@ public class TimersThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        running.set(true);
+        while (running.get()) {
             synchronized (timers) {
                 for (int i = 0; i < timers.size(); i++) {
                     TimerWdg timer = timers.get(i);
@@ -29,7 +32,7 @@ public class TimersThread extends Thread {
                         continue;
 
                     Session sess = timer.ui.sess;
-                    if (!sess.state.equals("") || sess.glob.serverEpoch == 0)
+                    if (!sess.state.equals("") || sess.glob.serverEpoch == 0 || timer.ui.gui == null) //just in case
                         continue;
 
                     timer.elapsed = (long) (sess.glob.globtime() * 1000 / Glob.SERVER_TIME_RATIO) - timer.start;
@@ -44,8 +47,14 @@ public class TimersThread extends Thread {
             try {
                 sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
+    }
+
+    public void kill() {
+        running.set(false);
+        interrupt();
     }
 
     public TimerWdg add(String name, long duration, long start) {
