@@ -1002,7 +1002,7 @@ public class Resource implements Serializable {
         public final int z, subz;
         public final boolean nooff;
         public final int id;
-        private float scale = 1f;
+        private float scale = 1;
         private int gay = -1;
         public Coord sz, o, tsz, ssz;
 
