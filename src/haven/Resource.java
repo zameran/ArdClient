@@ -1025,10 +1025,8 @@ public class Resource implements Serializable {
                     Message val = new MessageBuf(buf.bytes(len));
                     if (key.equals("tsz")) {
                         tsz = val.coord();
-                        System.out.println("[tsz] " + name + " " + tsz);
                     } else if (key.equals("scale")) {
                         scale = val.float32();
-                        System.out.println("[scale] " + name + " " + scale);
                     }
                 }
             }
@@ -1044,7 +1042,6 @@ public class Resource implements Serializable {
                 tsz = sz;
             ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
             if (scale != 1) {
-                System.out.println("[scaling] " + name + " " + scale);
                 img = scaled();
                 sz = ssz;
             }
