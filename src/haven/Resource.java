@@ -1043,6 +1043,10 @@ public class Resource implements Serializable {
             if (tsz == null)
                 tsz = sz;
             ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
+            if (scale != 1) {
+                img = scaled();
+                sz = ssz;
+            }
         }
 
         public BufferedImage scaled() {
