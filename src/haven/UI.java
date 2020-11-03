@@ -66,7 +66,7 @@ public class UI {
     private final Context uictx;
     public ActAudio audio = new ActAudio();
     public Charlist charlist;
-    private static final double scalef = Config.uiscale == null ? Utils.getprefd("uiscale", 1.0) : Config.uiscale;
+    private static final double scalef = 1.0;
 
     {
         lastevent = lasttick = Utils.rtime();

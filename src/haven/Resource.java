@@ -997,11 +997,12 @@ public class Resource implements Serializable {
     @LayerName("image")
     public class Image extends Layer implements Comparable<Image>, IDLayer<Integer> {
         public transient BufferedImage img;
+        private transient BufferedImage scaled;
         transient private TexI tex;
         public final int z, subz;
         public final boolean nooff;
         public final int id;
-        private float scale = 1;
+        private float scale = 1f;
         private int gay = -1;
         public Coord sz, o, tsz, ssz;
 
@@ -1024,8 +1025,10 @@ public class Resource implements Serializable {
                     Message val = new MessageBuf(buf.bytes(len));
                     if (key.equals("tsz")) {
                         tsz = val.coord();
+                        configuration.resourceLog("tsz", name, tsz);
                     } else if (key.equals("scale")) {
                         scale = val.float32();
+                        configuration.resourceLog("scale", name, scale);
                     }
                 }
             }
@@ -1039,7 +1042,17 @@ public class Resource implements Serializable {
             sz = Utils.imgsz(img);
             if (tsz == null)
                 tsz = sz;
-//            ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
+            ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
+        }
+
+        public BufferedImage scaled() {
+            if (scaled == null) {
+                synchronized (this) {
+                    if (scaled == null)
+                        scaled = PUtils.uiscale(img, ssz);
+                }
+            }
+            return (scaled);
         }
 
         public synchronized Tex tex() {
