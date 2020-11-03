@@ -1044,6 +1044,7 @@ public class Resource implements Serializable {
                 tsz = sz;
             ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
             if (scale != 1) {
+                System.out.println("[scaling] " + name + " " + scale);
                 img = scaled();
                 sz = ssz;
             }
