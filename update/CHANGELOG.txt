@@ -1,3 +1,7 @@
+20201103
+Fixed large images
+~
+
 20201102.1
 Fixed "Timer going off while you're on character select screen"x2
 ~
