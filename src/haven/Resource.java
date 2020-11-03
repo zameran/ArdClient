@@ -1025,10 +1025,10 @@ public class Resource implements Serializable {
                     Message val = new MessageBuf(buf.bytes(len));
                     if (key.equals("tsz")) {
                         tsz = val.coord();
-                        configuration.resourceLog("tsz", name, tsz);
+                        System.out.println("[tsz] " + name + " " + tsz);
                     } else if (key.equals("scale")) {
                         scale = val.float32();
-                        configuration.resourceLog("scale", name, scale);
+                        System.out.println("[scale] " + name + " " + scale);
                     }
                 }
             }
