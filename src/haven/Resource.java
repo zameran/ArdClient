@@ -1039,7 +1039,7 @@ public class Resource implements Serializable {
             sz = Utils.imgsz(img);
             if (tsz == null)
                 tsz = sz;
-            ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
+//            ssz = new Coord(Math.round(UI.scale(sz.x / scale)), Math.round(UI.scale(sz.y / scale)));
         }
 
         public synchronized Tex tex() {
