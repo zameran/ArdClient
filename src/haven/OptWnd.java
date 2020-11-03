@@ -1623,6 +1623,9 @@ public class OptWnd extends Window {
                 Utils.setprefb("scaletree", val);
                 configuration.scaletree = val;
                 this.a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.oc.refreshallresdraw();
+                }
             }
         }, new HSlider(200, 0, 255, configuration.scaletreeint) {
 
@@ -1635,6 +1638,9 @@ public class OptWnd extends Window {
             public void changed() {
                 configuration.scaletreeint = val;
                 Utils.setprefi("scaletreeint", configuration.scaletreeint);
+                if (ui.sess != null) {
+                    ui.sess.glob.oc.refreshallresdraw();
+                }
             }
 
             @Override

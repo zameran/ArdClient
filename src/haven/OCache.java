@@ -111,6 +111,16 @@ public class OCache implements Iterable<Gob> {
         }
     }
 
+    synchronized void refreshallresdraw() {
+        for (final Gob g : this) {
+            ResDrawable resDrawable = g.getattr(ResDrawable.class);
+            if (resDrawable != null) {
+                g.delattr(ResDrawable.class);
+                cres(g, resDrawable.res, resDrawable.sdt);
+            }
+        }
+    }
+
     public class ModdedGob extends Virtual {
         public ModdedGob(Coord2d c, double a) {
             super(c, a);
