@@ -127,16 +127,19 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                             break;
                         if (PBotUtils.findObjectByNames(ui, 5000, terobj) == null) {
                             PBotUtils.sysLogAppend(ui, "Out of items to stockpile, finishing.", "white");
-                            stop = true;
+                            if (PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).size() == 0)
+                                stop = true;
                             break;
                         }
                         PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                         Gob g = PBotUtils.findObjectByNames(ui, 5000, terobj);
-                        PBotUtils.PathfinderRightClick(ui, g, 1);
+                        PBotUtils.doClick(ui, g, 3, 1);
 //                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
                         //PBotUtils.sleep(1000);
 
-                        while (/*PBotUtils.getItemAtHand(ui) == null && PBotUtils.findObjectByNames(ui, 5000, terobj) != null && */PBotUtils.isMoving(ui)) {
+                        while (/*PBotUtils.getItemAtHand(ui) == null
+                        && PBotUtils.findObjectByNames(ui, 5000, terobj) != null
+                        && */PBotUtils.isMoving(ui)) {
 //                            setInfo("waiting for item on  hand");
                             setInfo("moving");
                             PBotUtils.sleep(100);
@@ -227,7 +230,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                 System.err.println("Something went wrong. Restart");
             }
         }
-    });
+    }, "StockpileFiller");
 
     public void areaselect(Coord a, Coord b) {
         this.a = a.mul(MCache.tilesz2);

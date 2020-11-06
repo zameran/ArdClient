@@ -1,3 +1,7 @@
+20201106
+Fixed StockpileFiller
+~
+
 20201103.2
 Added instant tree scaling
 ~
