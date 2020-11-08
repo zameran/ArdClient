@@ -284,7 +284,7 @@ public class LoginScreen extends Widget {
                         Config.logins.remove(itm);
                         Config.saveLogins();
                     }
-                } else if (c.x < sz.x - 35) {
+                } else if (lastMouseDown.x < sz.x - 35) {
                     parent.wdgmsg("forget");
                     parent.wdgmsg("login", new Object[]{new AuthClient.NativeCred(itm.name, itm.pass), false});
                     Context.accname = itm.name;
@@ -407,6 +407,8 @@ public class LoginScreen extends Widget {
 
     public void presize() {
         c = parent.sz.div(2).sub(sz.div(2));
+        if (opts != null && opts.visible)
+            opts.move(new Coord(sz.x * (opts.c.x + opts.sz.x / 2) / oldsz.x, sz.y * (opts.c.y + opts.sz.y / 2) / oldsz.y), 0.5, 0.5);
     }
 
     protected void added() {
@@ -418,7 +420,6 @@ public class LoginScreen extends Widget {
         }
     }
 
-    Coord oldsz;
 
     public void draw(GOut g) {
         super.draw(g);
@@ -440,11 +441,6 @@ public class LoginScreen extends Widget {
             g.aimage(error.tex(), new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2 + 100), 0.5, -1);
         if (progress != null)
             g.aimage(progress.tex(), new Coord(LoginScreen.this.sz.x / 2, LoginScreen.this.sz.y / 2), 0.5, -1);
-
-
-        if (oldsz != null && opts != null && opts.visible)
-            opts.move(new Coord(sz.x * (opts.c.x + opts.sz.x / 2) / oldsz.x, sz.y * (opts.c.y + opts.sz.y / 2) / oldsz.y), 0.5, 0.5);
-        oldsz = sz;
     }
 
     public boolean type(char k, KeyEvent ev) {
@@ -472,10 +468,8 @@ public class LoginScreen extends Widget {
                             }
                         }
 
-                        if (ui.gui != null) {
-                            if (ui.sess.alive()) {
-                                break;
-                            }
+                        if (ui != null && ui.gui != null && ui.sess != null && ui.sess.alive()) {
+                            break;
                         }
                         Thread.sleep(5000);
                     }

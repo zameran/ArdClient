@@ -609,6 +609,74 @@ public class MapFile {
             return (PUtils.rasterimg(buf));
         }
 
+        public static void savez(Message fp, int[] zmap) {
+            int min = zmap[0], max = zmap[0];
+            for (int z : zmap) {
+                min = Math.min(z, min);
+                max = Math.max(z, max);
+            }
+            if (min == max) {
+                fp.adduint8(0);
+                fp.addint32(min);
+                return;
+            }
+            quantize:
+            {
+                float q = 0, E = 0.01f;
+                for (int z : zmap) {
+                    if (z > (min + E)) {
+                        if (q == 0)
+                            q = z - min;
+                        else
+                            q = Utils.gcd(q, z - min, E);
+                    }
+                }
+                float iq = 1.0f / q;
+                for (int z : zmap) {
+                    if (Math.abs((Math.round((z - min) * iq) * q) + min - z) > E)
+                        break quantize;
+                }
+                if (Math.round((max - min) * iq) > 0xffff) {
+                    break quantize;
+                } else if (Math.round((max - min) * iq) > 0xff) {
+                    fp.adduint8(2).addfloat32(min).addfloat32(q);
+                    for (int z : zmap)
+                        fp.adduint16(Math.round((z - min) * iq));
+                } else {
+                    fp.adduint8(1).addfloat32(min).addfloat32(q);
+                    for (int z : zmap)
+                        fp.adduint8(Math.round((z - min) * iq));
+                }
+                return;
+            }
+            fp.adduint8(3);
+            for (int z : zmap)
+                fp.addint32(z);
+        }
+
+        public static int[] loadz(Message fp, String nm) {
+            int[] ret = new int[cmaps.x * cmaps.y];
+            int fmt = fp.uint8();
+            if (fmt == 0) {
+                int z = fp.int32();
+                Arrays.fill(ret, z);
+            } else if (fmt == 1) {
+                int min = fp.int32(), q = fp.int32();
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = min + (fp.uint8() * q);
+            } else if (fmt == 2) {
+                int min = fp.int32(), q = fp.int32();
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = min + (fp.uint16() * q);
+            } else if (fmt == 3) {
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = fp.int32();
+            } else {
+                throw (new Message.FormatError(String.format("Unknown grid z-map format for %s: %d", nm, fmt)));
+            }
+            return (ret);
+        }
+
         public static final Resource.Spec notile = new Resource.Spec(Resource.remote(), "gfx/tiles/notile", -1);
         public static final DataGrid nogrid;
 
@@ -1708,7 +1776,7 @@ public class MapFile {
 
         ImportedGrid(Message data) {
             int ver = data.uint8();
-            if (ver != 1)
+            if ((ver < 1) || (ver > 2))
                 throw (new Message.FormatError("Unknown grid data version: " + ver));
             gid = data.int64();
             segid = data.int64();
@@ -1717,10 +1785,18 @@ public class MapFile {
             tilesets = new TileInfo[data.uint8()];
             for (int i = 0; i < tilesets.length; i++)
                 tilesets[i] = new TileInfo(new Resource.Spec(Resource.remote(), data.string(), data.uint16()), data.uint8());
-            tiles = data.bytes();
-            zmap = new int[]{};
-            if (tiles.length != (cmaps.x * cmaps.y))
-                throw (new Message.FormatError("Bad grid data dimensions: " + tiles.length));
+            if (ver >= 2) {
+                int len = data.int32();
+                if (len != (cmaps.x * cmaps.y))
+                    throw (new Message.FormatError("Bad grid data dimensions: " + len));
+                tiles = data.bytes(len);
+                zmap = DataGrid.loadz(data, String.format("%x", gid));
+            } else {
+                tiles = data.bytes();
+                if (tiles.length != (cmaps.x * cmaps.y))
+                    throw (new Message.FormatError("Bad grid data dimensions: " + tiles.length));
+                zmap = new int[cmaps.x * cmaps.y];
+            }
             for (byte td : tiles) {
                 if ((td & 0xff) >= tiles.length)
                     throw (new Message.FormatError(String.format("Bad grid data contents: Tileset ID %d does not exist among 0-%d", (td & 0xff), tiles.length - 1)));
@@ -1820,7 +1896,8 @@ public class MapFile {
                     seg.offs.put(info.seg, info.sc.sub(grid.sc));
                 } else {
                     if (!off.equals(info.sc.sub(grid.sc)))
-                        throw (new RuntimeException("Inconsistent grid locations detected"));
+                        System.out.println("Inconsistent grid locations detected [" + off + "] [" + info.sc.sub(grid.sc) + "]");
+//                        throw (new RuntimeException("Inconsistent grid locations detected"));
                 }
             }
             Segment rseg;

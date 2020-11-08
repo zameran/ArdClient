@@ -3419,9 +3419,9 @@ public class OptWnd extends Window {
         });
 
         appender.add(new Label(""));
-        appender.add(new Label("Map settings. temp."));
+        appender.add(new Label("Map settings (temporarily)"));
 
-        appender.add(new CheckBox("Map settings. temp.") {
+        appender.add(new CheckBox("Additional marks on the map") {
             {
                 a = configuration.customMarkObj;
             }
@@ -3430,6 +3430,30 @@ public class OptWnd extends Window {
                 Utils.setprefb("customMarkObj", val);
                 configuration.customMarkObj = val;
                 a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+                return tex;
+            }
+        });
+
+        appender.add(new CheckBox("Scaling marks from zoom") {
+            {
+                a = configuration.scalingmarks;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("scalingmarks", val);
+                configuration.scalingmarks = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("On a large map the marks will look small").tex();
+                return tex;
             }
         });
 

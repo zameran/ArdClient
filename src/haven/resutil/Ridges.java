@@ -767,12 +767,17 @@ public class Ridges extends MapMesh.Hooks {
             return (false);
         int bz = ((RidgeTile) t).breakz();
         for (Coord ec : tecs) {
-            t = map.tiler(g.gettile(tc.add(ec)));
+            int tile = map.gettile(tc.add(ec));
+            if (tile < 0)
+                continue;
+            t = map.tiler(tile);
             if (t instanceof RidgeTile)
                 bz = Math.min(bz, ((RidgeTile) t).breakz());
         }
         for (int i = 0; i < 4; i++) {
-            if (Math.abs(g.getz(tc.add(tccs[(i + 1) % 4])) - g.getz(tc.add(tccs[i]))) > bz)
+            if (map.getfz(tc.add(tccs[(i + 1) % 4])) == 0.0 || map.getfz(tc.add(tccs[i])) == 0.0)
+                continue;
+            if (Math.abs(map.getfz(tc.add(tccs[(i + 1) % 4])) - map.getfz(tc.add(tccs[i]))) > bz)
                 return (true);
         }
         return (false);

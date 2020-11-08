@@ -125,6 +125,7 @@ public class configuration {
         put("gfx/terobjs/dng/antdungeon", getDefaultTextName("gfx/terobjs/dng/antdungeon"));
         put("gfx/terobjs/wonders/tarpit", getDefaultTextName("gfx/terobjs/wonders/tarpit"));
     }};
+    public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);

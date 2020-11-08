@@ -32,6 +32,7 @@ import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.MapFile.Segment;
+import modification.configuration;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -212,16 +213,31 @@ public class MapFileWidget extends Widget {
         }
 
         public void draw(GOut g, Coord c) {
+            float scale = (zoom + 1 + 5f) / (zoomlvls - 1);
             if (m instanceof PMarker) {
                 Coord ul = c.sub(flagcc);
+                Coord sul = c.sub(flagcc.div(scale));
                 g.chcolor(((PMarker) m).color);
-                g.image(flagfg, ul);
+                Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, flagfg.sz.div(scale)));
+                if (configuration.scalingmarks)
+                    g.image(iflagfg, sul);
+                else
+                    g.image(flagfg, ul);
                 g.chcolor();
-                g.image(flagbg, ul);
+                Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, flagbg.sz.div(scale)));
+                if (configuration.scalingmarks)
+                    g.image(iflagbg, sul);
+                else
+                    g.image(flagbg, ul);
                 if (Config.mapdrawflags) {
                     Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, Text.num12boldFnd).tex();
-                    if (tex != null)
-                        g.image(tex, ul.add(flagfg.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+                    if (tex != null) {
+                        Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
+                        if (configuration.scalingmarks)
+                            g.image(itex, sul.add(iflagfg.sz().x / 2, -20).sub(itex.sz().x / 2, 0));
+                        else
+                            g.image(tex, ul.add(flagfg.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+                    }
                 }
             } else if (m instanceof SMarker) {
                 SMarker sm = (SMarker) m;
@@ -240,13 +256,24 @@ public class MapFileWidget extends Widget {
                 }
                 if (img != null) {
                     //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
+                    Coord scc = cc.div(scale);
+                    Tex iimg = new TexI(PUtils.uiscale(img.img, img.sz.div(scale)));
                     if (Config.mapdrawquests) {
                         if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
                             Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, Text.num12boldFnd).tex();
-                            g.image(tex, c.sub(cc).add(img.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+                            if (tex != null) {
+                                Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
+                                if (configuration.scalingmarks)
+                                    g.image(itex, c.sub(scc).add(iimg.sz().x / 2, -20).sub(itex.sz().x / 2, 0));
+                                else
+                                    g.image(tex, c.sub(cc).add(img.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+                            }
                         }
                     }
-                    g.image(img, c.sub(cc));
+                    if (configuration.scalingmarks)
+                        g.image(iimg, c.sub(scc));
+                    else
+                        g.image(img, c.sub(cc));
                 }
             }
         }

@@ -91,8 +91,6 @@ public class MapMesh implements Rendered, Disposable {
         public void sfin() {
         }
 
-        ;
-
         public void calcnrm() {
         }
 
