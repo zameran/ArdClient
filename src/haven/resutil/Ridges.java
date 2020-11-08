@@ -775,9 +775,9 @@ public class Ridges extends MapMesh.Hooks {
                 bz = Math.min(bz, ((RidgeTile) t).breakz());
         }
         for (int i = 0; i < 4; i++) {
-            if (map.getfz(tc.add(tccs[(i + 1) % 4])) == 0.0 || map.getfz(tc.add(tccs[i])) == 0.0)
+            if (map.getz(tc.add(tccs[(i + 1) % 4])) == 0.0 || map.getz(tc.add(tccs[i])) == 0.0)
                 continue;
-            if (Math.abs(map.getfz(tc.add(tccs[(i + 1) % 4])) - map.getfz(tc.add(tccs[i]))) > bz)
+            if (Math.abs(map.getz(tc.add(tccs[(i + 1) % 4])) - map.getz(tc.add(tccs[i]))) > bz)
                 return (true);
         }
         return (false);
