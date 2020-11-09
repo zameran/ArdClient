@@ -216,26 +216,27 @@ public class MapFileWidget extends Widget {
             float scale = (zoom + 1 + 5f) / (zoomlvls - 1);
             if (m instanceof PMarker) {
                 Coord ul = c.sub(flagcc);
-                Coord sul = c.sub(flagcc.div(scale));
+                Coord sflagcc = flagcc.div(scale);
+                Coord sul = c.sub(sflagcc);
                 g.chcolor(((PMarker) m).color);
-                Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, flagfg.sz.div(scale)));
-                if (configuration.scalingmarks)
+                if (configuration.scalingmarks) {
+                    Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, flagfg.sz.div(scale)));
                     g.image(iflagfg, sul);
-                else
+                } else
                     g.image(flagfg, ul);
                 g.chcolor();
-                Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, flagbg.sz.div(scale)));
-                if (configuration.scalingmarks)
+                if (configuration.scalingmarks) {
+                    Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, flagbg.sz.div(scale)));
                     g.image(iflagbg, sul);
-                else
+                } else
                     g.image(flagbg, ul);
                 if (Config.mapdrawflags) {
                     Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, Text.num12boldFnd).tex();
                     if (tex != null) {
-                        Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
-                        if (configuration.scalingmarks)
-                            g.image(itex, sul.add(iflagfg.sz().x / 2, -20).sub(itex.sz().x / 2, 0));
-                        else
+                        if (configuration.scalingmarks) {
+                            Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
+                            g.image(itex, sul.add(sflagcc.x / 2, -20).sub(itex.sz().x / 2, 0));
+                        } else
                             g.image(tex, ul.add(flagfg.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
                     }
                 }

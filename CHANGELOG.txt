@@ -1,3 +1,7 @@
+20201109.1
+Map icon scaling fix
+~
+
 20201109
 Title change.
 ~

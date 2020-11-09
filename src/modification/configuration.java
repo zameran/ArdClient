@@ -424,7 +424,7 @@ public class configuration {
             int h2 = chosenSize.y;
             double scale1 = (double) w2 / w;
             double scale2 = (double) h2 / h;
-            BufferedImage after = new BufferedImage(w2, h2, BufferedImage.TYPE_INT_RGB);
+            BufferedImage after = new BufferedImage(w2, h2, BufferedImage.TYPE_INT_ARGB);
             AffineTransform scaleInstance = AffineTransform.getScaleInstance(scale1, scale2);
             AffineTransformOp scaleOp = new AffineTransformOp(scaleInstance, AffineTransformOp.TYPE_BILINEAR);
 
