@@ -1,3 +1,7 @@
+20201109
+Title change.
+~
+
 20201108
 Fixed default scripts. Scaling map marks option. Map export/import improved. Fixed clicking on the login list on the login screen when there is a large image for the background. Ridges on map.
 ~

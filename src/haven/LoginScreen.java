@@ -407,8 +407,6 @@ public class LoginScreen extends Widget {
 
     public void presize() {
         c = parent.sz.div(2).sub(sz.div(2));
-        if (opts != null && opts.visible)
-            opts.move(new Coord(sz.x * (opts.c.x + opts.sz.x / 2) / oldsz.x, sz.y * (opts.c.y + opts.sz.y / 2) / oldsz.y), 0.5, 0.5);
     }
 
     protected void added() {
@@ -418,6 +416,12 @@ public class LoginScreen extends Widget {
         if(Config.isUpdate){
             showChangeLog();
         }
+    }
+
+    public void resize(Coord sz) {
+        super.resize(sz);
+        if (opts != null && opts.visible)
+            opts.move(new Coord(sz.x * (opts.c.x + opts.sz.x / 2) / oldsz.x, sz.y * (opts.c.y + opts.sz.y / 2) / oldsz.y), 0.5, 0.5);
     }
 
 
