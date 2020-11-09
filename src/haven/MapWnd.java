@@ -33,6 +33,7 @@ import haven.MapFile.SMarker;
 import haven.MapFileWidget.Locator;
 import haven.MapFileWidget.MapLocator;
 import haven.MapFileWidget.SpecLocator;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -50,6 +51,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
@@ -67,11 +69,12 @@ public class MapWnd extends Window {
     private final Frame viewf, listf, fdropf;
     private final Button mebtn, mibtn;
     private final Dropbox<Pair<String, String>> fdrop;
+    public final IButton grid, hidemarks;
     private TextEntry namesel;
     private GroupSelector colsel;
     private Button mremove;
     private Comparator<Marker> mcmp = namecmp;
-    private List<Marker> markers = Collections.emptyList();
+    public List<Marker> markers = Collections.emptyList();
     private int markerseq = -1;
     private boolean domark = false;
     public Tex zoomtex = null;
@@ -88,6 +91,8 @@ public class MapWnd extends Window {
         super(sz, title, title, true);
         this.mv = mv;
         this.player = new MapLocator(mv);
+        grid = add(new IButton("gfx/hud/wndmap/btns/grid", "Toggle grid on map", this::toggleMapGrid));
+        hidemarks = add(new IButton("gfx/hud/wndmap/btns/viewdist", "Toggle marks vision", this::toggleMapViewDist));
         viewf = add(new Frame(Coord.z, true));
         view = viewf.add(new View(file));
         recenter();
@@ -430,9 +435,7 @@ public class MapWnd extends Window {
         if (visible && (markerseq != view.file.markerseq)) {
             if (view.file.lock.readLock().tryLock()) {
                 try {
-                    List<Marker> markers = view.file.markers.stream().filter(filter).collect(java.util.stream.Collectors.toList());
-                    markers.sort(mcmp);
-                    this.markers = markers;
+                    this.markers = view.file.markers.stream().filter(filter).sorted(mcmp).collect(Collectors.toList());
                     markerseq = view.file.markerseq;
                 } finally {
                     view.file.lock.readLock().unlock();
@@ -453,6 +456,16 @@ public class MapWnd extends Window {
     }
 
     public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32);
+
+    public void toggleMapGrid() {
+        configuration.bigmapshowgrid = !configuration.bigmapshowgrid;
+        Utils.setprefb("bigmapshowgrid", configuration.bigmapshowgrid);
+    }
+
+    public void toggleMapViewDist() {
+        configuration.bigmaphidemarks = !configuration.bigmaphidemarks;
+        Utils.setprefb("bigmaphidemarks", configuration.bigmaphidemarks);
+    }
 
     private static final Pair[] filters = new Pair[]{
             new Pair<>("-- All --", null),
@@ -614,11 +627,14 @@ public class MapWnd extends Window {
     public void resize(Coord sz) {
         super.resize(sz);
 
-        fdropf.c = new Coord(sz.x - 200, 0);
+        grid.c = new Coord(sz.x - 200, 0);
+        hidemarks.c = grid.c.add(grid.sz.x + 5, 0);
+
+        fdropf.c = new Coord(sz.x - 200, 20);
         fdrop.c = new Coord(fdropf.c.x + 5, fdropf.c.y + 5);
 
-        listf.resize(listf.sz.x, sz.y - 120);
-        listf.c = new Coord(sz.x - listf.sz.x, fdropf.sz.y);
+        listf.resize(listf.sz.x, sz.y - 140);
+        listf.c = new Coord(sz.x - listf.sz.x, fdropf.c.y + fdropf.sz.y);
         list.resize(listf.inner());
         mebtn.c = new Coord(sz.x - 200, sz.y - mebtn.sz.y);
         mibtn.c = new Coord(sz.x - 95, sz.y - mibtn.sz.y);

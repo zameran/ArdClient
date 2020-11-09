@@ -1,3 +1,7 @@
+20201109.2
+Map grid and hide icons.
+~
+
 20201109.1
 Map icon scaling fix
 ~

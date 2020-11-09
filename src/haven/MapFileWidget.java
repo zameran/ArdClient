@@ -77,6 +77,7 @@ public class MapFileWidget extends Widget {
     public static int zoom = 0;
     public static int zoomlvls = 7;
     private static final double[] scaleFactors = new double[]{1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public MapFileWidget(MapFile file, Coord sz) {
         super();
@@ -350,12 +351,15 @@ public class MapFileWidget extends Widget {
             }
             Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
             g.image(img, ul, cmaps.div(scalef()));
+            if (configuration.bigmapshowgrid)
+                g.image(gridred, ul, cmaps.div(scalef()));
         }
         if ((markers == null) || (file.markerseq != markerseq))
             remark(loc, dext);
-        if (markers != null) {
+        if (markers != null && !configuration.bigmaphidemarks) {
             for (DisplayMarker mark : markers) {
-                mark.draw(g, hsz.sub(loc.tc).add(mark.m.tc.div(scalef())));
+                if (ui != null && ui.gui != null && ui.gui.mapfile != null && ui.gui.mapfile.markers.contains(mark.m))
+                    mark.draw(g, hsz.sub(loc.tc).add(mark.m.tc.div(scalef())));
             }
         }
     }
@@ -572,7 +576,7 @@ public class MapFileWidget extends Widget {
 
 
     private Object biomeat(Coord c) {
-        final Coord tc = c.sub(sz.div(2)).mul(zoom == 0 ? 1 : scalef()).add(curloc.tc.mul(zoom == 0 ? 1 : scalef()));
+        final Coord tc = c.sub(sz.div(2)).mul(scalef()).add(curloc.tc.mul(scalef()));
         final Coord gc = tc.div(cmaps);
         String newbiome;
         try {

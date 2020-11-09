@@ -126,6 +126,8 @@ public class configuration {
         put("gfx/terobjs/wonders/tarpit", getDefaultTextName("gfx/terobjs/wonders/tarpit"));
     }};
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
+    public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
+    public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
