@@ -240,7 +240,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
     }
 
-    public List<ItemInfo> info() {
+    public synchronized List<ItemInfo> info() {
         if (info == null && rawinfo != null) {
             info = ItemInfo.buildinfo(this, rawinfo);
             //configuration.resourceLog(getname(), "tt", info);

@@ -1,3 +1,7 @@
+20201110.1
+ConcurrentModificationException fix.
+~
+
 20201110
 Ridges on map. Fight UI. Resource small fix.
 ~
