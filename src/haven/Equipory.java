@@ -27,6 +27,7 @@
 package haven;
 
 import haven.res.ui.tt.Armor;
+import haven.res.ui.tt.wpn.Damage;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -168,6 +169,26 @@ public class Equipory extends Widget implements DTarget {
         public int slots();
     }
 
+    private GItem lweap, rweap;
+
+    public GItem getWeapon() {
+        if (lweap != null && lweap.getinfo(Damage.class).isPresent()) {
+            return lweap;
+        } else if (rweap != null && rweap.getinfo(Damage.class).isPresent()) {
+            return rweap;
+        } else {
+            return null;
+        }
+    }
+
+    public GItem leftHand() {
+        return lweap;
+    }
+
+    public GItem rightHand() {
+        return rweap;
+    }
+
     public void addchild(Widget child, Object... args) {
         if (child instanceof GItem) {
             add(child);
@@ -179,6 +200,14 @@ public class Equipory extends Widget implements DTarget {
                 //v[i] = add(new WItem(g), ecoords[ep].add(1, 1));
                 //slots[ep] = v[i];
                 //quickslots[ep] = v[i];
+                switch (ep) {
+                    case 6:
+                        lweap = g;
+                        break;
+                    case 7:
+                        rweap = g;
+                        break;
+                }
             }
             g.sendttupdate = true;
             wmap.put(g, v);
@@ -210,14 +239,20 @@ public class Equipory extends Widget implements DTarget {
         super.cdestroy(w);
         if (w instanceof GItem) {
             GItem i = (GItem) w;
-            for (WItem v : wmap.remove(i)) {
+            final WItem[] witms = wmap.remove(i);
+            for (WItem v : witms) {
                 ui.destroy(v);
-                for (int s = 0; s < slots.length; s++) {
+                for (int s = 0; s < slots.length; ++s) {
                     if (slots[s] == v)
                         slots[s] = null;
                     if (quickslots[s] == v)
                         quickslots[s] = null;
                 }
+            }
+            if (lweap == i) {
+                lweap = null;
+            } else if (rweap == i) {
+                rweap = null;
             }
             if (armorclass != null) {
                 armorclass.dispose();

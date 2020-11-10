@@ -27,6 +27,16 @@
 package haven;
 
 
+import haven.res.gfx.fx.floatimg.DamageText;
+import haven.res.ui.tt.wpn.Armpen;
+import haven.sloth.gui.fight.Attack;
+import haven.sloth.gui.fight.Card;
+import haven.sloth.gui.fight.Cards;
+import haven.sloth.gui.fight.DefenseType;
+import haven.sloth.gui.fight.Restoration;
+import haven.sloth.gui.fight.Weapons;
+import haven.sloth.gui.fight.WeightType;
+
 import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -45,7 +55,7 @@ public class Fightsess extends Widget {
     public static final Coord indbframeo = (indframe.sz().sub(32, 32)).div(2);
     public static final Tex useframe = Resource.loadtex("gfx/hud/combat/lastframe");
     public static final Coord useframeo = (useframe.sz().sub(32, 32)).div(2);
-    public static final int actpitch = 50;
+    public static final int actpitch =75;
     public static int blue = 0, red = 0, myblue = 0, myred = 0, oldblue = 0, oldred = 0, unarmedcombat;
     public static Double delta, expected, lastactopened;
     public final Action[] actions;
@@ -67,12 +77,43 @@ public class Fightsess extends Widget {
     private Coord simpleOpeningSz = new Coord(32, 32);
     private Coord smallerOpeningSz = new Coord(24, 24);
 
-    public static class Action {
-        public final Indir<Resource> res;
-        public double cs, ct;
+    private Coord actionAnchor;
+    private Coord enemyBuffAnchor;
+    private Coord enemyIPAnchor;
+    private Coord enemyLastMoveAnchor;
+    private Coord buffAnchor;
+    private Coord IPAnchor;
+    private Coord lastMoveAnchor;
+    private Coord cooldownAnchor;
 
-        public Action(Indir<Resource> res) {
+    public static class Action {
+        public final int id;
+        public final Indir<Resource> res;
+        public Card card;
+        public int cards;
+        public double cs, ct;
+        private boolean discovered;
+
+        public Action(Indir<Resource> res, final int id) {
             this.res = res;
+            this.discovered = false;
+            this.id = id;
+        }
+
+        public boolean isDiscovered() {
+            return discovered;
+        }
+
+        void tick(final UI ui) {
+            if (!discovered) {
+                try {
+                    card = Cards.lookup.getOrDefault(res.get().layer(Resource.tooltip).t, Cards.unknown);
+                    cards = ui.gui.chrwdg.fight.cards(res.get().name);
+                    discovered = true;
+                } catch (Loading l) {
+                    //ignore
+                }
+            }
         }
     }
 
@@ -106,9 +147,26 @@ public class Fightsess extends Widget {
         presize();
     }
 
+    @Override
+    protected void removed() {
+        super.removed();
+        ui.gui.fs = null;
+        if (ui.gui.map != null)
+            ui.gui.map.removeCustomSprites(DamageText.id);
+    }
+
     public void presize() {
         resize(parent.sz);
         pcc = sz.div(2);
+        final Coord center = sz.div(2);
+        actionAnchor = center.add(0, center.y / 2);
+        cooldownAnchor = center.sub(0, (int) (center.y / 1.5f));
+        enemyBuffAnchor = cooldownAnchor.add(50, 0);
+        enemyIPAnchor = cooldownAnchor.add(75, 15);
+        enemyLastMoveAnchor = cooldownAnchor.add(50, 50);
+        buffAnchor = cooldownAnchor.sub(50, 0);
+        IPAnchor = cooldownAnchor.add(-75, 15);
+        lastMoveAnchor = cooldownAnchor.add(-50, 50);
     }
 
     private void updatepos() {
@@ -129,7 +187,7 @@ public class Fightsess extends Widget {
         Gob gob = ui.sess.glob.oc.getgob(gobid);
         if ((map == null) || (gob == null))
             return;
-        Pair<Long, Resource> id = new Pair<Long, Resource>(gobid, fx);
+        Pair<Long, Resource> id = new Pair<>(gobid, fx);
         Sprite spr = cfx.get(id);
         if (spr == null)
             cfx.put(id, spr = Sprite.create(null, fx, Message.nil));
@@ -140,6 +198,11 @@ public class Fightsess extends Widget {
     public void tick(double dt) {
         for (Sprite spr : curfx)
             spr.tick((int) (dt * 1000));
+        for (int i = 0; i < actions.length; ++i) {
+            if (actions[i] != null) {
+                actions[i].tick(ui);
+            }
+        }
         curfx.clear();
     }
 
@@ -187,7 +250,7 @@ public class Fightsess extends Widget {
     public void draw(GOut g) {
         updatepos();
         try {
-            if (parent.lchild != this) {
+            if (parent.focused != this) {
                 raise();
                 if (Config.forcefightfocusharsh)
                     parent.setfocus(this);
@@ -272,6 +335,19 @@ public class Fightsess extends Widget {
                     g.atextstroked(Utils.fmt1DecPlace(fv.atkct - now), cdc, 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num11Fnd);
             }
             g.image(cdframe, Config.altfightui ? new Coord(ui.gui.sz.x / 2, 200).sub(cdframe.sz().div(2)) : cdc.sub(cdframe.sz().div(2)));
+            if (fv.current != null && fv.current.estimatedBlockWeight != 0) {
+                final int stat;
+                final WeightType type;
+                if (fv.current.maneuver != null) {
+                    stat = (int) fv.current.maneuver.calculateStat(fv.current.estimatedBlockWeight);
+                    type = fv.current.maneuver.type;
+                } else {
+                    //An animal, just assume blockweight -> UA
+                    type = WeightType.UA;
+                    stat = (int) fv.current.estimatedBlockWeight;
+                }
+                FastText.aprintsf(g, cdc.add(0, -50), 0.5, 0.0, "%s: %d", type, stat);
+            }
         }
 
         try {
@@ -283,7 +359,7 @@ public class Fightsess extends Widget {
             double lastuse = fv.lastuse;
             if (lastact != null) {
                 Tex ut = lastact.get().layer(Resource.imgc).tex();
-                Coord useul = Config.altfightui ? new Coord(gcx - 69, 120) : pcc.add(usec1).sub(ut.sz().div(2));
+                Coord useul = Config.altfightui ? lastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec1).sub(ut.sz().div(2));
                 g.image(ut, useul);
                 g.image(useframe, useul.sub(useframeo));
                 double a = now - lastuse;
@@ -307,7 +383,7 @@ public class Fightsess extends Widget {
                 double lastuse = fv.current.lastuse;
                 if (lastact != null) {
                     Tex ut = lastact.get().layer(Resource.imgc).tex();
-                    Coord useul = Config.altfightui ? new Coord(gcx + 69 - ut.sz().x, 120) : pcc.add(usec2).sub(ut.sz().div(2));
+                    Coord useul = Config.altfightui ? enemyLastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec2).sub(ut.sz().div(2));
                     g.image(ut, useul);
                     g.image(useframe, useul.sub(useframeo));
                     double a = now - lastuse;
@@ -322,9 +398,21 @@ public class Fightsess extends Widget {
             }
         }
 
-
+        //My cards
+        final GItem weapon = weap();
+        final int weapq;
+        final int weapdmg;
+        final double weappen;
+        if (weapon != null) {
+            weapq = (int) weapon.quality().q;
+            weapdmg = Weapons.lookup.getOrDefault(weapon.name().orElse(""), 0);
+            weappen = weapon.getinfo(Armpen.class).orElse(Armpen.NOPEN).deg;
+        } else {
+            weapq = weapdmg = 0;
+            weappen = 0.0;
+        }
         for (int i = 0; i < actions.length; i++) {
-            Coord ca = Config.altfightui ? new Coord(gcx - 18, ui.gui.sz.y - 250).add(actc(i)).add(16, 16) : pcc.add(actc(i));
+            Coord ca = Config.altfightui ? actionAnchor.add(actc(i)) : pcc.add(actc(i));
             Action act = actions[i];
             try {
                 if (act != null) {
@@ -333,6 +421,7 @@ public class Fightsess extends Widget {
                     Coord ic = ca.sub(img.sz().div(2));
                     g.image(img, ic);
                     if (now < act.ct) {
+                        //This is from an era when moves had their own cooldown
                         double a = (now - act.cs) / (act.ct - act.cs);
                         g.chcolor(0, 0, 0, 128);
                         g.prect(ca, ic.sub(ca), ic.add(img.sz()).sub(ca), (1.0 - a) * Math.PI * 2);
@@ -346,6 +435,47 @@ public class Fightsess extends Widget {
                         g.image(actframe, ic.sub(actframeo));
                     }
 
+                    if (fv.current != null) {
+                        if (act.card instanceof Attack) {
+                            final Attack atk = (Attack) act.card;
+                            final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
+                                    str(), fv.current.defweights);
+                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
+                            final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                            final int mc = ui.sess.glob.cattr.get("melee").comp;
+
+                            final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                    ua, mc, act.cards,
+                                    fv.current.defweights, fv.current.estimatedBlockWeight);
+                            FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
+                                    Math.round(newWeights.get(DefenseType.RED) * 100),
+                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
+                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
+                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
+                        } else if (act.card instanceof Restoration) {
+                            final Restoration restro = (Restoration) act.card;
+                            final Map<DefenseType, Double> newWeights = restro.getFutureWeights(act.cards, fv.defweights);
+                            FastText.printsf(g, ic.add(0, 35), "%d/%d/%d/%d",
+                                    Math.round(newWeights.get(DefenseType.RED) * 100),
+                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
+                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
+                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
+                            if (act.card == Cards.flex) {
+                                final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                                final int mc = ui.sess.glob.cattr.get("melee").comp;
+
+                                final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                        ua, mc, act.cards,
+                                        fv.current.defweights, fv.current.estimatedBlockWeight);
+                                FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
+                                        Math.round(enemyWeights.get(DefenseType.RED) * 100),
+                                        Math.round(enemyWeights.get(DefenseType.GREEN) * 100),
+                                        Math.round(enemyWeights.get(DefenseType.BLUE) * 100),
+                                        Math.round(enemyWeights.get(DefenseType.YELLOW) * 100));
+                            }
+                        }
+                    }
+
                     if (Config.combshowkeys) {
 
                         Tex key;
@@ -356,7 +486,7 @@ public class Fightsess extends Widget {
                         } else {
                             key = keysfftex[i];
                         }
-                        g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y - 6));
+                        g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y / 2 - key.sz().y / 2));
                     }
                 }
             } catch (Loading l) {
@@ -439,7 +569,15 @@ public class Fightsess extends Widget {
             g.chcolor();
         } catch (Loading l) {
         }
+    }
 
+    private GItem weap() {
+        return ui.gui.equipory != null ? ui.gui.equipory.getWeapon() : null;
+    }
+
+    private int str() {
+        final Glob.CAttr strattr = ui.sess.glob.cattr.get("str");
+        return strattr.comp;
     }
 
     private Widget prevtt = null;
@@ -525,7 +663,7 @@ public class Fightsess extends Widget {
             int n = (Integer) args[0];
             if (args.length > 1) {
                 Indir<Resource> res = ui.sess.getres((Integer) args[1]);
-                actions[n] = new Action(res);
+                actions[n] = new Action(res, n);
             } else {
                 actions[n] = null;
             }

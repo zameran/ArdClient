@@ -55,6 +55,7 @@ public class FightWnd extends Widget {
     public final Actions actlist;
     public List<Action> acts = new ArrayList<Action>();
     public final Action[] order;
+    public int usesave;
     private final Text[] saves;
     private final ImageInfoBox info;
     private Tex count;
@@ -116,6 +117,19 @@ public class FightWnd extends Widget {
 
     public static interface IconInfo {
         public void draw(BufferedImage img, Graphics g);
+    }
+
+    public int cards(final String name) {
+        for (final Action act : acts) {
+            try {
+                if (act.res.get().name.equals(name)) {
+                    return act.u;
+                }
+            } catch (Loading l) {
+                //ignore
+            }
+        }
+        return 1;
     }
 
     private static final OwnerContext.ClassResolver<FightWnd> actxr = new OwnerContext.ClassResolver<FightWnd>()
@@ -310,6 +324,7 @@ public class FightWnd extends Widget {
 
     public class Actions extends Listbox<Action> implements DTarget {
         private boolean loading = false;
+        private int da = -1, ds = -1;
         UI.Grab d = null;
         Action drag = null;
         Coord dp;
@@ -403,6 +418,9 @@ public class FightWnd extends Widget {
             if (act.ra == null)
                 act.ra = Text.num12boldFnd.render(String.valueOf(act.a));
             g.aimage(act.ra.tex(), new Coord(sz.x - 15, ty), 1.0, 0.0);
+            g.aimage(act.ru.tex(), new Coord(sz.x - 45, ty), 1.0, 0.0);
+            g.aimage(add[da == idx ? 1 : 0], new Coord(sz.x - 10, itemh / 2), 1.0, 0.5);
+            g.aimage(sub[ds == idx ? 1 : 0], new Coord(sz.x - 25, itemh / 2), 1.0, 0.5);
         }
 
         public void change(final Action act) {
@@ -411,6 +429,16 @@ public class FightWnd extends Widget {
             else if (sel != null)
                 info.set((Tex) null);
             super.change(act);
+        }
+
+        public boolean mousewheel(Coord c, int am) {
+            if (ui.modshift) {
+                Action act = itemat(c);
+                if (act != null)
+                    setu(act, act.u - am);
+                return (true);
+            }
+            return (super.mousewheel(c, am));
         }
 
         public void draw(GOut g) {
@@ -447,8 +475,39 @@ public class FightWnd extends Widget {
             super.draw(g);
         }
 
+        private boolean onadd(Coord c, int idx) {
+            Coord ic = c.sub(0, (idx - sb.val) * itemh);
+            int by = (itemh - add[0].sz().y) / 2;
+            return (ic.isect(new Coord(sz.x - 10 - add[0].sz().x, by), add[0].sz()));
+        }
+
+        private boolean onsub(Coord c, int idx) {
+            Coord ic = c.sub(0, (idx - sb.val) * itemh);
+            int by = (itemh - sub[0].sz().y) / 2;
+            return (ic.isect(new Coord(sz.x - 25 - add[0].sz().x, by), add[0].sz()));
+        }
+
+        public void drag(Action act) {
+            if (d == null)
+                d = ui.grabmouse(this);
+            drag = act;
+            dp = null;
+        }
+
         public boolean mousedown(Coord c, int button) {
             if (button == 1) {
+                int idx = (c.y / itemh) + sb.val;
+                if (idx < listitems()) {
+                    if (onadd(c, idx)) {
+                        da = idx;
+                        d = ui.grabmouse(this);
+                        return (true);
+                    } else if (onsub(c, idx)) {
+                        ds = idx;
+                        d = ui.grabmouse(this);
+                        return (true);
+                    }
+                }
                 super.mousedown(c, button);
                 if ((sel != null) && (c.x < sb.c.x)) {
                     d = ui.grabmouse(this);
@@ -468,6 +527,31 @@ public class FightWnd extends Widget {
             }
         }
 
+        private boolean setu(Action act, int u) {
+            u = Utils.clip(u, 0, act.a);
+            int s;
+            for (s = 0; s < order.length; s++) {
+                if (order[s] == act)
+                    break;
+            }
+            if (u > 0) {
+                if (s == order.length) {
+                    for (s = 0; s < order.length; s++) {
+                        if (order[s] == null)
+                            break;
+                    }
+                    if (s == order.length)
+                        return (false);
+                    order[s] = act;
+                }
+            } else {
+                if (s < order.length)
+                    order[s] = null;
+            }
+            act.u(u);
+            return (true);
+        }
+
         public boolean mouseup(Coord c, int button) {
             if ((d != null) && (button == 1)) {
                 d.remove();
@@ -476,6 +560,19 @@ public class FightWnd extends Widget {
                     if (dp == null)
                         ui.dropthing(ui.root, c.add(rootpos()), drag);
                     drag = null;
+                }
+                if (da >= 0) {
+                    if (onadd(c, da)) {
+                        Action act = listitem(da);
+                        setu(act, act.u + 1);
+                    }
+                    da = -1;
+                } else if (ds >= 0) {
+                    if (onsub(c, ds)) {
+                        Action act = listitem(ds);
+                        setu(act, act.u - 1);
+                    }
+                    ds = -1;
                 }
                 return (true);
             }
@@ -769,6 +866,111 @@ public class FightWnd extends Widget {
                 }
                 anim = na;
             }
+        }
+    }
+
+    public class Savelist extends Listbox<Integer> {
+        private int edit = -1;
+        private Text.Line redit = null;
+        private LineEdit nmed;
+        private double focusstart;
+
+        public Savelist(int w, int h) {
+            super(w, h, attrf.height() + 2);
+            setcanfocus(true);
+            sel = Integer.valueOf(0);
+        }
+
+        protected Integer listitem(int idx) {
+            return (idx);
+        }
+
+        protected int listitems() {
+            return (nsave);
+        }
+
+        protected void drawbg(GOut g) {
+        }
+
+        protected void drawitem(GOut g, Integer save, int n) {
+            g.chcolor((n % 2 == 0) ? CharWnd.every : CharWnd.other);
+            g.frect(Coord.z, g.sz);
+            g.chcolor();
+            if (n == edit) {
+                if (redit == null)
+                    redit = attrf.render(nmed.line);
+                g.aimage(redit.tex(), new Coord(20, itemh / 2), 0.0, 0.5);
+                if (hasfocus && (((Utils.rtime() - focusstart) % 1.0) < 0.5)) {
+                    int cx = redit.advance(nmed.point);
+                    g.chcolor(255, 255, 255, 255);
+                    Coord co = new Coord(20 + cx + 1, (g.sz.y - redit.sz().y) / 2);
+                    g.line(co, co.add(0, redit.sz().y), 1);
+                    g.chcolor();
+                }
+            } else {
+                g.aimage(saves[n].tex(), new Coord(20, itemh / 2), 0.0, 0.5);
+            }
+            if (n == usesave)
+                g.aimage(Theme.timg("chkbox/small", 1), new Coord(itemh / 2, itemh / 2), 0.5, 0.5);
+        }
+
+        private Coord lc = null;
+        private double lt = 0;
+
+        public boolean mousedown(Coord c, int button) {
+            boolean ret = super.mousedown(c, button);
+            if (ret && (button == 1)) {
+                double now = Utils.rtime();
+                if (((now - lt) < 0.5) && (c.dist(lc) < 10) && (sel != null) && (saves[sel] != unused)) {
+                    if (sel == usesave) {
+                        edit = sel;
+                        nmed = new LineEdit(saves[sel].text) {
+                            protected void done(String line) {
+                                saves[edit] = attrf.render(line);
+                                edit = -1;
+                                nmed = null;
+                            }
+
+                            protected void changed() {
+                                redit = null;
+                            }
+                        };
+                        redit = null;
+                        parent.setfocus(this);
+                        focusstart = now;
+                    } else {
+                        load(sel);
+                        use(sel);
+                    }
+                } else {
+                    lt = now;
+                    lc = c;
+                }
+            }
+            return (ret);
+        }
+
+        public void change(Integer sel) {
+            super.change(sel);
+            if ((edit != -1) && (edit != sel)) {
+                edit = -1;
+                redit = null;
+                nmed = null;
+            }
+        }
+
+        public boolean keydown(KeyEvent ev) {
+            if (edit != -1) {
+                if (ev.getKeyChar() == 27) {
+                    edit = -1;
+                    redit = null;
+                    nmed = null;
+                    return (true);
+                } else {
+                    return (nmed.key(ev));
+                }
+            }
+            return (super.keydown(ev));
         }
     }
 

@@ -105,7 +105,7 @@ public class OptWnd extends Window {
     private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
     public static final int VERTICAL_AUDIO_MARGIN = 5;
     public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
-    public Panel waterPanel;
+    public Panel waterPanel, qualityPanel, mapPanel, devPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
     CheckBox sm = null, rm = null, lt = null, bt = null, ltl, discordrole, discorduser;
@@ -596,6 +596,9 @@ public class OptWnd extends Window {
         mapping = add(new Panel());
         modification = add(new Panel());
         waterPanel = add(new Panel());
+        qualityPanel = add(new Panel());
+        mapPanel = add(new Panel());
+        devPanel = add(new Panel());
 
         initMain(gopts);
         initAudio();
@@ -619,6 +622,9 @@ public class OptWnd extends Window {
         initDiscord();
         initModification();
         initWater();
+        initQualityPanel();
+        initMapPanel();
+        initDevPanel();
 
         chpanel(main);
     }
@@ -1732,11 +1738,11 @@ public class OptWnd extends Window {
         map.add(new Label("Show bushes:"), new Coord(165, 0));
         map.add(new Label("Show trees:"), new Coord(320, 0));
         map.add(new Label("Hide icons:"), new Coord(475, 0));
-        map.add(new Button(200, "Icon update (donotpress)") {
-            public void click() {
-                Iconfinder.updateConfig();
-            }
-        }, new Coord(425, 360));
+//        map.add(new Button(200, "Icon update (donotpress)") {
+//            public void click() {
+//                Iconfinder.updateConfig();
+//            }
+//        }, new Coord(425, 360));
 
         map.add(new CheckBox("Draw party members/names") {
             {
@@ -3131,17 +3137,17 @@ public class OptWnd extends Window {
     }
 
     private void initModification() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(400, 400)));
-        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(modification);
-        appender2.setHorizontalMargin(5);
-        appender2.setX(400);
-
-        appender.add(new PButton(50, "Water", 'w', waterPanel));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(620, 350)));
+        appender.setVerticalMargin(VERTICAL_MARGIN);
+        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.add(new Label("Strange or unreal modifications"));
 
-        appender.setVerticalMargin(VERTICAL_MARGIN);
-        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+        appender.addRow(new PButton(50, "Water", 'w', waterPanel),
+                new PButton(50, "Map", 'm', mapPanel),
+                new PButton(50, "Quality", 'c', qualityPanel),
+                new PButton(50, "Dev", 'w', devPanel)
+        );
 
         appender.addRow(new CheckBox("Custom title: ") {
                             {
@@ -3262,57 +3268,6 @@ public class OptWnd extends Window {
                 return tex;
             }
         });
-        appender.add(new CheckBox("Log for developer") {
-            {
-                a = configuration.logging;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("msglogging", val);
-                configuration.logging = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Decode code") {
-            {
-                a = configuration.decodeCode;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("decodeCode", val);
-                configuration.decodeCode = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Skip exceptions") {
-            {
-                a = configuration.skipexceptions;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("skipexceptions", val);
-                configuration.skipexceptions = val;
-                a = val;
-            }
-        });
-
-        appender.add(new CheckBox("Mode for PBot") {
-            {
-                a = configuration.pbotmode;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("pbotmode", val);
-                configuration.pbotmode = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Off - like old latest UI, On - only current UI").tex();
-                return tex;
-            }
-        });
 
         appender.addRow(new Label("Custom grid size: ") {
             @Override
@@ -3355,108 +3310,11 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new Label("Flowermenu"));
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
 
-        appender2.add(new Label("Choose/add item quality color:"));
-        appender2.add(new CheckBox("Custom quality below") {
-            {
-                a = configuration.customquality;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("customquality", val);
-                configuration.customquality = val;
-                a = val;
-            }
-        });
-
-        final CustomQualityList list = new CustomQualityList();
-        appender2.add(list);
-
-        appender2.addRow(new CheckBox("Quality color more than last") {
-            {
-                a = configuration.morethanquility;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("morethanquility", val);
-                configuration.morethanquility = val;
-                a = val;
-            }
-        }, new ColorPreview(new Coord(20, 20), new Color(configuration.morethancolor, true), val -> {
-            configuration.morethancolor = val.hashCode();
-            Utils.setprefi("morethancolor", val.hashCode());
-        }), new ColorPreview(new Coord(20, 20), new Color(configuration.morethancoloroutline, true), val -> {
-            configuration.morethancoloroutline = val.hashCode();
-            Utils.setprefi("morethancoloroutline", val.hashCode());
-        }));
-        final ColorPreview colPre = new ColorPreview(new Coord(20, 20), Color.WHITE, val -> {
-            CustomQualityList.NewColor = val;
-        });
-        final TextEntry value = new TextEntry(120, "") {
-            @Override
-            public void activate(String text) {
-                try {
-                    list.add(Double.parseDouble(text), Double.parseDouble(text), CustomQualityList.NewColor, true);
-                } catch (Exception e) {
-                    System.out.println("Color Quality TextEntry " + e);
-                }
-                settext("");
-            }
-        };
-        appender2.addRow(value, colPre, new Button(45, "Add") {
-            @Override
-            public void click() {
-                try {
-                    if (!value.text.isEmpty())
-                        list.add(Double.parseDouble(value.text), Double.parseDouble(value.text), CustomQualityList.NewColor, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                value.settext("");
-            }
-        });
-
-        appender.add(new Label(""));
-        appender.add(new Label("Map settings (temporarily)"));
-
-        appender.add(new CheckBox("Additional marks on the map") {
-            {
-                a = configuration.customMarkObj;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("customMarkObj", val);
-                configuration.customMarkObj = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
-                return tex;
-            }
-        });
-
-        appender.add(new CheckBox("Scaling marks from zoom") {
-            {
-                a = configuration.scalingmarks;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("scalingmarks", val);
-                configuration.scalingmarks = val;
-                a = val;
-            }
-
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("On a large map the marks will look small").tex();
-                return tex;
-            }
-        });
-
+        appender.add(new Label("Camera"));
         appender.addRow(new Label("Minimal distance for free camera"),
                 new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
                     @Override
@@ -3482,7 +3340,7 @@ public class OptWnd extends Window {
     }
 
     private void initWater() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(620, 400)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(waterPanel, new Coord(620, 350)));
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
@@ -3615,6 +3473,163 @@ public class OptWnd extends Window {
 
         waterPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         waterPanel.pack();
+    }
+
+    private void initQualityPanel() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(qualityPanel, new Coord(620, 350)));
+        appender.setVerticalMargin(5);
+        appender.setHorizontalMargin(5);
+
+        appender.add(new Label("Choose/add item quality color:"));
+        appender.add(new CheckBox("Custom quality below") {
+            {
+                a = configuration.customquality;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("customquality", val);
+                configuration.customquality = val;
+                a = val;
+            }
+        });
+
+        final CustomQualityList list = new CustomQualityList();
+        appender.add(list);
+
+        appender.addRow(new CheckBox("Quality color more than last") {
+            {
+                a = configuration.morethanquility;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("morethanquility", val);
+                configuration.morethanquility = val;
+                a = val;
+            }
+        }, new ColorPreview(new Coord(20, 20), new Color(configuration.morethancolor, true), val -> {
+            configuration.morethancolor = val.hashCode();
+            Utils.setprefi("morethancolor", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.morethancoloroutline, true), val -> {
+            configuration.morethancoloroutline = val.hashCode();
+            Utils.setprefi("morethancoloroutline", val.hashCode());
+        }));
+        final ColorPreview colPre = new ColorPreview(new Coord(20, 20), Color.WHITE, val -> {
+            CustomQualityList.NewColor = val;
+        });
+        final TextEntry value = new TextEntry(120, "") {
+            @Override
+            public void activate(String text) {
+                try {
+                    list.add(Double.parseDouble(text), Double.parseDouble(text), CustomQualityList.NewColor, true);
+                } catch (Exception e) {
+                    System.out.println("Color Quality TextEntry " + e);
+                }
+                settext("");
+            }
+        };
+        appender.addRow(value, colPre, new Button(45, "Add") {
+            @Override
+            public void click() {
+                try {
+                    if (!value.text.isEmpty())
+                        list.add(Double.parseDouble(value.text), Double.parseDouble(value.text), CustomQualityList.NewColor, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                value.settext("");
+            }
+        });
+
+        qualityPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        qualityPanel.pack();
+    }
+
+    private void initMapPanel() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(mapPanel, new Coord(620, 350)));
+        appender.setVerticalMargin(5);
+        appender.setHorizontalMargin(5);
+
+        appender.add(new CheckBox("Additional marks on the map") {
+            {
+                a = configuration.customMarkObj;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("customMarkObj", val);
+                configuration.customMarkObj = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+                return tex;
+            }
+        });
+
+        appender.add(new CheckBox("Scaling marks from zoom") {
+            {
+                a = configuration.scalingmarks;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("scalingmarks", val);
+                configuration.scalingmarks = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("On a large map the marks will look small").tex();
+                return tex;
+            }
+        });
+
+        mapPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        mapPanel.pack();
+    }
+
+    private void initDevPanel() {
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(devPanel, new Coord(620, 350)));
+        appender.setVerticalMargin(5);
+        appender.setHorizontalMargin(5);
+
+        appender.add(new CheckBox("Log for developer") {
+            {
+                a = configuration.logging;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("msglogging", val);
+                configuration.logging = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Decode code") {
+            {
+                a = configuration.decodeCode;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("decodeCode", val);
+                configuration.decodeCode = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Skip exceptions") {
+            {
+                a = configuration.skipexceptions;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("skipexceptions", val);
+                configuration.skipexceptions = val;
+                a = val;
+            }
+        });
+
+        devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        devPanel.pack();
     }
 
     private void initFlowermenus() {

@@ -238,6 +238,17 @@ public class Utils {
         return (new Random(seed));
     }
 
+    public static double fgrandoom(Random rnd) {
+        long raw = rnd.nextLong();
+        // 0000 bbbb baaa aabb bbba aaaa bbbb baaa aabb bbba aaaa bbbb baaa aabb bbba aaaa
+        raw = (raw & 0x007c1f07c1f07c1fl) + ((raw & 0x0f83d0f83d0f83f0l) >> 5);
+        // 0000 0000 bbbb bb00 00aa aaaa 0000 bbbb bb00 00aa aaaa 0000 bbbb bb00 00aa aaaa
+        raw = (raw & 0x00003f0003f0003fl) + ((raw & 0x00fc000fc000fc00l) >> 10);
+        // 0000 0000 0000 0000 0aaa aaaa 0000 0000 0000 0bbb bbbb 0000 0000 0000 0ccc cccc
+        raw = ((raw & 0x00007f0000000000l) >> 40) + ((raw & 0x0000000007f00000l) >> 20) + (raw & 0x000000000000007fl);
+        return ((raw - 186) * (1.0 / 31.0));
+    }
+
     static synchronized Preferences prefs() {
         if (prefs == null) {
             Preferences node = Preferences.userNodeForPackage(Utils.class);
@@ -590,6 +601,20 @@ public class Utils {
         return (b);
     }
 
+    public static int intvard(byte[] buf, int off) {
+        int len = buf.length - off;
+        switch (len) {
+            case 4:
+                return (int32d(buf, off));
+            case 2:
+                return (int16d(buf, off));
+            case 1:
+                return (buf[off]);
+            default:
+                throw (new IllegalArgumentException(Integer.toString(len)));
+        }
+    }
+
     public static void int64e(long num, byte[] buf, int off) {
         for (int i = 0; i < 8; i++) {
             buf[off++] = (byte) (num & 0xff);
@@ -604,6 +629,10 @@ public class Utils {
     public static void uint16e(int num, byte[] buf, int off) {
         buf[off] = sb(num & 0xff);
         buf[off + 1] = sb((num & 0xff00) >> 8);
+    }
+
+    public static void int16e(short num, byte[] buf, int off) {
+        uint16e(((int) num) & 0xffff, buf, off);
     }
 
     public static String strd(byte[] buf, int[] off) {
@@ -654,16 +683,16 @@ public class Utils {
     public static void float9995d(int word, float[] ret) {
         int xb = (word & 0x7f800000) >> 23, xs = ((word & 0x80000000) >> 31) & 1,
                 yb = (word & 0x003fc000) >> 14, ys = ((word & 0x00400000) >> 22) & 1,
-                zb = (word & 0x00001fd0) >> 5, zs = ((word & 0x00002000) >> 13) & 1;
+                zb = (word & 0x00001fe0) >> 5, zs = ((word & 0x00002000) >> 13) & 1;
         int me = (word & 0x1f) - 15;
         int xe = Integer.numberOfLeadingZeros(xb) - 24,
                 ye = Integer.numberOfLeadingZeros(yb) - 24,
                 ze = Integer.numberOfLeadingZeros(zb) - 24;
-        if (xe == 32) ret[0] = 0;
+        if (xe == 8) ret[0] = 0;
         else ret[0] = Float.intBitsToFloat((xs << 31) | ((me - xe + 127) << 23) | ((xb << (xe + 16)) & 0x007fffff));
-        if (ye == 32) ret[1] = 0;
+        if (ye == 8) ret[1] = 0;
         else ret[1] = Float.intBitsToFloat((ys << 31) | ((me - ye + 127) << 23) | ((yb << (ye + 16)) & 0x007fffff));
-        if (ze == 32) ret[2] = 0;
+        if (ze == 8) ret[2] = 0;
         else ret[2] = Float.intBitsToFloat((zs << 31) | ((me - ze + 127) << 23) | ((zb << (ze + 16)) & 0x007fffff));
     }
 
@@ -1032,6 +1061,22 @@ public class Utils {
         if (term) out.println();
     }
 
+    public static void dumparr(float[] arr, PrintStream out, boolean term) {
+        if (arr == null) {
+            out.print("null");
+        } else {
+            out.print('[');
+            boolean f = true;
+            for (float v : arr) {
+                if (!f) out.print(", ");
+                f = false;
+                out.print(v);
+            }
+            out.print(']');
+        }
+        if (term) out.println();
+    }
+
     public static void dumparr(int[] arr, PrintStream out, boolean term) {
         if (arr == null) {
             out.print("null");
@@ -1076,6 +1121,23 @@ public class Utils {
             for (int o = 0; (o < width) && (i + o < arr.length); o++) {
                 if (o > 0) out.print(' ');
                 out.printf("%02x", arr[i + o]);
+            }
+            out.print('\n');
+        }
+    }
+
+    public static void hexdump(ByteBuffer arr, PrintStream out, int width) {
+        if (arr == null) {
+            out.println("null");
+            return;
+        }
+        if (width <= 0)
+            width = 16;
+        for (int i = 0; i < arr.capacity(); i += width) {
+            out.printf("%08x:\t", i);
+            for (int o = 0; (o < width) && (i + o < arr.capacity()); o++) {
+                if (o > 0) out.print(' ');
+                out.printf("%02x", arr.get(i + o) & 0xff);
             }
             out.print('\n');
         }
@@ -1647,6 +1709,14 @@ public class Utils {
         }
     }
 
+    public static <T> T construct(Class<T> cl) {
+        try {
+            return (construct(cl.getConstructor()));
+        } catch (NoSuchMethodException e) {
+            throw (new RuntimeException(e));
+        }
+    }
+
     public static Object invoke(Method mth, Object ob, Object... args) {
         try {
             return (mth.invoke(ob, args));
@@ -1657,6 +1727,11 @@ public class Utils {
                 throw ((RuntimeException) e.getCause());
             throw (new RuntimeException(e.getCause()));
         }
+    }
+
+    public static <R> Function<Object[], R> consfun(Class<R> cl, Class<?>... args) throws NoSuchMethodException {
+        Constructor<R> cons = cl.getConstructor(args);
+        return (iargs -> construct(cons, iargs));
     }
 
     public static <R> Function<Object[], R> smthfun(Class<?> cl, String name, Class<R> rtype, Class<?>... args) throws NoSuchMethodException {
@@ -1903,6 +1978,16 @@ public class Utils {
         return (dst);
     }
 
+    public static int sidcmp(Object a, Object b) {
+        int ah = System.identityHashCode(a);
+        int bh = System.identityHashCode(b);
+        if (ah < bh)
+            return (-1);
+        else if (ah > bh)
+            return (1);
+        return (0);
+    }
+
     public static final Comparator<Object> idcmp = new Comparator<Object>() {
         int eid = 0;
         final Map<Ref, Long> emerg = new HashMap<Ref, Long>();
@@ -1953,7 +2038,7 @@ public class Utils {
 
             synchronized (emerg) {
                 if (eid == 0)
-                    System.err.println("could not impose ordering in idcmd, using slow-path");
+                    Warning.warn("could not impose ordering in idcmp, using slow-path");
                 clean();
                 Ref ar = new Ref(a, cleanq), br = new Ref(b, cleanq);
                 Long ai, bi;

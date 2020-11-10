@@ -1,8 +1,7 @@
-package haven.res.fx.floatimg;
+package haven.res.gfx.fx.floatimg;
 
 import haven.Gob;
 import haven.Resource;
-import haven.Sprite;
 import haven.TexI;
 import haven.Text;
 import haven.Utils;
@@ -15,9 +14,9 @@ public class FloatText extends FloatSprite {
             hhp = new Color(255, 204, 0),
             armor = new Color(136, 255, 136);
     private static final Object lock = new Object();
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 10);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 12);
 
-    public FloatText(Sprite.Owner owner, Resource res, String text, Color color) {
+    public FloatText(Owner owner, Resource res, String text, Color color) {
         super(owner, res,
                 new TexI(Utils.outline2(fnd.render(text, color).img, Utils.contrast(color))),
                 2000);

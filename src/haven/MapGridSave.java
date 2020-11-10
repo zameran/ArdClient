@@ -117,14 +117,14 @@ public class MapGridSave {
         if (blackpxs >= 9500) // if 95% black
             return null;
 
-        for (c.y = 0; c.y < sz.y; c.y++) {
-            for (c.x = 0; c.x < sz.x; c.x++) {
+        for (c.y = 1; c.y < sz.y - 1; c.y++) {
+            for (c.x = 1; c.x < sz.x - 1; c.x++) {
                 int t = g.gettile(c);
                 Tiler tl = map.tiler(t);
                 if (tl instanceof Ridges.RidgeTile) {
                     if (Ridges.brokenp(map, c, g)) {
-                        for (int y = Math.max(c.y - 1, 0), ny = Math.min(c.y + 1, sz.y - 1); y <= ny; y++) {
-                            for (int x = Math.max(c.x - 1, 0), nx = Math.min(c.x + 1, sz.x - 1); x <= nx; x++) {
+                        for (int y = c.y - 1; y <= c.y + 1; y++) {
+                            for (int x = c.x - 1; x <= c.x + 1; x++) {
                                 Color cc = new Color(buf.getRGB(x, y));
                                 buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
                             }

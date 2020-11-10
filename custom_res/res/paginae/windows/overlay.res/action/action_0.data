@@ -1,4 +1,3 @@
-#ABUTTON LAYER FOR RES amber-resrd//\res\paginae\windows\overlay.res
 #String pr
 paginae/windows/windows
 #uint16 pver
@@ -8,6 +7,6 @@ Overlay Manager
 #String preq
 
 #uint16 hk
-71
+79
 #uint16 ad length
 0

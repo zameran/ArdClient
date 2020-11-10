@@ -80,6 +80,7 @@ public class CharWnd extends Window {
     public final Widget woundbox;
     public static boolean abandonquest = false;
     public final WoundList wounds;
+    public FightWnd fight;
     public Wound.Info wound;
     private final Tabs.Tab questtab;
     public final Widget questbox;
@@ -2544,6 +2545,7 @@ public class CharWnd extends Window {
             Frame.around(sattr, Collections.singletonList(inf));
             getparent(GameUI.class).studywnd.setStudy((Inventory) child);
         } else if (place == "fmg") {
+            fight = (FightWnd) child;
             fgt.add(child, 0, 0);
         } else if (place == "wound") {
             this.wound = (Wound.Info) child;

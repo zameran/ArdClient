@@ -1,7 +1,6 @@
-package haven.res.fx.floatimg;
+package haven.res.gfx.fx.floatimg;
 
 import haven.Resource;
-import haven.Sprite;
 import haven.TexI;
 import haven.Text;
 import haven.Utils;
@@ -11,7 +10,7 @@ import java.awt.image.BufferedImage;
 
 public class DamageText extends FloatSprite {
     public static final int id = -14115;
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 10);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 12);
     private static final Color armorcol = new Color(136, 255, 136);
     private static final Color hhpcol = new Color(255, 204, 0);
     private static final Color shpcol = new Color(255, 0, 0);
@@ -20,7 +19,7 @@ public class DamageText extends FloatSprite {
     private int hhp;
     private int armor;
 
-    DamageText(Sprite.Owner owner, Resource res) {
+    DamageText(Owner owner, Resource res) {
         super(owner, res);
         shp = 0;
         hhp = 0;

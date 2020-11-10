@@ -26,9 +26,13 @@
 
 package haven;
 
+import dolda.xiphutil.VorbisStream;
 import modification.configuration;
 
 import javax.imageio.ImageIO;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -114,7 +118,7 @@ public class Resource implements Serializable {
     public final transient Pool pool;
     private boolean used = false;
 
-    public abstract static class Named implements Indir<Resource> {
+    public abstract static class Named implements Indir<Resource>, Serializable {
         public final String name;
         public final int ver;
 
@@ -138,6 +142,10 @@ public class Resource implements Serializable {
 
         public String name() {
             return name;
+        }
+
+        public String toString() {
+            return (String.format("#<res-name %s v%d>", name, ver));
         }
     }
 
@@ -164,6 +172,26 @@ public class Resource implements Serializable {
 
         public Resource get() {
             return (get(0));
+        }
+
+        public static Resource loadsaved(Resource.Pool pool, Resource.Spec spec) {
+            try {
+                if (spec.pool == null)
+                    return (pool.load(spec.name, spec.ver).get());
+                return (spec.get());
+            } catch (Loading l) {
+                throw (l);
+            } catch (Exception e) {
+                return (pool.load(spec.name).get());
+            }
+        }
+
+        public Resource loadsaved(Resource.Pool pool) {
+            return (loadsaved(pool, this));
+        }
+
+        public Resource loadsaved() {
+            return (loadsaved(this.pool));
         }
     }
 
@@ -317,7 +345,7 @@ public class Resource implements Serializable {
         {
             ssl = new SslHelper();
             try {
-                ssl.trust(ssl.loadX509(Resource.class.getResourceAsStream("ressrv.crt")));
+                ssl.trust(Resource.class.getResourceAsStream("ressrv.crt"));
             } catch (java.security.cert.CertificateException e) {
                 throw (new Error("Invalid built-in certificate", e));
             } catch (IOException e) {
@@ -327,7 +355,7 @@ public class Resource implements Serializable {
         }
 
         public HttpSource(URL baseurl) {
-            System.out.println("baseurl " + baseurl);
+            System.out.println("Base URL: " + baseurl);
             this.baseurl = baseurl;
         }
 
@@ -452,10 +480,11 @@ public class Resource implements Serializable {
                     throw (new Loading(this));
                 }
                 if (error != null)
-                    try {
+                    if (configuration.skipexceptions) {
+                        boostprio(1);
+                        System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
+                    } else {
                         throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 return (res);
             }
@@ -552,6 +581,7 @@ public class Resource implements Serializable {
                         if (ver != -1) {
                             if (ver < cq.ver) { //who cares, don't kill the client over this...
                                 //throw(new LoadException(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver), null));
+                                System.out.println(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver));
                                 cq.boostprio(prio);
                                 return (cq);
                             } else if (ver == cq.ver) {
@@ -779,7 +809,6 @@ public class Resource implements Serializable {
                     if (prscache != null)
                         remote.add(new CacheSource(prscache));
                     _remote = remote;
-                    ;
                 }
             }
         }
@@ -834,6 +863,19 @@ public class Resource implements Serializable {
         public LoadException(Throwable cause, Resource res) {
             super("Load error in resource " + res.toString() + ", from " + res.source, cause);
             this.res = res;
+        }
+    }
+
+    public static class LoadWarning extends Warning {
+        public final Resource res;
+
+        public LoadWarning(Resource res, String msg) {
+            super(msg);
+            this.res = res;
+        }
+
+        public LoadWarning(Resource res, String msg, Object... args) {
+            this(res, String.format(msg, args));
         }
     }
 
@@ -916,13 +958,8 @@ public class Resource implements Serializable {
         for (Class<?> cl : dolda.jglob.Loader.get(LayerName.class).classes()) {
             String nm = cl.getAnnotation(LayerName.class).value();
             if (LayerFactory.class.isAssignableFrom(cl)) {
-                try {
-                    addltype(nm, cl.asSubclass(LayerFactory.class).newInstance());
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
+//              addltype(nm, cl.asSubclass(LayerFactory.class).newInstance());
+                addltype(nm, (LayerFactory<?>) Utils.construct(cl.asSubclass(LayerFactory.class)));
             } else if (Layer.class.isAssignableFrom(cl)) {
                 addltype(nm, cl.asSubclass(Layer.class));
             } else {
@@ -963,36 +1000,36 @@ public class Resource implements Serializable {
         public T layerid();
     }
 
-	public static class ImageReadException extends IOException {
-		public final String[] supported = ImageIO.getReaderMIMETypes();
+    public static class ImageReadException extends IOException {
+        public final String[] supported = ImageIO.getReaderMIMETypes();
 
-		public ImageReadException() {
-			super("Could not decode image data");
-		}
-	}
+        public ImageReadException() {
+            super("Could not decode image data");
+        }
+    }
 
-	public static BufferedImage readimage(InputStream fp) throws IOException {
-		try {
-			/* This can crash if not privileged due to ImageIO
-			 * creating tempfiles without doing that privileged
-			 * itself. It can very much be argued that this is a bug
-			 * in ImageIO. */
-			return (AccessController.doPrivileged(new PrivilegedExceptionAction<BufferedImage>() {
-				public BufferedImage run() throws IOException {
-					BufferedImage ret;
-					ret = ImageIO.read(fp);
-					if (ret == null)
-						throw (new ImageReadException());
-					return (ret);
-				}
-			}));
-		} catch (PrivilegedActionException e) {
-			Throwable c = e.getCause();
-			if (c instanceof IOException)
-				throw ((IOException) c);
-			throw (new AssertionError(c));
-		}
-	}
+    public static BufferedImage readimage(InputStream fp) throws IOException {
+        try {
+            /* This can crash if not privileged due to ImageIO
+             * creating tempfiles without doing that privileged
+             * itself. It can very much be argued that this is a bug
+             * in ImageIO. */
+            return (AccessController.doPrivileged(new PrivilegedExceptionAction<BufferedImage>() {
+                public BufferedImage run() throws IOException {
+                    BufferedImage ret;
+                    ret = ImageIO.read(fp);
+                    if (ret == null)
+                        throw (new ImageReadException());
+                    return (ret);
+                }
+            }));
+        } catch (PrivilegedActionException e) {
+            Throwable c = e.getCause();
+            if (c instanceof IOException)
+                throw ((IOException) c);
+            throw (new AssertionError(c));
+        }
+    }
 
     @LayerName("image")
     public class Image extends Layer implements Comparable<Image>, IDLayer<Integer> {
@@ -1002,6 +1039,7 @@ public class Resource implements Serializable {
         public final int z, subz;
         public final boolean nooff;
         public final int id;
+        public final Map<String, byte[]> kvdata;
         private float scale = 1;
         private int gay = -1;
         public Coord sz, o, tsz, ssz;
@@ -1014,6 +1052,7 @@ public class Resource implements Serializable {
             nooff = (fl & 2) != 0;
             id = buf.int16();
             o = cdec(buf);
+            Map<String, byte[]> kvdata = new HashMap<>();
             if ((fl & 4) != 0) {
                 while (true) {
                     String key = buf.string();
@@ -1022,14 +1061,18 @@ public class Resource implements Serializable {
                     int len = buf.uint8();
                     if ((len & 0x80) != 0)
                         len = buf.int32();
-                    Message val = new MessageBuf(buf.bytes(len));
+                    byte[] data = buf.bytes(len);
+                    Message val = new MessageBuf(data);
                     if (key.equals("tsz")) {
                         tsz = val.coord();
                     } else if (key.equals("scale")) {
                         scale = val.float32();
+                    } else {
+                        kvdata.put(key, data);
                     }
                 }
             }
+            this.kvdata = kvdata.isEmpty() ? Collections.emptyMap() : kvdata;
             try {
                 img = readimage(new MessageInputStream(buf));
             } catch (IOException e) {
@@ -1057,25 +1100,33 @@ public class Resource implements Serializable {
             return (scaled);
         }
 
-        public synchronized Tex tex() {
-            if (tex != null)
-                return (tex);
-            tex = new TexI(img) {
-                public String toString() {
-                    return ("TexI(" + Resource.this.name + ", " + id + ")");
+        public Tex tex() {
+            if (tex == null) {
+                synchronized (this) {
+                    if (tex == null) {
+                        tex = new TexI(scaled()) {
+                            public String toString() {
+                                return ("TexI(" + Resource.this.name + ", " + id + ")");
+                            }
+                        };
+                    }
                 }
-            };
+            }
             return (tex);
         }
 
-        public synchronized TexI texi() {
-            if (tex != null)
-                return (tex);
-            tex = new TexI(img) {
-                public String toString() {
-                    return ("TexI(" + Resource.this.name + ", " + id + ")");
+        public TexI texi() {
+            if (tex == null) {
+                synchronized (this) {
+                    if (tex == null) {
+                        tex = new TexI(scaled()) {
+                            public String toString() {
+                                return ("TexI(" + Resource.this.name + ", " + id + ")");
+                            }
+                        };
+                    }
                 }
-            };
+            }
             return (tex);
         }
 
@@ -1109,32 +1160,27 @@ public class Resource implements Serializable {
 
     @LayerName("tooltip")
     public class Tooltip extends Layer {
-        public String t = "null";
+        public final String t;
 
         public Tooltip(Message buf) {
             String text = new String(buf.bytes(), Utils.utf8);
             Resource res = super.getres();
-            try {
-                String locText = getLocString(BUNDLE_TOOLTIP, res, text);
+            String locText = getLocString(BUNDLE_TOOLTIP, res, text);
 
-                if (!language.equals("en")) {
-                    if (locText.equals(text) || !res.name.startsWith("gfx/invobjs") ||
-                            // exclude meat "conditions" since the tooltip is dynamically generated and it won't be in right order
-                            text.contains("Raw ") || text.contains("Filet of ") || text.contains("Sizzling") ||
-                            text.contains("Roast") || text.contains("Meat") || text.contains("Spitroast") ||
-                            // exclude food conditions
-                            res.name.startsWith("gfx/invobjs/food/")) {
-                        this.t = locText;
-                    } else {
-                        this.t = locText + " (" + text + ")";
-                    }
-                    return;
+            if (!language.equals("en")) {
+                if (locText.equals(text) || !res.name.startsWith("gfx/invobjs") ||
+                        // exclude meat "conditions" since the tooltip is dynamically generated and it won't be in right order
+                        text.contains("Raw ") || text.contains("Filet of ") || text.contains("Sizzling") ||
+                        text.contains("Roast") || text.contains("Meat") || text.contains("Spitroast") ||
+                        // exclude food conditions
+                        res.name.startsWith("gfx/invobjs/food/")) {
+                    this.t = locText;
+                } else {
+                    this.t = locText + " (" + text + ")";
                 }
-                this.t = locText;
-            } catch (Exception e) {
-                this.t = text;
-                System.out.println("Tooltip res " + e);
+                return;
             }
+            this.t = locText;
         }
 
         public void init() {
@@ -1369,6 +1415,17 @@ public class Resource implements Serializable {
         }
     }
 
+    public static class ResourceClassNotFoundException extends ClassNotFoundException {
+        public final String clname;
+        public final Resource res;
+
+        public ResourceClassNotFoundException(String clname, Resource res) {
+            super(String.format("Could not find class %s in resource %s", clname, res));
+            this.clname = clname;
+            this.res = res;
+        }
+    }
+
     @LayerName("codeentry")
     public class CodeEntry extends Layer {
         private String clnm;
@@ -1427,7 +1484,7 @@ public class Resource implements Serializable {
                                     public Class<?> findClass(String name) throws ClassNotFoundException {
                                         Code c = clmap.get(name);
                                         if (c == null)
-                                            throw (new ClassNotFoundException("Could not find class " + name + " in resource (" + Resource.this + ")"));
+                                            throw (new ResourceClassNotFoundException(name, Resource.this));
                                         return (defineClass(name, c.data, 0, c.data.length));
                                     }
                                 };
@@ -1555,7 +1612,7 @@ public class Resource implements Serializable {
 
         public haven.Audio.CS stream() {
             try {
-                return (new haven.Audio.VorbisClip(new dolda.xiphutil.VorbisStream(new ByteArrayInputStream(coded))));
+                return (new haven.Audio.VorbisClip(new VorbisStream(new ByteArrayInputStream(coded))));
             } catch (IOException e) {
                 throw (new RuntimeException(e));
             }
@@ -1586,12 +1643,12 @@ public class Resource implements Serializable {
 
     @LayerName("midi")
     public class Music extends Resource.Layer {
-        transient javax.sound.midi.Sequence seq;
+        transient Sequence seq;
 
         public Music(Message buf) {
             try {
-                seq = javax.sound.midi.MidiSystem.getSequence(new MessageInputStream(buf));
-            } catch (javax.sound.midi.InvalidMidiDataException e) {
+                seq = MidiSystem.getSequence(new MessageInputStream(buf));
+            } catch (InvalidMidiDataException e) {
                 throw (new LoadException("Invalid MIDI data", Resource.this));
             } catch (IOException e) {
                 throw (new LoadException(e, Resource.this));
@@ -1684,9 +1741,8 @@ public class Resource implements Serializable {
         List<Layer> layers = new LinkedList<Layer>();
         if (this.ver == -1)
             this.ver = ver;
-        else if (ver != this.ver) {
+        else if (ver != this.ver)
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
-        }
         while (!in.eom()) {
             LayerFactory<?> lc = ltypes.get(in.string());
             int len = in.int32();
@@ -1719,7 +1775,7 @@ public class Resource implements Serializable {
             }
 
             public String toString() {
-                return String.format("<indir:%s(v%d)>", name, ver);
+                return (String.format("<indir:%s(v%d)>", name, ver));
             }
         }
         indir = new Ret(name, ver);
@@ -1741,6 +1797,10 @@ public class Resource implements Serializable {
         throw new RuntimeException("Failed to find img for " + name + " - id: " + id);
     }
 
+    public static BufferedImage loadsimg(String name) {
+        return (local().loadwait(name).layer(imgc).scaled());
+    }
+
     public static Tex loadtex(final String name, final int id) {
         final Resource res = local().loadwait(name);
         final Collection<Image> imgs = res.layers(imgc);
@@ -1754,6 +1814,10 @@ public class Resource implements Serializable {
 
     public static Tex loadtex(String name) {
         return (local().loadwait(name).layer(imgc).tex());
+    }
+
+    public static Tex loadtex(Resource res) {
+        return (local().loadwaited(res).layer(imgc).tex());
     }
 
     public String toString() {

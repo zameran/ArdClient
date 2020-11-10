@@ -50,6 +50,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Collection;
 
 public class SslHelper {
     private KeyStore creds, trusted;
@@ -125,6 +126,16 @@ public class SslHelper {
     public static Certificate loadX509(InputStream in) throws IOException, CertificateException {
         CertificateFactory fac = CertificateFactory.getInstance("X.509");
         return (fac.generateCertificate(in));
+    }
+
+    public static Collection<? extends Certificate> loadX509s(InputStream in) throws IOException, CertificateException {
+        CertificateFactory fac = CertificateFactory.getInstance("X.509");
+        return (fac.generateCertificates(in));
+    }
+
+    public void trust(InputStream in) throws IOException, CertificateException {
+        for (Certificate cert : loadX509s(in))
+            trust(cert);
     }
 
     public synchronized void loadCredsPkcs12(InputStream in, char[] pw) throws IOException, CertificateException {

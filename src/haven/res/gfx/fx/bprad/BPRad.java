@@ -1,4 +1,4 @@
-package haven.res.fx.bprad;
+package haven.res.gfx.fx.bprad;
 
 import haven.Coord2d;
 import haven.GLState;

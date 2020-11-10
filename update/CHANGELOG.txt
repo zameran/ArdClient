@@ -1,3 +1,7 @@
+20201110
+Ridges on map. Fight UI. Resource small fix.
+~
+
 20201109.2
 Map grid and hide icons.
 ~

@@ -171,6 +171,7 @@ public class MapFileWidget extends Widget {
         public final Indir<Grid> gref;
         private Grid cgrid = null;
         private Defer.Future<Tex> img = null;
+        private Tex tex = null;
 
         public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
             this.seg = seg;
@@ -186,7 +187,13 @@ public class MapFileWidget extends Widget {
                 img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 cgrid = grid;
             }
-            return ((img == null) ? null : img.get());
+
+            try {
+                tex = img.get();
+            } catch(Exception e) {
+                System.out.println(e + " " + seg.id);
+            }
+            return tex;
         }
     }
 

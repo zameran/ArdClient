@@ -86,6 +86,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public PBotScriptlistOld PBotScriptlistold;
     public MapView map;
     public Fightview fv;
+    public Fightsess fs;
     private List<Widget> meters = new LinkedList<Widget>();
     private List<Widget> cmeters = new LinkedList<Widget>();
     private Text lastmsg;
@@ -1035,7 +1036,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } else if (place == "fight") {
             fv = urpanel.add((Fightview) child, 0, 0);
         } else if (place == "fsess") {
-            add(child, Coord.z);
+            fs = add((Fightsess) child, Coord.z);
         } else if (place == "inv") {
             invwnd = new Hidewnd(Coord.z, "Inventory") {
                 public void cresize(Widget ch) {

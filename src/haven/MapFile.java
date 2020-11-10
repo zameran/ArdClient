@@ -784,7 +784,7 @@ public class MapFile {
         }
 
         public void save(Message fp) {
-            fp.adduint8(2);
+            fp.adduint8(3);
             ZMessage z = new ZMessage(fp);
             z.addint64(id);
             z.addint64(mtime);
@@ -873,67 +873,6 @@ public class MapFile {
                 Debug.log.printf("mapfile warning: error when loading grid %x: %s\n", id, e);
                 return (null);
             }
-        }
-
-        private BufferedImage tiletex(int t, BufferedImage[] texes, boolean[] cached) {
-            if (!cached[t]) {
-                Resource r = null;
-                try {
-                    r = loadsaved(Resource.remote(), tilesets[t].res);
-                } catch (Loading l) {
-                    throw (l);
-                } catch (Exception e) {
-                    Debug.log.printf("mapfile warning: could not load tileset resource %s(v%d): %s\n", tilesets[t].res.name, tilesets[t].res.ver, e);
-                }
-                if (r != null) {
-                    Resource.Image ir = r.layer(Resource.imgc);
-                    if (ir != null) {
-                        texes[t] = ir.img;
-                    }
-                }
-                cached[t] = true;
-            }
-            return (texes[t]);
-        }
-
-        public int gettile(Coord c) {
-            return (tiles[c.x + (c.y * cmaps.x)] & 0xff);
-        }
-
-        public BufferedImage render(Coord off) {
-            BufferedImage[] texes = new BufferedImage[256];
-            boolean[] cached = new boolean[256];
-            WritableRaster buf = PUtils.imgraster(cmaps);
-            Coord c = new Coord();
-            for (c.y = 0; c.y < cmaps.y; c.y++) {
-                for (c.x = 0; c.x < cmaps.x; c.x++) {
-                    int t = gettile(c);
-                    BufferedImage tex = tiletex(t, texes, cached);
-                    int rgb = 0;
-                    if (tex != null)
-                        rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()),
-                                Utils.floormod(c.y + off.y, tex.getHeight()));
-                    buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
-                    buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
-                    buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
-                    buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
-                }
-            }
-            for (c.y = 1; c.y < cmaps.y - 1; c.y++) {
-                for (c.x = 1; c.x < cmaps.x - 1; c.x++) {
-                    int p = tilesets[gettile(c)].prio;
-                    if ((tilesets[gettile(c.add(-1, 0))].prio > p) ||
-                            (tilesets[gettile(c.add(1, 0))].prio > p) ||
-                            (tilesets[gettile(c.add(0, -1))].prio > p) ||
-                            (tilesets[gettile(c.add(0, 1))].prio > p)) {
-                        buf.setSample(c.x, c.y, 0, 0);
-                        buf.setSample(c.x, c.y, 1, 0);
-                        buf.setSample(c.x, c.y, 2, 0);
-                        buf.setSample(c.x, c.y, 3, 255);
-                    }
-                }
-            }
-            return (PUtils.rasterimg(buf));
         }
     }
 

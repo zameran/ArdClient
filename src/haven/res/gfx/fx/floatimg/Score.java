@@ -1,4 +1,4 @@
-package haven.res.fx.floatimg;
+package haven.res.gfx.fx.floatimg;
 
 import haven.Message;
 import haven.Resource;

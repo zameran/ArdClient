@@ -65,6 +65,7 @@ import haven.purus.FlowerPicker;
 import haven.purus.StockpileFiller;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
+import haven.res.gfx.fx.floatimg.DamageText;
 import modification.configuration;
 
 import java.awt.Color;
@@ -1070,6 +1071,9 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::gobspawner",
                 Resource.local().load("paginae/windows/gobspawner"),
                 (pag) -> ui.gui.toggleGobSpawner()));
+        addSpecial(new SpecialPagina(this, "paginae::windows::nulldamage",
+                Resource.local().load("paginae/windows/nulldamage"),
+                (pag) -> ui.gui.map.removeCustomSprites(DamageText.id)));
 
         addSpecial(new SpecialPagina(this, "paginae::windows::lmap",
                 Resource.local().load("paginae/windows/lmap"),
