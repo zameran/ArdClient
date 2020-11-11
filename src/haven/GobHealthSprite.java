@@ -4,9 +4,9 @@ import java.awt.Color;
 
 
 public class GobHealthSprite extends Sprite {
-    private static final Tex hlt0 = Text.renderstroked("25%", new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
-    private static final Tex hlt1 = Text.renderstroked("50%", new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
-    private static final Tex hlt2 = Text.renderstroked("75%", new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
+    private static final Tex hlt0 = Text.renderstroked("25%", new Color(255, 0, 0), Color.BLACK, Text.num13boldFnd).tex();
+    private static final Tex hlt1 = Text.renderstroked("50%", new Color(255, 100, 0), Color.BLACK, Text.num13boldFnd).tex();
+    private static final Tex hlt2 = Text.renderstroked("75%", new Color(255, 255, 0), Color.BLACK, Text.num13boldFnd).tex();
     public int val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
@@ -23,9 +23,9 @@ public class GobHealthSprite extends Sprite {
     public void draw(GOut g) {
         float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
         Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= 15;
-        sc.y -= 20;
-        g.image(tex, sc);
+//        sc.x -= 15;
+//        sc.y -= 20;
+        g.aimage(tex, sc, 0.5, 0.5);
     }
 
     public boolean setup(RenderList rl) {

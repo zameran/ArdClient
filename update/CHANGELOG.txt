@@ -1,3 +1,7 @@
+20201111
+Fix pathfinding move gob (missing gob). Place grid option. Cache hash dev option. Gob health color. Quest point distance text. Render water surface video option (?).
+~
+
 20201110.1
 ConcurrentModificationException fix.
 ~

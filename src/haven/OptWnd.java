@@ -28,7 +28,6 @@ package haven;
 
 
 import haven.automation.Discord;
-import haven.purus.Iconfinder;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.sloth.gfx.HitboxMesh;
@@ -436,6 +435,7 @@ public class OptWnd extends Window {
                     }
                 });
                 appender.add(new IndirCheckBox("Wireframe mode", WIREFRAMEMODE));
+                appender.add(new IndirCheckBox("Render water surface", cf.WATERSURFACE));
                 appender.add(new CheckBox("Hide flavor objects but keep sounds (requires logout)") {
                     {
                         a = Config.hideflovisual;
@@ -3310,18 +3310,24 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show distance on Quest Point") {
+            {
+                a = configuration.showpointdist;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showpointdist", val);
+                configuration.showpointdist = val;
+                a = val;
+            }
+        });
         appender.add(new Label("Flowermenu"));
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
 
         appender.add(new Label("Camera"));
-        appender.addRow(new Label("Minimal distance for free camera"),
+        appender.addRow(new Label("Minimal distance for free camera: "),
                 new HSlider(200, -200, 200, (int) configuration.badcamdistminimaldefault) {
-                    @Override
-                    protected void added() {
-                        super.added();
-                    }
-
                     @Override
                     public void changed() {
                         configuration.badcamdistminimaldefault = val;
@@ -3333,7 +3339,27 @@ public class OptWnd extends Window {
                         Tex tex = Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
                         return tex;
                     }
-                });
+                }
+        );
+        appender.addRow(new Label("Place Grid: "),
+                new HSlider(200, 0, 100, Utils.getprefi("placegridval", 8)) {
+                    @Override
+                    public void changed() {
+                        try {
+                            ui.cons.run(new String[]{"placegrid", Integer.toString(val)});
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Utils.setprefi("placegridval", val);
+                        }
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        Tex tex = Text.render("Object placement grid: " + val).tex();
+                        return tex;
+                    }
+                }
+        );
 
         modification.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         modification.pack();
@@ -3627,6 +3653,51 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+
+        appender.add(new Label(""));
+        TextEntry baseurl = new TextEntry(200, Config.resurl.toString()) {
+            {
+                sz = new Coord(TextEntry.fnd.render(text).sz().x + 10, sz.y);
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("This is base url. Сhange this if necessary.").tex();
+            }
+        };
+        TextEntry hashid = new TextEntry(200, "") {
+            @Override
+            public void changed() {
+                sz = new Coord(TextEntry.fnd.render(text).sz().x + 10, sz.y);
+            }
+        };
+        TextEntry textEntry = new TextEntry(200, "") {
+            @Override
+            public boolean type(char c, KeyEvent ev) {
+                if (c == '\n') {
+                    String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + text)); //-8944751680107289605
+                    hashid.settext(hash);
+
+                    PBotUtils.sysMsg(ui, hash);
+                    System.out.println(hash);
+                } else {
+                    return buf.key(ev);
+                }
+                return false;
+            }
+
+            private long namehash(long h, String name) {
+                for (int i = 0; i < name.length(); i++)
+                    h = (h * 31) + name.charAt(i);
+                return (h);
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                Tex tex = Text.render("Enter resource name and get its hash").tex();
+                return tex;
+            }
+        };
+        appender.addRow(new Label("Base URL: "), baseurl);
+        appender.addRow(new Label("res/"), textEntry, hashid);
 
         devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         devPanel.pack();

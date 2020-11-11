@@ -425,7 +425,7 @@ public class WaterTile extends Tiler {
     public static final BottomFog shallowfog = new BottomFog(DefSettings.SHALLOWWATERCOL.get());
     public static final BottomFog oceanfog = new BottomFog(DefSettings.OCEANWATERCOL.get());
     public static final BottomFog wfog = new BottomFog(DefSettings.WATERCOL.get());
-    private static final GLState boff = new States.DepthOffset(16, 16);
+    private static final GLState boff = new States.DepthOffset(4, 4);
 
     public static final GLState obfog = new GLState.StandAlone(GLState.Slot.Type.DRAW) {
         {

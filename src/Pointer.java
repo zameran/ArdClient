@@ -3,6 +3,7 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Coord3f;
+import haven.FastText;
 import haven.GOut;
 import haven.GameUI;
 import haven.Gob;
@@ -15,6 +16,7 @@ import haven.Text;
 import haven.UI;
 import haven.Widget;
 import haven.sloth.script.PointerData;
+import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -102,6 +104,8 @@ public class Pointer extends Widget {
                     this.licon = ((this.icon.get()).layer(Resource.imgc)).tex();
                 }
                 g.aimage(this.licon, localCoord2.add(localCoord3), 0.5D, 0.5D);
+                if (configuration.showpointdist)
+                    FastText.aprint(g, localCoord2.add(localCoord3), 0.5, 0.5, dist + "");
             } catch (Loading localLoading) {
             }
         }
@@ -140,6 +144,8 @@ public class Pointer extends Widget {
                     this.licon = ((this.icon.get()).layer(Resource.imgc)).tex();
                 }
                 g.aimage(this.licon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
+                if (configuration.showpointdist)
+                    FastText.aprints(g, bc.add(Coord.sc(a, -30)), 0.5, 0.5, dist + "");
             } catch (Loading localLoading) {
                 //Ignore it
             }
@@ -175,6 +181,15 @@ public class Pointer extends Widget {
 
         if (gobsc != null) {
             final Double angle = ui.gui.map.screenangle(gobrc, true);
+            if (configuration.showpointdist) {
+                final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+                if (me != null) {
+                    final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
+                    if (cdist != dist) {
+                        dist = cdist;
+                    }
+                }
+            }
             if (!angle.equals(Double.NaN)) {
                 drawarrow(g, ui.gui.map.screenangle(gobrc, true));
             } else {

@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static haven.DefSettings.global;
+
 /*
  * XXX: Hmmpf. This whole thing seems very overly complex, but I
  * really want to avoid duplicating the validation checks in every
@@ -44,6 +46,7 @@ public class GLSettings implements java.io.Serializable {
 
     private GLSettings(GLConfig cfg) {
         this.cfg = cfg;
+        WATERSURFACE.ensure(true);
     }
 
     public static class SettingException extends RuntimeException {
@@ -271,6 +274,15 @@ public class GLSettings implements java.io.Serializable {
             TexGL.setallparams();
         }
     };
+
+    public final IndirSetting<Boolean> WATERSURFACE = new IndirSetting<>(global, "graphics.water-surface-show", val -> {
+        try {
+            this.wsurf.set(val);
+            return true;
+        } catch (SettingException se) {
+            return false;
+        }
+    });      //[Bool] Render water surfaces
 
     public Iterable<Setting<?>> settings() {
         return (settings);

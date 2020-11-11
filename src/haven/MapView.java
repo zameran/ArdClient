@@ -1928,6 +1928,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public boolean pathto(final Gob g) {
         g.updatePathfindingBlackout(true);
         boolean yea = pathto(new Coord2d(g.getc()));
+        pathfindGob = g;
         g.updatePathfindingBlackout(false);
         return yea;
     }

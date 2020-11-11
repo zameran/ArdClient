@@ -94,6 +94,7 @@ public class configuration {
     public static boolean morethanquility = Utils.getprefb("morethanquility", false);
     public static int morethancolor = Utils.getprefi("morethancolor", -1);
     public static int morethancoloroutline = Utils.getprefi("morethancoloroutline", Color.RED.hashCode());
+    public static boolean showpointdist = Utils.getprefb("showpointdist", false);
 
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead")) {{
         sort(new Comparator<String>() {
