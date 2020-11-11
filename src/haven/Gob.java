@@ -32,6 +32,7 @@ import haven.overlays.newPlantStageSprite;
 import haven.resutil.BPRadSprite;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.HitboxMesh;
+import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Halo;
@@ -369,6 +370,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
                 //checks for mannequins and changes their type to prevent unknown alarms
                 if (type == Type.HUMAN && attr.containsKey(GobHealth.class))
                     type = Type.UNKNOWN;
+                if (type == Type.HUMAN && id == ui.gui.map.plgob) {
+                    if (configuration.snowfalloverlay) {
+                        if (findol(-4921) == null)
+                            addol(new Overlay(-4921, new SnowFall(this)));
+                    }
+                }
                 if (name.endsWith("stump"))
                     type = Type.TREE;
                 //Check for any special attributes we should attach

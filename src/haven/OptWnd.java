@@ -31,6 +31,7 @@ import haven.automation.Discord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.sloth.gfx.HitboxMesh;
+import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
@@ -3319,6 +3320,35 @@ public class OptWnd extends Window {
                 Utils.setprefb("showpointdist", val);
                 configuration.showpointdist = val;
                 a = val;
+            }
+        });
+        appender.add(new CheckBox("Enable snow fall") {
+            {
+                a = configuration.snowfalloverlay;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("snowfalloverlay", val);
+                configuration.snowfalloverlay = val;
+                a = val;
+                if (ui != null && ui.gui != null) {
+                    Gob player = PBotUtils.player(ui);
+                    if (player != null) {
+                        if (val) {
+                            if (player.findol(-4921) == null)
+                                player.addol(new Gob.Overlay(-4921, new SnowFall(player)));
+                        } else {
+                            Gob.Overlay snow = player.findol(-4921);
+                            if (snow != null)
+                                player.ols.remove(snow);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Cosmetic Effect").tex();
             }
         });
         appender.add(new Label("Flowermenu"));
