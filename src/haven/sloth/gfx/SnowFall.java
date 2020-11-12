@@ -15,7 +15,8 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+/* it must be done as a weather condition like a narcotic fog
+* */
 public class SnowFall extends Sprite {
     private static final Random rnd = new Random();
 
