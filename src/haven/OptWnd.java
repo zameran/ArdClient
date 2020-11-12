@@ -3311,7 +3311,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Show distance on Quest Point") {
+        appender.add(new CheckBox("Show distance on Point") {
             {
                 a = configuration.showpointdist;
             }

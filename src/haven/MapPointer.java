@@ -1,5 +1,7 @@
 package haven;
 
+import modification.configuration;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
@@ -63,6 +65,8 @@ public class MapPointer extends Widget {
         g.gl.glEnd();
         g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
         g.aimage(icon, localCoord2.add(localCoord3), 0.5D, 0.5D);
+        if (configuration.showpointdist)
+            FastText.aprint(g, localCoord2.add(localCoord3), 0.5, 0.5, dist + "");
         this.lc = localCoord2.add(localCoord3);
     }
 
@@ -93,6 +97,8 @@ public class MapPointer extends Widget {
         g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
 
         g.aimage(icon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
+        if (configuration.showpointdist)
+            FastText.aprints(g, bc.add(Coord.sc(a, -30)), 0.5, 0.5, dist + "");
         this.lc = bc.add(Coord.sc(a, -30));
     }
 
@@ -106,6 +112,15 @@ public class MapPointer extends Widget {
 
         if (tc != null) {
             final Double angle = ui.gui.map.screenangle(tc, true);
+            if (configuration.showpointdist) {
+                final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+                if (me != null) {
+                    final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
+                    if (cdist != dist) {
+                        dist = cdist;
+                    }
+                }
+            }
             if (!angle.equals(Double.NaN)) {
                 drawarrow(g, ui.gui.map.screenangle(tc, true));
             } else {
