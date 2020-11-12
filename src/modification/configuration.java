@@ -3,13 +3,16 @@ package modification;
 import haven.AuthClient;
 import haven.Coord;
 import haven.GItem;
+import haven.Gob;
 import haven.MainFrame;
+import haven.OCache;
 import haven.Resource;
 import haven.Session;
 import haven.Tex;
 import haven.TexI;
 import haven.Utils;
 import haven.Widget;
+import haven.sloth.gfx.SnowFall;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -29,6 +32,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -95,7 +99,6 @@ public class configuration {
     public static int morethancolor = Utils.getprefi("morethancolor", -1);
     public static int morethancoloroutline = Utils.getprefi("morethancoloroutline", Color.RED.hashCode());
     public static boolean showpointdist = Utils.getprefb("showpointdist", false);
-    public static boolean snowfalloverlay = Utils.getprefb("snowfalloverlay", false);
 
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead")) {{
         sort(new Comparator<String>() {
@@ -560,5 +563,63 @@ public class configuration {
             return gobname.substring(p + 1, p + 2).toUpperCase() + gobname.substring(p + 2);
         } else return gobname;
 
+    }
+
+    public static boolean snowfalloverlay = Utils.getprefb("snowfalloverlay", false);
+    public static boolean blizzardoverlay = Utils.getprefb("blizzardoverlay", false);
+
+    public static int blizzarddensity = Utils.getprefi("blizzarddensity", 5);
+    public static int currentsnow = 0;
+
+    public static int getCurrentsnow(OCache oc) {
+        int count = 0;
+        for (final Gob g : oc) {
+            if (g.isplayer()) continue;
+            if (g.findol(-4921) != null)
+                count++;
+        }
+        return currentsnow = count;
+    }
+
+    public static void addsnow(OCache oc) {
+        ArrayList<Gob> gobs = new ArrayList<>();
+        oc.forEach(gobs::add);
+
+        while (configuration.getCurrentsnow(oc) < configuration.blizzarddensity) {
+            Gob g = getRandom(gobs);
+            if (g.findol(-4921) != null || g.isplayer()) continue;
+            g.addol(new Gob.Overlay(-4921, new SnowFall(g)));
+        }
+    }
+
+    public static void deleteAllSnow(OCache oc) {
+        for (final Gob g : oc) {
+            if (g.isplayer()) continue;
+            Gob.Overlay snow = g.findol(-4921);
+            if (snow != null)
+                g.ols.remove(snow);
+        }
+    }
+
+    public static void deleteSnow(OCache oc) {
+        ArrayList<Gob> gobs = new ArrayList<>();
+        for (final Gob g : oc) {
+            if (g.isplayer()) continue;
+            Gob.Overlay snow = g.findol(-4921);
+            if (snow != null)
+                gobs.add(g);
+        }
+
+        while (configuration.getCurrentsnow(oc) > configuration.blizzarddensity) {
+            Gob g = getRandom(gobs);
+            Gob.Overlay snow = g.findol(-4921);
+            if (snow != null)
+                g.ols.remove(snow);
+        }
+    }
+
+    public static Gob getRandom(ArrayList<Gob> array) {
+        int rnd = new Random().nextInt(array.size());
+        return array.get(rnd);
     }
 }

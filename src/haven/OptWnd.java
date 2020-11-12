@@ -3334,6 +3334,51 @@ public class OptWnd extends Window {
                 return Text.render("Cosmetic Effect").tex();
             }
         });
+        appender.addRow(new CheckBox("Enable blizzard") {
+                            {
+                                a = configuration.blizzardoverlay;
+                            }
+
+                            public void set(boolean val) {
+                                Utils.setprefb("blizzardoverlay", val);
+                                configuration.blizzardoverlay = val;
+                                a = val;
+                                if (ui != null && ui.gui != null && ui.sess != null) {
+                                    OCache oc = ui.sess.glob.oc;
+
+                                    if (val)
+                                        configuration.addsnow(oc);
+                                    else
+                                        configuration.deleteAllSnow(oc);
+                                }
+                            }
+
+                            @Override
+                            public Object tooltip(Coord c0, Widget prev) {
+                                return Text.render("Cosmetic Effect around other gobs, fps drops").tex();
+                            }
+                        },
+                new HSlider(200, 1, 20, configuration.blizzarddensity) {
+                    @Override
+                    public void changed() {
+                        configuration.blizzarddensity = val;
+                        Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
+
+                        if (ui != null && ui.gui != null && ui.sess != null) {
+                            OCache oc = ui.sess.glob.oc;
+
+                            if (configuration.getCurrentsnow(oc) < val)
+                                configuration.addsnow(oc);
+                            else
+                                configuration.deleteSnow(oc);
+                        }
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Blizzard density: " + configuration.blizzarddensity).tex();
+                    }
+                });
         appender.add(new Label("Flowermenu"));
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));

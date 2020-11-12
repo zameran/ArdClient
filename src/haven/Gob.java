@@ -370,11 +370,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
                 //checks for mannequins and changes their type to prevent unknown alarms
                 if (type == Type.HUMAN && attr.containsKey(GobHealth.class))
                     type = Type.UNKNOWN;
-                if (type == Type.HUMAN && id == ui.gui.map.plgob) {
-                    if (configuration.snowfalloverlay) {
-                        if (findol(-4921) == null)
-                            addol(new Overlay(-4921, new SnowFall(this)));
-                    }
+                if (configuration.snowfalloverlay && type == Type.HUMAN && isplayer()) {
+                    if (findol(-4921) == null)
+                        addol(new Overlay(-4921, new SnowFall(this)));
+                }
+                if (configuration.blizzardoverlay) {
+                    configuration.addsnow(glob.oc);
                 }
                 if (name.endsWith("stump"))
                     type = Type.TREE;
