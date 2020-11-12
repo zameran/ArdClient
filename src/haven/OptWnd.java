@@ -524,8 +524,7 @@ public class OptWnd extends Window {
                         Utils.setprefchklst("disableanim", Config.disableanim);
                     }
                 };
-                for (CheckListboxItem itm : Config.disableanim.values())
-                    disanimlist.items.add(itm);
+                disanimlist.items.addAll(Config.disableanim.values());
                 appender.add(disanimlist);
 
                 pack();
@@ -754,7 +753,7 @@ public class OptWnd extends Window {
                             ui.gui.discordconnected = true;
                         } else
                             PBotUtils.sysMsg(ui, "No Key Detected, if there is one in chat settings you might need to relog.", Color.white);
-                    } else if (ui.gui.discordconnected)
+                    } else
                         PBotUtils.sysMsg(ui, "Already connected.", Color.white);
                 }
             }, new Coord(210, 180));
@@ -792,7 +791,7 @@ public class OptWnd extends Window {
                     if (Discord.jdalogin != null)
                         ui.gui.DiscordToggle();
                     ui.gui.act("lo", "cs");
-                    if (ui.gui != null & ui.gui.map != null)
+                    if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
                 }
             }, new Coord(210, 300));
@@ -801,7 +800,7 @@ public class OptWnd extends Window {
                     if (Discord.jdalogin != null)
                         ui.gui.DiscordToggle();
                     ui.gui.act("lo");
-                    if (ui.gui != null & ui.gui.map != null)
+                    if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
                     MainFrame.instance.p.closeSession(ui);
                 }
@@ -1311,17 +1310,11 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new IndirCheckBox("Show Your Movement Path", SHOWPLAYERPATH));
-        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> {
-            GobPath.clrst = new States.ColState(val);
-        }));
+        appender.add(ColorPreWithLabel("Your path color: ", PLAYERPATHCOL, val -> GobPath.clrst = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Other Player Paths - Kinned player's paths will be their kin color.", SHOWGOBPATH));
-        appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val -> {
-            Movable.unknowngobcol = new States.ColState(val);
-        }));
+        appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val -> Movable.unknowngobcol = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Mob Paths", SHOWANIMALPATH));
-        appender.add(ColorPreWithLabel("Animal path color: ", ANIMALPATHCOL, val -> {
-            Movable.animalpathcol = new States.ColState(val);
-        }));
+        appender.add(ColorPreWithLabel("Animal path color: ", ANIMALPATHCOL, val -> Movable.animalpathcol = new States.ColState(val)));
         appender.add(new CheckBox("Show wear bars") {
             {
                 a = Config.showwearbars;
@@ -1490,9 +1483,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val -> {
-            BPRadSprite.cRackMissing = new Material.Colors(CHEESERACKMISSINGCOLOR.get());
-        }));
+        appender.add(ColorPreWithLabel("Cheese rack missing color: ", CHEESERACKMISSINGCOLOR, val -> BPRadSprite.cRackMissing = new Material.Colors(CHEESERACKMISSINGCOLOR.get())));
         appender.add(new CheckBox("Highlight finished garden pots. Requires restart.") {
             {
                 a = Config.highlightpots;
@@ -1652,8 +1643,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Scale tree and brush : " + configuration.scaletreeint + "%").tex();
-                return tex;
+                return Text.render("Scale tree and brush : " + configuration.scaletreeint + "%").tex();
             }
         });
 
@@ -2235,8 +2225,7 @@ public class OptWnd extends Window {
 
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        Tex tex = Text.render("Bad camera scrolling sensitivity : " + val).tex();
-                        return tex;
+                        return Text.render("Bad camera scrolling sensitivity : " + val).tex();
                     }
                 });
         appender.add(new CheckBox("Use French (AZERTY) keyboard layout") {
@@ -2368,8 +2357,7 @@ public class OptWnd extends Window {
                 Utils.setprefchklst("disableshiftclick", Config.disableshiftclick);
             }
         };
-        for (CheckListboxItem itm : Config.disableshiftclick.values())
-            disableshiftclick.items.add(itm);
+        disableshiftclick.items.addAll(Config.disableshiftclick.values());
         appender.add(disableshiftclick);
 
 
@@ -2697,8 +2685,7 @@ public class OptWnd extends Window {
             }
         };
         Utils.loadprefchklist("autowindows", Config.autowindows);
-        for (CheckListboxItem itm : Config.autowindows.values())
-            autoopenlist.items.add(itm);
+        autoopenlist.items.addAll(Config.autowindows.values());
         appender.add(autoopenlist);
 
 
@@ -3181,21 +3168,19 @@ public class OptWnd extends Window {
                                 configuration.defaultUtilsCustomLoginScreenBgBoolean = val;
                                 a = val;
                                 LoginScreen.bg = configuration.bgCheck();
-                                if (ui == null || ui.gui == null || ui.sess == null || !ui.sess.alive())
+                                if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
                                     ui.uimsg(1, "bg");
                             }
 
                             @Override
                             public Object tooltip(Coord c0, Widget prev) {
-                                Tex tex = Text.render("Request restart").tex();
-                                return tex;
+                                return Text.render("Request restart").tex();
                             }
                         },
                 pictureList != null ? makePictureChoiseDropdown() : new Label("The modification folder has no pictures") {
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        Tex tex = Text.render("Create modification folder and add in pictures or launch updater").tex();
-                        return tex;
+                        return Text.render("Create modification folder and add in pictures or launch updater").tex();
                     }
                 });
 
@@ -3265,16 +3250,14 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Bad works with the old system movement. Turn on only by interest.").tex();
-                return tex;
+                return Text.render("Bad works with the old system movement. Turn on only by interest.").tex();
             }
         });
 
         appender.addRow(new Label("Custom grid size: ") {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Request restart").tex();
-                return tex;
+                return Text.render("Request restart").tex();
             }
         }, makeCustomMenuGrid(0), makeCustomMenuGrid(1));
 
@@ -3366,8 +3349,7 @@ public class OptWnd extends Window {
 
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        Tex tex = Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
-                        return tex;
+                        return Text.render("Minimal distance for free camera : " + configuration.badcamdistminimaldefault).tex();
                     }
                 }
         );
@@ -3385,8 +3367,7 @@ public class OptWnd extends Window {
 
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
-                        Tex tex = Text.render("Object placement grid: " + val).tex();
-                        return tex;
+                        return Text.render("Object placement grid: " + val).tex();
                     }
                 }
         );
@@ -3569,9 +3550,7 @@ public class OptWnd extends Window {
             configuration.morethancoloroutline = val.hashCode();
             Utils.setprefi("morethancoloroutline", val.hashCode());
         }));
-        final ColorPreview colPre = new ColorPreview(new Coord(20, 20), Color.WHITE, val -> {
-            CustomQualityList.NewColor = val;
-        });
+        final ColorPreview colPre = new ColorPreview(new Coord(20, 20), Color.WHITE, val -> CustomQualityList.NewColor = val);
         final TextEntry value = new TextEntry(120, "") {
             @Override
             public void activate(String text) {
@@ -3618,8 +3597,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
-                return tex;
+                return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
             }
         });
 
@@ -3636,8 +3614,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("On a large map the marks will look small").tex();
-                return tex;
+                return Text.render("On a large map the marks will look small").tex();
             }
         });
 
@@ -3722,8 +3699,7 @@ public class OptWnd extends Window {
             }
 
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Enter resource name and get its hash").tex();
-                return tex;
+                return Text.render("Enter resource name and get its hash").tex();
             }
         };
         appender.addRow(new Label("Base URL: "), baseurl);
@@ -3748,8 +3724,7 @@ public class OptWnd extends Window {
             }
         };
         Utils.loadprefchklist("clustersel", Config.autoclusters);
-        for (CheckListboxItem itm : Config.autoclusters.values())
-            clusterlist.items.add(itm);
+        clusterlist.items.addAll(Config.autoclusters.values());
         // clusterlist.items.addAll(Config.autoclusters.values());
         flowermenus.add(clusterlist, new Coord(150, 20));
 
@@ -3763,8 +3738,7 @@ public class OptWnd extends Window {
             }
         };
         Utils.loadprefchklist("flowersel", Config.flowermenus);
-        for (CheckListboxItem itm : Config.flowermenus.values())
-            flowerlist.items.add(itm);
+        flowerlist.items.addAll(Config.flowermenus.values());
         //  flowerlist.items.addAll(Config.flowermenus.values());
         flowermenus.add(flowerlist, new Coord(0, 20));
 
@@ -4318,7 +4292,11 @@ public class OptWnd extends Window {
     private static final List<Integer> caveindust = Arrays.asList(1, 2, 5, 10, 15, 30, 45, 60, 120);
 
     private Dropbox<Integer> makeCaveInDropdown() {
-        List<String> values = caveindust.stream().map(x -> x.toString()).collect(Collectors.toList());
+        List<String> values = new ArrayList<>();
+        for (Integer x : caveindust) {
+            String s = x.toString();
+            values.add(s);
+        }
         return new Dropbox<Integer>(9, values) {
             {
                 super.change(null);
@@ -4351,7 +4329,7 @@ public class OptWnd extends Window {
 
     private Dropbox<Locale> langDropdown() {
         List<Locale> languages = enumerateLanguages();
-        List<String> values = languages.stream().map(x -> x.getDisplayName()).collect(Collectors.toList());
+        List<String> values = languages.stream().map(Locale::getDisplayName).collect(Collectors.toList());
         return new Dropbox<Locale>(10, values) {
             {
                 super.change(new Locale(Resource.language));
@@ -4380,7 +4358,6 @@ public class OptWnd extends Window {
         };
     }
 
-    @SuppressWarnings("unchecked")
     private Dropbox<String> makeFontsDropdown() {
         final List<String> fonts = Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
         return new Dropbox<String>(8, fonts) {
@@ -4437,7 +4414,7 @@ public class OptWnd extends Window {
             e.printStackTrace();
         }
 
-        return new ArrayList<Locale>(languages);
+        return new ArrayList<>(languages);
     }
 
     private static final Pair[] combatkeys = new Pair[]{
@@ -4479,7 +4456,7 @@ public class OptWnd extends Window {
     private static final List<Integer> fontSize = Arrays.asList(10, 11, 12, 13, 14, 15, 16);
 
     private Dropbox<Integer> makeFontSizeChatDropdown() {
-        List<String> values = fontSize.stream().map(x -> x.toString()).collect(Collectors.toList());
+        List<String> values = fontSize.stream().map(Object::toString).collect(Collectors.toList());
         return new Dropbox<Integer>(fontSize.size(), values) {
             {
                 change(Config.fontsizechat);
@@ -4655,8 +4632,7 @@ public class OptWnd extends Window {
                 Utils.setprefchklst("boulderssel_" + charname, Config.boulders);
             }
         };
-        for (CheckListboxItem itm : Config.boulders.values())
-            boulderlist.items.add(itm);
+        boulderlist.items.addAll(Config.boulders.values());
         map.add(boulderlist, new Coord(10, 15));
 
         CheckListbox bushlist = new CheckListbox(140, 16) {
@@ -4666,8 +4642,7 @@ public class OptWnd extends Window {
                 Utils.setprefchklst("bushessel_" + charname, Config.bushes);
             }
         };
-        for (CheckListboxItem itm : Config.bushes.values())
-            bushlist.items.add(itm);
+        bushlist.items.addAll(Config.bushes.values());
         map.add(bushlist, new Coord(165, 15));
 
         CheckListbox treelist = new CheckListbox(140, 16) {
@@ -4677,8 +4652,7 @@ public class OptWnd extends Window {
                 Utils.setprefchklst("treessel_" + charname, Config.trees);
             }
         };
-        for (CheckListboxItem itm : Config.trees.values())
-            treelist.items.add(itm);
+        treelist.items.addAll(Config.trees.values());
         map.add(treelist, new Coord(320, 15));
 
         CheckListbox iconslist = new CheckListbox(140, 16) {
@@ -4688,8 +4662,7 @@ public class OptWnd extends Window {
                 Utils.setprefchklst("iconssel_" + charname, Config.icons);
             }
         };
-        for (CheckListboxItem itm : Config.icons.values())
-            iconslist.items.add(itm);
+        iconslist.items.addAll(Config.icons.values());
         map.add(iconslist, new Coord(475, 15));
 
         map.add(new CheckBox("Show road Endpoints") {
@@ -4781,7 +4754,7 @@ public class OptWnd extends Window {
     }
 
     private Dropbox<String> makeAlarmDropdownUnknown() {
-        final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
+        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.alarmunknownplayer);
@@ -4814,7 +4787,7 @@ public class OptWnd extends Window {
     }
 
     private Dropbox<String> makeAlarmDropdownRed() {
-        final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
+        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.alarmredplayer);
@@ -4847,7 +4820,7 @@ public class OptWnd extends Window {
     }
 
     private Dropbox<String> makeAlarmDropdownStudy() {
-        final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
+        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.alarmstudy);
@@ -4880,7 +4853,7 @@ public class OptWnd extends Window {
     }
 
     private Dropbox<String> makeDropdownCleave() {
-        final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
+        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.cleavesfx);
@@ -4913,7 +4886,7 @@ public class OptWnd extends Window {
     }
 
     private Dropbox<String> makeDropdownCombat() {
-        final List<String> alarms = Config.alarms.values().stream().map(x -> x.toString()).collect(Collectors.toList());
+        final List<String> alarms = Config.alarms.values().stream().map(String::toString).collect(Collectors.toList());
         return new Dropbox<String>(Config.alarms.size(), alarms) {
             {
                 super.change(Config.attackedsfx);
@@ -4976,7 +4949,7 @@ public class OptWnd extends Window {
                 configuration.defaultUtilsCustomLoginScreenBg = item;
                 Utils.setpref("custom-login-background", item);
                 LoginScreen.bg = configuration.bgCheck();
-                if (ui == null || ui.gui == null || ui.sess == null || !ui.sess.alive())
+                if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
                     ui.uimsg(1, "bg");
             }
 
@@ -4991,8 +4964,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                Tex tex = Text.render("Right click to reload folder").tex();
-                return tex;
+                return Text.render("Right click to reload folder").tex();
             }
         };
     }
