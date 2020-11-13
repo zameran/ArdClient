@@ -783,7 +783,7 @@ public class OptWnd extends Window {
 
             main.add(new Button(200, "Changelog") {
                 public void click() {
-                   showChangeLog();
+                    showChangeLog();
                 }
             }, new Coord(210, 270));
 
@@ -1612,7 +1612,7 @@ public class OptWnd extends Window {
          }
          };**/
 
-        appender.addRow(new CheckBox("Scalable trees (req. logout)") {
+        appender.addRow(new CheckBox("Scalable trees: ") {
             {
                 this.a = configuration.scaletree;
             }
@@ -3332,7 +3332,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Cosmetic Effect").tex();
+                return Text.render("Cosmetic Effect around the player").tex();
             }
         });
         appender.addRow(new CheckBox("Enable blizzard") {
@@ -4786,7 +4786,7 @@ public class OptWnd extends Window {
             FileOutputStream out = new FileOutputStream(f);
             String strLine;
             int count = 0;
-            while((count < maxlines) && (strLine = br.readLine()) != null) {
+            while ((count < maxlines) && (strLine = br.readLine()) != null) {
                 txt.append(strLine);
                 out.write((strLine + Config.LINE_SEPARATOR).getBytes());
                 count++;
@@ -4794,7 +4794,7 @@ public class OptWnd extends Window {
             br.close();
             out.close();
             in.close();
-        } catch(IOException ignored) {
+        } catch (IOException ignored) {
         }
         txt.setprog(0);
     }

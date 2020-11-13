@@ -49,6 +49,7 @@ import modification.configuration;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -494,30 +495,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
 
     public String details() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(this);
-        sb.append("]\n");
         sb.append("Res: ");
-        sb.append(resname().orElse(""));
-        sb.append(" [");
-        sb.append(id);
-        sb.append("]\n");
-        sb.append("Type: ");
-        sb.append(type);
-        if (type == Type.TROUGH) {
-            int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-            sb.append(" Stage: ");
-            sb.append(stage);
-        }
-        if (resname().get().endsWith("stonepillar")) {
-            int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-            sb.append(" Stage: ");
-            sb.append(stage);
-        }
-        sb.append("\n");
-        sb.append("staticp: ");
-        sb.append(staticp() != null ? "static" : "dynamic");
-        sb.append("\n");
+        if (res().isPresent()) sb.append(getres());
+        sb.append(" [").append(id).append("]\n");
+        sb.append("Type: ").append(type).append("\n");
+        sb.append("staticp: ").append(staticp() != null ? "static" : "dynamic").append("\n");
         final Holding holding = getattr(Holding.class);
         if (holding != null) {
             sb.append("Holding: ");
@@ -537,6 +519,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         }
         ResDrawable dw = getattr(ResDrawable.class);
         if (dw != null) {
+            sb.append("ResDraw: ");
+            sb.append(Arrays.toString(dw.sdt.bytes()));
+            sb.append("\n");
             sb.append("sdt: ");
             sb.append(dw.sdtnum());
             sb.append("\n");
