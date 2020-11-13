@@ -3309,7 +3309,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     "Delete",
                     "Custom overlays",
                     "Mark on map");
-            ui.gui.add(modmenu, ui.mc);
+            ui.root.add(modmenu, ui.mc);
         });
     }
 

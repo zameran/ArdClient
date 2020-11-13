@@ -828,7 +828,7 @@ LocalMiniMap extends Widget {
             } else {
                 if (ui.modmeta) {
                     if (ui != null && ui.gui != null && ui.gui.map != null)
-                        ui.gui.map.showSpecialMenu(gob); //FIXME i dont know how make it overhover
+                        ui.gui.map.showSpecialMenu(gob);
                 } else {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
                     if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().contains("mussel") || gob.getres().basename().contains("oyster")))
