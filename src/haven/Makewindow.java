@@ -320,6 +320,34 @@ public class Makewindow extends Widget {
         super.draw(g);
     }
 
+    public boolean mousedown(Coord c, int button) {
+        try {
+            Coord c1 = new Coord(xoff, 0);
+            boolean popt = false;
+            for (Spec s : inputs) {
+                boolean opt = s.opt();
+                if (opt != popt)
+                    c1 = c1.add(10, 0);
+
+                if (c.isect(c1, Inventory.sqsz)) {
+                    Resource.AButton ab = s.getres().layer(Resource.action);
+                    if (ab != null) {
+                        String[] ad = ab.ad;
+                        if (ad != null)
+                            ui.gui.menu.wdgmsg("act", "craft", ad);
+                    }
+                    break;
+                }
+
+                c1 = c1.add(Inventory.sqsz.x, 0);
+                popt = opt;
+            }
+        } catch (Loading e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private long hoverstart;
     private Spec lasttip;
     private Indir<Object> stip, ltip;
