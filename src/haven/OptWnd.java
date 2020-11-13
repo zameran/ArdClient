@@ -35,6 +35,7 @@ import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -3674,34 +3675,34 @@ public class OptWnd extends Window {
 
         appender.add(new CheckBox("Log for developer") {
             {
-                a = configuration.logging;
+                a = dev.logging;
             }
 
             public void set(boolean val) {
                 Utils.setprefb("msglogging", val);
-                configuration.logging = val;
+                dev.logging = val;
                 a = val;
             }
         });
         appender.add(new CheckBox("Decode code") {
             {
-                a = configuration.decodeCode;
+                a = dev.decodeCode;
             }
 
             public void set(boolean val) {
                 Utils.setprefb("decodeCode", val);
-                configuration.decodeCode = val;
+                dev.decodeCode = val;
                 a = val;
             }
         });
         appender.add(new CheckBox("Skip exceptions") {
             {
-                a = configuration.skipexceptions;
+                a = dev.skipexceptions;
             }
 
             public void set(boolean val) {
                 Utils.setprefb("skipexceptions", val);
-                configuration.skipexceptions = val;
+                dev.skipexceptions = val;
                 a = val;
             }
         });

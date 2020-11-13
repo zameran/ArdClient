@@ -48,6 +48,7 @@ import haven.sloth.gui.SessionDisplay;
 import haven.sloth.gui.SoundManager;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
+import modification.dev;
 import modification.newQuickSlotsWdg;
 
 import java.awt.Color;
@@ -1335,8 +1336,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             else
                 help.res = res;
         } else if (msg == "map-mark") {
-            configuration.sysPrintStackTrace("map-mark");
-            configuration.Syslog("map-mark", this, -1, msg, args);
+            dev.sysPrintStackTrace("map-mark");
+            dev.sysLog("map-mark", this, -1, msg, args);
             long gobid = ((Integer) args[0]) & 0xffffffff;
             long oid = (Long) args[1];
             Indir<Resource> res = ui.sess.getres((Integer) args[2]);

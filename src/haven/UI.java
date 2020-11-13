@@ -26,8 +26,7 @@
 
 package haven;
 
-import haven.purus.pbot.PBotAPI;
-import modification.configuration;
+import modification.dev;
 
 import java.awt.Font;
 import java.awt.event.InputEvent;
@@ -217,7 +216,7 @@ public class UI {
             if (parent != 65535) {
                 Widget pwdg = widgets.get(parent);
                 if (pwdg == null) {
-                    if (configuration.skipexceptions) {
+                    if (dev.skipexceptions) {
                         System.out.println("Null parent widget " + parent + " for " + id);
                         return;
                     } else
@@ -264,7 +263,7 @@ public class UI {
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg == null) {
-                if (configuration.skipexceptions) {
+                if (dev.skipexceptions) {
                     System.out.println("Null child widget " + id + " added to " + parent);
                     return;
                 } else
@@ -272,7 +271,7 @@ public class UI {
             }
             Widget pwdg = widgets.get(parent);
             if (pwdg == null) {
-                if (configuration.skipexceptions) {
+                if (dev.skipexceptions) {
                     System.out.println("Null parent widget " + parent + " for " + id);
                     return;
                 } else
@@ -451,7 +450,7 @@ public class UI {
         }
         if (rcvr != null)
             rcvr.rcvmsg(id, msg, args);
-        configuration.Syslog(configuration.clientSender, sender, id, msg, args);
+        dev.sysLog(dev.clientSender, sender, id, msg, args);
     }
 
     public void uimsg(int id, String msg, Object... args) {
@@ -474,13 +473,13 @@ public class UI {
                 // try { for(Object obj:args) if(!wdg.toString().contains("CharWnd")) System.out.println("UI Wdg : " + wdg + " msg : "+msg+" id = " + id + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException qq){}
                 wdg.uimsg(msg.intern(), args);
             } else {
-                if (configuration.skipexceptions) {
+                if (dev.skipexceptions) {
                     System.out.println("Uimsg to non-existent widget " + id);
                     return;
                 } else
                     throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
             }
-            configuration.Syslog(configuration.serverSender, wdg, id, msg, args);
+            dev.sysLog(dev.serverSender, wdg, id, msg, args);
         }
     }
 

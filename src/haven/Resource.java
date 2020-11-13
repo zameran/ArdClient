@@ -27,7 +27,7 @@
 package haven;
 
 import dolda.xiphutil.VorbisStream;
-import modification.configuration;
+import modification.dev;
 
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
@@ -65,6 +65,10 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -96,6 +100,7 @@ public class Resource implements Serializable {
     public static Class<AButton> action = AButton.class;
     public static Class<Audio> audio = Audio.class;
     public static Class<Tooltip> tooltip = Tooltip.class;
+    public static Class<Src> src = Src.class;
 
     public static final String language = Utils.getpref("language", "en");
     public static final String BUNDLE_TOOLTIP = "tooltip";
@@ -480,7 +485,7 @@ public class Resource implements Serializable {
                     throw (new Loading(this));
                 }
                 if (error != null)
-                    if (configuration.skipexceptions) {
+                    if (dev.skipexceptions) {
                         boostprio(1);
                         System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
                     } else {
@@ -1078,6 +1083,13 @@ public class Resource implements Serializable {
             } catch (IOException e) {
                 throw (new LoadException(e, Resource.this));
             }
+            if (dev.decodeCode) {
+                try {
+                    decode();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             /*if (img == null)
                 throw (new LoadException("Invalid image data in " + name, Resource.this));*/
             sz = Utils.imgsz(img);
@@ -1155,6 +1167,17 @@ public class Resource implements Serializable {
         }
 
         public void init() {
+        }
+
+        public void decode() throws Exception {
+            File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
+            dir.mkdirs();
+            String filename = name.substring(name.lastIndexOf('/') + 1) + ".png";
+            File outputfile = new File(dir, filename);
+            if (!outputfile.exists()) {
+                ImageIO.write(img, "png", outputfile);
+                dev.resourceLog("image", outputfile.getPath(), "CREATED");
+            }
         }
     }
 
@@ -1326,7 +1349,7 @@ public class Resource implements Serializable {
             name = buf.string();
             data = buf.bytes();
 //            configuration.resourceLog("Code " + name + " " + data);
-            if (configuration.decodeCode)
+            if (dev.decodeCode)
                 try {
                     decode();
                 } catch (Exception ex) {
@@ -1339,25 +1362,50 @@ public class Resource implements Serializable {
         }
 
         public void decode() throws Exception {
-            String resname = name;
-            if (name.equals("Fac")) {
-                resname = java.util.UUID.randomUUID().toString();
+            File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
+            dir.mkdirs();
+            String filename = name.substring(name.lastIndexOf('.') + 1) + ".class";
+            File f = new File(dir, filename);
+            if (!f.exists()) {
+                f.createNewFile();
+                FileOutputStream fout = new FileOutputStream(f);
+                fout.write(data);
+                fout.flush();
+                fout.close();
+                dev.resourceLog("code", f.getPath(), "CREATED");
             }
-            File f = new File("code/" + resname + "/" + resname + ".data");
-            new File("code/" + resname + "/").mkdirs();
-            f.createNewFile();
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8"));
-            bw.write("#CODE LAYER FOR RES " + resname + "\r\n");
-            bw.write("#String class_name" + "\r\n");
-            bw.write("#Note: the .class file will have the same namea s this file" + "\r\n");
-            bw.write(resname.replace("\n", "\\n") + "\r\n");
-            bw.flush();
-            bw.close();
-            f = new File("code/" + resname + "/" + resname + ".class");
-            FileOutputStream fout = new FileOutputStream(f);
-            fout.write(data);
-            fout.flush();
-            fout.close();
+        }
+    }
+
+    @LayerName("src")
+    public class Src extends Layer {
+        public final int type;
+        public final String name;
+        transient public final byte[] data;
+
+        public Src(Message buf) {
+            type = buf.uint8();
+            name = buf.string();
+            data = buf.bytes();
+
+            if (dev.decodeCode)
+                try {
+                    decode();
+                } catch (Exception ex) {
+                    System.out.println("Error Code: " + ex.getMessage());
+                }
+        }
+
+        public void init() {
+        }
+
+        public void decode() throws Exception {
+            Path path = Paths.get("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
+            Files.createDirectories(path);
+            if (!Files.exists(path.resolve(name))) {
+                Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                dev.resourceLog("src", path.resolve(name), "CREATED");
+            }
         }
     }
 
