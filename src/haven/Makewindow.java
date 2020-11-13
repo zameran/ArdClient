@@ -336,7 +336,7 @@ public class Makewindow extends Widget {
                         if (ad != null)
                             ui.gui.menu.wdgmsg("act", "craft", ad);
                     }
-                    break;
+                    return false;
                 }
 
                 c1 = c1.add(Inventory.sqsz.x, 0);
@@ -345,7 +345,7 @@ public class Makewindow extends Widget {
         } catch (Loading e) {
             e.printStackTrace();
         }
-        return false;
+        return super.mousedown(c, button);
     }
 
     private long hoverstart;
