@@ -64,6 +64,39 @@ public class PBotGobAPI {
         return list;
     }
 
+    /**
+     * List of all gobs in radius
+     * @param radius     searh radius
+     * @param names      gobs names
+     *
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> findObjectsByNames(UI ui, int radius, String... names) {
+        Coord2d plc = PBotUtils.player(ui).rc;
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    boolean matches = false;
+                    for (String name : names) {
+                        if (gob.getres() != null && gob.getres().name.equals(name)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                    if (matches) {
+                        min = dist;
+                        list.add(new PBotGob(gob));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
 //    public static List<PBotGob> getAllGobs() {
 //        return getAllGobs(PBotAPI.modeui());
 //    }

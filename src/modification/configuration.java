@@ -4,7 +4,6 @@ import haven.Coord;
 import haven.Gob;
 import haven.MainFrame;
 import haven.OCache;
-import haven.Resource;
 import haven.Session;
 import haven.Tex;
 import haven.TexI;
@@ -25,10 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -44,7 +42,7 @@ public class configuration {
     }
 
     public static String defaultTitle = MainFrame.TITLE;
-    public static String defaultCustomTitle = "♂right version♂: You turn ♂Leatherman♂";
+    public static String defaultCustomTitle = "https://youtu.be/dQw4w9WgXcQ";
     public static String defaultUtilsCustomTitle = Utils.getpref("custom-title", defaultCustomTitle);
 
     public static String tittleCheck(Session sess) {
@@ -61,18 +59,6 @@ public class configuration {
             title = defaultTitle;
 
         return title + name;
-    }
-
-    public static boolean defaultUtilsCustomLoginScreenBgBoolean = Utils.getprefb("custom-login-background-bol", false);
-    public static String defaultCustomLoginScreenBg = picturePath + "/loginscr.png";
-    public static String defaultUtilsCustomLoginScreenBg = Utils.getpref("custom-login-background", defaultCustomLoginScreenBg);
-
-    public static Tex bgCheck() {
-        Tex bg;
-        if (defaultUtilsCustomLoginScreenBgBoolean)
-            bg = configuration.imageToTex(defaultUtilsCustomLoginScreenBg, true, Resource.loadtex("gfx/loginscr"));
-        else bg = Resource.loadtex("gfx/loginscr");
-        return bg;
     }
 
     public static Coord savedHavenPanelSize = Utils.getprefc("havpansz", new Coord(800, 600));
@@ -113,17 +99,6 @@ public class configuration {
     public static int sipwaiting = Utils.getprefi("sipwaiting", 2000);
     public static boolean drinkmessage = Utils.getprefb("drinkmessage", false);
 
-    public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
-
-    public static boolean customMarkObj = Utils.getprefb("customMarkObj", false);
-    public static Map<String, String> customMarkObjs = new HashMap<String, String>() {{
-        put("gfx/tiles/ridges/cavein", getDefaultTextName("gfx/tiles/ridges/cavein"));
-        put("gfx/tiles/ridges/caveout", getDefaultTextName("gfx/tiles/ridges/caveout"));
-        put("gfx/terobjs/beaverdamdoor", getDefaultTextName("gfx/terobjs/beaverdamdoor"));
-        put("gfx/terobjs/dng/batcave", getDefaultTextName("gfx/terobjs/dng/batcave"));
-        put("gfx/terobjs/dng/antdungeon", getDefaultTextName("gfx/terobjs/dng/antdungeon"));
-        put("gfx/terobjs/wonders/tarpit", getDefaultTextName("gfx/terobjs/wonders/tarpit"));
-    }};
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
     public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
@@ -414,9 +389,8 @@ public class configuration {
     }
 
     public static String getDefaultTextName(String gobname) {
-        int p;
         if (gobname.contains("/")) {
-            p = gobname.lastIndexOf('/');
+            int p = gobname.lastIndexOf('/');
             if (p < 0) return (gobname);
             return gobname.substring(p + 1, p + 2).toUpperCase() + gobname.substring(p + 2);
         } else return gobname;
@@ -429,7 +403,7 @@ public class configuration {
     public static int blizzarddensity = Utils.getprefi("blizzarddensity", 5);
     public static int currentsnow = 0;
 
-    public static int getCurrentsnow(OCache oc) {
+    public synchronized static int getCurrentsnow(OCache oc) {
         int count = 0;
         for (final Gob g : oc) {
             if (g.isplayer()) continue;
@@ -439,7 +413,7 @@ public class configuration {
         return currentsnow = count;
     }
 
-    public static void addsnow(OCache oc) {
+    public synchronized static void addsnow(OCache oc) {
         ArrayList<Gob> gobs = new ArrayList<>();
         oc.forEach(gobs::add);
 
@@ -450,7 +424,7 @@ public class configuration {
         }
     }
 
-    public static void deleteAllSnow(OCache oc) {
+    public synchronized static void deleteAllSnow(OCache oc) {
         for (final Gob g : oc) {
             if (g.isplayer()) continue;
             Gob.Overlay snow = g.findol(-4921);
@@ -459,7 +433,7 @@ public class configuration {
         }
     }
 
-    public static void deleteSnow(OCache oc) {
+    public synchronized static void deleteSnow(OCache oc) {
         ArrayList<Gob> gobs = new ArrayList<>();
         for (final Gob g : oc) {
             if (g.isplayer()) continue;
@@ -480,4 +454,36 @@ public class configuration {
         int rnd = new Random().nextInt(array.size());
         return array.get(rnd);
     }
+
+    public static class SnowThread extends Thread {
+        private final AtomicBoolean running = new AtomicBoolean(false);
+        final OCache oc;
+
+        public SnowThread(OCache oc) {
+            super("Snowfall");
+            this.oc = oc;
+        }
+
+        @Override
+        public void run() {
+            running.set(true);
+            while (running.get() && configuration.blizzardoverlay) {
+                synchronized (oc) {
+                    configuration.addsnow(oc);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void kill() {
+            running.set(false);
+            interrupt();
+        }
+    }
+
+    public static SnowThread snowThread;
 }

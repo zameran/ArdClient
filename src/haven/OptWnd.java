@@ -36,6 +36,7 @@ import haven.sloth.gob.Movable;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.dev;
+import modification.resources;
 
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -50,6 +51,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -3161,14 +3163,14 @@ public class OptWnd extends Window {
                 });
         appender.addRow(new CheckBox("Custom login background: ") {
                             {
-                                a = configuration.defaultUtilsCustomLoginScreenBgBoolean;
+                                a = resources.defaultUtilsCustomLoginScreenBgBoolean;
                             }
 
                             public void set(boolean val) {
                                 Utils.setprefb("custom-login-background-bol", val);
-                                configuration.defaultUtilsCustomLoginScreenBgBoolean = val;
+                                resources.defaultUtilsCustomLoginScreenBgBoolean = val;
                                 a = val;
-                                LoginScreen.bg = configuration.bgCheck();
+                                LoginScreen.bg = resources.bgCheck();
                                 if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
                                     ui.uimsg(1, "bg");
                             }
@@ -3344,13 +3346,20 @@ public class OptWnd extends Window {
                                 Utils.setprefb("blizzardoverlay", val);
                                 configuration.blizzardoverlay = val;
                                 a = val;
-                                if (ui != null && ui.gui != null && ui.sess != null) {
-                                    OCache oc = ui.sess.glob.oc;
+                                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                                    synchronized (ui.sess.glob.oc) {
+                                        OCache oc = ui.sess.glob.oc;
 
-                                    if (val)
-                                        configuration.addsnow(oc);
-                                    else
-                                        configuration.deleteAllSnow(oc);
+                                        if (val) {
+                                            if (configuration.snowThread != null && !configuration.snowThread.isAlive()) {
+                                                configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
+                                                configuration.snowThread.start();
+                                            }
+                                        } else {
+                                            if (configuration.snowThread.isAlive()) configuration.snowThread.kill();
+                                            configuration.deleteAllSnow(oc);
+                                        }
+                                    }
                                 }
                             }
 
@@ -3365,13 +3374,15 @@ public class OptWnd extends Window {
                         configuration.blizzarddensity = val;
                         Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
 
-                        if (ui != null && ui.gui != null && ui.sess != null) {
-                            OCache oc = ui.sess.glob.oc;
+                        if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                            synchronized (ui.sess.glob.oc) {
+                                OCache oc = ui.sess.glob.oc;
 
-                            if (configuration.getCurrentsnow(oc) < val)
-                                configuration.addsnow(oc);
-                            else
-                                configuration.deleteSnow(oc);
+                                if (configuration.getCurrentsnow(oc) < val)
+                                    configuration.addsnow(oc);
+                                else
+                                    configuration.deleteSnow(oc);
+                            }
                         }
                     }
 
@@ -3632,12 +3643,12 @@ public class OptWnd extends Window {
 
         appender.add(new CheckBox("Additional marks on the map") {
             {
-                a = configuration.customMarkObj;
+                a = resources.customMarkObj;
             }
 
             public void set(boolean val) {
                 Utils.setprefb("customMarkObj", val);
-                configuration.customMarkObj = val;
+                resources.customMarkObj = val;
                 a = val;
             }
 
@@ -3704,6 +3715,14 @@ public class OptWnd extends Window {
                 Utils.setprefb("skipexceptions", val);
                 dev.skipexceptions = val;
                 a = val;
+            }
+        });
+        appender.add(new Button(50, "Resource") {
+            @Override
+            public void click() {
+                if (ui.sess != null) {
+                    ui.sess.allCache();
+                }
             }
         });
 
@@ -4679,6 +4698,7 @@ public class OptWnd extends Window {
             }
         };
         boulderlist.items.addAll(Config.boulders.values());
+        boulderlist.items.sort(Comparator.comparing(a -> a.name));
         map.add(boulderlist, new Coord(10, 15));
 
         CheckListbox bushlist = new CheckListbox(140, 16) {
@@ -4689,6 +4709,7 @@ public class OptWnd extends Window {
             }
         };
         bushlist.items.addAll(Config.bushes.values());
+        bushlist.items.sort(Comparator.comparing(a -> a.name));
         map.add(bushlist, new Coord(165, 15));
 
         CheckListbox treelist = new CheckListbox(140, 16) {
@@ -4699,6 +4720,7 @@ public class OptWnd extends Window {
             }
         };
         treelist.items.addAll(Config.trees.values());
+        treelist.items.sort(Comparator.comparing(a -> a.name));
         map.add(treelist, new Coord(320, 15));
 
         CheckListbox iconslist = new CheckListbox(140, 16) {
@@ -4709,6 +4731,7 @@ public class OptWnd extends Window {
             }
         };
         iconslist.items.addAll(Config.icons.values());
+        iconslist.items.sort(Comparator.comparing(a -> a.name));
         map.add(iconslist, new Coord(475, 15));
 
         map.add(new CheckBox("Show road Endpoints") {
@@ -4970,7 +4993,7 @@ public class OptWnd extends Window {
     private Dropbox<String> makePictureChoiseDropdown() {
         return new Dropbox<String>(pictureList.size(), pictureList) {
             {
-                super.change(configuration.defaultUtilsCustomLoginScreenBg);
+                super.change(resources.defaultUtilsCustomLoginScreenBg);
             }
 
             @Override
@@ -4992,9 +5015,9 @@ public class OptWnd extends Window {
             @Override
             public void change(String item) {
                 super.change(item);
-                configuration.defaultUtilsCustomLoginScreenBg = item;
+                resources.defaultUtilsCustomLoginScreenBg = item;
                 Utils.setpref("custom-login-background", item);
-                LoginScreen.bg = configuration.bgCheck();
+                LoginScreen.bg = resources.bgCheck();
                 if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
                     ui.uimsg(1, "bg");
             }

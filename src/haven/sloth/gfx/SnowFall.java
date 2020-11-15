@@ -28,7 +28,7 @@ public class SnowFall extends Sprite {
 
         Flake(Coord3f pos) {
             this.position = new Coord3f(pos.x, pos.y, pos.z);
-            this.velocity = new Coord3f(0.0F, 0.0F, 0.0F);
+            this.velocity = new Coord3f(0.0F, 0.0F,  (pos.z - 500F) * .98f / 2);
             this.normal = new Coord3f(0, 0, 0).norm();
         }
 
@@ -110,7 +110,7 @@ public class SnowFall extends Sprite {
         de += f * str;
         if (de > 1.0F) {
             de -= 1.0F;
-            flakes.add(new Flake(offset.add(rnd.nextFloat() * sz.x, rnd.nextFloat() * sz.y, 500F)));
+            flakes.add(new Flake(offset.add(rnd.nextFloat() * sz.x, rnd.nextFloat() * sz.y, rnd.nextFloat() * 500F)));
         }
         //Remove dead dust
         flakes.removeIf(boll -> boll.tick(f));

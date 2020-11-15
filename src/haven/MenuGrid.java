@@ -59,6 +59,7 @@ import haven.automation.SteelRefueler;
 import haven.automation.TakeTrays;
 import haven.automation.TrellisDestroy;
 import haven.automation.TrellisHarvest;
+import haven.automation.farmer.FarmerBots;
 import haven.purus.Farmer;
 import haven.purus.Farmer2;
 import haven.purus.FlowerPicker;
@@ -218,8 +219,6 @@ public class MenuGrid extends Widget {
                 pag.scm.cur = paginafor(pag.scm.cur.act().parent);
                 curoff = 0;
             }
-
-
         }
 
         public BufferedImage rendertt(boolean withpg) {
@@ -500,7 +499,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::coal9",
                 Resource.local().load("paginae/amber/coal9"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         Thread t = new Thread(new AddCoalToSmelter(ui.gui, 9), "AddCoalToSmelter");
                         t.start();
@@ -510,7 +508,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::branchoven",
                 Resource.local().load("paginae/amber/branchoven"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         Thread t = new Thread(new AddBranchesToOven(ui.gui, 4), "AddBranchesToOven");
                         t.start();
@@ -520,7 +517,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::steel",
                 Resource.local().load("paginae/amber/steel"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Steel Refueler") == null) {
                             SteelRefueler sw = new SteelRefueler();
@@ -536,7 +532,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::torch",
                 Resource.local().load("paginae/amber/torch"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Torch Lighter") == null) {
                             LightWithTorch sw = new LightWithTorch();
@@ -552,7 +547,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::coaltosmelters",
                 Resource.local().load("paginae/amber/CoalToSmelters"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Add Coal To Smelters") == null) {
                             CoalToSmelters sw = new CoalToSmelters();
@@ -568,7 +562,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::coracleslol",
                 Resource.local().load("paginae/amber/Coracleslol"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new Coracleslol(ui.gui), "Coracleslol").start();
                     }
@@ -577,7 +570,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::mineralert",
                 Resource.local().load("paginae/amber/MinerAlert"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Miner Alert") == null) {
                             MinerAlert sw = new MinerAlert();
@@ -590,7 +582,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::clover",
                 Resource.local().load("paginae/amber/clover"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new FeedClover(ui.gui), "FeedClover").start();
                     }
@@ -599,7 +590,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::rope",
                 Resource.local().load("paginae/amber/rope"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new LeashAnimal(ui.gui), "LeashAnimal").start();
                     }
@@ -608,7 +598,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::fish",
                 Resource.local().load("paginae/amber/fish"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new ButcherFish(ui.gui), "ButcherFish").start();
                     }
@@ -617,7 +606,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::timers",
                 Resource.local().load("paginae/amber/timers"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         ui.gui.timerswnd.show(!ui.gui.timerswnd.visible);
                         ui.gui.timerswnd.raise();
@@ -627,7 +615,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::livestock",
                 Resource.local().load("paginae/amber/livestock"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         ui.gui.livestockwnd.show(!ui.gui.livestockwnd.visible);
                         ui.gui.livestockwnd.raise();
@@ -637,7 +624,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::dream",
                 Resource.local().load("paginae/amber/dream"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new DreamHarvester(ui.gui), "DreamHarvester").start();
                     }
@@ -646,7 +632,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::trellisharvest",
                 Resource.local().load("paginae/amber/trellisharvest"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new TrellisHarvest(ui.gui), "TrellisHarvest").start();
                     }
@@ -655,7 +640,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::trellisdestroy",
                 Resource.local().load("paginae/amber/trellisdestroy"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new TrellisDestroy(ui.gui), "TrellisDestroy").start();
                     }
@@ -664,7 +648,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::cheesetrayfiller",
                 Resource.local().load("paginae/amber/cheesetrayfiller"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new FillCheeseTray(ui.gui), "FillCheeseTray").start();
                     }
@@ -673,7 +656,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::equipweapon",
                 Resource.local().load("paginae/amber/equipweapon"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new EquipWeapon(ui.gui), "EquipWeapon").start();
                     }
@@ -682,7 +664,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::equipsacks",
                 Resource.local().load("paginae/amber/equipsacks"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new EquipSacks(ui.gui), "EquipSacks").start();
                     }
@@ -691,16 +672,14 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::equipswordshield",
                 Resource.local().load("paginae/amber/equipswordshield"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new EquipSwordShield(ui.gui), "EquipSwordShield").start();
                     }
                 }
-        ));//
+        ));
         addSpecial(new SpecialPagina(this, "paginae::amber::bunnyshoes",
                 Resource.local().load("paginae/amber/bunnyshoes"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new EquipSlippers(ui.gui), "bunnyshoes").start();
                     }
@@ -709,16 +688,14 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::rusalka",
                 Resource.local().load("paginae/amber/rusalka"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new EquipRusalka(ui.gui), "rusalka").start();
                     }
                 }
-        ));//
+        ));
         addSpecial(new SpecialPagina(this, "paginae::amber::slicecheese",
                 Resource.local().load("paginae/amber/SliceCheese"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new SliceCheese(ui.gui), "SliceCheese").start();
                     }
@@ -727,7 +704,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::oysteropener",
                 Resource.local().load("paginae/amber/OysterOpener"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new OysterOpener(ui.gui), "OysterOpener").start();
                     }
@@ -736,7 +712,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::splitlogs",
                 Resource.local().load("paginae/amber/SplitLogs"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new SplitLogs(ui.gui), "SplitLogs").start();
                     }
@@ -745,7 +720,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::countgobs",
                 Resource.local().load("paginae/amber/CountGobs"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new CountGobs(ui.gui), "CountGobs").start();
                     }
@@ -754,7 +728,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::mothkillers",
                 Resource.local().load("paginae/amber/MothKiller"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new MothKiller(ui.gui), "MothKiller").start();
                     }
@@ -763,7 +736,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::flaxbot",
                 Resource.local().load("paginae/amber/FlaxBot"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Flax Bot") == null) {
                             FlaxBot sw = new FlaxBot(ui.gui);
@@ -773,10 +745,19 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
+        addSpecial(new SpecialPagina(this, "paginae::bots::farmerbots",
+                Resource.local().load("paginae/bots/FarmerBots"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        FarmerBots f = new FarmerBots();
+                        Window w = f;
+                        ui.gui.add(w, new Coord(ui.gui.sz.x / 2 - w.sz.x / 2, ui.gui.sz.y / 2 - w.sz.y / 2 - 200));
+                    }
+                }
+        ));
         addSpecial(new SpecialPagina(this, "paginae::amber::pepperbotpro",
                 Resource.local().load("paginae/amber/PepperBotPro"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         if (ui.gui.getwnd("Pepper Bot") == null) {
                             PepperBotPro sw = new PepperBotPro();
@@ -793,7 +774,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::taketrays",
                 Resource.local().load("paginae/amber/TakeTrays"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new TakeTrays(ui.gui), "TakeTrays").start();
                     }
@@ -802,7 +782,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::pepperfood",
                 Resource.local().load("paginae/amber/PepperFood"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new PepperFood(ui.gui), "PepperFood").start();
                     }
@@ -811,16 +790,14 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::placetrays",
                 Resource.local().load("paginae/amber/PlaceTrays"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new PlaceTrays(ui.gui), "PlaceTrays").start();
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::farmer",
+        addSpecial(new SpecialPagina(this, "paginae::purus::farmer",
                 Resource.local().load("paginae/purus/farmer"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         Farmer f = new Farmer();
                         Window w = f;
@@ -832,10 +809,9 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::farmer2",
+        addSpecial(new SpecialPagina(this, "paginae::purus::farmer2",
                 Resource.local().load("paginae/purus/farmer2"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         Farmer2 f = new Farmer2();
                         Window w = f;
@@ -847,16 +823,15 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::flowerpicker",
+        addSpecial(new SpecialPagina(this, "paginae::purus::flowerpicker",
                 Resource.local().load("paginae/purus/flowerPicker"),
                 (pag) -> {
                     new Thread(new FlowerPicker(ui.gui)).start();
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::troughfill",
+        addSpecial(new SpecialPagina(this, "paginae::purus::troughfill",
                 Resource.local().load("paginae/purus/troughfill"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         TroughFiller tf = new TroughFiller();
                         ui.gui.add(tf, new Coord(ui.gui.sz.x / 2 - tf.sz.x / 2, ui.gui.sz.y / 2 - tf.sz.y / 2 - 200));
@@ -866,10 +841,9 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::amber::stockpilefill",
+        addSpecial(new SpecialPagina(this, "paginae::purus::stockpilefill",
                 Resource.local().load("paginae/purus/stockpilefill"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         StockpileFiller spf = new StockpileFiller();
                         ui.gui.add(spf, new Coord(ui.gui.sz.x / 2 - spf.sz.x / 2, ui.gui.sz.y / 2 - spf.sz.y / 2 - 200));
@@ -882,17 +856,15 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::amber::dismount",
                 Resource.local().load("paginae/amber/dismount"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         new Thread(new Dismount(ui.gui), "Dismount").start();
                     }
                 }
         ));
         if (Config.showPBot) {
-            addSpecial(new SpecialPagina(this, "paginae::amber::pbotmenu",
+            addSpecial(new SpecialPagina(this, "paginae::purus::pbotmenu",
                     Resource.local().load("paginae/purus/PBotMenu"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             if (ui.gui.PBotScriptlist.show(!ui.gui.PBotScriptlist.visible)) {
                                 ui.gui.PBotScriptlist.raise();
@@ -904,10 +876,9 @@ public class MenuGrid extends Widget {
             ));
         }
         if (Config.showPBotOld) {
-            addSpecial(new SpecialPagina(this, "paginae::amber::pbotmenuold",
+            addSpecial(new SpecialPagina(this, "paginae::purus::pbotmenuold",
                     Resource.local().load("paginae/purus/PBotMenuOld"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             if (ui.gui.PBotScriptlistold.show(!ui.gui.PBotScriptlistold.visible)) {
                                 ui.gui.PBotScriptlistold.raise();
@@ -922,7 +893,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::chat",
                 Resource.local().load("paginae/windows/chat"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         ui.gui.OpenChat();
                     }
@@ -977,7 +947,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::char",
                     Resource.local().load("paginae/mainmenu/char"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleCharWnd();
                         }
@@ -987,7 +956,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::equ",
                     Resource.local().load("paginae/mainmenu/equ"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleEquipment();
                         }
@@ -996,7 +964,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::inv",
                     Resource.local().load("paginae/mainmenu/inv"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleInv();
                         }
@@ -1005,7 +972,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::kithnkin",
                     Resource.local().load("paginae/mainmenu/kithnkin"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleKinList();
                         }
@@ -1014,7 +980,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::search",
                     Resource.local().load("paginae/mainmenu/search"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleSearch();
                         }
@@ -1024,7 +989,6 @@ public class MenuGrid extends Widget {
             addSpecial(new SpecialPagina(this, "paginae::options",
                     Resource.local().load("paginae/mainmenu/opt"),
                     (pag) -> {
-
                         if (ui.gui != null) {
                             ui.gui.toggleOptions();
                         }
@@ -1036,7 +1000,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::smap",
                 Resource.local().load("paginae/windows/smap"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         ui.gui.toggleMinimap();
                     }
@@ -1045,7 +1008,6 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "paginae::windows::study",
                 Resource.local().load("paginae/windows/study"),
                 (pag) -> {
-
                     if (ui.gui != null) {
                         ui.gui.toggleStudy();
                     }
@@ -1066,7 +1028,7 @@ public class MenuGrid extends Widget {
                 Resource.local().load("paginae/windows/highlight"),
                 (pag) -> ui.gui.toggleHighlight()));
         addSpecial(new SpecialPagina(this, "paginae::windows::overlay",
-                Resource.local().load("paginae/windows/overlay"), //FIXME ingame setting title and picture
+                Resource.local().load("paginae/windows/overlay"),
                 (pag) -> ui.gui.toggleOverlay()));
         addSpecial(new SpecialPagina(this, "paginae::windows::gobspawner",
                 Resource.local().load("paginae/windows/gobspawner"),

@@ -185,4 +185,12 @@ public class PBotInventory {
         int allSlots = inv.isz.x * inv.isz.y;
         return allSlots - takenSlots;
     }
+
+    public Coord getFreeSlot() {
+        return inv.getFreeSlot();
+    }
+
+    public void wdgmsg(String msg, Object... args) {
+        inv.wdgmsg(msg, args);
+    }
 }

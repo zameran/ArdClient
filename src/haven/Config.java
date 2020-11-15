@@ -359,7 +359,7 @@ public class Config {
     public final static String chatfile = "chatlog.txt";
     public static PrintWriter chatlog = null;
 
-    public final static HashMap<String, CheckListboxItem> boulders = new HashMap<String, CheckListboxItem>(19) {{
+    public final static HashMap<String, CheckListboxItem> boulders = new HashMap<String, CheckListboxItem>() {{
         put("alabaster", new CheckListboxItem("Alabaster"));
         put("basalt", new CheckListboxItem("Basalt"));
         put("schist", new CheckListboxItem("Schist"));
@@ -379,6 +379,8 @@ public class Config {
         put("apatite", new CheckListboxItem("Apatite"));
         put("corund", new CheckListboxItem("Korund"));
         put("gabbro", new CheckListboxItem("Gabbro"));
+        put("arkose", new CheckListboxItem("Arkose"));
+        put("breccia", new CheckListboxItem("Breccia"));
     }};
 
     public final static HashMap<String, CheckListboxItem> bushes = new HashMap<String, CheckListboxItem>(24) {{

@@ -46,6 +46,7 @@ import haven.sloth.io.HighlightData;
 import haven.sloth.script.pathfinding.Hitbox;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
+import modification.resources;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -355,10 +356,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         //Don't try to discover anything until we know who the plgob is.
         final UI ui = glob.ui.get();
         if (ui != null && ui.gui != null && ui.gui.map != null && ui.gui.map.plgob != -1) {
-            if (ui.gui.mapfile != null && configuration.customMarkObj) {
-                for (String resname : configuration.customMarkObjs.keySet()) {
-                    if (name.equals(resname)) {
-                        ui.gui.mapfile.markobj(id, this, configuration.customMarkObjs.get(resname));
+            if (ui.gui.mapfile != null && resources.customMarkObj) {
+                for (Map.Entry<String, String> entry : resources.customMarkObjs.entrySet()) {
+                    if (name.equals(entry.getKey())) {
+                        ui.gui.mapfile.markobj(id, this, entry.getValue());
                     }
                 }
             }
@@ -375,11 +376,28 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
                 }
-                if (configuration.blizzardoverlay) {
-                    configuration.addsnow(glob.oc);
-                }
                 if (name.endsWith("stump"))
                     type = Type.TREE;
+
+                if (getattr(GobIcon.class) == null) {
+                    if (type == Type.TREE || type == Type.BUSH) {
+                        String fistname1 = name.substring(0, name.lastIndexOf('/'));
+                        String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
+                        String lastname = name.replace(fistname, "");
+
+                        String icon = fistname + "/mm" + lastname;
+                        GobIcon.Ref res = new GobIcon.Ref(icon);
+                        if (res.get() != null)
+                            setattr(new GobIcon(this, res));
+                    } else if (type == Type.BOULDER) {
+                        String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
+
+                        GobIcon.Ref res = new GobIcon.Ref(icon);
+                        if (res.get() != null)
+                            setattr(new GobIcon(this, res));
+                    }
+                }
+
                 //Check for any special attributes we should attach
                 Alerted.checkAlert(name, this);
 
@@ -498,6 +516,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         sb.append("Res: ");
         if (res().isPresent()) sb.append(getres());
         sb.append(" [").append(id).append("]\n");
+        final GobIcon icon = getattr(GobIcon.class);
+        if (icon != null) {
+            sb.append("Icon: ").append(icon.res.get()).append("\n");
+        }
         sb.append("Type: ").append(type).append("\n");
         sb.append("staticp: ").append(staticp() != null ? "static" : "dynamic").append("\n");
         final Holding holding = getattr(Holding.class);

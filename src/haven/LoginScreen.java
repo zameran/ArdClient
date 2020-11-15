@@ -26,7 +26,7 @@
 
 package haven;
 
-import modification.configuration;
+import modification.resources;
 
 import java.awt.Color;
 import java.awt.Desktop;
@@ -54,7 +54,7 @@ public class LoginScreen extends Widget {
     OptWnd opts;
     Img background;
     static Text.Foundry textf, textfs, special;
-    static Tex bg = configuration.bgCheck();
+    static Tex bg = resources.bgCheck();
 
     Text progress = null;
     private Window log;
@@ -413,7 +413,7 @@ public class LoginScreen extends Widget {
         lower();
         presize();
         parent.setfocus(this);
-        if(Config.isUpdate){
+        if (Config.isUpdate) {
             showChangeLog();
         }
     }

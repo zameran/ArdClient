@@ -94,6 +94,14 @@ public abstract class Listbox<T> extends ListWidget<T> {
             change(item);
     }
 
+    public Coord idxc(int idx) {
+        return (new Coord(0, (idx - sb.val) * itemh));
+    }
+
+    public int idxat(Coord c) {
+        return ((c.y / itemh) + sb.val);
+    }
+
     public void change(final int idx) {
         if (idx >= 0 && idx < listitems()) {
             sel = listitem(idx);

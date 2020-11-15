@@ -36,6 +36,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -46,8 +47,7 @@ import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
 
-public class
-LocalMiniMap extends Widget {
+public class LocalMiniMap extends Widget {
     private static final Tex resize = Resource.loadtex("gfx/hud/wndmap/lg/resize");
     private static final Tex gridblue = Resource.loadtex("gfx/hud/mmap/gridblue");
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
@@ -66,6 +66,9 @@ LocalMiniMap extends Widget {
     private int zIndex = 2;
     private boolean showGrid = DefSettings.MMSHOWGRID.get();
     private boolean showView = DefSettings.MMSHOWVIEW.get();
+
+    public List<DisplayIcon> icons = Collections.emptyList();
+    public GobIcon.Settings iconconf;
 
 
     private final HashSet<Long> sgobs = new HashSet<Long>();
@@ -368,9 +371,9 @@ LocalMiniMap extends Widget {
                         continue;
 
                     GobIcon icon = gob.getattr(GobIcon.class);
-                    if (icon != null && !Config.hideallicons || Config.additonalicons.containsKey(res.name) && !Config.hideallicons) {
+                    if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
                         CheckListboxItem itm = Config.icons.get(res.basename());
-                        if (itm == null || !itm.selected) {
+                        if (itm != null && !itm.selected) {
                             Tex tex;
                             if (icon != null)
                                 tex = gob.isDead() == Boolean.TRUE ? icon.texgrey() : icon.tex();
@@ -745,6 +748,8 @@ LocalMiniMap extends Widget {
             }
         }
         drawicons(g);
+        icons = findicons();
+        drawnewicons(g);
 
         synchronized (ui.sess.glob.party.memb) {
             Collection<Party.Member> members = ui.sess.glob.party.memb.values();
@@ -948,5 +953,80 @@ LocalMiniMap extends Widget {
             iconZoom = ziArray[zIndex];
         }
         return true;
+    }
+
+    public static class DisplayIcon {
+        public final GobIcon icon;
+        public final Gob gob;
+        public final GobIcon.Image img;
+        public Coord cc;
+        public double ang = 0.0;
+        public Color col = Color.WHITE;
+        public int z;
+
+        public DisplayIcon(GobIcon icon, Coord cc, double ang) {
+            this.icon = icon;
+            this.gob = icon.gob;
+            this.img = icon.img();
+            this.cc = cc;
+            this.ang = ang;
+            this.z = this.img.z;
+        }
+    }
+
+    public void drawnewicons(GOut g) {
+        for (DisplayIcon disp : icons) {
+            GobIcon.Image img = disp.img;
+            if (disp.col != null)
+                g.chcolor(disp.col);
+            else
+                g.chcolor();
+
+            Tex tex = disp.gob.isDead() == Boolean.TRUE ? img.texgrey() : img.tex();
+            if (!img.rot)
+                g.image(tex, disp.cc.sub(img.cc));
+            else
+                g.rotimage(tex, disp.cc, img.cc, -disp.ang + img.ao);
+            //g.image(img.tex, p2c(disp.gob.rc).sub(img.tex.sz().mul(iconZoom).div(2)).add(delta), img.tex.dim.mul(iconZoom));
+        }
+        g.chcolor();
+    }
+
+    public List<DisplayIcon> findicons() {
+        if ((ui.sess == null) /*|| (sessloc == null) || (dloc.seg != sessloc.seg) */ || (iconconf == null))
+            return (Collections.emptyList());
+        List<DisplayIcon> ret = new ArrayList<>();
+        OCache oc = ui.sess.glob.oc;
+        synchronized (oc) {
+            for (Gob gob : oc) {
+                try {
+                    GobIcon icon = gob.getattr(GobIcon.class);
+                    if (icon != null) {
+                        GobIcon.Setting conf = iconconf.get(icon.res.get());
+                        if ((conf != null) && conf.show) {
+                            Coord gc = p2c(gob.rc);
+                            DisplayIcon disp = new DisplayIcon(icon, gc, gob.a);
+                            KinInfo kin = gob.getattr(KinInfo.class);
+                            if ((kin != null) && (kin.group < BuddyWnd.gc.length))
+                                disp.col = BuddyWnd.gc[kin.group];
+                            ret.add(disp);
+                        }
+                    }
+                } catch (Loading l) {
+                }
+            }
+        }
+        ret.sort((a, b) -> a.z - b.z);
+        if (ret.size() == 0)
+            return (Collections.emptyList());
+        return (ret);
+    }
+
+    protected void attached() {
+        if (iconconf == null) {
+            if (ui.gui != null)
+                iconconf = ui.gui.iconconf;
+        }
+        super.attached();
     }
 }

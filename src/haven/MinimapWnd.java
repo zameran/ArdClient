@@ -216,6 +216,17 @@ public class MinimapWnd extends ResizableWnd {
                 center.c.add(center.sz.x + spacer, 0));
         final IButton viewdist = add(new IButton("gfx/hud/wndmap/btns/viewdist", "Toggle view range", () -> ui.gui.toggleMapViewDist()),
                 grid.c.add(grid.sz.x + spacer, 0));
+        final IButton iconbtn = add(new IButton("gfx/hud/wndmap/btns/lbtn-ico", "Icon settings", () -> {
+            if (ui.gui.iconconf == null)
+                return;
+            if (ui.gui.iconwnd == null) {
+                ui.gui.iconwnd = new GobIcon.SettingsWindow(ui.gui.iconconf, () -> Utils.defer(ui.gui::saveiconconf));
+                ui.gui.fitwdg(ui.gui.add(ui.gui.iconwnd, Utils.getprefc("wndc-icon", new Coord(200, 200))));
+            } else {
+                ui.destroy(ui.gui.iconwnd);
+                ui.gui.iconwnd = null;
+            }
+        }), viewdist.c.add(viewdist.sz.x + spacer, 0));
 
         header = pclaim.sz.y + spacer;
         add(mm, new Coord(0, header));

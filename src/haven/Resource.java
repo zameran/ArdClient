@@ -1173,8 +1173,13 @@ public class Resource implements Serializable {
             File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             dir.mkdirs();
             String filename = name.substring(name.lastIndexOf('/') + 1) + ".png";
+            if (filename.equals("con.png")) filename = "_" + filename;
             File outputfile = new File(dir, filename);
             if (!outputfile.exists()) {
+                if (img == null) {
+                    dev.resourceLog("image", outputfile.getPath(), "NULL");
+                    return;
+                }
                 ImageIO.write(img, "png", outputfile);
                 dev.resourceLog("image", outputfile.getPath(), "CREATED");
             }

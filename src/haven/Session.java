@@ -200,6 +200,12 @@ public class Session implements Resource.Resolver {
         }
     }
 
+    public void allCache() {
+        for (Map.Entry<Integer, CachedRes> entry : rescache.entrySet()) {
+            System.out.println("Resource [" + entry.getKey() + " : " + entry.getValue().get() + "]");
+        }
+    }
+
     private int cacheres(String resname) {
         return cacheres(Resource.local().loadwait(resname));
     }
@@ -702,6 +708,9 @@ public class Session implements Resource.Resolver {
     }
 
     public void close() {
+        if (glob != null && glob.ui != null && glob.ui.get() != null && glob.ui.get().gui != null) {
+            glob.ui.get().gui.reqdestroy();
+        }
         sworker.interrupt();
     }
 

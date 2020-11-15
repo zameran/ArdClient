@@ -4,6 +4,7 @@ import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import java.awt.Color;
 
 
 public class MapPointer extends Widget {
@@ -66,7 +67,7 @@ public class MapPointer extends Widget {
         g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
         g.aimage(icon, localCoord2.add(localCoord3), 0.5D, 0.5D);
         if (configuration.showpointdist)
-            FastText.aprint(g, localCoord2.add(localCoord3), 0.5, 0.5, dist + "");
+            g.aimage(Text.renderstroked(dist + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex(), localCoord2.add(localCoord3), 0.5, 0.5);
         this.lc = localCoord2.add(localCoord3);
     }
 
@@ -98,7 +99,7 @@ public class MapPointer extends Widget {
 
         g.aimage(icon, bc.add(Coord.sc(a, -30)), 0.5, 0.5);
         if (configuration.showpointdist)
-            FastText.aprints(g, bc.add(Coord.sc(a, -30)), 0.5, 0.5, dist + "");
+            g.aimage(Text.renderstroked(dist + "", Color.WHITE, Color.BLACK, Text.num12boldFnd).tex(), bc.add(Coord.sc(a, -30)), 0.5, 0.5);
         this.lc = bc.add(Coord.sc(a, -30));
     }
 

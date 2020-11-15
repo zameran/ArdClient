@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -84,6 +85,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public PBotScriptlist PBotScriptlist;
     public PBotScriptlistOld PBotScriptlistold;
     public MapView map;
+    public GobIcon.Settings iconconf;
     public Fightview fv;
     public Fightsess fs;
     private List<Widget> meters = new LinkedList<Widget>();
@@ -91,6 +93,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private Text lastmsg;
     private double msgtime;
     public Window invwnd, equwnd;
+    public Window iconwnd;
     public FilterWnd filter;
     public Inventory maininv;
     private Boolean temporarilyswimming = false;
@@ -337,6 +340,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    protected void attached() {
+        if (configuration.blizzardoverlay) {
+            configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
+            configuration.snowThread.start();
+        }
+        iconconf = loadiconconf();
+        super.attached();
+    }
+
     @Override
     public void destroy() {
         if (statuswindow != null) {//seems to be a bug that occasionally keeps the status window thread alive.
@@ -347,6 +359,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             ui.root.add(ui.root.sessionDisplay);
         }
         Glob.timersThread.kill();
+
+        if (configuration.snowThread.isAlive()) configuration.snowThread.kill();
         super.destroy();
         ui.gui = null;
     }
@@ -1190,6 +1204,43 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
     }
 
+    private String iconconfname() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("data/mm-icons");
+        if (genus != null)
+            buf.append("/" + genus);
+        if (ui.sess != null)
+            buf.append("/" + ui.sess.username);
+        return (buf.toString());
+    }
+
+    private GobIcon.Settings loadiconconf() {
+        if (ResCache.global == null)
+            return (new GobIcon.Settings());
+        try {
+            try (StreamMessage fp = new StreamMessage(ResCache.global.fetch(iconconfname()))) {
+                return (GobIcon.Settings.load(fp));
+            }
+        } catch (java.io.FileNotFoundException e) {
+            return (new GobIcon.Settings());
+        } catch (Exception e) {
+            new Warning(e, "failed to load icon-conf").issue();
+            return (new GobIcon.Settings());
+        }
+    }
+
+    public void saveiconconf() {
+        if (ResCache.global == null)
+            return;
+        try {
+            try (StreamMessage fp = new StreamMessage(ResCache.global.store(iconconfname()))) {
+                iconconf.save(fp);
+            }
+        } catch (Exception e) {
+            new Warning(e, "failed to store icon-conf").issue();
+        }
+    }
+
     private double lastwndsave = 0;
 
     public void tick(double dt) {
@@ -1342,6 +1393,43 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             String nm = (String) args[3];
             if (mapfile != null)
                 mapfile.markobj(gobid, oid, res, nm);
+        } else if (msg == "map-icons") {
+            GobIcon.Settings conf = this.iconconf;
+            int tag = (Integer) args[0];
+            if (args.length < 2) {
+                if (conf.tag != tag)
+                    wdgmsg("map-icons", conf.tag);
+            } else if (args[1] instanceof String) {
+                Resource.Spec res = new Resource.Spec(null, (String) args[1], (Integer) args[2]);
+                GobIcon.Setting cset = new GobIcon.Setting(res);
+                boolean has = conf.settings.containsKey(res.name);
+                cset.show = cset.defshow = ((Integer) args[3]) != 0;
+                conf.receive(tag, new GobIcon.Setting[]{cset});
+                saveiconconf();
+                if (!has && conf.notify) {
+                    if (!has && conf.notify) {
+                        Resource lres = Resource.remote().load(res.name, res.ver).get();
+                        Resource.Tooltip tip = lres.layer(Resource.tooltip);
+                        if (tip != null)
+                            msg(String.format("%s added to list of seen icons.", tip.t));
+                    }
+                }
+            } else if (args[1] instanceof Object[]) {
+                Object[] sub = (Object[]) args[1];
+                int a = 0;
+                Collection<GobIcon.Setting> csets = new ArrayList<>();
+                while (a < sub.length) {
+                    String resnm = (String) sub[a++];
+                    int resver = (Integer) sub[a++];
+                    int fl = (Integer) sub[a++];
+                    Resource.Spec res = new Resource.Spec(null, resnm, resver);
+                    GobIcon.Setting cset = new GobIcon.Setting(res);
+                    cset.show = cset.defshow = ((fl & 1) != 0);
+                    csets.add(cset);
+                }
+                conf.receive(tag, csets.toArray(new GobIcon.Setting[0]));
+                saveiconconf();
+            }
         } else {
             super.uimsg(msg, args);
         }
@@ -1360,8 +1448,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 ui.destroy(help);
                 help = null;
                 return;
-            } else if ((polities.contains(sender)) && (msg == "close"))
+            } else if ((polities.contains(sender)) && (msg == "close")) {
                 sender.hide();
+            } else if (sender == iconwnd) {
+                ui.destroy(iconwnd);
+                iconwnd = null;
+                return;
+            }
         }
         super.wdgmsg(sender, msg, args);
     }

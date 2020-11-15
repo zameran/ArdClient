@@ -11,7 +11,6 @@ import haven.Widget;
 import haven.WidgetVerticalAppender;
 import haven.Window;
 import haven.automation.GobSelectCallback;
-import haven.purus.pbot.PBotAPI;
 import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotUtils;
 
@@ -122,6 +121,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                     setInfo("In main loop");
                     if (stop)
                         break;
+                    PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                     while (PBotUtils.getItemAtHand(ui) == null) {
                         if (stop)
                             break;
@@ -131,19 +131,22 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                                 stop = true;
                             break;
                         }
-                        PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
                         Gob g = PBotUtils.findObjectByNames(ui, 5000, terobj);
-                        PBotUtils.doClick(ui, g, 3, 1);
+                        while (PBotUtils.findObjectById(ui, g.id) != null && !stop) {
+                            PBotUtils.doClick(ui, g, 3, 0);
+                            while (PBotUtils.isMoving(ui) && !stop) {
+                                PBotUtils.sleep(100);
+                            }
+                            if (notmoving(1000, g)) break;
+                        }
 //                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
                         //PBotUtils.sleep(1000);
 
-                        while (/*PBotUtils.getItemAtHand(ui) == null
-                        && PBotUtils.findObjectByNames(ui, 5000, terobj) != null
-                        && */PBotUtils.isMoving(ui)) {
+//                        while (PBotUtils.getItemAtHand(ui) == null && PBotUtils.findObjectByNames(ui, 5000, terobj) != null) {
 //                            setInfo("waiting for item on  hand");
-                            setInfo("moving");
-                            PBotUtils.sleep(100);
-                        }
+//                            setInfo("moving");
+//                            PBotUtils.sleep(100);
+//                        }
                         setInfo("inv free slots : " + PBotUtils.invFreeSlots(ui));
                     }
 
@@ -197,26 +200,8 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                         }
                         PBotUtils.sleep(1000);
                         setInfo("clicking stockpile");
-                        try {
-                            while (PBotUtils.getItemAtHand(ui) == null)
-                                PBotUtils.takeItem(ui, PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).get(0).witem);
-                        } catch (NullPointerException q) {
-                            //break on null pointer here, bot is prob done
-                            stop = true;
-                            break main;
-                        }
-                        int cnt = PBotUtils.invFreeSlots(ui);
-                        try {
-                            ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 1, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
-                        } catch (IndexOutOfBoundsException lolindexes) {
-                            PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
-                            stop = true;
-                            stop();
-                        }
-                        while (PBotUtils.invFreeSlots(ui) == cnt && PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).size() != 0) {
-                            setInfo("waiting for inv update");
-                            PBotUtils.sleep(100);
-                        }
+                        if (!takeItem(invobj)) break;
+                        itemact(stockpiles.get(0));
                     }
                     if (PBotUtils.findObjectByNames(ui, 5000, terobj) == null)
                         break;
@@ -300,7 +285,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
 
     public void setInfo(String text) {
         infoLbl.settext(text);
-        System.out.println(text);
+        System.out.println(this.cap.text + ": " + text);
     }
 
     @Override
@@ -323,5 +308,61 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
         }
         reqdestroy();
         //ui.gui.map.wdgmsg("click", Coord.z, new Coord((int)BotUtils.player().rc.x, (int)BotUtils.player().rc.y), 1, 0);
+    }
+
+    public void itemact(Gob gob) {
+        int cnt = PBotUtils.invFreeSlots(ui);
+        try {
+            ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 1, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        } catch (IndexOutOfBoundsException lolindexes) {
+            PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
+            stop = true;
+            stop();
+        }
+        int stoping = 0;
+        int maxstoping = 1000;
+        int time = 10;
+        while (PBotUtils.invFreeSlots(ui) == cnt && PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).size() != 0 && !stop) {
+            setInfo("waiting for inv update");
+            if (stoping >= maxstoping)
+                break;
+            PBotUtils.sleep(time);
+            stoping += time;
+        }
+    }
+
+    public boolean takeItem(String invobj) {
+        WItem wItem = PBotUtils.getInventoryItemsByName(ui.gui.maininv, invobj).get(0).witem;
+        if (wItem != null) {
+            while (PBotUtils.getItemAtHand(ui) == null && !stop) {
+                int stoping = 0;
+                int maxstoping = 1000;
+                int time = 10;
+                PBotUtils.takeItem(ui, wItem);
+                while (PBotUtils.getItemAtHand(ui) == null && !stop) {
+                    if (stoping >= maxstoping)
+                        break;
+                    PBotUtils.sleep(time);
+                    stoping += time;
+                }
+            }
+            return true;
+        } else
+            return false;
+    }
+
+    public boolean notmoving(int wait, Gob g) {
+        int stoping = 0;
+        int maxstoping = wait;
+        int time = 10;
+        while (!PBotUtils.isMoving(ui) && !stop) {
+            if (PBotUtils.findObjectById(ui, g.id) == null)
+                return false;
+            if (stoping >= maxstoping)
+                return true;
+            PBotUtils.sleep(time);
+            stoping += time;
+        }
+        return false;
     }
 }

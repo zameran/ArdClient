@@ -169,7 +169,7 @@ public class PBotUtils {
 //    }
 
     /**
-     * Click some place on map
+     * Click some place on map (double type with floor(posres))
      *
      * @param x   x-coordinate
      * @param y   y-coordinate
@@ -185,7 +185,7 @@ public class PBotUtils {
 //    }
 
     /**
-     * Click some place on map
+     * Click some place on map (double type with floor(posres))
      *
      * @param x   x-coordinate
      * @param y   y-coordinate
@@ -196,20 +196,43 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
     }
 
+    /**
+     * Click some place on map (double type with floor(posres))
+     *
+     * @param c   coordinate (x, y)
+     * @param btn 1 = left click, 3 = right click
+     * @param mod 1 = shift, 2 = ctrl, 4 = alt
+     */
+    public static void mapClick(UI ui, Coord2d c, int btn, int mod) {
+        ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c.floor(posres), btn, mod);
+    }
+
+    /**
+     * Click some place on map (int type without floor(posres))
+     *
+     * @param x   x-coordinate
+     * @param y   y-coordinate
+     * @param btn 1 = left click, 3 = right click
+     * @param mod 1 = shift, 2 = ctrl, 4 = alt
+     */
+    public static void mapFinalClick(UI ui, int x, int y, int btn, int mod) {
+        ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord(x, y), btn, mod);
+    }
+
+    /**
+     * Click some place on map (int type without floor(posres))
+     *
+     * @param c   coordinate (x, y)
+     * @param btn 1 = left click, 3 = right click
+     * @param mod 1 = shift, 2 = ctrl, 4 = alt
+     */
+    public static void mapFinalClick(UI ui, Coord c, int btn, int mod) {
+        ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c, btn, mod);
+    }
+
 //    public static void mapClick(double x, double y, int btn, int mod) {
 //        mapClick(PBotAPI.modeui(), x, y, btn, mod);
 //    }
-
-    /**
-     * Use item in hand to ground below player, for example, to plant carrot
-     */
-    /*public static void mapInteractClick(UI ui) {
-        ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(), PBotGobAPI.player().getRcCoords().floor(posres), 3, ui.modflags());
-    }*/
-
-    /*public static void mapInteractClick() {
-        mapInteractClick(PBotAPI.modeui());
-    }*/
 
 
     /**
@@ -220,8 +243,8 @@ public class PBotUtils {
     public static Coord getCenterScreenCoord(UI ui) {
         Coord sc, sz;
         sz = ui.gui.map.sz;
-        sc = new Coord((int) Math.round(Math.random() * 200 + sz.x / 2 - 100),
-                (int) Math.round(Math.random() * 200 + sz.y / 2 - 100));
+        sc = new Coord((int) Math.round(Math.random() * 200 + sz.x / 2f - 100),
+                (int) Math.round(Math.random() * 200 + sz.y / 2f - 100));
         return sc;
     }
 
@@ -791,8 +814,7 @@ public class PBotUtils {
     // Button 1 = Left click and 3 = right click
     // Modifier 1 - shift; 2 - ctrl; 4 - alt;
     public static void doClick(UI ui, Gob gob, int button, int mod) {
-        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0,
-                -1);
+        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, -1);
     }
 
 //    public static void doClick(Gob gob, int button, int mod) {
@@ -818,6 +840,10 @@ public class PBotUtils {
 
     // Returns null if not found
     public static Coord getFreeInvSlot(Inventory inventory) {
+        return inventory.getFreeSlot();
+    }
+
+    public static Coord getFreeInvSlot(PBotInventory inventory) {
         return inventory.getFreeSlot();
     }
 
@@ -927,8 +953,18 @@ public class PBotUtils {
 //    }
 
     // Find object by ID, returns null if not found
+//    public static Gob findObjectById(UI ui, long id) {
+//        return ui.sess.glob.oc.getgob(id);
+//    }
+
     public static Gob findObjectById(UI ui, long id) {
-        return ui.sess.glob.oc.getgob(id);
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                if (gob.id == id)
+                    return gob;
+            }
+        }
+        return null;
     }
 
 //    public static Gob findObjectById(long id) {
@@ -1103,7 +1139,9 @@ public class PBotUtils {
         }
     }
 
-    // Use item in hand to ground below player, for example, plant carrot
+    /**
+     * Use item in hand to ground below player, for example, to plant carrot
+     */
     public static void mapInteractClick(UI ui) {
         ui.gui.map.wdgmsg("itemact", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 3, ui.modflags());
     }
@@ -1157,6 +1195,10 @@ public class PBotUtils {
 
     // Drops item from  hand to given slot in given inventory
     public static void dropItemToInventory(Coord coord, Inventory inventory) {
+        inventory.wdgmsg("drop", coord);
+    }
+
+    public static void dropItemToInventory(Coord coord, PBotInventory inventory) {
         inventory.wdgmsg("drop", coord);
     }
 
