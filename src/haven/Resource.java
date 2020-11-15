@@ -1372,7 +1372,6 @@ public class Resource implements Serializable {
             String filename = name.substring(name.lastIndexOf('.') + 1) + ".class";
             File f = new File(dir, filename);
             if (!f.exists()) {
-                f.createNewFile();
                 FileOutputStream fout = new FileOutputStream(f);
                 fout.write(data);
                 fout.flush();
