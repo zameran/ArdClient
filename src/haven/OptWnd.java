@@ -3348,16 +3348,14 @@ public class OptWnd extends Window {
                                 a = val;
                                 if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
                                     synchronized (ui.sess.glob.oc) {
-                                        OCache oc = ui.sess.glob.oc;
-
                                         if (val) {
-                                            if (configuration.snowThread != null && !configuration.snowThread.isAlive()) {
+                                            if (configuration.snowThread == null)
                                                 configuration.snowThread = new configuration.SnowThread(ui.sess.glob.oc);
+                                            if (!configuration.snowThread.isAlive())
                                                 configuration.snowThread.start();
-                                            }
                                         } else {
-                                            if (configuration.snowThread.isAlive()) configuration.snowThread.kill();
-                                            configuration.deleteAllSnow(oc);
+                                            if (configuration.snowThread != null && configuration.snowThread.isAlive())
+                                                configuration.snowThread.kill();
                                         }
                                     }
                                 }

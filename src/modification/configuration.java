@@ -482,6 +482,8 @@ public class configuration {
         public void kill() {
             running.set(false);
             interrupt();
+            configuration.deleteAllSnow(oc);
+            configuration.snowThread = null;
         }
     }
 

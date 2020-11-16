@@ -381,7 +381,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         }
         Glob.timersThread.kill();
 
-        if (configuration.snowThread != null && configuration.snowThread.isAlive()) configuration.snowThread.kill();
+        if (configuration.snowThread != null && configuration.snowThread.isAlive())
+            configuration.snowThread.kill();
         super.destroy();
         ui.gui = null;
     }

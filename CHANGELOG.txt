@@ -1,3 +1,7 @@
+20201117.1
+Character Sheet hd images. Snowfall fix.
+~
+
 20201117
 Equipory fix. Map icons. Snowfall fix. Farmer as FlaxBot(beta). Fix farmer and Stockpile.
 ~
