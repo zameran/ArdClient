@@ -321,7 +321,7 @@ public class GobIcon extends GAttrib {
                             }
                         }
                     }
-                    Collections.sort(ordered, (a, b) -> {
+                    ordered.sort((a, b) -> {
                         if ((a.name == null) && (b.name == null))
                             return (0);
                         if (a.name == null)
@@ -345,7 +345,7 @@ public class GobIcon extends GAttrib {
                 Icon icon = ordered.get(idx);
                 if (icon.name == null)
                     return (false);
-                return (icon.name.text.toLowerCase().indexOf(txt.toLowerCase()) >= 0);
+                return (icon.name.text.toLowerCase().contains(txt.toLowerCase()));
             }
 
             public void draw(GOut g) {

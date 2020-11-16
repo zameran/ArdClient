@@ -526,7 +526,7 @@ public class LocalMiniMap extends Widget {
                     GobIcon icon = gob.getattr(GobIcon.class);
                     if (icon != null) {
                         CheckListboxItem itm = Config.icons.get(gob.getres().basename());
-                        if (itm == null || !itm.selected) {
+                        if ((itm != null && !itm.selected) || icons.stream().anyMatch(i -> i.gob.equals(gob))) {
                             Coord gc = p2c(gob.rc).add(delta);
                             Coord sz = icon.tex().sz();
                             if (c.isect(gc.sub(sz.div(2)), sz)) {
