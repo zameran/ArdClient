@@ -157,6 +157,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private List<Coord2d> questQueue = new ArrayList<>();
     private Gob pathfindGob;
     private int pathfindGobMod = 0;
+    private int pathfindGobMouse = 0;
     private String lasttt = "";
     private Object tt;
 
@@ -1851,7 +1852,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         GobHitbox.BBox box = GobHitbox.getBBox(pathfindGob);
                         GobHitbox.BBox pbox = GobHitbox.getBBox(pl);
                         if (box != null && pbox != null) {
-                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box.a.x, box.a.y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox.a.x, pbox.a.y), 2) * 2);
+                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box.a.x, box.a.y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox.a.x, pbox.a.y), 2) * 2) + 2;
                         } else
                             return movingto.dist(pl.rc) <= 5;
                     } else
@@ -1867,7 +1868,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public boolean isclearmovequeue() {
-        return pathfindGob == null && pathfindGobMod == 0 && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
+        return pathfindGob == null && pathfindGobMod == 0 && pathfindGobMouse == 0 && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
     }
 
     public void clearmovequeue() {
@@ -1875,6 +1876,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (pathfindGob != null) {
             pathfindGob = null; //set pathfind gob back to null incase pathfinding was interrupted in the middle of a pathfind right click.
             pathfindGobMod = 0;
+            pathfindGobMouse = 0;
             isclickongob = false;
         }
         movequeue.clear();
@@ -1929,6 +1931,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         g.updatePathfindingBlackout(true);
         boolean yea = pathto(new Coord2d(g.getc()));
         pathfindGob = g;
+        pathfindGobMouse = 1;
         g.updatePathfindingBlackout(false);
         return yea;
     }
@@ -1939,6 +1942,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         boolean yea = pathto(new Coord2d(g.getc()));
         pathfindGob = g;
         pathfindGobMod = mod;
+        pathfindGobMouse = 3;
         g.updatePathfindingBlackout(false);
         return yea;
     }
@@ -1990,7 +1994,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
             lastMove = System.currentTimeMillis();
         }
-        if (movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
+        if (pathfindGobMouse == 3 && movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
             wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
             isclickongob = true;
         }

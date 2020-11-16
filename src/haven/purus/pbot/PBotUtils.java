@@ -959,12 +959,11 @@ public class PBotUtils {
 
     public static Gob findObjectById(UI ui, long id) {
         synchronized (ui.sess.glob.oc) {
-            for (Gob gob : ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc)
                 if (gob.id == id)
-                    return gob;
-            }
+                    return (gob);
         }
-        return null;
+        return (null);
     }
 
 //    public static Gob findObjectById(long id) {

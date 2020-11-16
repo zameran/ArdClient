@@ -206,11 +206,12 @@ public class PBotGobAPI {
      * @return Object, or null if not found
      */
     public static PBotGob findGobById(UI ui, long id) {
-        Gob gob = ui.sess.glob.oc.getgob(id);
-        if (gob == null)
-            return null;
-        else
-            return new PBotGob(ui.sess.glob.oc.getgob(id));
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc)
+                if (gob.id == id)
+                    return (new PBotGob(gob));
+        }
+        return (null);
     }
 
 //    public static PBotGob findGobById(long id) {
