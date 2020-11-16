@@ -33,9 +33,10 @@ import haven.resutil.Ridges;
 import haven.sloth.gob.Type;
 
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -982,12 +983,18 @@ public class LocalMiniMap extends Widget {
             else
                 g.chcolor();
 
-            Tex tex = disp.gob.isDead() == Boolean.TRUE ? img.texgrey() : img.tex();
+            TexI tex = disp.gob.isDead() == Boolean.TRUE ? img.texgrey() : img.tex();
             if (!img.rot)
-                g.image(tex, disp.cc.sub(img.cc));
-            else
-                g.rotimage(tex, disp.cc, img.cc, -disp.ang + img.ao);
-            //g.image(img.tex, p2c(disp.gob.rc).sub(img.tex.sz().mul(iconZoom).div(2)).add(delta), img.tex.dim.mul(iconZoom));
+                g.image(tex, disp.cc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
+            else {
+                BufferedImage bi = tex.back;
+                AffineTransform transform = new AffineTransform();
+                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI) ;
+                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
+                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+                bi = op.filter(bi, null);
+                g.image(bi, disp.cc.sub(img.cc.mul(iconZoom)).add(delta));
+            }
         }
         g.chcolor();
     }

@@ -60,7 +60,7 @@ public class GobIcon extends GAttrib {
         public Resource get() {
             try {
                 if (res == null)
-                    res = Resource.remote().loadwait(resnm);
+                    res = Resource.remote().load(resnm).get();
             } catch (Exception e) {
             }
             return (res);
@@ -99,7 +99,7 @@ public class GobIcon extends GAttrib {
 
     public static class Image {
         public Resource.Image rimg;
-        private Tex tex, texgrey;
+        private TexI tex, texgrey;
         public Coord cc;
         public boolean rot;
         public double ao;
@@ -107,7 +107,7 @@ public class GobIcon extends GAttrib {
 
         public Image(Resource.Image rimg) {
             this.rimg = rimg;
-            Tex tex = rimg.tex();
+            TexI tex = rimg.texi();
             if ((tex.sz().x > size) || (tex.sz().y > size)) {
                 BufferedImage buf = rimg.img;
                 buf = PUtils.rasterimg(PUtils.blurmask2(buf.getRaster(), 1, 1, Color.BLACK));
@@ -132,7 +132,7 @@ public class GobIcon extends GAttrib {
                 this.z = Utils.intvard(data, 0);
         }
 
-        public Tex texgrey() {
+        public TexI texgrey() {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
                 Tex tex = new TexI(bimg);
@@ -145,7 +145,7 @@ public class GobIcon extends GAttrib {
             return texgrey;
         }
 
-        public Tex tex() {
+        public TexI tex() {
             return tex;
         }
     }

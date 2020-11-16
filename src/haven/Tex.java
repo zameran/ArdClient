@@ -57,20 +57,6 @@ public abstract class Tex {
         render(g, c, Coord.z, dim, dim);
     }
 
-    public void render(GOut g, float[] gc, float[] tc) {
-        render(g, new Coord(gc[0], gc[1]), new Coord(gc[4], gc[5]), new Coord(tc[0], tc[1]), new Coord(tc[4], tc[5]));
-//        public default void render(GOut g, Coord dul, Coord dbr, Coord tul, Coord tbr) {
-//          float[] gc = {
-//                  dul.x, dul.y, dbr.x, dul.y,
-//                  dbr.x, dbr.y, dul.x, dbr.y,
-//          };
-//          float[] tc = {
-//                  tul.x, tul.y, tbr.x, tul.y,
-//                  tbr.x, tbr.y, tul.x, tbr.y,
-//          };
-//        render(g, gc, tc);
-    }
-
     /* Render texture at c, scaled to tsz, clipping everything outside ul to ul + sz. */
     public void crender(GOut g, Coord c, Coord ul, Coord sz, Coord tsz) {
         if ((tsz.x == 0) || (tsz.y == 0))
