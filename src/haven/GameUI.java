@@ -205,16 +205,37 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         cal = umpanel.add(new Cal(), new Coord(0, 10));
         if (Config.hidecalendar)
             cal.hide();
-        add(new Widget(new Coord(360, 40)) {
+//        add(new Widget(new Coord(360, 40)) {
+//            @Override
+//            public void draw(GOut g) {
+//                if (Config.showservertime) {
+//                    Tex time = ui.sess.glob.servertimetex;
+//                    if (time != null)
+//                        g.image(time, new Coord(360 / 2 - time.sz().x / 2, 0));
+//                }
+//            }
+//        }, new Coord(HavenPanel.w / 2 - 360 / 2, umpanel.sz.y));
+
+        add(new Widget(new Coord(360, umpanel.sz.y)) {
             @Override
             public void draw(GOut g) {
+                c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
-                    Tex time = ui.sess.glob.servertimetex;
-                    if (time != null)
-                        g.image(time, new Coord(360 / 2 - time.sz().x / 2, 0));
+                    Tex mtime = ui.sess.glob.mservertimetex;
+                    Tex ltime = ui.sess.glob.lservertimetex;
+                    Tex rtime = ui.sess.glob.rservertimetex;
+                    Tex btime = ui.sess.glob.bservertimetex;
+                    if (mtime != null)
+                        g.aimage(mtime, new Coord(sz.x - 5, 10), 1, 0);
+                    if (ltime != null)
+                        g.aimage(ltime, new Coord(sz.x - 5, 22), 1, 0);
+                    if (rtime != null)
+                        g.aimage(rtime, new Coord(sz.x - 5, 34), 1, 0);
+                    if (btime != null)
+                        g.aimage(btime, new Coord(sz.x - 5, 46), 1, 0);
                 }
             }
-        }, new Coord(HavenPanel.w / 2 - 360 / 2, umpanel.sz.y));
+        }, new Coord(umpanel.c.x - 360, 0));
 
         opts = add(new OptWnd());
         opts.hide();

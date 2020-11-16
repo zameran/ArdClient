@@ -195,6 +195,9 @@ public class Glob {
         oc.ctick(dt);
         map.ctick(dt);
 
+        if (Config.showservertime)
+            servertimecalc();
+
         lastctick = now;
     }
 
@@ -230,7 +233,7 @@ public class Glob {
             "Waning Crescent"
     };
 
-    private void servertimecalc() {
+    private void servertimecalc1() {
         if (ast == null)
             return;
 
@@ -285,6 +288,63 @@ public class Glob {
         servertimetex = Text.render(servertime).tex();
     }
 
+    private void servertimecalc() {
+        long secs = (long)globtime();
+        long day = secs / secinday;
+        long secintoday = secs % secinday;
+        long hours = secintoday / 3600;
+        long mins = (secintoday % 3600) / 60;
+        long seconds = secintoday % 60;
+        
+        bservertime = " ";
+        String dayOfMonth = "";
+        String phaseOfMoon = " ";
+        if (ast != null) {
+            int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 35 : ast.is == 3 ? 5 : 10));
+
+            int sdt = (ast.is == 1 ? 105 : ast.is == 3 ? 15 : 30); //days of season total
+            int sdp = (int)(ast.sp * (sdt)); //days of season passed
+            int sdl = (int)Math.floor((1 - ast.sp) * (sdt));
+            if (sdl >= 1)
+                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
+            else
+                dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
+            int mp = (int)Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
+            phaseOfMoon = mPhaseNames[mp] + " Moon";
+        }
+
+        lservertime = String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "%s"), dayOfMonth);
+        mservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "Day") + String.format(" %d, %02d:%02d:%02d", day, hours, mins, seconds);
+        rservertime = Resource.getLocString(Resource.BUNDLE_LABEL, phaseOfMoon);
+        if (secintoday >= dewyladysmantletimemin && secintoday <= dewyladysmantletimemax)
+            bservertime = Resource.getLocString(Resource.BUNDLE_LABEL, "(Dewy Lady's Mantle)");
+        /*
+        if(night) {
+            if (moonid == 128)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (New Moon)");
+            else if (moonid == 129)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Waxing Crescent)");
+            else if (moonid == 130)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (First Quarter)");
+            else if (moonid == 131)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Waxing Gibbous)");
+            else if (moonid == 132)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Full Moon)");
+            else if (moonid == 133)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Waning Gibbous)");
+            else if (moonid == 134)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Last Quarter)");
+            else if (moonid == 135)
+                servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Waning Crescent)");
+        }else
+            servertime += Resource.getLocString(Resource.BUNDLE_LABEL, " (Daytime)");
+        */
+        mservertimetex = Text.render(mservertime).tex();
+        lservertimetex = Text.render(lservertime).tex();
+        rservertimetex = Text.render(rservertime).tex();
+        bservertimetex = Text.render(bservertime).tex();
+    }
+
     public void blob(Message msg) {
         boolean inc = msg.uint8() != 0;
         while (!msg.eom()) {
@@ -296,7 +356,7 @@ public class Glob {
                 localEpoch = Utils.rtime();
                 if (!inc)
                     lastrep = 0;
-                servertimecalc();
+//                servertimecalc();
             } else if (t == "astro") {
                 double dt = ((Number) a[n++]).doubleValue();
                 double mp = ((Number) a[n++]).doubleValue();
