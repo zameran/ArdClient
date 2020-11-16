@@ -65,8 +65,8 @@ public class Config {
     public static String resdir = getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
     public static String authuser = null;
     public static String authserv = null;
-    public static String defserv = null;
-    public static URL resurl = null;
+    public static String defserv = getprop("haven.defserv", "game.havenandhearth.com");
+    public static URL resurl = geturl("haven.resurl", "https://game.havenandhearth.com/hres/");
     public static boolean dbtext = false;
     public static boolean profile = false;
     public static boolean simplemap = Utils.getprefb("simplemap", false);
