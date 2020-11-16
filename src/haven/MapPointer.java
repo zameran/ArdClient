@@ -1,5 +1,6 @@
 package haven;
 
+import haven.purus.pbot.PBotUtils;
 import modification.configuration;
 
 import javax.media.opengl.GL;
@@ -114,7 +115,7 @@ public class MapPointer extends Widget {
         if (tc != null) {
             final Double angle = ui.gui.map.screenangle(tc, true);
             if (configuration.showpointdist) {
-                final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+                final Gob me = PBotUtils.player(ui);
                 if (me != null) {
                     final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
                     if (cdist != dist) {
@@ -139,17 +140,11 @@ public class MapPointer extends Widget {
 
     public Object tooltip(Coord c, Widget wdg) {
         if ((this.lc != null) && (this.lc.dist(c) < 20.0D) && tc != null) {
-            final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+            final Gob me = PBotUtils.player(ui);
             if (me != null) {
-                final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
-                if (cdist != dist) {
-                    dist = cdist;
-                    if (tt != null && tt.tex() != null)
-                        tt.tex().dispose();
-                    return tt = Text.render("Distance: " + dist);
-                } else {
-                    return tt;
-                }
+                if (tt != null && tt.tex() != null)
+                    tt.tex().dispose();
+                return tt = Text.render("Distance: " + dist);
             } else {
                 return null;
             }

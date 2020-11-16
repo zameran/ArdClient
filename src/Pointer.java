@@ -15,6 +15,7 @@ import haven.Tex;
 import haven.Text;
 import haven.UI;
 import haven.Widget;
+import haven.purus.pbot.PBotUtils;
 import haven.sloth.script.PointerData;
 import modification.configuration;
 
@@ -184,7 +185,7 @@ public class Pointer extends Widget {
         if (gobsc != null) {
             final Double angle = ui.gui.map.screenangle(gobrc, true);
             if (configuration.showpointdist) {
-                final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+                final Gob me = PBotUtils.player(ui);
                 if (me != null) {
                     final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
                     if (cdist != dist) {
@@ -281,23 +282,17 @@ public class Pointer extends Widget {
     public Object tooltip(Coord c, Widget wdg) {
         if ((this.lc != null) && (this.lc.dist(c) < 20.0D) && tc != null) {
             if (tooltip instanceof Text.Line) {
-                final Gob me = ui.sess.glob.oc.getgob(ui.gui.map.plgob);
+                final Gob me = PBotUtils.player(ui);
                 if (me != null) {
-                    final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
-                    if (cdist != dist) {
-                        dist = cdist;
-                        final String extra;
-                        if (dist >= 1000) {
-                            extra = " - May be further than the client can see";
-                        } else {
-                            extra = "";
-                        }
-                        if (tt != null && tt.tex() != null)
-                            tt.tex().dispose();
-                        return tt = Text.render(((Text.Line) this.tooltip).text + " - Distance: " + dist + extra);
+                    final String extra;
+                    if (dist >= 1000) {
+                        extra = " - May be further than the client can see";
                     } else {
-                        return tt;
+                        extra = "";
                     }
+                    if (tt != null && tt.tex() != null)
+                        tt.tex().dispose();
+                    return tt = Text.render(((Text.Line) this.tooltip).text + " - Distance: " + dist + extra);
                 }
             } else {
                 return this.tooltip;
