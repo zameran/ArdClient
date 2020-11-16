@@ -135,14 +135,14 @@ public class GobIcon extends GAttrib {
         public TexI texgrey() {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
-                Tex tex = new TexI(bimg);
+                texgrey = new TexI(bimg);
                 if ((tex.sz().x > size) && (tex.sz().y > size)) {
                     bimg = PUtils.rasterimg(PUtils.blurmask2(bimg.getRaster(), 1, 1, Color.BLACK));
                     bimg = PUtils.convolvedown(bimg, new Coord(20, 20), filter);
                     texgrey = new TexI(bimg);
                 }
             }
-            return texgrey;
+            return (texgrey);
         }
 
         public TexI tex() {
