@@ -524,42 +524,25 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         sb.append("staticp: ").append(staticp() != null ? "static" : "dynamic").append("\n");
         final Holding holding = getattr(Holding.class);
         if (holding != null) {
-            sb.append("Holding: ");
-            sb.append(holding.held.id);
-            sb.append(" - ");
-            sb.append(holding.held.resname().orElse("Unknown"));
-            sb.append("\n");
+            sb.append("Holding: ").append(holding.held.id).append(" - ").append(holding.held.resname().orElse("Unknown")).append("\n");
         } else {
             final HeldBy heldby = getattr(HeldBy.class);
             if (heldby != null) {
-                sb.append("Held By: ");
-                sb.append(heldby.holder.id);
-                sb.append(" - ");
-                sb.append(heldby.holder.resname().orElse("Unknown"));
-                sb.append("\n");
+                sb.append("Held By: ").append(heldby.holder.id).append(" - ").append(heldby.holder.resname().orElse("Unknown")).append("\n");
             }
         }
         ResDrawable dw = getattr(ResDrawable.class);
         if (dw != null) {
-            sb.append("ResDraw: ");
-            sb.append(Arrays.toString(dw.sdt.bytes()));
-            sb.append("\n");
-            sb.append("sdt: ");
-            sb.append(dw.sdtnum());
-            sb.append("\n");
-            sb.append("Angle: ");
-            sb.append(Math.toDegrees(a));
-            sb.append("\n");
+            sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf)).append("\n");
+            sb.append("sdt: ").append(dw.sdtnum()).append("\n");
         } else {
             Composite comp = getattr(Composite.class);
             if (comp != null) {
-                sb.append(eq());
-                sb.append("\n");
+                sb.append(eq()).append("\n");
             }
         }
-        sb.append("Position: ");
-        sb.append(getc());
-        sb.append("\n");
+        sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");
+        sb.append("Position: ").append(getc()).append("\n");
         return sb.toString();
     }
 
