@@ -28,7 +28,7 @@ public class SnowFall extends Sprite {
 
         Flake(Coord3f pos) {
             this.position = new Coord3f(pos.x, pos.y, pos.z);
-            this.velocity = new Coord3f(0.0F, 0.0F,  (pos.z - 500F) * .98f / 2);
+            this.velocity = new Coord3f(0.0F, 0.0F,  (pos.z - 500F) * .98f / 1000.0F);//неправильная начальная скорость
             this.normal = new Coord3f(0, 0, 0).norm();
         }
 
@@ -44,6 +44,10 @@ public class SnowFall extends Sprite {
             }
             return done;
         }
+
+        void move(Coord3f pos) {
+            this.position = this.position.sub(pos);
+        }
     }
 
 
@@ -52,12 +56,16 @@ public class SnowFall extends Sprite {
     private float de = 0.0F;
     private final Coord3f offset = new Coord3f(-1000f, -1000f, 0f);
     private final Coord3f sz = new Coord3f(2000f, 2000f, 0f);
+    private final Gob master;
+    private Coord3f lastCoord;  //нужно доработать - персонаж разворачивается, нужно добавить угол
 
     FloatBuffer posb = null;
     FloatBuffer nrmb = null;
 
     public SnowFall(final Gob g) {
         super(g, null);
+        master = g;
+        lastCoord = g.getc();
 
         mat = new Material.Colors(new Color(255, 255, 255),
                 new Color(255, 255, 255),
@@ -66,6 +74,10 @@ public class SnowFall extends Sprite {
     }
 
     public void draw(GOut g) {
+//        for (Flake boll : flakes) {
+//            boll.move(master.getc().sub(lastCoord));
+//        }
+//        lastCoord = master.getrc();
         updpos(g);
         if (posb == null)
             return;
