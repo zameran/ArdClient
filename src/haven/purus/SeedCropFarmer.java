@@ -4,9 +4,7 @@ import haven.Button;
 import haven.Coord;
 import haven.FlowerMenu;
 import haven.GItem;
-import haven.GameUI;
 import haven.Gob;
-import haven.IMeter;
 import haven.Inventory;
 import haven.Label;
 import haven.Loading;
@@ -16,6 +14,7 @@ import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotGobAPI;
+import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
@@ -100,16 +99,13 @@ public class SeedCropFarmer extends Window implements Runnable {
                 ispumpkin = true;
             else
                 ispumpkin = false;
+            crop:
             for (Gob g : crops) {
                 if (stopThread)
                     return;
-                // Check if stamina is under 30%, drink if so
-                //GameUI gui = this.parent.findchild(GameUI.class);
-                GameUI gui = ui.gui;
                 if (PBotUtils.getStamina(ui) < 60) {
                     lblProg2.settext("Drinking");
                     PBotUtils.drink(ui, true);
-//                    PBotUtils.sleep(1000);//sleep while drinking
                 }
 
                 if (stopThread)
@@ -117,65 +113,25 @@ public class SeedCropFarmer extends Window implements Runnable {
 
                 // Right click the crop
                 lblProg2.settext("Harvesting");
-                try {
-                    PBotUtils.pfmovegob(ui, g);
-                    //BotUtils.pfRightClick(g,0);
-                } catch (NullPointerException ii) {
-                    continue;
-                }
-                //	BotUtils.gui.map.wdgmsg("click", Coord.z, g.rc.floor(posres), 1, 0);
                 int retryharvest = 0;
-                int retrycount = 0;
-                lblProg2.settext("Moving to Harvest");
-//                while (PBotUtils.player(ui) != null && (PBotUtils.player(ui).rc.x != g.rc.x || PBotUtils.player(ui).rc.y != g.rc.y)) {
-//                    if (stopThread)
-//                        return;
-//                    lblProg2.settext("Moving to Harvest");
-//                    retryharvest++;
-//                    while (PBotUtils.isMoving(ui))
-//                        PBotUtils.sleep(10);//if we're moving, sleep and dont trigger unstucking
-//                    if (retryharvest > 300) {
-//                        lblProg2.settext("Unstucking");
-//                        PBotUtils.sysLogAppend(ui, "Moving char", "white");
-//                        Gob player = gui.map.player();
-//                        Coord location = player.rc.floor(posres);
-//                        int x = location.x + getrandom();
-//                        int y = location.y + getrandom();
-//                        Coord finalloc = new Coord(x, y);
-//                        ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-//                        PBotUtils.sleep(1000);
-//                        PBotUtils.doClick(ui, g, 1, 0);
-//                        retryharvest = 0;
-//                        retrycount++;
-//                    }
-//                    if (retrycount > 5) {
-//                        PBotUtils.sysLogAppend(ui, "Tried to move to crop 3 times, skipping left click loop", "white");
-//                        //super stuck, fuck it skip this wait
-//                        break;
-//                    }
-//                    PBotUtils.sleep(10);
-//                };
-                PBotUtils.PathfinderRightClick(ui, g, 0);
-                ui.wdgmsg(ui.next_predicted_id, "cl", 0, 0);
-                retryharvest = 0;
-                while (PBotUtils.findObjectById(ui, g.id) != null) {
+                while (PBotGobAPI.findGobById(ui, g.id) != null) {
                     if (stopThread)
                         return;
-                    lblProg2.settext("Waiting for crop to disappear");
+                    if (retryharvest > 50) continue crop;
                     retryharvest++;
-                    if (retryharvest > 500) {
-                        lblProg2.settext("Retry harvest");
-                        //PBotUtils.pfRightClick(g,0);
+                    lblProg2.settext("Moving to Harvest " + retryharvest);
+                    if (!PBotUtils.pfmovegob(ui, g)) {
+                        PBotUtils.sysMsg(ui, "Path not found");
+                        continue;
+                    } else {
                         PBotUtils.PathfinderRightClick(ui, g, 0);
-                        ui.wdgmsg(ui.next_predicted_id, "cl", 0, 0);
-                        retryharvest = 0;
                     }
-                    PBotUtils.sleep(10);
+                    lblProg2.settext("Waiting for crop to disappear " + retryharvest);
+                    if (!harvest()) {
+                        PBotUtils.sysMsg(ui, "Harvest not found");
+                        continue;
+                    }
                 }
-
-
-                if (stopThread)
-                    return;
                 // Replant
                 if (ispumpkin) {
                     try {
@@ -228,7 +184,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             FlowerMenu.setNextSelection("Slice");
                             int retryslice = 0;
                             lblProg2.settext("Slicing");
-                            while (gui.maininv.getItemsPartial("seeds").size() == 0) {
+                            while (ui.gui.maininv.getItemsPartial("seeds").size() == 0) {
                                 if (stopThread)
                                     return;
                                 retryslice++;
@@ -240,7 +196,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 }
                                 PBotUtils.sleep(50);
                             }
-                            List<WItem> fleshlist = gui.maininv.getItemsPartial("Flesh");
+                            List<WItem> fleshlist = ui.gui.maininv.getItemsPartial("Flesh");
                             for (WItem flesh : fleshlist) {
                                 flesh.item.wdgmsg("drop", Coord.z);
                             }
@@ -277,7 +233,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui));
                         lblProg2.settext("Planting");
                         //PBotUtils.mapInteractClick();
-                        gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
+                        ui.gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
                         while (PBotUtils.findNearestStageCrop(ui, 5, 0, cropName) == null || (PBotUtils.getItemAtHand(ui) != null && (seedName.contains("seed") && amount == PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui))))) {
                             if (stopThread)
                                 return;
@@ -294,59 +250,39 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                 } else if (replant) {
                     try {
-                        GItem item = null;
-                        while (PBotUtils.getItemAtHand(ui) == null) {
+                        lblProg2.settext("Planting");
+
+                        int retryplant = 0;
+                        while (PBotUtils.findNearestStageCrop(ui, 5, 0, cropName) == null && harvestItem() != null) {
                             if (stopThread)
                                 return;
-                            lblProg2.settext("Grabbing seeds1");
-                            Inventory inv = ui.gui.maininv;
-                            for (Widget w = inv.child; w != null; w = w.next) {
-                                if (w instanceof GItem && ((GItem) w).resource().name.equals(seedName) && (!seedName.contains("seed") || PBotUtils.getAmount((GItem) w) >= 5)) {
-                                    item = (GItem) w;
-                                    break;
-                                }
-                            }
-                            if (item != null) {
-                                System.out.println("picking up item to plant");
-                                PBotUtils.takeItem(ui, item, 1000);
-                            } else {
-                                System.out.println("picking up item null");
-                            }
-                        }
-                        retryharvest = 0;
-                        if (item != null) {
-                            while (PBotUtils.getItemAtHand(ui) == null) {
-                                retryharvest++;
-                                if (retryharvest > 500) {
-                                    lblProg2.settext("Failed to pickup seeds, retrying.");
-                                    retryharvest = 0;
-                                }
-                                PBotUtils.sleep(10);
-                            }
-                            // Plant the seed from hand
-                            int amount = 0;
-                            if (seedName.contains("seed"))
-                                PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui));
-                            lblProg2.settext("Planting");
-                            //PBotUtils.mapInteractClick();
-                            gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
-                            while (PBotUtils.findNearestStageCrop(ui, 5, 0, cropName) == null || (PBotUtils.getItemAtHand(ui) != null && (seedName.contains("seed") && amount == PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui))))) {
-                                if (stopThread)
-                                    return;
-                                PBotUtils.sleep(10);
-                            }
-                            PBotUtils.dropItem(ui, 0);
-                            lblProg2.settext("Dropping seeds");
-                            for (Widget w = ui.gui.maininv.child; w != null; w = w.next) {
-                                if (w instanceof GItem && ((GItem) w).resource().name.equals(seedName)) {
-                                    item = (GItem) w;
-                                    try {
-                                        item.wdgmsg("drop", Coord.z);
-                                    } catch (Exception e) {
+                            if (retryplant > 50) continue crop;
+                            retryplant++;
+                            if (PBotUtils.getItemAtHand(ui) != null) {
+                                if (inHandHarvestItem())
+                                    PBotUtils.mapInteractClick(ui);
+                                else {
+                                    if (!inHandToInventory()) {
+                                        PBotUtils.sysMsg(ui, "Drop can not");
+                                        if (PBotUtils.getItemAtHand(ui) != null)
+                                            PBotUtils.dropItem(ui, 0);
                                     }
                                 }
+                            } else {
+                                if (!takeSeed())
+                                    continue;
                             }
                         }
+
+                        lblProg2.settext("Dropping seeds");
+                        if (!inHandToInventory()) {
+                            PBotUtils.sysMsg(ui, "Drop can not");
+                            if (PBotUtils.getItemAtHand(ui) != null)
+                                PBotUtils.dropItem(ui, 0);
+                        }
+
+//                            ui.gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
+
                     } catch (NullPointerException | Loading | Sprite.ResourceException q) {
                     }
                 } else if (replantcontainer) {
@@ -412,7 +348,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                             PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui)); // logs the seed count in your hand so it can use the count to verify it successfully planted
                         lblProg2.settext("Planting");
                         //PBotUtils.mapInteractClick();
-                        gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
+                        ui.gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
                         while (PBotUtils.findNearestStageCrop(ui, 5, 0, cropName) == null || (PBotUtils.getItemAtHand(ui) != null && (seedName.contains("seed") && amount == PBotUtils.getAmount(PBotUtils.getGItemAtHand(ui))))) {
                             if (stopThread)
                                 return;
@@ -993,5 +929,77 @@ public class SeedCropFarmer extends Window implements Runnable {
         }
         gobs.sort(new CoordSort());
         return gobs;
+    }
+
+    public boolean harvest() {
+        PBotUtils.waitForFlowerMenu(ui, 1000);
+        if (PBotUtils.petalExists(ui)) {
+            if (PBotUtils.choosePetal(ui, "Harvest")) {
+                PBotUtils.waitFlowermenuClose(ui);
+                PBotUtils.waitForHourglass(ui, 1000);
+                return (true);
+            } else
+                return (false);
+        } else
+            return (false);
+    }
+
+    public PBotItem harvestItem() {
+        PBotInventory inv = PBotUtils.playerInventory(ui);
+        List<PBotItem> items = inv.getInventoryItemsByResnames(seedName);
+        for (PBotItem item : items) {
+            if (!seedName.contains("seed") || item.getAmount() >= 5) {
+                return (item);
+            }
+        }
+        return (null);
+    }
+
+    public boolean takeSeed() {
+        int retrytake = 0;
+        while (PBotUtils.getItemAtHand(ui) == null && harvestItem() != null) {
+            if (stopThread)
+                break;
+            if (retrytake > 50)
+                return (false);
+            retrytake++;
+            lblProg2.settext("Grabbing seeds " + retrytake);
+            if (harvestItem() == null || !harvestItem().takeItem(1000)) {
+                PBotUtils.sysMsg(ui, "Take can not");
+                continue;
+            }
+        }
+        return (true);
+    }
+
+    public boolean inHandHarvestItem() {
+        if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getResname().equals(seedName))
+            return (true);
+        else
+            return (false);
+    }
+
+    public boolean inHandToInventory() {
+        if (PBotUtils.getItemAtHand(ui) != null) {
+            PBotItem item = PBotUtils.getItemAtHand(ui);
+            PBotInventory inv = PBotUtils.playerInventory(ui);
+            Coord coord = inv.freeSpaceForItem(item);
+            if (coord != null) {
+                inv.dropItemToInventory(coord);
+                int retrydrop = 0;
+                while (PBotUtils.getItemAtHand(ui) == null) {
+                    if (stopThread)
+                        break;
+                    lblProg2.settext("Dropping seeds " + retrydrop);
+                    if (retrydrop > 50)
+                        return (false);
+                    retrydrop++;
+                    PBotUtils.sleep(100);
+                }
+                return (true);
+            } else
+                return (false);
+        }
+        return (false);
     }
 }
