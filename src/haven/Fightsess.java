@@ -36,6 +36,7 @@ import haven.sloth.gui.fight.DefenseType;
 import haven.sloth.gui.fight.Restoration;
 import haven.sloth.gui.fight.Weapons;
 import haven.sloth.gui.fight.WeightType;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.event.InputEvent;
@@ -151,7 +152,7 @@ public class Fightsess extends Widget {
     protected void removed() {
         super.removed();
         ui.gui.fs = null;
-        if (ui.gui.map != null)
+        if (configuration.autocleardamage && ui.gui.map != null)
             ui.gui.map.removeCustomSprites(DamageText.id);
     }
 

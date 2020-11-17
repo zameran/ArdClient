@@ -2043,6 +2043,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Auto Clear Damage") {
+            {
+                a = configuration.autocleardamage;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autocleardamage", val);
+                configuration.autocleardamage = val;
+                a = val;
+            }
+        });
         appender.add(new Label("Chat Exempt will force the fight session to have focus unless the chat box has focus."));
         appender.add(new CheckBox("Force Fight Session Focus - Chat Exempt") {
             {

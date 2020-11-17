@@ -125,7 +125,7 @@ public class GobHitmap {
 
     public synchronized List<Coord> add(final Gob g) {
         final UI ui = g.glob.ui.get();
-        if (ui != null && g.id != ui.gui.map.plgob && !(g instanceof OCache.Virtual) && g.id >= 0) {
+        if (ui != null && ui.gui != null && ui.gui.map != null && g.id != ui.gui.map.plgob && !(g instanceof OCache.Virtual) && g.id >= 0) {
             return fill(g);
         } else {
             return null;
