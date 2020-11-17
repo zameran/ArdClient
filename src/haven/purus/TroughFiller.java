@@ -9,7 +9,6 @@ import haven.Gob;
 import haven.Label;
 import haven.Loading;
 import haven.Resource;
-import haven.WItem;
 import haven.Widget;
 import haven.Window;
 import haven.automation.GobSelectCallback;

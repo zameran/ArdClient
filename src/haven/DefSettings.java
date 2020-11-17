@@ -6,7 +6,6 @@ import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Hidden;
 import haven.sloth.gob.Movable;
-import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
 import haven.sloth.io.HighlightData;
 

@@ -173,7 +173,7 @@ public class FarmerBot extends Window {
 
                         int retryharvest = 0;
                         int retrycount = 0;
-                        PBotUtils.mapClick(ui, g.rc,1, 0);
+                        PBotUtils.mapClick(ui, g.rc, 1, 0);
                         while (player.rc.x != g.rc.x || player.rc.y != g.rc.y) {
                             if (stopThread || PBotWindowAPI.getWindow(ui, windowName) == null)
                                 return;
@@ -187,10 +187,10 @@ public class FarmerBot extends Window {
                                 int x = location.x + getrandom();
                                 int y = location.y + getrandom();
                                 Coord finalloc = new Coord(x, y);
-                                PBotUtils.mapFinalClick(ui, finalloc,1, 0);
+                                PBotUtils.mapFinalClick(ui, finalloc, 1, 0);
                                 retryharvest = 0;
                                 PBotUtils.sleep(1000);
-                                PBotUtils.mapClick(ui, g.rc,1, 0);
+                                PBotUtils.mapClick(ui, g.rc, 1, 0);
                             }
                             PBotUtils.sleep(10);
                         }
@@ -228,7 +228,7 @@ public class FarmerBot extends Window {
                                     int x = location.x + getrandom();
                                     int y = location.y + getrandom();
                                     Coord finalloc = new Coord(x, y);
-                                    PBotUtils.mapFinalClick(ui, finalloc,1, 0);
+                                    PBotUtils.mapFinalClick(ui, finalloc, 1, 0);
                                     retrycount = 0;
                                     PBotUtils.sleep(1000);
                                     PBotUtils.pfRightClick(ui, g, 0);

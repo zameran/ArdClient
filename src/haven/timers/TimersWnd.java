@@ -14,7 +14,6 @@ import haven.Widget;
 import haven.Window;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TimersWnd extends Window {

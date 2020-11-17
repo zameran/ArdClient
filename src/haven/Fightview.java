@@ -27,7 +27,6 @@
 package haven;
 
 
-import haven.res.gfx.fx.floatimg.DamageText;
 import haven.sloth.gfx.GobCombatSprite;
 import haven.sloth.gob.AggroMark;
 import haven.sloth.gui.fight.Attack;
@@ -286,9 +285,9 @@ public class Fightview extends Widget {
          * For Scripting API only
          */
 
-        public void peace(){
+        public void peace() {
             //if not peaced, peace
-            if(give.state != 1){
+            if (give.state != 1) {
                 give.wdgmsg("click", 1);
             }
         }
@@ -575,7 +574,7 @@ public class Fightview extends Widget {
             g.chcolor(Color.RED);
             FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
             final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
-            if (gob != null){
+            if (gob != null) {
                 g.chcolor(Color.BLUE);
                 FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
                 FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
@@ -733,7 +732,7 @@ public class Fightview extends Widget {
      * For Scripting API only
      */
 
-    public Relation[] getrelations(){
+    public Relation[] getrelations() {
         return lsrel.toArray(new Relation[0]);
     }
 

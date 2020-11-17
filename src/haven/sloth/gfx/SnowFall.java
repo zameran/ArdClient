@@ -15,8 +15,9 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 /* it must be done as a weather condition like a narcotic fog
-* */
+ * */
 public class SnowFall extends Sprite {
     private static final Random rnd = new Random();
 
@@ -28,7 +29,7 @@ public class SnowFall extends Sprite {
 
         Flake(Coord3f pos) {
             this.position = new Coord3f(pos.x, pos.y, pos.z);
-            this.velocity = new Coord3f(0.0F, 0.0F,  (pos.z - 500F) * .98f / 1000.0F);//неправильная начальная скорость
+            this.velocity = new Coord3f(0.0F, 0.0F, (pos.z - 500F) * .98f / 1000.0F);//неправильная начальная скорость
             this.normal = new Coord3f(0, 0, 0).norm();
         }
 

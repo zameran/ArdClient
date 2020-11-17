@@ -990,7 +990,7 @@ public class LocalMiniMap extends Widget {
             else {
                 BufferedImage bi = tex.back;
                 AffineTransform transform = new AffineTransform();
-                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI) ;
+                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI);
                 transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
                 AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
                 bi = op.filter(bi, null);

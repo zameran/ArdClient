@@ -1,11 +1,15 @@
 package haven.purus;
 
-import haven.*;
+import haven.FlowerMenu;
+import haven.GameUI;
+import haven.Inventory;
+import haven.WItem;
+import haven.Widget;
 import haven.automation.GobSelectCallback;
 import haven.automation.WItemDestroyCallback;
 import haven.purus.pbot.PBotUtils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 
 public class FlowerPicker implements Runnable, ItemClickCallback, WItemDestroyCallback {

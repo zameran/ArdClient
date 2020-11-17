@@ -66,9 +66,9 @@ public class PBotGobAPI {
 
     /**
      * List of all gobs in radius
-     * @param radius     searh radius
-     * @param names      gobs names
      *
+     * @param radius searh radius
+     * @param names  gobs names
      * @return List of all gobs in radius
      */
     public static List<PBotGob> findObjectsByNames(UI ui, int radius, String... names) {

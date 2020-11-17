@@ -10,7 +10,6 @@ import haven.HSlider;
 import haven.Label;
 import haven.Listbox;
 import haven.Resource;
-import haven.UI;
 import haven.Utils;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;

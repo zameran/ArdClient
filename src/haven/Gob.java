@@ -384,8 +384,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
                         String fistname1 = name.substring(0, name.lastIndexOf('/'));
                         String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
                         String lastname = name.replace(fistname, "");
-                        if (lastname.endsWith("stump")) lastname = lastname.substring(0, lastname.length() - "stump".length());
-                        if (lastname.endsWith("log")) lastname = lastname.substring(0, lastname.length() - "log".length());
+                        if (lastname.endsWith("stump"))
+                            lastname = lastname.substring(0, lastname.length() - "stump".length());
+                        if (lastname.endsWith("log"))
+                            lastname = lastname.substring(0, lastname.length() - "log".length());
 
                         String icon = fistname + "/mm" + lastname;
                         GobIcon.Ref res = new GobIcon.Ref(icon);

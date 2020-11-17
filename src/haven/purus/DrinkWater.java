@@ -1,17 +1,11 @@
 package haven.purus;
 
 import haven.AltBeltWnd;
-import haven.Composite;
-import haven.Coord;
-import haven.Drawable;
 import haven.Equipory;
-import haven.FlowerMenu;
 import haven.GameUI;
-import haven.Gob;
 import haven.Inventory;
 import haven.ItemInfo;
 import haven.Loading;
-import haven.ResData;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
@@ -89,7 +83,8 @@ public class DrinkWater implements Runnable {
                                 PBotUtils.closeFlowermenu(gui.ui);
                                 break;
                             }
-                            if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired.", Color.RED);
+                            if (configuration.drinkmessage)
+                                PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired.", Color.RED);
                             gui.lastDrinkingSucessful = false;
                             gui.drinkingWater = false;
                             return;
@@ -142,14 +137,16 @@ public class DrinkWater implements Runnable {
         PBotUtils.activateItem(drinkFromThis);
 
         if (!PBotUtils.waitForFlowerMenu(gui.ui, 5000)) {
-            if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Flower not found. Water timeout expired. Drink failed.", Color.RED);
+            if (configuration.drinkmessage)
+                PBotUtils.sysMsg(gui.ui, "Flower not found. Water timeout expired. Drink failed.", Color.RED);
             return false;
         }
         if (PBotUtils.choosePetal(gui.ui, "Drink"))
             PBotUtils.waitFlowermenuClose(gui.ui);
         else {
             PBotUtils.closeFlowermenu(gui.ui);
-            if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Drink failed.", Color.RED);
+            if (configuration.drinkmessage)
+                PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Drink failed.", Color.RED);
             return false;
         }
         return true;
@@ -169,7 +166,8 @@ public class DrinkWater implements Runnable {
                 int cycles = 0;
                 while (PBotUtils.petalExists(gui.ui)) {
                     if (cycles >= limit) {
-                        if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired. Sip failed.", Color.RED);
+                        if (configuration.drinkmessage)
+                            PBotUtils.sysMsg(gui.ui, "Wrong petal exist. Water timeout expired. Sip failed.", Color.RED);
                         return false;
                     }
                     sleep(sleep);
@@ -203,7 +201,8 @@ public class DrinkWater implements Runnable {
                 PBotUtils.waitFlowermenuClose(gui.ui);
             else {
                 PBotUtils.closeFlowermenu(gui.ui);
-                if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Sip failed.", Color.RED);
+                if (configuration.drinkmessage)
+                    PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Sip failed.", Color.RED);
                 return false;
             }
 
@@ -212,7 +211,8 @@ public class DrinkWater implements Runnable {
                     sleep(50);
                 }
             else {
-                if (configuration.drinkmessage) PBotUtils.sysMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
+                if (configuration.drinkmessage)
+                    PBotUtils.sysMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
                 return false;
             }
         }

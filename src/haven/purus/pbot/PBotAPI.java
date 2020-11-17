@@ -3,7 +3,6 @@ package haven.purus.pbot;
 import haven.GameUI;
 import haven.MainFrame;
 import haven.UI;
-import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.Iterator;

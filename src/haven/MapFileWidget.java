@@ -190,7 +190,7 @@ public class MapFileWidget extends Widget {
 
             try {
                 tex = img.get();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 System.out.println(e + " " + seg.id);
             }
             return tex;

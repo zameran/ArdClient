@@ -3,7 +3,6 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Coord3f;
-import haven.FastText;
 import haven.GOut;
 import haven.GameUI;
 import haven.Gob;
@@ -21,7 +20,6 @@ import modification.configuration;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-
 import java.awt.Color;
 
 import static haven.OCache.posres;

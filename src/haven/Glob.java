@@ -289,13 +289,13 @@ public class Glob {
     }
 
     private void servertimecalc() {
-        long secs = (long)globtime();
+        long secs = (long) globtime();
         long day = secs / secinday;
         long secintoday = secs % secinday;
         long hours = secintoday / 3600;
         long mins = (secintoday % 3600) / 60;
         long seconds = secintoday % 60;
-        
+
         bservertime = " ";
         String dayOfMonth = "";
         String phaseOfMoon = " ";
@@ -303,13 +303,13 @@ public class Glob {
             int nextseason = (int) Math.ceil((1 - ast.sp) * (ast.is == 1 ? 35 : ast.is == 3 ? 5 : 10));
 
             int sdt = (ast.is == 1 ? 105 : ast.is == 3 ? 15 : 30); //days of season total
-            int sdp = (int)(ast.sp * (sdt)); //days of season passed
-            int sdl = (int)Math.floor((1 - ast.sp) * (sdt));
+            int sdp = (int) (ast.sp * (sdt)); //days of season passed
+            int sdl = (int) Math.floor((1 - ast.sp) * (sdt));
             if (sdl >= 1)
                 dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, seasonNames[ast.is]) + String.format(" %d (%d ", (sdp + 1), sdl) + Resource.getLocString(Resource.BUNDLE_LABEL, "left") + String.format(" (%d RL))", nextseason);
             else
                 dayOfMonth = Resource.getLocString(Resource.BUNDLE_LABEL, String.format("Last day of %s", seasonNames[ast.is]));
-            int mp = (int)Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
+            int mp = (int) Math.round(ast.mp * mPhaseNames.length) % mPhaseNames.length;
             phaseOfMoon = mPhaseNames[mp] + " Moon";
         }
 
