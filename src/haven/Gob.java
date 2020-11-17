@@ -537,7 +537,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         }
         ResDrawable dw = getattr(ResDrawable.class);
         if (dw != null) {
-            sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf)).append("\n");
+            sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf)).append(". Peek: ").append(dw.sdt.peekrbuf(0)).append("\n");
             sb.append("sdt: ").append(dw.sdtnum()).append("\n");
         } else {
             Composite comp = getattr(Composite.class);
@@ -1024,6 +1024,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
                 if (stage == 1)
                     rl.prepc(coopMissing);
                 if (stage == 0)
+                    rl.prepc(cRackFull);
+            }
+
+            if (configuration.showbeehivestatus && type == Type.BEEHIVE) {
+                int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+
+                if (stage == 6 || stage == 7)
                     rl.prepc(cRackFull);
             }
 

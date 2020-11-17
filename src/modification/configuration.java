@@ -77,6 +77,7 @@ public class configuration {
     public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
+    public static boolean showbeehivestatus = Utils.getprefb("showbeehivestatus", false);
     public static boolean morethanquility = Utils.getprefb("morethanquility", false);
     public static int morethancolor = Utils.getprefi("morethancolor", -1);
     public static int morethancoloroutline = Utils.getprefi("morethancoloroutline", Color.RED.hashCode());

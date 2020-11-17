@@ -3286,6 +3286,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show beehive status") {
+            {
+                a = configuration.showbeehivestatus;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showbeehivestatus", val);
+                configuration.showbeehivestatus = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Resource info on item") {
             {
                 a = Config.resinfo;
