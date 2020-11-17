@@ -176,10 +176,15 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
 
     private void preview() {
         if (sounds.sel != null) {
-            if (Alerted.customsort.get(sounds.sel))
-                Audio.play(sounds.sel, volslider.val / 1000.0);
-            else
-                Audio.play(Resource.remote().load(sounds.sel), volslider.val / 1000.0);
+            try {
+                if (Alerted.customsort.get(sounds.sel))
+                    Audio.play(sounds.sel, volslider.val / 1000.0);
+                else
+                    Audio.play(Resource.local().load(sounds.sel), volslider.val / 1000.0);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("[SoundManager preview] Sound: " + sounds.sel);
+            }
         }
     }
 

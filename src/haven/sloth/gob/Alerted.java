@@ -93,7 +93,7 @@ public class Alerted {
 
         for (final String sound : sounds) {
             try {
-                Resource.remote().loadwait(sound);
+                Resource.local().load(sound);
             } catch (Exception e) {
                 //Ignore it
                 logger.atSevere().withCause(e).log("Failed to load %s", sound);
@@ -165,12 +165,12 @@ public class Alerted {
             if (containsObj(name)) {
                 if (!name.equals("gfx/borka/body") && !g.isDead() && !sgobs.contains(g.id)) {
                     if (!alertedmap.containsKey(g.id) || (System.currentTimeMillis() - alertedmap.get(g.id) > 5000)) {
-                        if (isLocal(name))
-                            Audio.play(getSound(name), getVolume(name));
-                        else
-                            Audio.play(Resource.remote().load(getSound(name)), getVolume(name));
-                        if (Config.discordalarmalert) {
-                            try {
+                        try {
+                            if (isLocal(name))
+                                Audio.play(getSound(name), getVolume(name));
+                            else
+                                Audio.play(Resource.local().load(getSound(name)), getVolume(name));
+                            if (Config.discordalarmalert) {
                                 String s = g.name().substring(g.name().lastIndexOf("/") + 1);
                                 if (Config.discorduser) {
                                     PBotDiscord.mapAlert(Config.discordalertstring, s);
@@ -179,14 +179,15 @@ public class Alerted {
                                 } else {
                                     PBotDiscord.mapAlertEveryone(s);
                                 }
-                            } catch (Exception e) {
-
                             }
+                            if (Config.alarmonce) {
+                                sgobs.add(g.id);
+                            }
+                            alertedmap.put(g.id, System.currentTimeMillis());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("[Alerted checkAlert] Sound: " + getConnectSound(name).toString() + " Gob: " + g.getres());
                         }
-                        if (Config.alarmonce) {
-                            sgobs.add(g.id);
-                        }
-                        alertedmap.put(g.id, System.currentTimeMillis());
                     }
                 }
             }
@@ -222,6 +223,10 @@ public class Alerted {
             this.soundName = soundName;
             this.volume = volume;
             this.local = customsort.get(soundName);
+        }
+
+        public String toString() {
+            return "[ObjName: " + objName + "] [SoundName: " + soundName + "] [Volume: " + volume + "] [IsLocal: " + local  + "]";
         }
     }
 
