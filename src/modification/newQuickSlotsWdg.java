@@ -75,7 +75,8 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
     }
 
     public void draw(GOut g) {
-        Equipory e = ui.gui.getequipory();
+        Equipory e = null;
+        if (ui.gui != null) e = ui.gui.getequipory();
         if (e != null) {
             g.image(sbg, Coord.z);
             new Item(4, 14);

@@ -19,7 +19,8 @@ public class QuickSlotsWdg extends Widget implements DTarget {
 
     @Override
     public void draw(GOut g) {
-        Equipory e = ui.gui.getequipory();
+        Equipory e = null;
+        if (ui.gui != null) e = ui.gui.getequipory();
         if (e != null) {
             g.image(sbg, Coord.z);
             WItem left = e.quickslots[6];
