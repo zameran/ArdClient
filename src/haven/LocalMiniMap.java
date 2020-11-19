@@ -839,14 +839,19 @@ public class LocalMiniMap extends Widget {
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
-                    if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().contains("mussel") || gob.getres().basename().contains("oyster")))
-                        mv.startMusselsPicker(gob);
-                    if (Config.autopickclay && gob.getres() != null && gob.getres().basename().contains("clay-gray"))
-                        mv.startMusselsPicker(gob);
-                    if (Config.autopickbarnacles && gob.getres() != null && gob.getres().basename().contains("goosebarnacle"))
-                        mv.startMusselsPicker(gob);
-                    if (Config.autopickcattails && gob.getres() != null && gob.getres().basename().contains("cattail"))
-                        mv.startMusselsPicker(gob);
+                    if (gob != null && gob.getres() != null) {
+                        CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
+                        if (itm != null && itm.selected)
+                            mv.startMusselsPicker(gob);
+                    }
+//                    if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().contains("mussel") || gob.getres().basename().contains("oyster")))
+//                        mv.startMusselsPicker(gob);
+//                    if (Config.autopickclay && gob.getres() != null && gob.getres().basename().contains("clay-gray"))
+//                        mv.startMusselsPicker(gob);
+//                    if (Config.autopickbarnacles && gob.getres() != null && gob.getres().basename().contains("goosebarnacle"))
+//                        mv.startMusselsPicker(gob);
+//                    if (Config.autopickcattails && gob.getres() != null && gob.getres().basename().contains("cattail"))
+//                        mv.startMusselsPicker(gob);
                 }
             }
         } else if (button == dragBind) {

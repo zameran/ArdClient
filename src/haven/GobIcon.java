@@ -401,14 +401,37 @@ public class GobIcon extends GAttrib {
                 }
                 return (super.keydown(ev));
             }
+
+            public void showall() {
+                for (Icon icon : ordered)
+                    icon.conf.show = true;
+                if (save != null)
+                    save.run();
+            }
+
+            public void hideall() {
+                for (Icon icon : ordered)
+                    icon.conf.show = false;
+                if (save != null)
+                    save.run();
+            }
+
+            public void reset() {
+                for (Icon icon : ordered)
+                    icon.conf.show = icon.conf.defshow;
+                if (save != null)
+                    save.run();
+            }
         }
 
         public SettingsWindow(Settings conf, Runnable save) {
             super(Coord.z, "Icon settings");
             this.conf = conf;
             this.save = save;
-            Widget prev = add(new IconList(UI.scale(250), 25), Coord.z);
-            add(new CheckBox("Notification on newly seen icons") {
+            Composer composer = new Composer(this).vmrgn(UI.scale(5)).hmrgn(UI.scale(5));
+            IconList list = composer.add(new IconList(UI.scale(250), 21));
+            composer.hpad(UI.scale(5));
+            composer.add(new CheckBox("Notification on newly seen icons") {
                 {
                     this.a = conf.notify;
                 }
@@ -418,7 +441,13 @@ public class GobIcon extends GAttrib {
                     if (save != null)
                         save.run();
                 }
-            }, prev.pos("bl").adds(5, 5));
+            });
+            composer.hpad(UI.scale(10));
+            composer.addar(UI.scale(230),
+                    new Button(UI.scale(50), "Show all", false, list::showall),
+                    new Button(UI.scale(50), "Hide all", false, list::hideall),
+                    new Button(UI.scale(80), "Reset to default", false, list::reset)
+            );
             pack();
         }
     }
