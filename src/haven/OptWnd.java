@@ -2949,7 +2949,7 @@ public class OptWnd extends Window {
             }
 
             public void set(boolean val) {
-                Utils.setprefb("straightcavewall (requires new chunk render)", val);
+                Utils.setprefb("straightcavewall", val);
                 Config.straightcavewall = val;
                 a = val;
             }
