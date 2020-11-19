@@ -15,7 +15,9 @@ public class ObservableCollection<T> implements Iterable<T> {
 
     public boolean add(T item) {
         if (base.add(item)) {
-            listeners.forEach((lst) -> lst.added(item));
+            synchronized (listeners) {
+                listeners.forEach((lst) -> lst.added(item));
+            }
             return true;
         } else {
             return false;

@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -1428,12 +1429,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 conf.receive(tag, new GobIcon.Setting[]{cset});
                 saveiconconf();
                 if (!has && conf.notify) {
-                    if (!has && conf.notify) {
+                    Defer.later(() -> {
                         Resource lres = Resource.remote().load(res.name, res.ver).get();
                         Resource.Tooltip tip = lres.layer(Resource.tooltip);
                         if (tip != null)
                             msg(String.format("%s added to list of seen icons.", tip.t));
-                    }
+                        return true;
+                    });
                 }
             } else if (args[1] instanceof Object[]) {
                 Object[] sub = (Object[]) args[1];

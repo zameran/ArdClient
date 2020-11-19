@@ -94,7 +94,7 @@ public class DrinkWater implements Runnable {
                     }
                 }
                 if (configuration.autodrinkosip) {
-                    if (getLiquid(drinkFromThis) != null && getLiquid(drinkFromThis).equals("Water"))
+                    if (getLiquid(drinkFromThis).contains("Water"))
                         success = drinkMode(drinkFromThis);
                     else
                         success = sipMode(drinkFromThis);
@@ -281,7 +281,7 @@ public class DrinkWater implements Runnable {
                 }
             }
         }
-        return null;
+        return "";
     }
 
     private void sleep(int timeInMs) {
