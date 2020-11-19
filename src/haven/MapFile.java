@@ -1835,8 +1835,8 @@ public class MapFile {
                     seg.offs.put(info.seg, info.sc.sub(grid.sc));
                 } else {
                     if (!off.equals(info.sc.sub(grid.sc)))
-                        System.out.println("Inconsistent grid locations detected [" + off + "] [" + info.sc.sub(grid.sc) + "]");
-//                        throw (new RuntimeException("Inconsistent grid locations detected"));
+//                        System.out.println("Inconsistent grid locations detected [" + off + "] [" + info.sc.sub(grid.sc) + "]");
+                        throw (new RuntimeException("Inconsistent grid locations detected"));
                 }
             }
             Segment rseg;

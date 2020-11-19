@@ -33,6 +33,7 @@ import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.MapFile.Segment;
 import modification.configuration;
+import modification.dev;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -191,7 +192,7 @@ public class MapFileWidget extends Widget {
             try {
                 tex = img.get();
             } catch (Exception e) {
-                System.out.println(e + " " + seg.id);
+                dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
             }
             return tex;
         }
