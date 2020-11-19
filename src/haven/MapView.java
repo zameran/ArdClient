@@ -478,7 +478,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public class OrthoCam extends Camera {
-        public boolean exact;
+        public boolean exact = true;
         protected float dist = 500.0f;
         protected float elev = (float) Math.PI / 6.0f;
         protected float angl = -(float) Math.PI / 4.0f;
@@ -486,14 +486,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private Coord dragorig = null;
         private float anglorig;
         protected Coord3f cc, jc;
-
-        public OrthoCam(boolean exact) {
-            this.exact = exact;
-        }
-
-        public OrthoCam() {
-            this(false);
-        }
 
         public void tick2(double dt) {
             Coord3f cc = getcc();
@@ -546,18 +538,24 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private float anglorig;
         private float tangl = angl;
         private float tfield = field;
+        private boolean isometric = true;
         private final float pi2 = (float) (Math.PI * 2);
 
-        public SOrthoCam(boolean exact) {
-            super(exact);
-        }
-
         public SOrthoCam(String... args) {
-            PosixArgs opt = PosixArgs.getopt(args, "e");
+            PosixArgs opt = PosixArgs.getopt(args, "enif");
             for (char c : opt.parsed()) {
                 switch (c) {
                     case 'e':
                         exact = true;
+                        break;
+                    case 'n':
+                        exact = false;
+                        break;
+                    case 'i':
+                        isometric = true;
+                        break;
+                    case 'f':
+                        isometric = false;
                         break;
                 }
             }
@@ -606,6 +604,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (c == null || dragorig == null)
                 return;
             tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
+        }
+
+        public void release() {
+            if(isometric && (tfield > 100))
+                tangl = (float)(Math.PI * 0.5 * (Math.floor(tangl / (Math.PI * 0.5)) + 0.5));
         }
 
         private void chfield(float nf) {
@@ -3087,13 +3090,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Camera restorecam() {
         Class<? extends Camera> ct = camtypes.get(Utils.getpref("defcam", null));
         if (ct == null)
-            return (new SOrthoCam(true));
+            return (new SOrthoCam());
         String[] args = (String[]) Utils.deserialize(Utils.getprefb("camargs", null));
         if (args == null) args = new String[0];
         try {
             return (makecam(ct, args));
         } catch (Exception e) {
-            return (new SOrthoCam(true));
+            return (new SOrthoCam());
         }
     }
 
