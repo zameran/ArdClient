@@ -538,7 +538,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private float anglorig;
         private float tangl = angl;
         private float tfield = field;
-        private boolean isometric = true;
+        private boolean isometric = false;
         private final float pi2 = (float) (Math.PI * 2);
 
         public SOrthoCam(String... args) {
@@ -606,10 +606,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
         }
 
-//        public void release() {
-//            if(isometric && (tfield > 100))
-//                tangl = (float)(Math.PI * 0.5 * (Math.floor(tangl / (Math.PI * 0.5)) + 0.5));
-//        }
+        public void release() {
+            if ((isometric || ui.modctrl) && (tfield > 100))
+                tangl = (float) (Math.PI * 0.5 * (Math.floor(tangl / (Math.PI * 0.5)) + 0.5));
+        }
 
         private void chfield(float nf) {
             tfield = nf;
