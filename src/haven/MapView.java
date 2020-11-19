@@ -55,6 +55,7 @@ import haven.sloth.io.HighlightData;
 import haven.sloth.script.pathfinding.Move;
 import haven.sloth.script.pathfinding.NBAPathfinder;
 import modification.configuration;
+import modification.dev;
 
 import javax.media.opengl.GL;
 import java.awt.Color;
@@ -1740,12 +1741,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Loading camload = null, lastload = null;
 
     public void draw(GOut g) {
-
         if ((olftimer != 0) && (olftimer < Utils.rtime()))
             unflashol();
         try {
             if (camload != null)
                 throw (new Loading(camload));
+            Gob pl = player();
+            if (pl != null)
+                this.cc = new Coord2d(pl.getc());
             undelay(delayed, g);
             super.draw(g);
             undelay(delayed2, g);
@@ -1760,9 +1763,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     gridol.update(tc);
                 }
             }
-            //  try {
-            glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)),
-                    cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
+            try {
+                glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)),
+                        cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
+            } catch (Defer.DeferredException e) {
+                dev.sysPrintStackTrace("MapView draw " + e);
+                // there seems to be a rare problem with fetching gridcuts when teleporting, not sure why...
+                // we ignore Defer.DeferredException to prevent the client for crashing
+            }
         } catch (Loading e) {
             lastload = e;
             String text = e.getMessage();

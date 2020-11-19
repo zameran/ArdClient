@@ -372,6 +372,10 @@ public class LocalMiniMap extends Widget {
                     if (res == null)
                         continue;
 
+                    if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
+                        dangergobs.add(gob);
+                        continue;
+                    }
                     GobIcon icon = gob.getattr(GobIcon.class);
                     if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
                         CheckListboxItem itm = Config.icons.get(res.basename());
@@ -383,11 +387,7 @@ public class LocalMiniMap extends Widget {
                                 tex = Config.additonalicons.get(res.name);
                             g.image(tex, p2c(gob.rc).sub(tex.sz().mul(iconZoom).div(2)).add(delta), tex.dim.mul(iconZoom));
                         }
-                    } else if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
-                        dangergobs.add(gob);
-                        continue;
                     }
-
                     String basename = res.basename();
                     if (gob.type == Type.BOULDER) {
                         CheckListboxItem itm = Config.boulders.get(basename.substring(0, basename.length() - 1));
@@ -468,38 +468,38 @@ public class LocalMiniMap extends Widget {
                         if (sgobs.contains(gob.id))
                             continue;
 
-                        boolean enemy = false;
-                        if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
-                            sgobs.add(gob.id);
-                            Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
-                            if (Config.discordplayeralert) {
-                                if (Config.discorduser) {
-                                    PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                                } else if (Config.discordrole) {
-                                    PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                                } else {
-                                    PBotDiscord.mapAlertEveryone("Player");
-                                }
-                            }
-                            enemy = true;
-                        } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
-                            sgobs.add(gob.id);
-                            Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone("Player");
-                            }
-                            enemy = true;
-                        }
-
-                        if (Config.autologout && enemy) {
-                            PBotUtils.sysMsg(ui, "Ememy spotted! Logging out!", Color.white);
-                            ui.gui.act("lo");
-                        } else if (Config.autohearth && enemy)
-                            ui.gui.act("travel", "hearth");
+//                        boolean enemy = false;
+//                        if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
+//                            sgobs.add(gob.id);
+//                            Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
+//                            if (Config.discordplayeralert) {
+//                                if (Config.discorduser) {
+//                                    PBotDiscord.mapAlert(Config.discordalertstring, "Player");
+//                                } else if (Config.discordrole) {
+//                                    PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
+//                                } else {
+//                                    PBotDiscord.mapAlertEveryone("Player");
+//                                }
+//                            }
+//                            enemy = true;
+//                        } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
+//                            sgobs.add(gob.id);
+//                            Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
+//                            if (Config.discorduser) {
+//                                PBotDiscord.mapAlert(Config.discordalertstring, "Player");
+//                            } else if (Config.discordrole) {
+//                                PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
+//                            } else {
+//                                PBotDiscord.mapAlertEveryone("Player");
+//                            }
+//                            enemy = true;
+//                        }
+//
+//                        if (Config.autologout && enemy) {
+//                            PBotUtils.sysMsg(ui, "Ememy spotted! Logging out!", Color.white);
+//                            ui.gui.act("lo");
+//                        } else if (Config.autohearth && enemy)
+//                            ui.gui.act("travel", "hearth");
 
                     } else {
                         GobIcon icon = gob.getattr(GobIcon.class);
@@ -609,7 +609,8 @@ public class LocalMiniMap extends Widget {
     }
 
     public void tick(double dt) {
-        Gob pl = ui.sess.glob.oc.getgob(mv.plgob);
+        OCache oc = ui.sess.glob.oc;
+        Gob pl = oc.getgob(mv.plgob);
         if (pl == null)
             this.cc = mv.cc.floor(tilesz);
         else
@@ -630,6 +631,69 @@ public class LocalMiniMap extends Widget {
             }
         }
         icons = findicons(icons);
+
+        List<Gob> dangergobs = new ArrayList<Gob>();
+        synchronized (oc) {
+            Gob player = mv.player();
+            for (Gob gob : oc) {
+                try {
+                    Resource res = gob.getres();
+                    if (res == null)
+                        continue;
+                    if (gob.type == Type.HUMAN && player != null && gob.id != player.id) {
+                        dangergobs.add(gob);
+                        continue;
+                    }
+                    if (sgobs.contains(gob.id))
+                        continue;
+                } catch (Loading l) {
+                }
+            }
+            for (Gob gob : dangergobs) {
+                if (gob.type == Type.HUMAN && gob.id != mv.player().id) {
+                    if (ui.sess.glob.party.memb.containsKey(gob.id))
+                        continue;
+
+                    KinInfo kininfo = gob.getattr(KinInfo.class);
+
+                    if (sgobs.contains(gob.id))
+                        continue;
+
+                    boolean enemy = false;
+                    if (!Config.alarmunknownplayer.equals("None") && kininfo == null) {
+                        sgobs.add(gob.id);
+                        Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
+                        if (Config.discordplayeralert) {
+                            if (Config.discorduser) {
+                                PBotDiscord.mapAlert(Config.discordalertstring, "Player");
+                            } else if (Config.discordrole) {
+                                PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
+                            } else {
+                                PBotDiscord.mapAlertEveryone("Player");
+                            }
+                        }
+                        enemy = true;
+                    } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
+                        sgobs.add(gob.id);
+                        Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
+                        if (Config.discorduser) {
+                            PBotDiscord.mapAlert(Config.discordalertstring, "Player");
+                        } else if (Config.discordrole) {
+                            PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
+                        } else {
+                            PBotDiscord.mapAlertEveryone("Player");
+                        }
+                        enemy = true;
+                    }
+
+                    if (Config.autologout && enemy) {
+                        PBotUtils.sysMsg(ui, "Ememy spotted! Logging out!", Color.white);
+                        ui.gui.act("lo");
+                    } else if (Config.autohearth && enemy)
+                        ui.gui.act("travel", "hearth");
+                }
+            }
+        }
     }
 
     private void setBiome(Coord c) {
