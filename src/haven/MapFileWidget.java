@@ -189,10 +189,12 @@ public class MapFileWidget extends Widget {
                 cgrid = grid;
             }
 
-            try {
-                tex = img.get();
-            } catch (Exception e) {
-                dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+            if (img != null) {
+                try {
+                    tex = img.get();
+                } catch (Exception e) {
+                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+                }
             }
             return tex;
         }

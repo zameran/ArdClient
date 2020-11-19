@@ -346,7 +346,7 @@ public class OptWnd extends Window {
                             },
                             dpy);
                 }
-                appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious. (Requires restart)") {
+                appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious") {
                     {
                         a = Config.obviousridges;
                     }
@@ -355,6 +355,9 @@ public class OptWnd extends Window {
                         Utils.setprefb("obviousridges", val);
                         Config.obviousridges = val;
                         a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
                     }
                 });
                 appender.add(new CheckBox("Disable Animations (Big Performance Boost, makes some animations look weird.)") {
@@ -399,7 +402,7 @@ public class OptWnd extends Window {
                         }
                     }
                 });
-                appender.add(new CheckBox("Disable terrain smoothing (requires logout)") {
+                appender.add(new CheckBox("Disable terrain smoothing") {
                     {
                         a = Config.disableterrainsmooth;
                     }
