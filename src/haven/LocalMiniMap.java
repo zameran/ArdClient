@@ -629,6 +629,7 @@ public class LocalMiniMap extends Widget {
             } catch (NullPointerException npe) {
             }
         }
+        icons = findicons(icons);
     }
 
     private void setBiome(Coord c) {
@@ -750,7 +751,7 @@ public class LocalMiniMap extends Widget {
             }
         }
         drawicons(g);
-        icons = findicons();
+
         drawnewicons(g);
 
         synchronized (ui.sess.glob.party.memb) {
@@ -957,27 +958,40 @@ public class LocalMiniMap extends Widget {
         return true;
     }
 
-    public static class DisplayIcon {
+    public class DisplayIcon {
         public final GobIcon icon;
         public final Gob gob;
         public final GobIcon.Image img;
-        public Coord cc;
+        public Coord2d rc = null;
+        public Coord sc = null;
         public double ang = 0.0;
         public Color col = Color.WHITE;
         public int z;
+        public double stime;
 
-        public DisplayIcon(GobIcon icon, Coord cc, double ang) {
+        public DisplayIcon(GobIcon icon) {
             this.icon = icon;
             this.gob = icon.gob;
             this.img = icon.img();
-            this.cc = cc;
             this.ang = ang;
             this.z = this.img.z;
+            this.stime = Utils.rtime();
+        }
+
+        public void update(Coord2d rc, double ang) {
+            this.rc = rc;
+            this.ang = ang;
+            if ((this.rc == null))
+                this.sc = null;
+            else
+                this.sc = p2c(this.rc);
         }
     }
 
     public void drawnewicons(GOut g) {
         for (DisplayIcon disp : icons) {
+            if (disp.sc == null)
+                continue;
             GobIcon.Image img = disp.img;
             if (disp.col != null)
                 g.chcolor(disp.col);
@@ -986,7 +1000,7 @@ public class LocalMiniMap extends Widget {
 
             TexI tex = disp.gob.isDead() == Boolean.TRUE ? img.texgrey() : img.tex();
             if (!img.rot)
-                g.image(tex, disp.cc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
+                g.image(tex, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
             else {
                 BufferedImage bi = tex.back;
                 AffineTransform transform = new AffineTransform();
@@ -994,15 +1008,21 @@ public class LocalMiniMap extends Widget {
                 transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
                 AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
                 bi = op.filter(bi, null);
-                g.image(bi, disp.cc.sub(img.cc.mul(iconZoom)).add(delta));
+                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta));
             }
         }
         g.chcolor();
     }
 
-    public List<DisplayIcon> findicons() {
+    public List<DisplayIcon> findicons(Collection<? extends DisplayIcon> prev) {
         if ((ui.sess == null) /*|| (sessloc == null) || (dloc.seg != sessloc.seg) */ || (iconconf == null))
             return (Collections.emptyList());
+        Map<Gob, DisplayIcon> pmap = Collections.emptyMap();
+        if (prev != null) {
+            pmap = new HashMap<>();
+            for (DisplayIcon disp : prev)
+                pmap.put(disp.gob, disp);
+        }
         List<DisplayIcon> ret = new ArrayList<>();
         OCache oc = ui.sess.glob.oc;
         synchronized (oc) {
@@ -1012,8 +1032,10 @@ public class LocalMiniMap extends Widget {
                     if (icon != null) {
                         GobIcon.Setting conf = iconconf.get(icon.res.get());
                         if ((conf != null) && conf.show) {
-                            Coord gc = p2c(gob.rc);
-                            DisplayIcon disp = new DisplayIcon(icon, gc, gob.a);
+                            DisplayIcon disp = pmap.get(gob);
+                            if (disp == null)
+                                disp = new DisplayIcon(icon);
+                            disp.update(gob.rc, gob.a);
                             KinInfo kin = gob.getattr(KinInfo.class);
                             if ((kin != null) && (kin.group < BuddyWnd.gc.length))
                                 disp.col = BuddyWnd.gc[kin.group];

@@ -63,7 +63,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
+public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
     public int cropstgmaxval = 0;
     private Overlay gobpath = null;
     private Overlay bowvector = null;
@@ -194,9 +194,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         }
 
         public static class FactMaker implements Resource.PublishedCode.Instancer {
-            public Factory make(Class<?> cl) throws InstantiationException, IllegalAccessException {
+            public Factory make(Class<?> cl, Resource ires, Object... argv) {
                 if (Factory.class.isAssignableFrom(cl))
-                    return (cl.asSubclass(Factory.class).newInstance());
+                    return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
                 if (ResAttr.class.isAssignableFrom(cl)) {
                     try {
                         final java.lang.reflect.Constructor<? extends ResAttr> cons = cl.asSubclass(ResAttr.class).getConstructor(Gob.class, Message.class);
@@ -1030,7 +1030,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             if (configuration.showbeehivestatus && type == Type.BEEHIVE) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
-                if (stage == 6 || stage == 7)
+                if (stage == 5 || stage == 6 || stage == 7)
                     rl.prepc(cRackFull);
             }
 
@@ -1309,6 +1309,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         Drawable d = getattr(Drawable.class);
         if (d != null)
             return (d.getres());
+        return (null);
+    }
+
+    public Skeleton.Pose getpose() {
+        Drawable d = getattr(Drawable.class);
+        if (d != null)
+            return (d.getpose());
         return (null);
     }
 

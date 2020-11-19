@@ -53,6 +53,14 @@ public abstract class Tex {
 
     public abstract GLState clip();
 
+    public void render(GOut g, float[] gc, float[] tc) {
+        Coord c = new Coord(tc[0], tc[1]);
+        Coord sz = new Coord(tc[4], tc[5]);
+        Coord ul = new Coord(gc[0], gc[1]);
+        Coord br = new Coord(gc[4], gc[5]);
+        render(g, c, ul, br, sz);
+    }
+
     public void render(GOut g, Coord c) {
         render(g, c, Coord.z, dim, dim);
     }

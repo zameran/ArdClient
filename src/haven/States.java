@@ -516,4 +516,36 @@ public abstract class States extends GLState {
             buf.put(pointsize, this);
         }
     }
+
+    public static final Slot<Scissor> scissor = new Slot<Scissor>(Slot.Type.SYS, Scissor.class);
+
+    public static class Scissor extends GLState {
+        public final Area area;
+
+        public Scissor(Area area) {
+            this.area = area;
+        }
+
+        public boolean equals(Object o) {
+            return ((o instanceof Scissor) && (((Scissor) o).area.equals(area)));
+        }
+
+        public void apply(GOut g) {
+        }
+
+        public void unapply(GOut g) {
+        }
+
+        public ShaderMacro shader() {
+            return (null);
+        }
+
+        public void prep(Buffer buf) {
+            buf.put(scissor, this);
+        }
+
+        public String toString() {
+            return (String.format("#<scissor %sx%s+%s+%s>", area.br.x - area.ul.x, area.br.y - area.ul.y, area.ul.x, area.ul.y));
+        }
+    }
 }

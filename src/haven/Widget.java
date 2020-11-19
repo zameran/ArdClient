@@ -34,11 +34,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.AbstractSequentialList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -166,9 +169,9 @@ public class Widget {
     }
 
     public static class FactMaker implements Resource.PublishedCode.Instancer {
-        public Factory make(Class<?> cl) {
+        public Factory make(Class<?> cl, Resource ires, Object... argv) {
             if (Factory.class.isAssignableFrom(cl))
-                return (Utils.construct(cl.asSubclass(Factory.class)));
+                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
             try {
                 final Method mkm = cl.getDeclaredMethod("mkwidget", UI.class, Object[].class);
                 int mod = mkm.getModifiers();
@@ -709,23 +712,7 @@ public class Widget {
             if (tt instanceof String) {
                 tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, (String) tt));
             } else if (tt instanceof Integer) {
-                final Indir<Resource> tres = ui.sess.getres((Integer) tt);
-                tooltip = new Indir<Tex>() {
-                    Text t = null;
-
-                    public Tex get() {
-                        if (t == null) {
-                            Resource.Pagina pag;
-                            try {
-                                pag = tres.get().layer(Resource.pagina);
-                            } catch (Loading e) {
-                                return (null);
-                            }
-                            t = RichText.render(pag.text, 300);
-                        }
-                        return (t.tex());
-                    }
-                };
+                tooltip = new PaginaTip(ui.sess.getres((Integer) tt));
             }
         } else if (msg == "gk") {
             gkey = (Integer) args[0];
@@ -1182,6 +1169,89 @@ public class Widget {
         return (null);
     }
 
+    public class Children extends AbstractSequentialList<Widget> {
+        protected Children() {
+        }
+
+        public int size() {
+            int n = 0;
+            for (Widget ch : this)
+                n++;
+            return (n);
+        }
+
+        public ListIterator<Widget> listIterator(int idx) {
+            ListIterator<Widget> ret = new ListIterator<Widget>() {
+                Widget next = child, prev = null;
+                Widget last = null;
+                int idx = -1;
+
+                public boolean hasNext() {
+                    return (next != null);
+                }
+
+                public boolean hasPrevious() {
+                    return (prev != null);
+                }
+
+                public Widget next() {
+                    if (next == null)
+                        throw (new NoSuchElementException());
+                    last = next;
+                    next = last.next;
+                    prev = last;
+                    idx++;
+                    return (last);
+                }
+
+                public Widget previous() {
+                    if (prev == null)
+                        throw (new NoSuchElementException());
+                    last = prev;
+                    next = last;
+                    prev = last.prev;
+                    idx--;
+                    return (last);
+                }
+
+                public void add(Widget wdg) {
+                    throw (new UnsupportedOperationException());
+                }
+
+                public void set(Widget wdg) {
+                    throw (new UnsupportedOperationException());
+                }
+
+                public void remove() {
+                    if (last == null)
+                        throw (new IllegalStateException());
+                    if (next == last)
+                        next = next.next;
+                    if (prev == last)
+                        prev = prev.prev;
+                    last.destroy();
+                    last = null;
+                }
+
+                public int nextIndex() {
+                    return (idx + 1);
+                }
+
+                public int previousIndex() {
+                    return (idx);
+                }
+            };
+            for (int i = 0; i < idx; i++)
+                ret.next();
+            return (ret);
+        }
+    }
+
+    public List<Widget> children() {
+        return (new Children());
+    }
+
+    /* XXX: Should be renamed to rchildren at this point. */
     public <T extends Widget> Set<T> children(final Class<T> cl) {
         return (new AbstractSet<T>() {
             public int size() {
@@ -1249,6 +1319,51 @@ public class Widget {
             return ((cursor == null) ? null : cursor.get());
         } catch (Loading l) {
             return (null);
+        }
+    }
+
+    public static class PaginaTip implements Indir<Tex> {
+        public final String title;
+        public final Indir<Resource> res;
+        private Tex rend;
+        private boolean hasrend = false;
+
+        public PaginaTip(Indir<Resource> res, String title) {
+            this.res = res;
+            this.title = title;
+        }
+
+        public PaginaTip(Indir<Resource> res) {
+            this(res, null);
+        }
+
+        public Tex get() {
+            if (!hasrend) {
+                render:
+                {
+                    try {
+                        Resource.Pagina pag = res.get().layer(Resource.pagina);
+                        if (pag == null)
+                            break render;
+                        String text;
+                        if (title == null) {
+                            if (pag.text.length() == 0)
+                                break render;
+                            text = pag.text;
+                        } else {
+                            if (pag.text.length() == 0)
+                                text = title;
+                            else
+                                text = title + "\n\n" + pag.text;
+                        }
+                        rend = RichText.render(text, 300).tex();
+                    } catch (Loading l) {
+                        return (null);
+                    }
+                }
+                hasrend = true;
+            }
+            return (rend);
         }
     }
 
@@ -1401,5 +1516,30 @@ public class Widget {
                 widgets.add(c.cast(wdg));
         }
         return widgets;
+    }
+
+    public static class Temporary extends Widget {
+        public void lower() {
+            Widget last = parent.lchild;
+            last.next = child;
+            child.prev = last;
+            for (Widget w = child; w != null; w = w.next) {
+                w.parent = parent;
+                w.c = w.c.add(c);
+            }
+            parent.lchild = lchild;
+            child = null;
+            lchild = null;
+            destroy();
+        }
+
+        public static void optimize(Widget wdg) {
+            for (Widget w = wdg.child; w != null; w = w.next) {
+                if (w instanceof Temporary)
+                    ((Temporary) w).lower();
+                else
+                    optimize(w);
+            }
+        }
     }
 }

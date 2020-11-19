@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 public class Debug {
     public static boolean kf1, kf2, kf3, kf4;
@@ -67,6 +68,35 @@ public class Debug {
 
     public static File somedir(String basename) {
         return (new File(basename));
+    }
+
+    public static void dump(Object... stuff) {
+        if(stuff.length > 0) {
+            System.err.print(stuff[0]);
+            for(int i = 1; i < stuff.length; i++) {
+                System.err.print(' ');
+                if(stuff[i] instanceof Object[]) {
+                    System.err.print(Arrays.asList((Object[])stuff[i]));
+                } else if(stuff[i] instanceof byte[]) {
+                    byte[] ba = (byte[])stuff[i];
+                    if(ba.length < 32) {
+                        System.err.print(Utils.byte2hex(ba));
+                    } else {
+                        System.err.println();
+                        Utils.hexdump(ba, System.err, 0);
+                    }
+                } else if(stuff[i] instanceof int[]) {
+                    Utils.dumparr((int[])stuff[i], System.err, false);
+                } else if(stuff[i] instanceof float[]) {
+                    Utils.dumparr((float[])stuff[i], System.err, false);
+                } else if(stuff[i] instanceof short[]) {
+                    Utils.dumparr((short[])stuff[i], System.err, false);
+                } else {
+                    System.err.print(stuff[i]);
+                }
+            }
+        }
+        System.err.println();
     }
 
     public static class DumpGL extends TraceGL4bc {

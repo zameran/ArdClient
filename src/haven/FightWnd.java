@@ -1094,7 +1094,7 @@ public class FightWnd extends Widget {
         info = add(new ImageInfoBox(new Coord(223, 152)), new Coord(5, 35).add(wbox.btloff()));
         Frame.around(this, Collections.singletonList(info));
 
-        add(new Img(CharWnd.catf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Martial Arts & Combat Schools")).tex()), 0, 0);
+        add(CharWnd.settip(new Img(CharWnd.catf.render("Martial Arts & Combat Schools").tex()), "gfx/hud/chr/tips/combat"), 0, 0);
         actlist = add(new Actions(235, actionsListHeight()), new Coord(276, 35).add(wbox.btloff()));
         Frame.around(this, Collections.singletonList(actlist));
         Widget p = add(new BView(), 77, 200);

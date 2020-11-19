@@ -66,12 +66,15 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -1653,6 +1656,83 @@ public class Utils {
         T ret = i.next();
         i.remove();
         return (ret);
+    }
+
+    public static <T> List<T> reversed(List<T> ls) {
+        return (new AbstractList<T>() {
+            public int size() {
+                return (ls.size());
+            }
+
+            public T get(int i) {
+                return (ls.get(ls.size() - 1 - i));
+            }
+
+            public ListIterator<T> listIterator(int first) {
+                ListIterator<T> bk = ls.listIterator(ls.size() - first);
+                return (new ListIterator<T>() {
+                    public boolean hasNext() {
+                        return (bk.hasPrevious());
+                    }
+
+                    public boolean hasPrevious() {
+                        return (bk.hasNext());
+                    }
+
+                    public T next() {
+                        return (bk.previous());
+                    }
+
+                    public T previous() {
+                        return (bk.next());
+                    }
+
+                    public int nextIndex() {
+                        return (ls.size() - bk.previousIndex() - 1);
+                    }
+
+                    public int previousIndex() {
+                        return (ls.size() - bk.nextIndex() - 1);
+                    }
+
+                    public void set(T el) {
+                        bk.set(el);
+                    }
+
+                    public void remove() {
+                        bk.remove();
+                    }
+
+                    public void add(T el) {
+                        bk.add(el);
+                    }
+                });
+            }
+
+            public ListIterator<T> listIterator() {
+                return (listIterator(0));
+            }
+
+            public Iterator<T> iterator() {
+                return (listIterator());
+            }
+
+            public T set(int i, T el) {
+                return (ls.set(ls.size() - 1 - i, el));
+            }
+
+            public void add(int i, T el) {
+                ls.add(ls.size() - i, el);
+            }
+
+            public T remove(int i) {
+                return (ls.remove(ls.size() - 1 - i));
+            }
+
+            public String toString() {
+                return (String.format("#<reversed %s>", ls));
+            }
+        });
     }
 
     public static <T> int index(T[] arr, T el) {

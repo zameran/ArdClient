@@ -61,10 +61,28 @@ public abstract class Sprite implements Rendered {
         }
     }
 
+    public class RecOwner implements Owner, Skeleton.HasPose {
+        public Random mkrandoom() {
+            return (owner.mkrandoom());
+        }
+
+        public <T> T context(Class<T> cl) {
+            return (owner.context(cl));
+        }
+
+        public Resource getres() {
+            return (res);
+        }
+
+        public Skeleton.Pose getpose() {
+            return (Skeleton.getpose(Sprite.this));
+        }
+    }
+
     public static class FactMaker implements Resource.PublishedCode.Instancer {
-        public Factory make(Class<?> cl) throws InstantiationException, IllegalAccessException {
+        public Factory make(Class<?> cl, Resource ires, Object... args) {
             if (Factory.class.isAssignableFrom(cl))
-                return (cl.asSubclass(Factory.class).newInstance());
+                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, args));
             try {
                 Function<Object[], Sprite> make = Utils.smthfun(cl, "mksprite", Sprite.class, Owner.class, Resource.class, Message.class);
                 return (new Factory() {
