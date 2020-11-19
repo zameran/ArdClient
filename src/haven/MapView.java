@@ -606,10 +606,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
         }
 
-        public void release() {
-            if(isometric && (tfield > 100))
-                tangl = (float)(Math.PI * 0.5 * (Math.floor(tangl / (Math.PI * 0.5)) + 0.5));
-        }
+//        public void release() {
+//            if(isometric && (tfield > 100))
+//                tangl = (float)(Math.PI * 0.5 * (Math.floor(tangl / (Math.PI * 0.5)) + 0.5));
+//        }
 
         private void chfield(float nf) {
             tfield = nf;
