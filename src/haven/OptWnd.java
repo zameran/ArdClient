@@ -30,6 +30,7 @@ package haven;
 import haven.automation.Discord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
+import haven.resutil.FoodInfo;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
@@ -1198,6 +1199,9 @@ public class OptWnd extends Window {
                 Utils.setprefb("flatcaves", val);
                 Config.flatcaves = val;
                 a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
             }
         });
         appender.add(new CheckBox("Display stage 1 (fresh planted) crops when crop stage overlay enabled.") {
@@ -2952,6 +2956,9 @@ public class OptWnd extends Window {
                 Utils.setprefb("straightcavewall", val);
                 Config.straightcavewall = val;
                 a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
             }
         });
 
@@ -3325,6 +3332,36 @@ public class OptWnd extends Window {
                 Utils.setprefb("resinfo", val);
                 Config.resinfo = val;
                 a = val;
+            }
+        });
+        appender.add(new CheckBox("Show base quality fep on food") {
+            {
+                a = FoodInfo.showbaseq;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showbaseq", val);
+                FoodInfo.showbaseq = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Shows base quality fep on food: fep (basefep) - %").tex();
+            }
+        });
+        appender.add(new CheckBox("Straight ridges") {
+            {
+                a = configuration.straightridges;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("straightridges", val);
+                configuration.straightridges = val;
+                a = val;
+                if (ui.sess != null) {
+                    ui.sess.glob.map.invalidateAll();
+                }
             }
         });
         appender.add(new CheckBox("Show distance on Point") {

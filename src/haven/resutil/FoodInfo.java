@@ -58,18 +58,19 @@ import static haven.PUtils.convolvedown;
 import static haven.QualityList.SingleType.Quality;
 
 public class FoodInfo extends ItemInfo.Tip {
-    public final double end, glut;
+    public final double end, glut, cons;
     public final Event[] evs;
     public final Effect[] efs;
     public final int[] types;
-    public static boolean showbaseq;
+    public static boolean showbaseq = Utils.getprefb("showbaseq", false);;
     private final CharacterInfo.Constipation constipation;
     private final static DecimalFormat basefepfmt = new DecimalFormat("0.##");
 
-    public FoodInfo(Owner owner, double end, double glut, Event[] evs, Effect[] efs, int[] types) {
+    public FoodInfo(Owner owner, double end, double glut, double cons, Event[] evs, Effect[] efs, int[] types) {
         super(owner);
         this.end = end;
         this.glut = glut;
+        this.cons = cons;
         this.evs = evs;
         this.efs = efs;
         this.types = types;
@@ -83,6 +84,10 @@ public class FoodInfo extends ItemInfo.Tip {
         } catch (NullPointerException | OwnerContext.NoContext ignore) {
         }
         this.constipation = constipation;
+    }
+
+    public FoodInfo(Owner owner, double end, double glut, Event[] evs, Effect[] efs, int[] types) {
+        this(owner, end, glut, 0, evs, efs, types);
     }
 
 
@@ -111,7 +116,10 @@ public class FoodInfo extends ItemInfo.Tip {
     }
 
     public BufferedImage tipimg() {
-        BufferedImage base = RichText.render(String.format("Energy: $col[128,128,255]{%s%%}, Hunger: $col[255,192,128]{%s%%}", Utils.odformat2(end * 100, 2), Utils.odformat2(glut * 100, 2)), 0).img;
+        String head = String.format("Energy: $col[128,128,255]{%s%%}, Hunger: $col[255,192,128]{%s%%}", Utils.odformat2(end * 100, 2), Utils.odformat2(glut * 100, 2));
+        if (cons != 0)
+            head += String.format(", Satiation: $col[192,192,128]{%s%%}", Utils.odformat2(cons * 100, 2));
+        BufferedImage base = RichText.render(head, 0).img;
         Collection<BufferedImage> imgs = new LinkedList<BufferedImage>();
         imgs.add(base);
         double totalFeps = 0;
@@ -123,10 +131,10 @@ public class FoodInfo extends ItemInfo.Tip {
             String str;
             if (showbaseq && owner instanceof GItem) {
                 QBuff q = ((GItem) owner).quality();
-                str = String.format("%s: $col[%d,%d,%d]{%s}  $col[%d,%d,%d]{(%s - %s)}",
+                str = String.format("%s: $col[%d,%d,%d]{%s (%s) - %s}",
                         evs[i].ev.nm,
                         col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2),
-                        col.getRed(), col.getGreen(), col.getBlue(), q != null ? basefepfmt.format(evs[i].a / Math.sqrt(q.q / 10)) : "???",
+                        q != null ? Utils.odformat2(evs[i].a / Math.sqrt(q.q / 10), 2) : "???",
                         Utils.odformat2(evs[i].a / (totalFeps / 100.0), 2) + "%");
 
             } else {
@@ -134,7 +142,13 @@ public class FoodInfo extends ItemInfo.Tip {
             }
             imgs.add(catimgsh(5, evs[i].img, RichText.render(str, 0).img));
         }
-        imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2)), 0).img);
+        if (showbaseq && owner instanceof GItem) {
+            QBuff q = ((GItem) owner).quality();
+            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s (%s)}, FEP/Hunger: $col[%d,%d,%d]{%s (%s)}",
+                    0, 180, 0, Utils.odformat2(totalFeps, 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10), 2) : "???",
+                    0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2), q != null ? Utils.odformat2(totalFeps / Math.sqrt(q.q / 10) / (glut * 100), 2) : "???"), 0).img);
+        } else
+            imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps / (glut * 100), 2)), 0).img);
         for (int i = 0; i < efs.length; i++) {
             BufferedImage efi = ItemInfo.longtip(efs[i].info);
             if (efs[i].p != 1)

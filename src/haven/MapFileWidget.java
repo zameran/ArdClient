@@ -39,6 +39,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -60,6 +61,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 import static haven.MCache.cmaps;
+import static haven.Text.latin;
 
 public class MapFileWidget extends Widget {
     public final MapFile file;
@@ -225,28 +227,31 @@ public class MapFileWidget extends Widget {
 
         public void draw(GOut g, Coord c) {
             float scale = (zoom + 1 + 5f) / (zoomlvls - 1);
+            Text.Foundry fnd = configuration.scalingmarks ? new Text.Foundry(latin.deriveFont(Font.BOLD), Math.round(12 / scale)).aa(true) : new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
             if (m instanceof PMarker) {
                 Coord ul = c.sub(flagcc);
                 Coord sflagcc = flagcc.div(scale);
                 Coord sul = c.sub(sflagcc);
                 g.chcolor(((PMarker) m).color);
                 if (configuration.scalingmarks) {
-                    Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, flagfg.sz.div(scale)));
+                    Coord scalesz = flagfg.sz.div(scale);
+                    Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, scalesz));
                     g.image(iflagfg, sul);
                 } else
                     g.image(flagfg, ul);
                 g.chcolor();
                 if (configuration.scalingmarks) {
-                    Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, flagbg.sz.div(scale)));
+                    Coord scalesz = flagbg.sz.div(scale);
+                    Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, scalesz));
                     g.image(iflagbg, sul);
                 } else
                     g.image(flagbg, ul);
                 if (Config.mapdrawflags) {
-                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, Text.num12boldFnd).tex();
+                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, fnd).tex();
                     if (tex != null) {
                         if (configuration.scalingmarks) {
-                            Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
-                            g.image(itex, sul.add(sflagcc.x / 2, -20).sub(itex.sz().x / 2, 0));
+//                            Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
+                            g.image(tex, sul.add(sflagcc.x / 2, -20).sub(tex.sz().x / 2, 0));
                         } else
                             g.image(tex, ul.add(flagfg.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
                     }
@@ -269,22 +274,25 @@ public class MapFileWidget extends Widget {
                 if (img != null) {
                     //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
                     Coord scc = cc.div(scale);
-                    Tex iimg = new TexI(PUtils.uiscale(img.img, img.sz.div(scale)));
                     if (Config.mapdrawquests) {
                         if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
-                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, Text.num12boldFnd).tex();
+                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
                             if (tex != null) {
-                                Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
-                                if (configuration.scalingmarks)
-                                    g.image(itex, c.sub(scc).add(iimg.sz().x / 2, -20).sub(itex.sz().x / 2, 0));
-                                else
+                                if (configuration.scalingmarks) {
+                                    Coord scalesz = img.sz.div(scale);
+                                    Tex iimg = new TexI(PUtils.uiscale(img.img, scalesz));
+//                                    Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
+                                    g.image(tex, c.sub(scc).add(iimg.sz().x / 2, -20).sub(tex.sz().x / 2, 0));
+                                } else
                                     g.image(tex, c.sub(cc).add(img.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
                             }
                         }
                     }
-                    if (configuration.scalingmarks)
+                    if (configuration.scalingmarks) {
+                        Coord scalesz = img.sz.div(scale);
+                        Tex iimg = new TexI(PUtils.uiscale(img.img, scalesz));
                         g.image(iimg, c.sub(scc));
-                    else
+                    } else
                         g.image(img, c.sub(cc));
                 }
             }
@@ -368,8 +376,9 @@ public class MapFileWidget extends Widget {
             remark(loc, dext);
         if (markers != null && !configuration.bigmaphidemarks) {
             for (DisplayMarker mark : markers) {
-                if (ui != null && ui.gui != null && ui.gui.mapfile != null && ui.gui.mapfile.markers.contains(mark.m))
+                if (ui != null && ui.gui != null && ui.gui.mapfile != null && ui.gui.mapfile.markers.contains(mark.m)) {
                     mark.draw(g, hsz.sub(loc.tc).add(mark.m.tc.div(scalef())));
+                }
             }
         }
     }
