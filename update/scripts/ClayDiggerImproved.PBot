@@ -29,7 +29,7 @@ const startBtnCb = () => {
 	for (let i = minY; i < maxY; i += 11) {
 		for (let j = minX; j < maxX; j += 11) {
 			// Add shallow water tiles into the claytile list
-			if (PBotUtils.tileResnameAt(ui, j, i) === "gfx/tiles/water") {
+			if (PBotUtils.tileResnameAt(ui, j, i) === "gfx/tiles/water" || PBotUtils.tileResnameAt(ui, j, i) === "gfx/tiles/owater") {
 				clayTiles.push({ x: j, y: i });
 			}
 		}
