@@ -41,7 +41,7 @@ public class Equipory extends Widget implements DTarget {
     private static final Tex bg = Resource.loadtex("gfx/hud/equip/bg");
     private static final int rx = invsq.sz().x + bg.sz().x;
     private static final int yo = Inventory.sqsz.y;
-    private static final int acx = 34 + bg.sz().x / 2;
+    private static final int acx = invsq.sz().x + bg.sz().x / 2;
     private static final Text.Foundry acf = new Text.Foundry(Text.sans, Text.cfg.def).aa(true);
     private Tex armorclass = null;
     private Tex percexp = null;
@@ -137,7 +137,7 @@ public class Equipory extends Widget implements DTarget {
             protected java.awt.Color clearcolor() {
                 return (null);
             }
-        }, new Coord(34, 0));
+        }, new Coord(invsq.sz().x, 0));
         ava.color = null;
         bonuses = add(new AttrBonusesWdg(isz.y), isz.x + 5, 0);
         pack();

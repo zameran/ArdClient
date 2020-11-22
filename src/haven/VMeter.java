@@ -26,8 +26,13 @@
 
 package haven;
 
+import modification.configuration;
+
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VMeter extends Widget {
@@ -40,6 +45,44 @@ public class VMeter extends Widget {
         put("Finery Forge", 6 * 2);
         put("Ore Smelter", (int) (3.3 * 12));
     }};
+    public static final List<Kit> kits = new ArrayList<Kit>() {{
+        add(new Kit("Cauldron", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(71, 101, 153), 30f, "L"));
+            add(new TypeLimit(new Color(255, 128, 0), 10f, "ticks"));
+        }}));
+    }};
+
+    public static class Kit {
+        public final String windowName;
+        public final List<TypeLimit> typeLimit;
+        public Kit(String windowName, ArrayList<TypeLimit> typeLimit) {
+            this.windowName = windowName;
+            this.typeLimit = typeLimit;
+        }
+        public static Kit getKit(String windowName) {
+            for (Kit kit : kits)
+                if (kit.windowName.equals(windowName))
+                    return kit;
+            return null;
+        }
+    }
+
+    public static class TypeLimit {
+        public final Color color;
+        public final double limit;
+        public final String subText;
+        public TypeLimit(Color color, double limit, String subText) {
+            this.color = color;
+            this.limit = limit;
+            this.subText = subText;
+        }
+        public static TypeLimit getTypeLimit(Kit kit, Color color) {
+            for (TypeLimit typeLimit : kit.typeLimit)
+                if (typeLimit.color.equals(color))
+                    return typeLimit;
+            return null;
+        }
+    }
 
     @RName("vm")
     public static class $_ implements Factory {
@@ -73,6 +116,7 @@ public class VMeter extends Widget {
         int hm = (sz.y - 6);
         int h = (hm * amount) / 100;
         g.image(fg, new Coord(0, 0), new Coord(0, sz.y - 3 - h), sz.add(0, h));
+        g.chcolor();
 
         Widget p = this.parent;
         if (p instanceof Window) {
@@ -113,6 +157,17 @@ public class VMeter extends Widget {
                     return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
                 } else {
                     return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
+                }
+            } else if (((Window) p).cap.text.equals("Cauldron")) {
+                if (cl.equals(new Color(71, 101, 153))) {
+                    return RichText.render("$b{$col[255,223,5]{" + 30f * amount / 100 + "/30L (" + amount + "%)}}", -1).tex();
+                } else if (cl.equals(new Color(255, 128, 0))){
+                    if (ui.modctrl) {
+                        return RichText.render("$b{$col[255,223,5]{" + 10f * amount / 100 + "/10 ticks (" + amount + "%)}}" +
+                                "\n1 tick = 4 minutes 50 seconds\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks", -1).tex();
+                    } else {
+                        return RichText.render("$b{$col[255,223,5]{" + 10f * amount / 100 + "/10 ticks (" + amount + "%)}}", -1).tex();
+                    }
                 }
             }
         }
