@@ -31,6 +31,7 @@ import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.Ridges;
 import haven.sloth.gob.Type;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
@@ -458,10 +459,28 @@ public class LocalMiniMap extends Widget {
 
                         KinInfo kininfo = gob.getattr(KinInfo.class);
                         if (pc.x >= 0 && pc.x <= sz.x && pc.y >= 0 && pc.y < sz.y) {
-                            g.chcolor(Color.BLACK);
-                            g.fcircle(pc.x, pc.y, 5, 16);
+//                            g.chcolor(Color.BLACK);
+//                            g.fcircle(pc.x, pc.y, 5, 16);
+//                            g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
+//                            g.fcircle(pc.x, pc.y, 4, 16);
+//                            g.chcolor();
+
+                            double angle = gob.geta();
+//                            final Coord front = new Coord(5, 0).rotate(angle).add(pc);
+//                            final Coord right = new Coord(-3, 3).rotate(angle).add(pc);
+//                            final Coord left = new Coord(-3, -3).rotate(angle).add(pc);
+//                            final Coord notch = new Coord(0, 0).rotate(angle).add(pc);
+
+                            final Coord coord1 = new Coord(8, 0).rotate(angle).add(pc);
+                            final Coord coord2 = new Coord(5, -5).rotate(angle).add(pc);
+                            final Coord coord3 = new Coord(5, -2).rotate(angle).add(pc);
+                            final Coord coord4 = new Coord(-8, 0).rotate(angle).add(pc);
+                            final Coord coord5 = new Coord(5, 2).rotate(angle).add(pc);
+                            final Coord coord6 = new Coord(5, 5).rotate(angle).add(pc);
                             g.chcolor(kininfo != null ? BuddyWnd.gc[kininfo.group] : Color.WHITE);
-                            g.fcircle(pc.x, pc.y, 4, 16);
+                            g.poly(coord1, coord2, coord3, coord4, coord5, coord6);
+                            g.chcolor(Color.BLACK);
+                            g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6);
                             g.chcolor();
                         }
 
@@ -847,14 +866,21 @@ public class LocalMiniMap extends Widget {
                     continue;
                 }
 
-                final Coord front = new Coord(8, 0).rotate(angle).add(ptc);
-                final Coord right = new Coord(-5, 5).rotate(angle).add(ptc);
-                final Coord left = new Coord(-5, -5).rotate(angle).add(ptc);
-                final Coord notch = new Coord(-2, 0).rotate(angle).add(ptc);
+//                final Coord front = new Coord(5, 0).rotate(angle).add(ptc);
+//                final Coord right = new Coord(-3, 3).rotate(angle).add(ptc);
+//                final Coord left = new Coord(-3, -3).rotate(angle).add(ptc);
+//                final Coord notch = new Coord(0, 0).rotate(angle).add(ptc);
+
+                final Coord coord1 = new Coord(8, 0).rotate(angle).add(ptc);
+                final Coord coord2 = new Coord(5, -5).rotate(angle).add(ptc);
+                final Coord coord3 = new Coord(5, -2).rotate(angle).add(ptc);
+                final Coord coord4 = new Coord(-8, 0).rotate(angle).add(ptc);
+                final Coord coord5 = new Coord(5, 2).rotate(angle).add(ptc);
+                final Coord coord6 = new Coord(5, 5).rotate(angle).add(ptc);
                 g.chcolor(m.col);
-                g.poly(front, right, notch, left);
+                g.poly(coord1, coord2, coord3, coord4, coord5, coord6);
                 g.chcolor(Color.BLACK);
-                g.polyline(1, front, right, notch, left);
+                g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6);
                 g.chcolor();
             }
         }
@@ -1071,12 +1097,12 @@ public class LocalMiniMap extends Widget {
             if (!img.rot)
                 g.image(tex, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), tex.dim.mul(iconZoom));
             else {
-                BufferedImage bi = tex.back;
-                AffineTransform transform = new AffineTransform();
-                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI);
-                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
-                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
-                bi = op.filter(bi, null);
+                BufferedImage bi = configuration.rotate(tex.back, (disp.ang + Math.PI / 2) % (2 * Math.PI));
+//                AffineTransform transform = new AffineTransform();
+//                double angle = (disp.ang + Math.PI / 2) % (2 * Math.PI);
+//                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
+//                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+//                bi = op.filter(bi, null);
                 g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta));
             }
         }

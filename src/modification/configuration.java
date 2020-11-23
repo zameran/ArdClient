@@ -14,6 +14,9 @@ import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -351,6 +354,19 @@ public class configuration {
 
     public static Tex imageToTex(String name, boolean autoSize, Tex defaultTex) {
         return imageToTex(name, autoSize, null, defaultTex);
+    }
+
+    public static BufferedImage rotate(BufferedImage image, double angle) {
+        AffineTransform transform = new AffineTransform();
+        transform.rotate(angle, image.getWidth() / 2, image.getHeight() / 2);
+        AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+        return image = op.filter(image, null);
+    }
+
+    public static GraphicsConfiguration getDefaultConfiguration() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        return gd.getDefaultConfiguration();
     }
 
     public static ArrayList<String> findFiles(String dir, List<String> exts) {

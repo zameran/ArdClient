@@ -26,7 +26,7 @@ public class PBotScriptlistItem {
         this.filename = scriptFile.getName();
         this.ui = ui;
 
-        File icon = new File("scripts/" + scriptFile.getName().substring(0, scriptFile.getName().lastIndexOf(".")) + ".png");
+        File icon = new File(scriptFile.getPath().substring(0, scriptFile.getPath().lastIndexOf(".")) + ".png");
         if (icon.exists()) {
             try {
                 this.iconTex = new TexI(ImageIO.read(icon));

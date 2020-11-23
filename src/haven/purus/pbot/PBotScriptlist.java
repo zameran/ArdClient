@@ -119,12 +119,10 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            if (!super.mousedown(c, button)) {
-                mdItem = itemat(c);
-                if (button == 1 && mdItem != null) {
-                    grab = ui.grabmouse(this);
-                    wdgmsg("dragstart", mdItem);
-                }
+            mdItem = itemat(c);
+            if (button == 1 && mdItem != null) {
+                grab = ui.grabmouse(this);
+                wdgmsg("dragstart", mdItem);
             }
             return true;
         }
