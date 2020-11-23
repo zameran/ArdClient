@@ -119,10 +119,12 @@ public class PBotScriptlist extends GameUI.Hidewnd {
 
         @Override
         public boolean mousedown(Coord c, int button) {
-            mdItem = itemat(c);
-            if (button == 1 && mdItem != null) {
-                grab = ui.grabmouse(this);
-                wdgmsg("dragstart", mdItem);
+            if (!super.mousedown(c, button)) {
+                mdItem = itemat(c);
+                if (button == 1 && mdItem != null) {
+                    grab = ui.grabmouse(this);
+                    wdgmsg("dragstart", mdItem);
+                }
             }
             return true;
         }
@@ -157,6 +159,14 @@ public class PBotScriptlist extends GameUI.Hidewnd {
             if (!scriptDirectory.exists())
                 scriptDirectory.mkdir();
             for (File f : scriptDirectory.listFiles()) {
+                if (f.getName().endsWith(".PBot")) {
+                    itemList.add(new PBotScriptlistItem(ui, f.getName(), f));
+                }
+            }
+            File scriptOffDirectory = new File("scripts/official/");
+            if (!scriptOffDirectory.exists())
+                scriptOffDirectory.mkdir();
+            for (File f : scriptOffDirectory.listFiles()) {
                 if (f.getName().endsWith(".PBot")) {
                     itemList.add(new PBotScriptlistItem(ui, f.getName(), f));
                 }
