@@ -517,7 +517,7 @@ public class PBotUtils {
      * @param str Message to send
      */
     public static void sysMsg(UI ui, String str) {
-        ui.gui.msg(str, Color.WHITE);
+        sysMsg(ui, str, Color.WHITE);
     }
 
 //    public static void sysMsg(String str) {
@@ -531,7 +531,8 @@ public class PBotUtils {
      * @param col Color of the text
      */
     public static void sysMsg(UI ui, String str, Color col) {
-        ui.gui.msg(str, col);
+        if (ui.gui != null)
+            ui.gui.msg(str, col);
     }
 
 //    public static void sysMsg(String str, Color col) {
@@ -547,7 +548,7 @@ public class PBotUtils {
      * @param b   Amount of blue colour in the text
      */
     public static void sysMsg(UI ui, String str, int r, int g, int b) {
-        ui.gui.msg(str, new Color(r, g, b));
+        sysMsg(ui, str, new Color(r, g, b));
     }
 
 //    public static void sysMsg(String str, int r, int g, int b) {
