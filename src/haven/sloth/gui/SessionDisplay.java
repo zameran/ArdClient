@@ -78,10 +78,12 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
     }
 
     public void init(Collection<UI> base) {
-        for (final UI lui : base) {
-            final UIDisplay display = new UIDisplay(lui);
-            uimap.put(lui, display);
-            grp.add(display);
+        synchronized (base) {
+            for (final UI lui : base) {
+                final UIDisplay display = new UIDisplay(lui);
+                uimap.put(lui, display);
+                grp.add(display);
+            }
         }
         add.destroy();
         grp.add(add);

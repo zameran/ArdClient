@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import haven.MenuGrid.Pagina;
+import haven.sloth.util.ObservableListener;
 import rx.Subscription;
 
 import java.awt.Color;
@@ -26,7 +27,7 @@ import static haven.CraftDBWnd.Mode.All;
 import static haven.CraftDBWnd.Mode.Favourites;
 import static haven.CraftDBWnd.Mode.History;
 
-public class CraftDBWnd extends Window implements DTarget2, ObservableListener<MenuGrid.Pagina> {
+public class CraftDBWnd extends Window implements DTarget2, ObservableListener<Pagina> {
     private static final int PANEL_H = 52;
     private static final Coord WND_SZ = new Coord(635, 360 + PANEL_H);
     private static final Coord ICON_SZ = new Coord(20, 20);

@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.util.ObservableListener;
+
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;

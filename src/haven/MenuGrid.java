@@ -67,6 +67,7 @@ import haven.purus.StockpileFiller;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
+import haven.sloth.util.ObservableCollection;
 import modification.configuration;
 
 import java.awt.Color;
