@@ -1,6 +1,5 @@
 import haven.CharWnd;
 import haven.Coord;
-import haven.GItem;
 import haven.GItem.NumberInfo;
 import haven.GSprite;
 import haven.GSprite.ImageSprite;
@@ -12,17 +11,17 @@ import haven.ResData;
 import haven.Resource;
 import haven.RichText;
 import haven.Text;
-import haven.UI;
 import haven.Utils;
 import haven.res.lib.tspec.Spec;
+import haven.res.ui.tt.attrmod.AttrMod;
 import haven.res.ui.tt.defn.DefName;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -81,10 +80,48 @@ public class ISlots extends Tip implements NumberInfo {
         }
 
         Iterator sItemIterator = s.iterator();
+        Map<Resource, Integer> totalAttr = new HashMap<Resource, Integer>();
+        int sitems = 0;
+
+        for (ItemInfo ii : owner.info()) {
+            if (ii instanceof AttrMod) {
+                for (AttrMod.Mod mod : ((AttrMod) ii).mods) {
+                    boolean exist = false;
+                    for (Map.Entry<Resource, Integer> entry : totalAttr.entrySet()) {
+                        if (entry.getKey().equals(mod.attr)) {
+                            exist = true;
+                            entry.setValue(entry.getValue() + mod.mod);
+                            break;
+                        }
+                    }
+                    if (!exist)
+                        totalAttr.put(mod.attr, mod.mod);
+                }
+            }
+        }
+        if (totalAttr.size() > 0) sitems++;
 
         while (sItemIterator.hasNext()) {
             SItem sItem = (SItem) sItemIterator.next();
             sItem.layout(layout);
+            sitems++;
+
+            for (ItemInfo ii : sItem.info) {
+                if (ii instanceof AttrMod) {
+                    for (AttrMod.Mod mod : ((AttrMod) ii).mods) {
+                        boolean exist = false;
+                        for (Map.Entry<Resource, Integer> entry : totalAttr.entrySet()) {
+                            if (entry.getKey().equals(mod.attr)) {
+                                exist = true;
+                                entry.setValue(entry.getValue() + mod.mod);
+                                break;
+                            }
+                        }
+                        if (!exist)
+                            totalAttr.put(mod.attr, mod.mod);
+                    }
+                }
+            }
         }
 
         if (left > 0) {
@@ -93,68 +130,24 @@ public class ISlots extends Tip implements NumberInfo {
             layout.cmp.add(Text.slotFnd.render(left > 1 ? String.format(gildStr, Integer.valueOf(left)) : gild2Str).img, new Coord(10, layout.cmp.sz.y));
         }
 
-        if (owner instanceof GItem) {
+        if (totalAttr.size() > 0 && sitems > 1) {
             BufferedImage totalString = RichText.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Total:")).img;
             layout.cmp.add(totalString, new Coord(0, layout.cmp.sz.y));
 
-            GItem gItem = (GItem) owner; //FIXME I don't like the way it looks
-            setui(gItem.ui);
-            Map<Resource, Integer> totalAttrs = new HashMap<>();
-
-            totalAttrs = Arrays.stream(new GItem[]{gItem})
-                    .map(GItem::info)
-                    .map(ItemInfo::getBonuses)
-                    .map(Map::entrySet)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
-            List<ItemInfo> info = null;
-            if (totalAttrs != null) {
-                ItemInfo compiled = make(getui(), totalAttrs.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList()));
-                info = compiled != null ? Collections.singletonList(compiled) : null;
+            List<AttrMod.Mod> lmods = new ArrayList<>();
+            List<Map.Entry<Resource, Integer>> sortAttr = totalAttr.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList());
+            for (Map.Entry<Resource, Integer> entry : sortAttr) {
+                lmods.add(new AttrMod.Mod(entry.getKey(), entry.getValue()));
             }
 
-            BufferedImage tip = null;
-
-            if (info != null && !info.isEmpty()) {
-                tip = ItemInfo.longtip(info);
-                layout.cmp.add(tip, new Coord(10, layout.cmp.sz.y));
-            }
+            BufferedImage tip = AttrMod.modimg(lmods);
+            layout.cmp.add(tip, new Coord(10, layout.cmp.sz.y));
         }
-    }
-
-    private UI ui;
-
-    private void setui(UI ui) {
-        this.ui = ui;
-    }
-
-    private UI getui() {
-        return this.ui;
-    }
-
-    private ItemInfo make(UI ui, Collection<Map.Entry<Resource, Integer>> mods) {
-        if (mods.isEmpty()) {
-            return null;
-        }
-        Resource res = Resource.remote().load("ui/tt/attrmod").get();
-        ItemInfo.InfoFactory f = res.layer(Resource.CodeEntry.class).get(ItemInfo.InfoFactory.class);
-        Object[] args = new Object[mods.size() * 2 + 1];
-        int i = 1;
-        for (Map.Entry<Resource, Integer> entry : mods) {
-            args[i] = ui.sess.getresid(entry.getKey());
-            args[i + 1] = entry.getValue();
-            i += 2;
-        }
-        return f.build(owner, args);
     }
 
     private int BY_PRIORITY(Map.Entry<Resource, Integer> o1, Map.Entry<Resource, Integer> o2) {
         Resource r1 = o1.getKey();
         Resource r2 = o2.getKey();
-
-        if (getui().gui.chrwdg != null) {
-            return getui().gui.chrwdg.BY_PRIORITY(r1, r2);
-        }
         return r1.name.compareTo(r2.name);
     }
 
