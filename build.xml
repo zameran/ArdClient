@@ -293,4 +293,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
         <move file="ver" todir="update"/>
     </target>
 
+    <target name="update_jars" depends="jars, update"/>
+    <target name="update_clean_jars" depends="jars_clean, update"/>
+
 </project>

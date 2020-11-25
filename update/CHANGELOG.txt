@@ -1,3 +1,7 @@
+20201125
+Fixes. Add stump and log type.
+~
+
 20201123
 Fixes. Music bot (beta). Scripts...
 ~
