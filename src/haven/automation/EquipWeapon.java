@@ -35,21 +35,21 @@ public class EquipWeapon implements Runnable {
         try {//start giant try catch to prevent any loading/null crashes when using this.
             Inventory beltInv = null;
             InventoryBelt quickBeltInv = null;
-            WItem lhand = gui.getequipory().quickslots[6];
-            WItem rhand = gui.getequipory().quickslots[7];
+            WItem righthand = gui.getequipory().quickslots[7];
+            WItem lefthand = gui.getequipory().quickslots[6];
             HashMap<WItem, Integer> wepmap = new HashMap<>();
             wepmap.putAll(getWeapon(gui.maininv));
 
-            if (lhand != null) {
-                if (lhand.name.get().contains("Sword") || lhand.name.get().contains("Battleaxe")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found weapon in left hand, canceling.", Color.white);
+            if (righthand != null) {
+                if (righthand.name.get().contains("Sword") || righthand.name.get().contains("Battleaxe")) {
+                    PBotUtils.sysMsg(gui.ui, "Already found weapon in right hand, canceling.", Color.white);
                     return;
                 }
             }
 
-            if (rhand != null) {
-                if (rhand.name.get().contains("Sword") || rhand.name.get().contains("Battleaxe")) {
-                    PBotUtils.sysMsg(gui.ui, "Already found weapon in right hand, canceling.", Color.white);
+            if (lefthand != null) {
+                if (lefthand.name.get().contains("Sword") || lefthand.name.get().contains("Battleaxe")) {
+                    PBotUtils.sysMsg(gui.ui, "Already found weapon in left hand, canceling.", Color.white);
                     return;
                 }
             }
@@ -113,7 +113,7 @@ public class EquipWeapon implements Runnable {
             if (e == null)//equipory is somehow null, break
                 return;
 
-            if (lhand == null || rhand == null) {//nothing in either left or right hand, makes equipping easy.
+            if (righthand == null || lefthand == null) {//nothing in either left or right hand, makes equipping easy.
                 weaponItem.wdgmsg("take", new Coord(weaponItem.sz.x / 2, weaponItem.sz.y / 2));
 
                 try {
@@ -122,10 +122,10 @@ public class EquipWeapon implements Runnable {
                 } catch (InterruptedException ie) {
                     return;
                 }
-                if (lhand == null) //try to find an empty hand first, otherwise drop it in left hand
-                    e.wdgmsg("drop", 6);
-                else
+                if (righthand == null) //try to find an empty hand first, otherwise drop it in right hand
                     e.wdgmsg("drop", 7);
+                else
+                    e.wdgmsg("drop", 6);
             } else {//neither hand is empty, if we're equipping a sword this is no problem, if we're not - it's a problem.
                 if (weaponItem.getname().contains("Sword") || (weaponItem.getname().contains("Axe") && !weaponItem.getname().contains("Battleaxe"))) {//if sword just drop it in a hand
                     weaponItem.wdgmsg("take", new Coord(weaponItem.sz.x / 2, weaponItem.sz.y / 2));
@@ -136,9 +136,9 @@ public class EquipWeapon implements Runnable {
                     } catch (InterruptedException ie) {
                         return;
                     }
-                    e.wdgmsg("drop", 6);
+                    e.wdgmsg("drop", 7);
                 } else {//else, we have to empty one hand before we can drop it in.
-                    PBotUtils.takeItem(gui.ui, lhand);
+                    PBotUtils.takeItem(gui.ui, righthand);
                     try {
                         if (!Utils.waitForOccupiedHand(gui, TIMEOUT, "waitForOccupiedHand timed-out"))
                             return;
@@ -178,7 +178,7 @@ public class EquipWeapon implements Runnable {
                     } catch (InterruptedException ie) {
                         return;
                     }
-                    e.wdgmsg("drop", 6);
+                    e.wdgmsg("drop", 7);
                     while (PBotUtils.getGItemAtHand(gui.ui) == weaponItem)//sleep till we recognize item on cursor has changed.
                         PBotUtils.sleep(100);
                 }

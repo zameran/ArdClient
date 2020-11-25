@@ -35,32 +35,32 @@ public class EquipSacks implements Runnable {
         try {//start giant try catch to prevent any loading/null crashes when using this.
             Inventory beltInv = null;
             InventoryBelt quickBeltInv = null;
-            WItem lhand = gui.getequipory().quickslots[6];
-            WItem rhand = gui.getequipory().quickslots[7];
+            WItem righthand = gui.getequipory().quickslots[7];
+            WItem lefthand = gui.getequipory().quickslots[6];
             HashMap<WItem, Integer> wepmap = new HashMap<>();
             int iterations = 0;
 
 
-            if (lhand != null && rhand != null) {
-                if (lhand.name.get().contains("Sack") && rhand.name.get().contains("Sack")) {
+            if (righthand != null && lefthand != null) {
+                if (righthand.name.get().contains("Sack") && lefthand.name.get().contains("Sack")) {
                     PBotUtils.sysMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
                     return;
                 }
-                if (lhand.name.get().contains("Bindle") && rhand.name.get().contains("Bindle")) {
+                if (righthand.name.get().contains("Bindle") && lefthand.name.get().contains("Bindle")) {
                     PBotUtils.sysMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
                     return;
                 }
             }
-            if (lhand == null && rhand == null) {//if hands are empty obviously we need to run this twice to attempt to equip 2 sacks.
+            if (righthand == null && lefthand == null) {//if hands are empty obviously we need to run this twice to attempt to equip 2 sacks.
                 iterations = 2;
             } else { //else figure out if we already have 1 sack equipped when we run
-                if (lhand != null) {
-                    if (!lhand.name.get().contains("Sack") && !lhand.name.get().contains("Bindle"))
+                if (righthand != null) {
+                    if (!righthand.name.get().contains("Sack") && !righthand.name.get().contains("Bindle"))
                         iterations++;
                 } else
                     iterations++;
-                if (rhand != null) {
-                    if (!rhand.name.get().contains("Sack") && !rhand.name.get().contains("Bindle"))
+                if (lefthand != null) {
+                    if (!lefthand.name.get().contains("Sack") && !lefthand.name.get().contains("Bindle"))
                         iterations++;
                 } else
                     iterations++;
@@ -135,15 +135,15 @@ public class EquipSacks implements Runnable {
                 if (e == null)//equipory is somehow null, break
                     return;
 
-                if (lhand == null) //try to find an empty hand first, otherwise drop it in left hand
-                    e.wdgmsg("drop", 6);
-                else if (rhand == null)
+                if (righthand == null) //try to find an empty hand first, otherwise drop it in left hand
                     e.wdgmsg("drop", 7);
+                else if (lefthand == null)
+                    e.wdgmsg("drop", 6);
                 else {//resolve what's in both hands to ensure we don't overwrite a sack with another sack
-                    if (!lhand.name.get().contains("Sack") && !lhand.name.get().contains("Bindle"))
-                        e.wdgmsg("drop", 6);
-                    else if (!rhand.name.get().contains("Sack") && !rhand.name.get().contains("Bindle"))
+                    if (!righthand.name.get().contains("Sack") && !righthand.name.get().contains("Bindle"))
                         e.wdgmsg("drop", 7);
+                    else if (!lefthand.name.get().contains("Sack") && !lefthand.name.get().contains("Bindle"))
+                        e.wdgmsg("drop", 6);
                     try {
                         if (!Utils.waitForOccupiedHand(gui, TIMEOUT, "waitForOccupiedHand2 timed-out"))
                             return;
@@ -191,8 +191,8 @@ public class EquipSacks implements Runnable {
                 }
                 beltInv = null;
                 quickBeltInv = null;
-                lhand = gui.getequipory().quickslots[6];
-                rhand = gui.getequipory().quickslots[7];
+                righthand = gui.getequipory().quickslots[7];
+                lefthand = gui.getequipory().quickslots[6];
                 wepmap.clear();
             }
         } catch (Exception e) {

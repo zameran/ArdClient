@@ -35,28 +35,28 @@ public class EquipSwordShield implements Runnable {
         try {//start giant try catch to prevent any loading/null crashes when using this.
             Inventory beltInv = null;
             InventoryBelt quickBeltInv = null;
-            WItem lhand = gui.getequipory().quickslots[6];
-            WItem rhand = gui.getequipory().quickslots[7];
+            WItem righthand = gui.getequipory().quickslots[7];
+            WItem lefthand = gui.getequipory().quickslots[6];
             HashMap<WItem, Integer> wepmap = new HashMap<>();
             int iterations = 0;
 
 
-            if (lhand != null && rhand != null) {
-                if ((lhand.name.get().contains("Sword") && rhand.name.get().contains("shield")) || (lhand.name.get().contains("shield") && rhand.name.get().contains("Sword"))) {
-                    PBotUtils.sysMsg(gui.ui, "Already found traveler sacks, canceling.", Color.white);
+            if (righthand != null && lefthand != null) {
+                if ((righthand.name.get().contains("Sword") && lefthand.name.get().contains("shield")) || (righthand.name.get().contains("shield") && lefthand.name.get().contains("Sword"))) {
+                    PBotUtils.sysMsg(gui.ui, "Already found sword/shield equip, canceling.", Color.white);
                     return;
                 }
             }
-            if (lhand == null && rhand == null) {//if hands are empty obviously we need to run this twice to attempt to equip 2 sacks.
+            if (righthand == null && lefthand == null) {//if hands are empty obviously we need to run this twice to attempt to equip 2 sacks.
                 iterations = 2;
             } else { //else figure out if we already have 1 sack equipped when we run
-                if (lhand != null) {
-                    if (!lhand.name.get().contains("Sword") && !lhand.name.get().contains("shield"))
+                if (righthand != null) {
+                    if (!righthand.name.get().contains("Sword") && !righthand.name.get().contains("shield"))
                         iterations++;
                 } else
                     iterations++;
-                if (rhand != null) {
-                    if (!rhand.name.get().contains("Sword") && !rhand.name.get().contains("shield"))
+                if (lefthand != null) {
+                    if (!lefthand.name.get().contains("Sword") && !lefthand.name.get().contains("shield"))
                         iterations++;
                 } else
                     iterations++;
@@ -131,15 +131,15 @@ public class EquipSwordShield implements Runnable {
                 if (e == null)//equipory is somehow null, break
                     return;
 
-                if (lhand == null) //try to find an empty hand first, otherwise drop it in left hand
-                    e.wdgmsg("drop", 6);
-                else if (rhand == null)
+                if (righthand == null) //try to find an empty hand first, otherwise drop it in left hand
                     e.wdgmsg("drop", 7);
+                else if (lefthand == null)
+                    e.wdgmsg("drop", 6);
                 else {//resolve what's in both hands to ensure we don't overwrite a sack with another sack
-                    if (!lhand.name.get().contains("Sword") && !lhand.name.get().contains("shield"))
-                        e.wdgmsg("drop", 6);
-                    else if (!rhand.name.get().contains("Sword") && !rhand.name.get().contains("shield"))
+                    if (!righthand.name.get().contains("Sword") && !righthand.name.get().contains("shield"))
                         e.wdgmsg("drop", 7);
+                    else if (!lefthand.name.get().contains("Sword") && !lefthand.name.get().contains("shield"))
+                        e.wdgmsg("drop", 6);
                     try {
                         if (!Utils.waitForOccupiedHand(gui, TIMEOUT, "waitForOccupiedHand2 timed-out"))
                             return;
@@ -187,8 +187,8 @@ public class EquipSwordShield implements Runnable {
                 }
                 beltInv = null;
                 quickBeltInv = null;
-                lhand = gui.getequipory().quickslots[6];
-                rhand = gui.getequipory().quickslots[7];
+                righthand = gui.getequipory().quickslots[7];
+                lefthand = gui.getequipory().quickslots[6];
                 wepmap.clear();
             }
         } catch (Exception e) {
