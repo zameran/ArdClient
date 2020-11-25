@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
@@ -111,14 +113,16 @@ public class GobIcon extends GAttrib {
             if ((tex.sz().x > size) || (tex.sz().y > size)) {
                 BufferedImage buf = rimg.img;
                 buf = PUtils.rasterimg(PUtils.blurmask2(buf.getRaster(), 1, 1, Color.BLACK));
-                Coord tsz;
-                if (buf.getWidth() > buf.getHeight())
-                    tsz = new Coord(size, (size * buf.getHeight()) / buf.getWidth());
-                else
-                    tsz = new Coord((size * buf.getWidth()) / buf.getHeight(), size);
-                buf = PUtils.convolve(buf, tsz, filter);
+//                Coord tsz;
+//                if (buf.getWidth() > buf.getHeight())
+//                    tsz = new Coord(size, (size * buf.getHeight()) / buf.getWidth());
+//                else
+//                    tsz = new Coord((size * buf.getWidth()) / buf.getHeight(), size);
+                buf = PUtils.convolve(buf, new Coord(20, 20), filter);
                 tex = new TexI(buf);
             }
+//            if ((tex.sz().x != size) || (tex.sz().y != size))
+//                tex = new TexI(configuration.scaleImage(rimg.img, new Coord(20, 20)));
             this.tex = tex;
             this.cc = tex.sz().div(2);
             byte[] data = rimg.kvdata.get("mm/rot");
@@ -136,7 +140,7 @@ public class GobIcon extends GAttrib {
             if (texgrey == null) {
                 BufferedImage bimg = PUtils.monochromize(rimg.img, Color.WHITE);
                 texgrey = new TexI(bimg);
-                if ((tex.sz().x > size) && (tex.sz().y > size)) {
+                if ((texgrey.sz().x > size) && (texgrey.sz().y > size)) {
                     bimg = PUtils.rasterimg(PUtils.blurmask2(bimg.getRaster(), 1, 1, Color.BLACK));
                     bimg = PUtils.convolvedown(bimg, new Coord(20, 20), filter);
                     texgrey = new TexI(bimg);
