@@ -571,6 +571,8 @@ public class Widget {
     }
 
     public void destroy() {
+        for (Widget wdg = child; wdg != null; wdg = wdg.next)
+            wdg.reqdestroy();
         if (canfocus)
             setcanfocus(false);
         unlink();

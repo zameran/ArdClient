@@ -24,6 +24,8 @@ public enum Type {
     TILE,
     SOUND,
     TREE,
+    LOG,
+    STUMP,
     BUSH,
     BOULDER,
     ROAD,

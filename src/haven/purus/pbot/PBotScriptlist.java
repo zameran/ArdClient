@@ -1,10 +1,12 @@
 package haven.purus.pbot;
 
+import haven.Button;
 import haven.Coord;
 import haven.GOut;
 import haven.GameUI;
 import haven.Listbox;
 import haven.Loading;
+import haven.Text;
 import haven.TextEntry;
 import haven.UI;
 import haven.Widget;
@@ -14,12 +16,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PBotScriptlist extends GameUI.Hidewnd {
 
     private TextEntry search;
+    private Button change;
     private ScriptList list;
+    private ThreadList threadList;
 
     boolean dragging;
     PBotScriptlistItem draggedItem;
@@ -27,22 +32,47 @@ public class PBotScriptlist extends GameUI.Hidewnd {
     public PBotScriptlist() {
         super(new Coord(228, 280), "PBot New Scripts");
 
-        search = new TextEntry(210, "") {
+        change = new Button(0, "T") {
+            public void click() {
+                list.show(!list.visible);
+                threadList.show(!threadList.visible);
+                search.settext("");
+                if (list.visible) {
+                    list.refreshItemList();
+                    list.sb.val = 0;
+                } else if (threadList.visible) {
+                    threadList.refreshItemList();
+                    threadList.sb.val = 0;
+                }
+            }
+        };
+        search = new TextEntry(210 - change.sz.x, "") {
             @Override
             public boolean keydown(KeyEvent ev) {
                 if (!parent.visible)
                     return false;
 
-                boolean ret = buf.key(ev);
-                list.changeFilter(text);
-                list.sb.val = 0;
+                if (list.visible) {
+                    boolean ret = buf.key(ev);
+                    list.changeFilter(text);
+                    list.sb.val = 0;
+                } else if (threadList.visible) {
+                    boolean ret = buf.key(ev);
+                    threadList.changeFilter(text);
+                    threadList.sb.val = 0;
+                }
                 return true;
             }
         };
         add(search, new Coord(10, 5));
+        add(change, new Coord(sz.x - change.sz.x - 10, 5));
 
         list = new ScriptList(210, 10);
         add(list, new Coord(10, 35));
+
+        threadList = new ThreadList(210, 10);
+        add(threadList, new Coord(10, 35));
+        threadList.hide();
     }
 
     @Override
@@ -173,6 +203,82 @@ public class PBotScriptlist extends GameUI.Hidewnd {
                     .sorted(Comparator.comparing(PBotScriptlistItem::getName))
                     .collect(Collectors.toList());
             filteredItemList = itemList;
+        }
+    }
+
+    private static class ThreadList extends Listbox<Map.Entry<String, PBotScript>> {
+        private static final Coord nameoff = new Coord(5, 5);
+
+        private String filter = "";
+        List<Map.Entry<String, PBotScript>> itemList, filteredItemList;
+        private UI.Grab grab;
+        Map.Entry<String, PBotScript> mdItem;
+
+        public ThreadList(int w, int h) {
+            super(w, h, 24);
+        }
+
+        public void changeFilter(String filter) {
+            filteredItemList = itemList.stream()
+                    .filter(item -> item.getKey().toLowerCase().contains(filter.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        protected Map.Entry<String, PBotScript> listitem(int i) {
+            if (i < 0 || i >= filteredItemList.size())
+                return null;
+            return filteredItemList.get(i);
+        }
+
+        @Override
+        protected int listitems() {
+            return filteredItemList.size();
+        }
+
+        @Override
+        protected void drawitem(GOut g, Map.Entry<String, PBotScript> item, int i) {
+            g.image(Text.render(item.getValue().name()).tex(), nameoff);
+        }
+
+        @Override
+        public boolean mousedown(Coord c, int button) {
+            mdItem = itemat(c);
+            return true;
+        }
+
+        @Override
+        public boolean mouseup(Coord c, int button) {
+            Map.Entry<String, PBotScript> item = itemat(c);
+            if (item != null && itemat(c) == mdItem) {
+                deleteItem(item);
+                refreshItemList();
+            }
+            mdItem = null;
+            return true;
+        }
+
+        @Override
+        protected void drawbg(GOut g) {
+            g.chcolor(0, 0, 0, 120);
+            g.frect(Coord.z, sz);
+            g.chcolor();
+        }
+
+        public void refreshItemList() {
+            itemList = new ArrayList<Map.Entry<String, PBotScript>>();
+            itemList.addAll(PBotScriptmanager.scripts.entrySet());
+            itemList = itemList.stream()
+                    .sorted(Comparator.comparing(Map.Entry<String, PBotScript>::getKey))
+                    .collect(Collectors.toList());
+            filteredItemList = itemList;
+        }
+
+        public void deleteItem(Map.Entry<String, PBotScript> item) {
+            item.getValue().kill();
+            filteredItemList.remove(item);
+            itemList.remove(item);
+            PBotScriptmanager.scripts.remove(item.getKey());
         }
     }
 }

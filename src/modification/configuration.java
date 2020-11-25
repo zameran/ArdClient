@@ -4,6 +4,7 @@ import haven.Coord;
 import haven.Gob;
 import haven.MainFrame;
 import haven.OCache;
+import haven.PUtils;
 import haven.Session;
 import haven.Tex;
 import haven.TexI;
@@ -363,10 +364,9 @@ public class configuration {
         return image = op.filter(image, null);
     }
 
-    public static GraphicsConfiguration getDefaultConfiguration() {
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        return gd.getDefaultConfiguration();
+    public static TexI monochrome(TexI texI, Color color) {
+        BufferedImage bimg = PUtils.monochromize(texI.back, color);
+        return new TexI(bimg);
     }
 
     public static ArrayList<String> findFiles(String dir, List<String> exts) {

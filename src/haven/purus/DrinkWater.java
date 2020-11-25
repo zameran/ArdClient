@@ -158,6 +158,7 @@ public class DrinkWater implements Runnable {
 //                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
         for (int i = 0; i < sips; i++) {
             if (!canDrinkFrom(drinkFromThis)) {
+                PBotUtils.sysMsg(gui.ui, "Can't drink from this.", Color.RED);
                 return false;
             }
             if (PBotUtils.petalExists(gui.ui)) {

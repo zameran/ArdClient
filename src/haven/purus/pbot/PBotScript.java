@@ -32,4 +32,17 @@ public class PBotScript extends Thread {
             PBotError.handleException(ui, e);
         }
     }
+
+    public void kill() {
+        try {
+//            interrupt();
+            context.close(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String name() {
+        return name;
+    }
 }

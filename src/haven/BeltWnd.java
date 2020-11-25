@@ -91,7 +91,7 @@ public class BeltWnd extends MovableWidget {
             tt = null;
             res = null;
             pag = null;
-            if (ui.gui.belt[slot] != null) {
+            if (ui.gui != null && ui.gui.belt[slot] != null) {
                 res = ui.gui.belt[slot];
                 data.remove(slot);
             } else {

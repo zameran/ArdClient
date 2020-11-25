@@ -376,11 +376,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
                 }
-                if (name.endsWith("stump") || name.endsWith("log"))
-                    type = Type.TREE;
+                if (name.endsWith("stump"))
+                    type = Type.STUMP;
+                if (name.endsWith("log"))
+                    type = Type.LOG;
 
                 if (getattr(GobIcon.class) == null) {
-                    if (type == Type.TREE || type == Type.BUSH) {
+                    if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
                         String fistname1 = name.substring(0, name.lastIndexOf('/'));
                         String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
                         String lastname = name.replace(fistname, "");
@@ -709,7 +711,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 final UI ui = glob.ui.get();
                 if (discovered) {
                     if (getattr(HeldBy.class) == null &&
-                            (getattr(Holding.class) == null || ui == null || getattr(Holding.class).held.id != ui.gui.map.plgob) &&
+                            (getattr(Holding.class) == null || ui == null || (ui.gui != null && ui.gui.map != null && getattr(Holding.class).held.id != ui.gui.map.plgob)) &&
                             !pathfinding_blackout) {
                         hitboxcoords = glob.gobhitmap.add(this);
                     }

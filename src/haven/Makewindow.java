@@ -330,13 +330,12 @@ public class Makewindow extends Widget {
                     c1 = c1.add(10, 0);
 
                 if (c.isect(c1, Inventory.sqsz)) {
-                    Resource.AButton ab = s.getres().layer(Resource.action);
-                    if (ab != null) {
-                        String[] ad = ab.ad;
-                        if (ad != null)
-                            ui.gui.menu.wdgmsg("act", "craft", ad);
+                    Resource res = s.getres();
+                    if (res != null) {
+                        String name = res.name.substring(res.name.lastIndexOf("/") + 1);
+                        ui.gui.menu.wdgmsg("act", "craft", name);
                     }
-                    return false;
+                    return (true);
                 }
 
                 c1 = c1.add(Inventory.sqsz.x, 0);
