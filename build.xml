@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
     <property name="name" value="ArdClient"/>
-    <property name="version" value="20201123"/>
+    <property name="version" value="20201125"/>
 
     <target name="build-env">
         <mkdir dir="build"/>
@@ -159,6 +159,19 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
             <fileset dir="lib/jogl-natives" includes="*.jar">
             </fileset>
         </copy>
+    </target>
+
+    <target name="clean-classes">
+        <delete dir="build/classes"/>
+        <delete dir="build/classes-lib"/>
+        <delete file="build/hafen.jar"/>
+        <delete file="build/custom-res"/>
+        <delete file="build/modification"/>
+        <delete file="build/scripts"/>
+    </target>
+
+    <target name="jars_clean" depends="clean-classes, jars">
+
     </target>
 
     <target name="dist" depends="rebuild">
