@@ -55,7 +55,7 @@ public class PickForageable implements Runnable {
                         if (gate) {
                             for (Gob.Overlay ol : gob.ols) {
                                 String resname = (this.gui.map.glob.sess.getres(Utils.uint16d(ol.sdt.rbuf, 0)).get()).basename();
-                                if (resname.equals("visflag")) {
+                                if (Config.disablevgatekeybind && resname.equals("visflag")) {
                                     gate = false;
                                 }
                             }

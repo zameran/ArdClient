@@ -52,7 +52,12 @@ public class Traverse implements Runnable {
 
     private ArrayList<String> gobNameSuffix = new ArrayList<String>(Arrays.asList(
             "-door",
-            "ladder"
+            "ladder",
+            "upstairs",
+            "downstairs",
+            "cellarstairs",
+            "cavein",
+            "caveout"
     ));
 
     public ArrayList<doorShiftData> buildings = new ArrayList<doorShiftData>(Arrays.asList(
