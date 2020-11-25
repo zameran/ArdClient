@@ -4,6 +4,7 @@ import haven.Config;
 import haven.automation.DiscordBot;
 import integrations.mapv4.MappingClient;
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -23,7 +24,9 @@ public class PBotDiscord extends ListenerAdapter {
      * @param name
      */
     public static void setChannelByName(String name) {
-        channels = DiscordBot.getJda().getTextChannelsByName(name, true);
+        JDA jda = DiscordBot.getJda();
+        if (jda != null)
+            channels = jda.getTextChannelsByName(name, true);
     }
 
     /***

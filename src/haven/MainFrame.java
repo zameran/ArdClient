@@ -27,6 +27,7 @@
 package haven;
 
 import com.google.common.flogger.FluentLogger;
+import haven.purus.pbot.PBotDiscord;
 import modification.configuration;
 
 import javax.swing.JOptionPane;
@@ -418,6 +419,11 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         setupres();
         DefSettings.init(); //init after res has been setup...
+        try {
+            PBotDiscord.initalize();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         MainFrame f = (instance = new MainFrame(null));
         if (Utils.getprefb("fullscreen", false))
             f.setfs();

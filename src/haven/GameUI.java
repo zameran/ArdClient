@@ -34,7 +34,6 @@ import haven.livestock.LivestockManager;
 import haven.overlays.OverlayManager;
 import haven.purus.DrinkWater;
 import haven.purus.ItemClickCallback;
-import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotScriptlist;
 import haven.purus.pbot.PBotScriptlistOld;
 import haven.purus.pbot.PBotUtils;
@@ -63,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -348,11 +346,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         Glob.timersThread = new haven.timers.TimersThread();
         Glob.timersThread.start();
         timerswnd = add(new haven.timers.TimersWnd(this));
-        try {
-            PBotDiscord.initalize();
-        } catch (Exception e) {
-            System.out.println("PBotDiscord.initalize() " + e);
-        }
         if (!Config.autowindows.get("Timers").selected)
             timerswnd.hide();
         ui.root.sessionDisplay.unlink();

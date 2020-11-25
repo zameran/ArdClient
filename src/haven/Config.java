@@ -264,7 +264,7 @@ public class Config {
     public static boolean obviousridges = Utils.getprefb("obviousridges", false);
     public static String treeboxclr = Utils.getpref("treeboxclr", "D7FF00");
     public static String discordtoken = Utils.getpref("discordtoken", "Null");
-    public static String discordchannel = Utils.getpref("discordchannel", "Null");
+    public static String discordchannel = Utils.getpref("discordchannel", "");
     public static String discordalertstring = Utils.getpref("discordalertstring", "Null");
     public static boolean discorduser = Utils.getprefb("discorduser", false);
     public static boolean discordrole = Utils.getprefb("discordrole", false);

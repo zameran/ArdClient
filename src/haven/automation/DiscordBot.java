@@ -17,12 +17,11 @@ public class DiscordBot {
                 jda.getPresence().setStatus(OnlineStatus.ONLINE);
                 jda.getPresence().setGame(Game.playing("Revived Bot"));
             } catch (Exception e) {
-                System.out.println("Invalid Token");
+                System.out.println("DiscordBot getJDA: Invalid Token");
+                e.printStackTrace();
             }
-            return jda;
-        } else {
-            return jda;
         }
+        return jda;
     }
 }
 
