@@ -2364,6 +2364,16 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Disable pick forage keybind (Q by Default) opening/closing visitor gates.") {
+            {
+                a = Config.disablevgatekeybind;
+            }
+            public void set(boolean val) {
+                Utils.setprefb("disablevgatekeybind", val);
+                Config.disablevgatekeybind = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Disable pick forage keybind (Q by Default) picking up/dropping carts.") {
             {
                 a = Config.disablecartkeybind;

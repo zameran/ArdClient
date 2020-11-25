@@ -238,6 +238,7 @@ public class Config {
     public static boolean showarchvector = Utils.getprefb("showarchvector", false);
     public static boolean disabledrinkhotkey = Utils.getprefb("disabledrinkhotkey", false);
     public static boolean disablegatekeybind = Utils.getprefb("disablegatekeybind", false);
+    public static boolean disablevgatekeybind = Utils.getprefb("disablevgatekeybind", true);
     public static boolean disablecartkeybind = Utils.getprefb("disablecartkeybind", true);
     public static boolean autologout = Utils.getprefb("autologout", false);
     public static int combatkeys = Utils.getprefi("combatkeys", 0);
