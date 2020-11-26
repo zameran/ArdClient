@@ -31,9 +31,11 @@ import haven.automation.Discord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
+import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Movable;
+import haven.sloth.gob.Type;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.dev;
@@ -2368,6 +2370,7 @@ public class OptWnd extends Window {
             {
                 a = Config.disablevgatekeybind;
             }
+
             public void set(boolean val) {
                 Utils.setprefb("disablevgatekeybind", val);
                 Config.disablevgatekeybind = val;
@@ -3383,6 +3386,36 @@ public class OptWnd extends Window {
                 Utils.setprefb("showpointdist", val);
                 configuration.showpointdist = val;
                 a = val;
+            }
+        });
+        appender.add(new CheckBox("Enable speed sprite") {
+            {
+                a = configuration.gobspeedsprite;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("gobspeedsprite", val);
+                configuration.gobspeedsprite = val;
+                a = val;
+                if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                    synchronized (ui.sess.glob.oc) {
+                        for (Gob g : ui.sess.glob.oc) {
+                            if (val) {
+                                if (g.findol(GobSpeedSprite.id) == null && (g.type == Type.HUMAN || g.type == Type.ANIMAL || g.name().startsWith("gfx/kritter/")))
+                                    g.addol(new Gob.Overlay(GobSpeedSprite.id, new GobSpeedSprite(g)));
+                            } else {
+                                Gob.Overlay speed = g.findol(GobSpeedSprite.id);
+                                if (speed != null)
+                                    g.ols.remove(speed);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Show speed over head (HUMAN, ANIMAL, gfx/kritter/)").tex();
             }
         });
         appender.add(new CheckBox("Enable snow fall") {

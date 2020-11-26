@@ -15,6 +15,8 @@ import haven.Sprite;
 import haven.Tex;
 import haven.Text;
 
+import java.awt.Color;
+
 public class GobSpeedSprite extends Sprite {
     public static final int id = -24447;
     private Tex speed;
@@ -55,7 +57,7 @@ public class GobSpeedSprite extends Sprite {
         final Gob g = (Gob) owner;
         final double spd = g.getv();
         if (spd != lspeed) {
-            speed = Text.renderstroked(String.format("%.2f", spd)).tex();
+            speed = Text.render(String.format("%.2f", spd), new Color(200, 200, 200)).tex();
             lspeed = spd;
         }
         return super.tick(dt);
