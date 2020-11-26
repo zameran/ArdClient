@@ -31,6 +31,7 @@ import haven.overlays.TextOverlay;
 import haven.overlays.newPlantStageSprite;
 import haven.resutil.BPRadSprite;
 import haven.resutil.WaterTile;
+import haven.sloth.gfx.GobSpeedSprite;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.gfx.SnowFall;
 import haven.sloth.gob.Alerted;
@@ -372,6 +373,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //checks for mannequins and changes their type to prevent unknown alarms
                 if (type == Type.HUMAN && attr.containsKey(GobHealth.class))
                     type = Type.UNKNOWN;
+
+                if (configuration.gobspeedsprite && type == Type.HUMAN || type == Type.ANIMAL || name.startsWith("gfx/kritter/")) {
+                    addol(new Overlay(GobSpeedSprite.id, new GobSpeedSprite(this)));
+                    //if(id == ui.gui.map.rlplgob) {
+                    //    addol(new Overlay(-4921, new SnowFall(this)));
+                    //}
+                }
+
                 if (configuration.snowfalloverlay && type == Type.HUMAN && isplayer()) {
                     if (findol(-4921) == null)
                         addol(new Overlay(-4921, new SnowFall(this)));
