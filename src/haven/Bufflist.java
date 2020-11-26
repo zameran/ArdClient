@@ -84,7 +84,7 @@ public class Bufflist extends MovableWidget {
 
     @Override
     protected boolean moveHit(Coord c, int btn) {
-        if (btn == 3 && ui.modmeta) {
+        if (super.moveHit(c, btn)) {
             for (Widget wdg = child; wdg != null; wdg = wdg.next) {
                 if (c.isect(wdg.c, wdg.sz))
                     return true;
