@@ -1,18 +1,18 @@
 package haven;
 
+import haven.sloth.gui.MovableWidget;
+
 import static haven.Inventory.invsq;
 
-public class CraftHistoryBelt extends Widget {
+public class CraftHistoryBelt extends MovableWidget {
     private static final int SIZE = 8;
     private MenuGrid.Pagina[] belt = new MenuGrid.Pagina[SIZE];
-    private UI.Grab dragging;
-    private Coord dc;
     private static final Coord vsz = new Coord(34, 450);
     private static final Coord hsz = new Coord(450, 34);
     private boolean vertical;
 
     public CraftHistoryBelt(boolean vertical) {
-        super(vertical ? vsz : hsz);
+        super(vertical ? vsz : hsz, "CraftHistoryBelt");
         this.vertical = vertical;
     }
 
@@ -43,6 +43,9 @@ public class CraftHistoryBelt extends Widget {
 
     @Override
     public boolean mousedown(Coord c, int button) {
+        if (super.mousedown(c, button)) {
+            return true;
+        }
         int slot = beltslot(c);
         if (slot != -1) {
             if (button == 1 && belt[slot] != null) {
@@ -62,9 +65,6 @@ public class CraftHistoryBelt extends Widget {
                         vertical = true;
                     }
                     Utils.setprefb("histbelt_vertical", vertical);
-                } else {
-                    dragging = ui.grabmouse(this);
-                    dc = c;
                 }
                 return true;
             }
@@ -73,25 +73,25 @@ public class CraftHistoryBelt extends Widget {
         return false;
     }
 
-    @Override
-    public boolean mouseup(Coord c, int button) {
-        if (dragging != null) {
-            dragging.remove();
-            dragging = null;
-            Utils.setprefc("histbelt_c", this.c);
-            return true;
-        }
-        return super.mouseup(c, button);
-    }
+//    @Override
+//    public boolean mouseup(Coord c, int button) {
+//        if (dragging != null) {
+//            dragging.remove();
+//            dragging = null;
+//            Utils.setprefc("histbelt_c", this.c);
+//            return true;
+//        }
+//        return super.mouseup(c, button);
+//    }
 
-    @Override
-    public void mousemove(Coord c) {
-        if (dragging != null) {
-            this.c = this.c.add(c.x, c.y).sub(dc);
-            return;
-        }
-        super.mousemove(c);
-    }
+//    @Override
+//    public void mousemove(Coord c) {
+//        if (dragging != null) {
+//            this.c = this.c.add(c.x, c.y).sub(dc);
+//            return;
+//        }
+//        super.mousemove(c);
+//    }
 
     public void push(MenuGrid.Pagina pagina) {
         for (MenuGrid.Pagina p : belt) {

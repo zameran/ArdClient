@@ -55,7 +55,16 @@ public class IMeter extends MovableWidget {
             for (int i = 1; i < args.length; i += 2) {
                 meters.add(new Meter((Color) args[i], (Integer) args[i + 1]));
             }
-            return (new IMeter(bg, meters, "meter-" + args[0]));
+            String name = null;
+            while (name == null) {
+                if (bg != null)
+                    try {
+                        name = bg.get().basename();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+            }
+            return (new IMeter(bg, meters, "meter-" + name));
         }
     }
 
@@ -73,11 +82,6 @@ public class IMeter extends MovableWidget {
             this.c = c;
             this.a = a;
         }
-    }
-
-    @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return c.isect(Coord.z, sz);
     }
 
     public void draw(GOut g) {

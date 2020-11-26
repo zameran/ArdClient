@@ -29,6 +29,7 @@ package haven;
 
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.ui.tt.wpn.Armpen;
+import haven.sloth.gui.MovableWidget;
 import haven.sloth.gui.fight.Attack;
 import haven.sloth.gui.fight.Card;
 import haven.sloth.gui.fight.Cards;
@@ -87,6 +88,17 @@ public class Fightsess extends Widget {
     private Coord lastMoveAnchor;
     private Coord cooldownAnchor;
 
+    public MovableWidget actionWdg;
+    public MovableWidget cooldownWdg;
+
+    public static String colred = "[221,28,26]";    //"[255,105,180]";
+    public static String colgreen = "[8,103,1]"; //"[0,255,0]";
+    public static String colblue = "[8,103,136]";   //"[0,255,255]";
+    public static String colyellow = "[203,168,6]";   //"[239,253,63]";
+    public static String colgrey = "[60,60,60,168]";
+    public static String ffont = "[mono]";
+    public static Color grey = new Color(30, 30, 30);
+
     public static class Action {
         public final int id;
         public final Indir<Resource> res;
@@ -134,18 +146,402 @@ public class Fightsess extends Widget {
         this.actions = new Action[nact];
 
         for (int i = 0; i < 10; i++) {
-            keystex[i] = Text.renderstroked(FightWnd.keys[i], Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+            keystex[i] = Text.renderstroked(FightWnd.keys[i], grey, Color.WHITE, Text.num20Fnd).tex();
             if (i < 5)
                 keysftex[i] = keystex[i];
             else
-                keysftex[i] = Text.renderstroked(FightWnd.keysf[i - 5], Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
-            keysfftex[i] = Text.renderstroked(FightWnd.keysf[i], Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+                keysftex[i] = Text.renderstroked(FightWnd.keysf[i - 5], grey, Color.WHITE, Text.num20Fnd).tex();
+            keysfftex[i] = Text.renderstroked(FightWnd.keysf[i], grey, Color.WHITE, Text.num20Fnd).tex();
         }
     }
 
     protected void added() {
         fv = parent.getparent(GameUI.class).fv;
         presize();
+
+        actionWdg = new MovableWidget(new Coord(400, 175), "FightSessActions") {
+            @Override
+            public void draw(GOut g) {
+                //My cards
+                final GItem weapon = weap();
+                final int weapq;
+                final int weapdmg;
+                final double weappen;
+                if (weapon != null) {
+                    weapq = (int) weapon.quality().q;
+                    weapdmg = Weapons.lookup.getOrDefault(weapon.name().orElse(""), 0);
+                    weappen = weapon.getinfo(Armpen.class).orElse(Armpen.NOPEN).deg;
+                } else {
+                    weapq = weapdmg = 0;
+                    weappen = 0.0;
+                }
+
+                for (int i = 0; i < actions.length; i++) {
+//                    Coord ca = Config.altfightui ? actionAnchor.add(actc(i)) : pcc.add(actc(i));
+                    Coord ca = actionAnchor.sub(0, 50).add(actc(i));
+                    Action act = actions[i];
+                    try {
+                        if (act != null) {
+                            Resource res = act.res.get();
+                            Tex img = res.layer(Resource.imgc).tex();
+                            Coord ic = ca.sub(img.sz().div(2));
+                            g.image(img, ic);
+                            if (now < act.ct) {
+                                //This is from an era when moves had their own cooldown
+                                double a = (now - act.cs) / (act.ct - act.cs);
+                                g.chcolor(0, 0, 0, 128);
+                                g.prect(ca, ic.sub(ca), ic.add(img.sz()).sub(ca), (1.0 - a) * Math.PI * 2);
+                                g.chcolor();
+                            }
+                            if (i == use) {
+                                g.image(indframe, ic.sub(indframeo));
+                            } else if (i == useb) {
+                                g.image(indbframe, ic.sub(indbframeo));
+                            } else {
+                                g.image(actframe, ic.sub(actframeo));
+                            }
+
+                            if (fv.current != null) {
+                                if (act.card instanceof Attack) {
+                                    final Attack atk = (Attack) act.card;
+                                    final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
+                                            str(), fv.current.defweights);
+//                                    Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(dmg.a) + "} / $col" + colyellow + "{" + Math.round(dmg.b) + "}}}}", -1).tex();
+                                    Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(dmg.a), colyellow, Math.round(dmg.b)), -1).tex();
+//                                    g.chcolor(grey);
+//                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
+//                                    g.chcolor();
+                                    g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+//                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
+                                    final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                                    final int mc = ui.sess.glob.cattr.get("melee").comp;
+
+                                    final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                            ua, mc, act.cards,
+                                            fv.current.defweights, fv.current.estimatedBlockWeight);
+//                                    Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
+                                    Tex texa = RichText.render(String.format("$bg%s{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+//                                    g.chcolor(grey);
+//                                    g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
+//                                    g.chcolor();
+                                    g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+//                            FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
+//                                    Math.round(newWeights.get(DefenseType.RED) * 100),
+//                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
+//                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
+//                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
+                                } else if (act.card instanceof Restoration) {
+                                    final Restoration restro = (Restoration) act.card;
+                                    final Map<DefenseType, Double> newWeights = restro.getFutureWeights(act.cards, fv.defweights);
+//                                    Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
+                                    Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+//                                    g.chcolor(grey);
+//                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
+//                                    g.chcolor();
+                                    g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+//                            FastText.printsf(g, ic.add(0, 35), "%d/%d/%d/%d",
+//                                    Math.round(newWeights.get(DefenseType.RED) * 100),
+//                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
+//                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
+//                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
+                                    if (act.card == Cards.flex) {
+                                        final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                                        final int mc = ui.sess.glob.cattr.get("melee").comp;
+
+                                        final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                                ua, mc, act.cards,
+                                                fv.current.defweights, fv.current.estimatedBlockWeight);
+//                                        Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(enemyWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(enemyWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(enemyWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(enemyWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
+                                        Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(enemyWeights.get(DefenseType.RED) * 100), colgreen, Math.round(enemyWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(enemyWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(enemyWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+//                                        g.chcolor(grey);
+//                                        g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
+//                                        g.chcolor();
+                                        g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+//                                FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
+//                                        Math.round(enemyWeights.get(DefenseType.RED) * 100),
+//                                        Math.round(enemyWeights.get(DefenseType.GREEN) * 100),
+//                                        Math.round(enemyWeights.get(DefenseType.BLUE) * 100),
+//                                        Math.round(enemyWeights.get(DefenseType.YELLOW) * 100));
+                                    }
+                                }
+                            }
+
+                            if (Config.combshowkeys) {
+                                Tex key;
+                                if (Config.combatkeys == 0) {
+                                    key = keystex[i];
+                                } else if (Config.combatkeys == 1) {
+                                    key = keysftex[i];
+                                } else {
+                                    key = keysfftex[i];
+                                }
+                                g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y / 2 - key.sz().y / 2));
+                            }
+                        }
+                    } catch (Loading l) {
+                    }
+                }
+
+                if (configuration.showcombatborder) {
+                    g.chcolor(Color.WHITE);
+                    g.rect(Coord.z, sz);
+                    g.chcolor();
+                }
+            }
+
+            public Object tooltip(Coord c, Widget prev) {
+                for (int i = 0; i < actions.length; i++) {
+//                    Coord ca = Config.altfightui ? new Coord(cx - 18, ui.gui.sz.y - 250).add(actc(i)).add(16, 16) : pcc.add(actc(i));
+//                    Coord ca = new Coord(cx - 18, sz.y - 250).add(actc(i)).add(16, 16);
+                    Coord ca = actionAnchor.sub(0, 50).add(actc(i));
+                    Indir<Resource> act = (actions[i] == null) ? null : actions[i].res;
+                    try {
+                        if (act != null) {
+                            Tex img = act.get().layer(Resource.imgc).tex();
+                            ca = ca.sub(img.sz().div(2));
+                            if (c.isect(ca, img.sz())) {
+                                String tip = act.get().layer(Resource.tooltip).t + " ($bg[60,60,60,168]{$b{$font" + ffont + "{$col[255,128,0]{" + keytips[i] + "}}}})";
+                                if ((acttip == null) || !acttip.text.equals(tip))
+                                    acttip = RichText.render(tip, -1);
+                                return (acttip);
+                            }
+                        }
+                    } catch (Loading l) {
+                    }
+                }
+                return (null);
+            }
+        };
+
+        cooldownWdg = new MovableWidget(new Coord(600, 200), "FightSessCooldowns") {
+            @Override
+            public void draw(GOut g) {
+                double now = Utils.rtime();
+//                int gcx = ui.gui.sz.x / 2;
+                int gcx = sz.x / 2;
+                int gcy = sz.y / 2 - 50;
+                for (Buff buff : fv.buffs.children(Buff.class)) {
+//                    Coord bc = Config.altfightui ? new Coord(gcx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
+                    Coord bc = new Coord(gcx - buff.c.x - Buff.cframe.sz().x - 80, gcy);
+                    drawOpening(g, buff, bc);
+                }
+
+                if (fv.current != null) {
+                    for (Buff buff : fv.current.buffs.children(Buff.class)) {
+                        Coord bc = new Coord(gcx + buff.c.x + 80, gcy);
+                        drawOpening(g, buff, bc);
+                    }
+
+                    g.aimage(ip.get().tex(), new Coord(gcx - 45, gcy + 20), 0.5, 0.5);
+                    g.aimage(oip.get().tex(), new Coord(gcx + 45, gcy + 20), 0.5, 0.5);
+
+                    if (fv.lsrel.size() > 1) {
+                        fxon(fv.current.gobid, tgtfx);
+                        if (Config.showothercombatinfo) {
+                            for (int i = 0; i < fv.lsrel.size(); i++) {
+                                if (fv.current != fv.lsrel.get(i)) {
+                                    try {
+                                        Coord buffcoord = null;
+                                        for (Buff buff : fv.lsrel.get(i).buffs.children(Buff.class)) {
+                                            pcc2 = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
+                                            //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
+                                            Coord cc = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
+                                            Coord finalcc = new Coord(cc.x, cc.y - 60);
+                                            if (buffcoord == null)
+                                                buffcoord = finalcc;
+                                            else
+                                                finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
+                                            drawOpeningofftarget(g, buff, finalcc, 24);
+                                        }
+                                        int itransfer = i;
+                                        Text.UText<?> oip2 = new Text.UText<Integer>(ipf2) {
+                                            public String text(Integer v) {
+                                                return ("IP: " + v);
+                                            }
+
+                                            public Integer value() {
+                                                return (fv.lsrel.get(itransfer).oip);
+                                            }
+                                        };
+                                        Text.UText<?> ip2 = new Text.UText<Integer>(ipf) {
+                                            public String text(Integer v) {
+                                                return ("IP: " + v);
+                                            }
+
+                                            public Integer value() {
+                                                return (fv.lsrel.get(itransfer).ip);
+                                            }
+                                        };
+                                        Coord cc = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
+                                        Coord finalcc = new Coord(cc.x, cc.y - 50);
+                                        g.aimage(ip2.get().tex(), finalcc.add(-5, 0), 1, .5);
+                                        g.aimage(oip2.get().tex(), finalcc.add(-5, 20), 1, .5);
+                                    } catch (Exception idk) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                {
+//                    Coord cdc = Config.altfightui ? new Coord(gcx, 200) : pcc.sub(cmc);
+                    Coord cdc = new Coord(gcx, gcy + 20);
+                    if (now < fv.atkct) {
+                        double a = (now - fv.atkcs) / (fv.atkct - fv.atkcs);
+                        g.chcolor(255, 0, 128, 224);
+                        g.fellipse(cdc, new Coord(24, 24), Math.PI / 2 - (Math.PI * 2 * Math.min(1.0 - a, 1.0)), Math.PI / 2);
+                        g.chcolor();
+                        if (Config.showcooldown)
+                            g.atextstroked(Utils.fmt1DecPlace(fv.atkct - now), cdc, 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num11Fnd);
+                    }
+                    g.image(cdframe, cdc.sub(cdframe.sz().div(2)));
+                    if (fv.current != null && fv.current.estimatedBlockWeight != 0) {
+                        final int stat;
+                        final WeightType type;
+                        if (fv.current.maneuver != null) {
+                            stat = (int) fv.current.maneuver.calculateStat(fv.current.estimatedBlockWeight);
+                            type = fv.current.maneuver.type;
+                        } else {
+                            //An animal, just assume blockweight -> UA
+                            type = WeightType.UA;
+                            stat = (int) fv.current.estimatedBlockWeight;
+                        }
+//                        Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + type + "} : $col" + colgreen + "{" + stat + "}}}}", -1).tex();
+                        Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{%s : %d}}}}", colgrey, ffont, type, stat), -1).tex();
+//                        g.chcolor(grey);
+//                        g.rect(cdc.add(-tex.sz().x / 2, -50).sub(2, 2), tex.sz().add(2, 2));
+//                        g.chcolor();
+                        g.aimage(tex, cdc.sub(0, cdframe.sz().y / 2), 0.5, 1);
+//                        FastText.aprintsf(g, cdc.add(0, -50), 0.5, 0.0, "%s: %d", type, stat);
+                    }
+                }
+
+                try {
+                    Indir<Resource> lastact = fv.lastact;
+                    if (lastact != Fightsess.this.lastact1) {
+                        Fightsess.this.lastact1 = lastact;
+                        Fightsess.this.lastacttip1 = null;
+                    }
+                    double lastuse = fv.lastuse;
+                    if (lastact != null) {
+                        Tex ut = lastact.get().layer(Resource.imgc).tex();
+//                        Coord useul = Config.altfightui ? lastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec1).sub(ut.sz().div(2));
+                        Coord useul = lastMoveAnchor.sub(ut.sz().x / 2, 0);
+                        g.image(ut, useul);
+                        g.image(useframe, useul.sub(useframeo));
+                        double a = now - lastuse;
+                        if (a < 1) {
+                            Coord off = new Coord((int) (a * ut.sz().x / 2), (int) (a * ut.sz().y / 2));
+                            g.chcolor(255, 255, 255, (int) (255 * (1 - a)));
+                            g.image(ut, useul.sub(off), ut.sz().add(off.mul(2)));
+                            g.chcolor();
+                        }
+                    }
+                } catch (Loading l) {
+                }
+
+                if (fv.current != null) {
+                    try {
+                        Indir<Resource> lastact = fv.current.lastact;
+                        if (lastact != Fightsess.this.lastact2) {
+                            Fightsess.this.lastact2 = lastact;
+                            Fightsess.this.lastacttip2 = null;
+                        }
+                        double lastuse = fv.current.lastuse;
+                        if (lastact != null) {
+                            Tex ut = lastact.get().layer(Resource.imgc).tex();
+//                            Coord useul = Config.altfightui ? enemyLastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec2).sub(ut.sz().div(2));
+                            Coord useul = enemyLastMoveAnchor.sub(ut.sz().x / 2, 0);
+                            g.image(ut, useul);
+                            g.image(useframe, useul.sub(useframeo));
+                            double a = now - lastuse;
+                            if (a < 1) {
+                                Coord off = new Coord((int) (a * ut.sz().x / 2), (int) (a * ut.sz().y / 2));
+                                g.chcolor(255, 255, 255, (int) (255 * (1 - a)));
+                                g.image(ut, useul.sub(off), ut.sz().add(off.mul(2)));
+                                g.chcolor();
+                            }
+                        }
+                    } catch (Loading l) {
+                    }
+                }
+
+                if (configuration.showcombatborder) {
+                    g.chcolor(Color.WHITE);
+                    g.rect(Coord.z, sz);
+                    g.chcolor();
+                }
+            }
+
+            public Object tooltip(Coord c, Widget prev) {
+                int cx = sz.x / 2;
+                int cy = sz.y / 2 - 50;
+                for (Buff buff : fv.buffs.children(Buff.class)) {
+//            Coord dc = Config.altfightui ? new Coord(cx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
+                    Coord dc = new Coord(cx - buff.c.x - Buff.cframe.sz().x - 80, cy);
+                    if (c.isect(dc, buff.sz)) {
+                        Object ret = buff.tooltip(c.sub(dc), prevtt);
+                        if (ret != null) {
+                            prevtt = buff;
+                            return (ret);
+                        }
+                    }
+                }
+
+                if (fv.current != null) {
+                    for (Buff buff : fv.current.buffs.children(Buff.class)) {
+//                        Coord dc = Config.altfightui ? new Coord(cx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
+                        Coord dc = new Coord(cx + buff.c.x + 80, cy);
+                        if (c.isect(dc, buff.sz)) {
+                            Object ret = buff.tooltip(c.sub(dc), prevtt);
+                            if (ret != null) {
+                                prevtt = buff;
+                                return (ret);
+                            }
+                        }
+                    }
+                }
+                try {
+                    Indir<Resource> lastact = Fightsess.this.lastact1;
+                    if (lastact != null) {
+                        Coord usesz = lastact.get().layer(Resource.imgc).sz;
+//                        Coord lac = Config.altfightui ? new Coord(cx - 69, 120).add(usesz.div(2)) : pcc.add(usec1);
+//                        Coord lac = new Coord(cx - 69, 120).add(usesz.div(2));
+                        Coord lac = lastMoveAnchor;
+                        if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                            if (lastacttip1 == null)
+                                lastacttip1 = Text.render(lastact.get().layer(Resource.tooltip).t);
+                            return (lastacttip1);
+                        }
+                    }
+                } catch (Loading l) {
+                }
+                try {
+                    Indir<Resource> lastact = Fightsess.this.lastact2;
+                    if (lastact != null) {
+                        Coord usesz = lastact.get().layer(Resource.imgc).sz;
+//                        Coord lac = Config.altfightui ? new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2)) : pcc.add(usec2);
+//                        Coord lac = new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2));
+                        Coord lac = enemyLastMoveAnchor;
+                        if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                            if (lastacttip2 == null)
+                                lastacttip2 = Text.render(lastact.get().layer(Resource.tooltip).t);
+                            return (lastacttip2);
+                        }
+                    }
+                } catch (Loading l) {
+                }
+                return (null);
+            }
+        };
+
+        final Coord center = sz.div(2);
+
+        adda(actionWdg, center.add(0, center.y / 4), 0.5, 0.5);
+        adda(cooldownWdg, center.sub(0, (int) (center.y / 1.5f)), 0.5, 0.5);
+
+        anchors();
     }
 
     @Override
@@ -159,15 +555,27 @@ public class Fightsess extends Widget {
     public void presize() {
         resize(parent.sz);
         pcc = sz.div(2);
+
+        if (actionWdg != null)
+            actionWdg.move(new Coord(sz.x * (actionWdg.c.x + actionWdg.sz.x / 2) / oldsz.x, sz.y * (actionWdg.c.y + actionWdg.sz.y / 2) / oldsz.y), 0.5, 0.5);
+        if (cooldownWdg != null)
+            cooldownWdg.move(new Coord(sz.x * (cooldownWdg.c.x + cooldownWdg.sz.x / 2) / oldsz.x, sz.y * (cooldownWdg.c.y + cooldownWdg.sz.y / 2) / oldsz.y), 0.5, 0.5);
+    }
+
+    public void anchors() {
         final Coord center = sz.div(2);
-        actionAnchor = center.add(0, center.y / 2);
-        cooldownAnchor = center.sub(0, (int) (center.y / 1.5f));
+        final Coord acenter = actionWdg.sz.div(2);
+        final Coord ccenter = cooldownWdg.sz.div(2);
+//        actionAnchor = center.add(0, center.y / 4);
+//        cooldownAnchor = center.sub(0, (int) (center.y / 1.5f));
+        actionAnchor = acenter;
+        cooldownAnchor = ccenter;
         enemyBuffAnchor = cooldownAnchor.add(50, 0);
         enemyIPAnchor = cooldownAnchor.add(75, 15);
-        enemyLastMoveAnchor = cooldownAnchor.add(50, 50);
+        enemyLastMoveAnchor = cooldownAnchor.add(50, 25);
         buffAnchor = cooldownAnchor.sub(50, 0);
         IPAnchor = cooldownAnchor.add(-75, 15);
-        lastMoveAnchor = cooldownAnchor.add(-50, 50);
+        lastMoveAnchor = cooldownAnchor.add(-50, 25);
     }
 
     private void updatepos() {
@@ -238,7 +646,7 @@ public class Fightsess extends Widget {
         if (Config.combatkeys == 1)
             row ^= 1;
 
-        return (new Coord((actpitch * (i % rl)) - (((rl - 1) * actpitch) / 2), 125 + (row * actpitch)));
+        return (new Coord((actpitch * (i % rl)) - (((rl - 1) * actpitch) / 2), (row * actpitch)));
     }
 
     private static final Coord cmc = new Coord(0, 67);
@@ -253,6 +661,10 @@ public class Fightsess extends Widget {
         try {
             if (parent.focused != this) {
                 raise();
+                if (actionWdg != null)
+                    actionWdg.raise();
+                if (cooldownWdg != null)
+                    cooldownWdg.raise();
                 if (Config.forcefightfocusharsh)
                     parent.setfocus(this);
                 else if (!ui.gui.chat.hasfocus && Config.forcefightfocus)
@@ -260,239 +672,7 @@ public class Fightsess extends Widget {
             }
         } catch (Exception e) {
         }
-        double now = Utils.rtime();
-        int gcx = ui.gui.sz.x / 2;
-        for (Buff buff : fv.buffs.children(Buff.class)) {
-            Coord bc = Config.altfightui ? new Coord(gcx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
-            drawOpening(g, buff, bc);
-        }
-
-        if (fv.current != null) {
-            for (Buff buff : fv.current.buffs.children(Buff.class)) {
-                Coord bc = Config.altfightui ? new Coord(gcx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
-                drawOpening(g, buff, bc);
-            }
-
-            g.aimage(ip.get().tex(), Config.altfightui ? new Coord(gcx - 45, 200) : pcc.add(-75, 0), 1, 0.5);
-            g.aimage(oip.get().tex(), Config.altfightui ? new Coord(gcx + 45, 200) : pcc.add(75, 0), 0, 0.5);
-
-            if (fv.lsrel.size() > 1) {
-                fxon(fv.current.gobid, tgtfx);
-                if (Config.showothercombatinfo) {
-                    for (int i = 0; i < fv.lsrel.size(); i++) {
-                        if (fv.current != fv.lsrel.get(i)) {
-                            try {
-                                Coord buffcoord = null;
-                                for (Buff buff : fv.lsrel.get(i).buffs.children(Buff.class)) {
-                                    pcc2 = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
-                                    //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
-                                    Coord cc = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                    Coord finalcc = new Coord(cc.x, cc.y - 60);
-                                    if (buffcoord == null)
-                                        buffcoord = finalcc;
-                                    else
-                                        finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
-                                    drawOpeningofftarget(g, buff, finalcc, 24);
-                                }
-                                int itransfer = i;
-                                Text.UText<?> oip2 = new Text.UText<Integer>(ipf2) {
-                                    public String text(Integer v) {
-                                        return ("IP: " + v);
-                                    }
-
-                                    public Integer value() {
-                                        return (fv.lsrel.get(itransfer).oip);
-                                    }
-                                };
-                                Text.UText<?> ip2 = new Text.UText<Integer>(ipf) {
-                                    public String text(Integer v) {
-                                        return ("IP: " + v);
-                                    }
-
-                                    public Integer value() {
-                                        return (fv.lsrel.get(itransfer).ip);
-                                    }
-                                };
-                                Coord cc = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                Coord finalcc = new Coord(cc.x, cc.y - 50);
-                                g.aimage(ip2.get().tex(), finalcc.add(-5, 0), 1, .5);
-                                g.aimage(oip2.get().tex(), finalcc.add(-5, 20), 1, .5);
-                            } catch (Exception idk) {
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        {
-            Coord cdc = Config.altfightui ? new Coord(gcx, 200) : pcc.add(cmc);
-            if (now < fv.atkct) {
-                double a = (now - fv.atkcs) / (fv.atkct - fv.atkcs);
-                g.chcolor(255, 0, 128, 224);
-                g.fellipse(cdc, Config.altfightui ? new Coord(24, 24) : new Coord(22, 22), Math.PI / 2 - (Math.PI * 2 * Math.min(1.0 - a, 1.0)), Math.PI / 2);
-                g.chcolor();
-                if (Config.showcooldown)
-                    g.atextstroked(Utils.fmt1DecPlace(fv.atkct - now), cdc, 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num11Fnd);
-            }
-            g.image(cdframe, Config.altfightui ? new Coord(ui.gui.sz.x / 2, 200).sub(cdframe.sz().div(2)) : cdc.sub(cdframe.sz().div(2)));
-            if (fv.current != null && fv.current.estimatedBlockWeight != 0) {
-                final int stat;
-                final WeightType type;
-                if (fv.current.maneuver != null) {
-                    stat = (int) fv.current.maneuver.calculateStat(fv.current.estimatedBlockWeight);
-                    type = fv.current.maneuver.type;
-                } else {
-                    //An animal, just assume blockweight -> UA
-                    type = WeightType.UA;
-                    stat = (int) fv.current.estimatedBlockWeight;
-                }
-                FastText.aprintsf(g, cdc.add(0, -50), 0.5, 0.0, "%s: %d", type, stat);
-            }
-        }
-
-        try {
-            Indir<Resource> lastact = fv.lastact;
-            if (lastact != this.lastact1) {
-                this.lastact1 = lastact;
-                this.lastacttip1 = null;
-            }
-            double lastuse = fv.lastuse;
-            if (lastact != null) {
-                Tex ut = lastact.get().layer(Resource.imgc).tex();
-                Coord useul = Config.altfightui ? lastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec1).sub(ut.sz().div(2));
-                g.image(ut, useul);
-                g.image(useframe, useul.sub(useframeo));
-                double a = now - lastuse;
-                if (a < 1) {
-                    Coord off = new Coord((int) (a * ut.sz().x / 2), (int) (a * ut.sz().y / 2));
-                    g.chcolor(255, 255, 255, (int) (255 * (1 - a)));
-                    g.image(ut, useul.sub(off), ut.sz().add(off.mul(2)));
-                    g.chcolor();
-                }
-            }
-        } catch (Loading l) {
-        }
-
-        if (fv.current != null) {
-            try {
-                Indir<Resource> lastact = fv.current.lastact;
-                if (lastact != this.lastact2) {
-                    this.lastact2 = lastact;
-                    this.lastacttip2 = null;
-                }
-                double lastuse = fv.current.lastuse;
-                if (lastact != null) {
-                    Tex ut = lastact.get().layer(Resource.imgc).tex();
-                    Coord useul = Config.altfightui ? enemyLastMoveAnchor.sub(ut.sz().x / 2, 0) : pcc.add(usec2).sub(ut.sz().div(2));
-                    g.image(ut, useul);
-                    g.image(useframe, useul.sub(useframeo));
-                    double a = now - lastuse;
-                    if (a < 1) {
-                        Coord off = new Coord((int) (a * ut.sz().x / 2), (int) (a * ut.sz().y / 2));
-                        g.chcolor(255, 255, 255, (int) (255 * (1 - a)));
-                        g.image(ut, useul.sub(off), ut.sz().add(off.mul(2)));
-                        g.chcolor();
-                    }
-                }
-            } catch (Loading l) {
-            }
-        }
-
-        //My cards
-        final GItem weapon = weap();
-        final int weapq;
-        final int weapdmg;
-        final double weappen;
-        if (weapon != null) {
-            weapq = (int) weapon.quality().q;
-            weapdmg = Weapons.lookup.getOrDefault(weapon.name().orElse(""), 0);
-            weappen = weapon.getinfo(Armpen.class).orElse(Armpen.NOPEN).deg;
-        } else {
-            weapq = weapdmg = 0;
-            weappen = 0.0;
-        }
-        for (int i = 0; i < actions.length; i++) {
-            Coord ca = Config.altfightui ? actionAnchor.add(actc(i)) : pcc.add(actc(i));
-            Action act = actions[i];
-            try {
-                if (act != null) {
-                    Resource res = act.res.get();
-                    Tex img = res.layer(Resource.imgc).tex();
-                    Coord ic = ca.sub(img.sz().div(2));
-                    g.image(img, ic);
-                    if (now < act.ct) {
-                        //This is from an era when moves had their own cooldown
-                        double a = (now - act.cs) / (act.ct - act.cs);
-                        g.chcolor(0, 0, 0, 128);
-                        g.prect(ca, ic.sub(ca), ic.add(img.sz()).sub(ca), (1.0 - a) * Math.PI * 2);
-                        g.chcolor();
-                    }
-                    if (i == use) {
-                        g.image(indframe, ic.sub(indframeo));
-                    } else if (i == useb) {
-                        g.image(indbframe, ic.sub(indbframeo));
-                    } else {
-                        g.image(actframe, ic.sub(actframeo));
-                    }
-
-                    if (fv.current != null) {
-                        if (act.card instanceof Attack) {
-                            final Attack atk = (Attack) act.card;
-                            final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
-                                    str(), fv.current.defweights);
-                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
-                            final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                            final int mc = ui.sess.glob.cattr.get("melee").comp;
-
-                            final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                    ua, mc, act.cards,
-                                    fv.current.defweights, fv.current.estimatedBlockWeight);
-                            FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
-                                    Math.round(newWeights.get(DefenseType.RED) * 100),
-                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
-                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
-                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
-                        } else if (act.card instanceof Restoration) {
-                            final Restoration restro = (Restoration) act.card;
-                            final Map<DefenseType, Double> newWeights = restro.getFutureWeights(act.cards, fv.defweights);
-                            FastText.printsf(g, ic.add(0, 35), "%d/%d/%d/%d",
-                                    Math.round(newWeights.get(DefenseType.RED) * 100),
-                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
-                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
-                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
-                            if (act.card == Cards.flex) {
-                                final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                                final int mc = ui.sess.glob.cattr.get("melee").comp;
-
-                                final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                        ua, mc, act.cards,
-                                        fv.current.defweights, fv.current.estimatedBlockWeight);
-                                FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
-                                        Math.round(enemyWeights.get(DefenseType.RED) * 100),
-                                        Math.round(enemyWeights.get(DefenseType.GREEN) * 100),
-                                        Math.round(enemyWeights.get(DefenseType.BLUE) * 100),
-                                        Math.round(enemyWeights.get(DefenseType.YELLOW) * 100));
-                            }
-                        }
-                    }
-
-                    if (Config.combshowkeys) {
-
-                        Tex key;
-                        if (Config.combatkeys == 0) {
-                            key = keystex[i];
-                        } else if (Config.combatkeys == 1) {
-                            key = keysftex[i];
-                        } else {
-                            key = keysfftex[i];
-                        }
-                        g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y / 2 - key.sz().y / 2));
-                    }
-                }
-            } catch (Loading l) {
-            }
-        }
+        super.draw(g);
     }
 
     private void drawOpening(GOut g, Buff buff, Coord bc) {
@@ -584,80 +764,6 @@ public class Fightsess extends Widget {
     private Widget prevtt = null;
     private Text acttip = null;
     public static final String[] keytips = {"1", "2", "3", "4", "5", "Shift+1", "Shift+2", "Shift+3", "Shift+4", "Shift+5"};
-
-    public Object tooltip(Coord c, Widget prev) {
-        int cx = ui.gui.sz.x / 2;
-
-        for (Buff buff : fv.buffs.children(Buff.class)) {
-            Coord dc = Config.altfightui ? new Coord(cx - buff.c.x - Buff.cframe.sz().x - 80, 180) : pcc.add(-buff.c.x - Buff.cframe.sz().x - 20, buff.c.y + pho - Buff.cframe.sz().y);
-            if (c.isect(dc, buff.sz)) {
-                Object ret = buff.tooltip(c.sub(dc), prevtt);
-                if (ret != null) {
-                    prevtt = buff;
-                    return (ret);
-                }
-            }
-        }
-
-        if (fv.current != null) {
-            for (Buff buff : fv.current.buffs.children(Buff.class)) {
-                Coord dc = Config.altfightui ? new Coord(cx + buff.c.x + 80, 180) : pcc.add(buff.c.x + 20, buff.c.y + pho - Buff.cframe.sz().y);
-                if (c.isect(dc, buff.sz)) {
-                    Object ret = buff.tooltip(c.sub(dc), prevtt);
-                    if (ret != null) {
-                        prevtt = buff;
-                        return (ret);
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < actions.length; i++) {
-            Coord ca = Config.altfightui ? new Coord(cx - 18, ui.gui.sz.y - 250).add(actc(i)).add(16, 16) : pcc.add(actc(i));
-            Indir<Resource> act = (actions[i] == null) ? null : actions[i].res;
-            try {
-                if (act != null) {
-                    Tex img = act.get().layer(Resource.imgc).tex();
-                    ca = ca.sub(img.sz().div(2));
-                    if (c.isect(ca, img.sz())) {
-                        String tip = act.get().layer(Resource.tooltip).t + " ($b{$col[255,128,0]{" + keytips[i] + "}})";
-                        if ((acttip == null) || !acttip.text.equals(tip))
-                            acttip = RichText.render(tip, -1);
-                        return (acttip);
-                    }
-                }
-            } catch (Loading l) {
-            }
-        }
-
-        try {
-            Indir<Resource> lastact = this.lastact1;
-            if (lastact != null) {
-                Coord usesz = lastact.get().layer(Resource.imgc).sz;
-                Coord lac = Config.altfightui ? new Coord(cx - 69, 120).add(usesz.div(2)) : pcc.add(usec1);
-                if (c.isect(lac.sub(usesz.div(2)), usesz)) {
-                    if (lastacttip1 == null)
-                        lastacttip1 = Text.render(lastact.get().layer(Resource.tooltip).t);
-                    return (lastacttip1);
-                }
-            }
-        } catch (Loading l) {
-        }
-        try {
-            Indir<Resource> lastact = this.lastact2;
-            if (lastact != null) {
-                Coord usesz = lastact.get().layer(Resource.imgc).sz;
-                Coord lac = Config.altfightui ? new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2)) : pcc.add(usec2);
-                if (c.isect(lac.sub(usesz.div(2)), usesz)) {
-                    if (lastacttip2 == null)
-                        lastacttip2 = Text.render(lastact.get().layer(Resource.tooltip).t);
-                    return (lastacttip2);
-                }
-            }
-        } catch (Loading l) {
-        }
-        return (null);
-    }
 
     public void uimsg(String msg, Object... args) {
         if (msg == "act") {
@@ -817,6 +923,4 @@ public class Fightsess extends Widget {
         else
             return (super.globtype(key, ev));
     }
-
-
 }

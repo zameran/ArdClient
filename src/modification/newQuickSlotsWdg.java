@@ -51,11 +51,6 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
         super(new Coord(ssz.x * 4 + spz.x * 3, ssz.y), "NewQuickSlotsWdg");
     }
 
-    @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return btn == 3;
-    }
-
     public static BufferedImage shorttip(List info) {
         return ItemInfo.shorttip(info);
     }
@@ -233,6 +228,9 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
     }
 
     public boolean mousedown(Coord c, int button) {
+        if (super.mousedown(c, button)) {
+            return true;
+        }
         if (this.ui.modmeta) {
             return true;
         } else if (this.ui.modctrl && button == 1 && Config.disablequickslotdrop) {
@@ -254,14 +252,7 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
                     w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), button);
                     return true;
                 }
-
-                if (button == 1) {
-                    this.dragging = this.ui.grabmouse(this);
-                    this.dc = c;
-                    return true;
-                }
             }
-
             return false;
         }
     }
@@ -285,24 +276,24 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
 
     }
 
-    public boolean mouseup(Coord c, int button) {
-        if (this.dragging != null) {
-            this.dragging.remove();
-            this.dragging = null;
-            Utils.setprefc("newQuickSlotWdgc", this.c);
-            return true;
-        } else {
-            return super.mouseup(c, button);
-        }
-    }
+//    public boolean mouseup(Coord c, int button) {
+//        if (this.dragging != null) {
+//            this.dragging.remove();
+//            this.dragging = null;
+////            Utils.setprefc("newQuickSlotWdgc", this.c);
+//            return true;
+//        } else {
+//            return super.mouseup(c, button);
+//        }
+//    }
 
-    public void mousemove(Coord c) {
-        if (this.dragging != null) {
-            this.c = this.c.add(c.x, c.y).sub(this.dc);
-        } else {
-            super.mousemove(c);
-        }
-    }
+//    public void mousemove(Coord c) {
+//        if (this.dragging != null) {
+//            this.c = this.c.add(c.x, c.y).sub(this.dc);
+//        } else {
+//            super.mousemove(c);
+//        }
+//    }
 
     public Object tooltip(Coord c, Widget prev) {
         Object tt = super.tooltip(c, prev);

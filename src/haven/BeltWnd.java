@@ -379,7 +379,7 @@ public class BeltWnd extends MovableWidget {
 
     @Override
     protected boolean moveHit(Coord c, int btn) {
-        if (btn == 1 && ui.modctrl) {
+        if (super.moveHit(c, btn)) {
             for (BeltBtn bbtn : btns) {
                 if (c.isect(bbtn.c, bbtn.sz))
                     return true;

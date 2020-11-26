@@ -181,4 +181,13 @@ public class TimerWdg extends Widget {
             return super.type(key, ev);
         }
     }
+
+    public void reqdestroy() {
+        destroy();
+    }
+
+    public void destroy() {
+        unlink();
+        parent.cdestroy(this);
+    }
 }

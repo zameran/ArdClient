@@ -238,32 +238,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         opts = add(new OptWnd());
         opts.hide();
 
-
-        quickslots = new QuickSlotsWdg();
-        newquickslots = new modification.newQuickSlotsWdg();
-
-        if (!Config.quickslots) {
-            quickslots.hide();
-            newquickslots.hide();
-        } else if (configuration.newQuickSlotWdg)
-            quickslots.hide();
-        else newquickslots.hide();
-
-        add(quickslots, Utils.getprefc("quickslotsc", new Coord(430, HavenPanel.h - 160)));
-        add(newquickslots, Utils.getprefc("newQuickSlotWdgc", new Coord(450, HavenPanel.h - 160)));
-
-        if (Config.statuswdgvisible) {
-            statuswindow = new StatusWdg();
-            add(statuswindow, new Coord(HavenPanel.w / 2 + 80, 10));
-        }
-
-
-        histbelt = new CraftHistoryBelt(Utils.getprefb("histbelt_vertical", true));
-        add(histbelt, Utils.getprefc("histbelt_c", new Coord(70, 200)));
-        if (!Config.histbelt)
-            histbelt.hide();
-
-
 //        PBotAPI.gui = this;
         if (Config.showTroughrad && Config.showBeehiverad)
             saferadius = 4;
@@ -304,6 +278,28 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         });
         Debug.log = ui.cons.out;
         buffs = add(new Bufflist(), new Coord(95, 85));
+        quickslots = new QuickSlotsWdg();
+        newquickslots = new modification.newQuickSlotsWdg();
+
+        if (!Config.quickslots) {
+            quickslots.hide();
+            newquickslots.hide();
+        } else if (configuration.newQuickSlotWdg)
+            quickslots.hide();
+        else newquickslots.hide();
+
+        add(quickslots, new Coord(430, 160));
+        add(newquickslots, new Coord(450, 160));
+
+        if (Config.statuswdgvisible) {
+            statuswindow = new StatusWdg();
+            add(statuswindow, new Coord(HavenPanel.w / 2 + 80, 10));
+        }
+
+        histbelt = new CraftHistoryBelt(Utils.getprefb("histbelt_vertical", true));
+        add(histbelt, new Coord(70, 200));
+        if (!Config.histbelt)
+            histbelt.hide();
         if (!chrid.equals("")) {
             Utils.loadprefchklist("boulderssel_" + chrid, Config.boulders);
             Utils.loadprefchklist("bushessel_" + chrid, Config.bushes);
@@ -313,6 +309,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             Config.discordchat = Utils.getprefb("discordchat_" + chrid, false);
             opts.discordcheckbox.a = Config.discordchat;
         }
+
         zerg = add(new Zergwnd(), new Coord(187, 50));
         if (!Config.autowindows.get("Kith & Kin").selected)
             zerg.hide();
@@ -488,8 +485,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     public void peaceCurrent() {
         try {
-            if (fv != null && fv.current != null && fv.curgive != null) {
-                fv.curgive.mousedown(Coord.z, 1);
+            if (fv != null && fv.current != null && fv.current.give != null) {
+                fv.current.give.wdgmsg("click", 1);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -926,7 +923,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         for (Widget meter : cmeters) {
             int x = ((meters.size() + i) % 3) * (IMeter.fsz.x + 5);
             int y = ((meters.size() + i) / 3) * (IMeter.fsz.y + 2);
-            meter.c = new Coord(portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
+//            meter.c = new Coord(portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
             i++;
         }
     }
@@ -1062,7 +1059,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             filter = add(new FilterWnd("Filter"));
             filter.hide();
         } else if (place == "fight") {
-            fv = urpanel.add((Fightview) child, 0, 0);
+//            fv = urpanel.add((Fightview) child, 0, 0);
+            fv = adda((Fightview) child, sz.x, 0, 1, 0);
         } else if (place == "fsess") {
             fs = add((Fightsess) child, Coord.z);
         } else if (place == "inv") {

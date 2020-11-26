@@ -128,7 +128,9 @@ public abstract class MovableWidget extends Widget {
         super.added();
     }
 
-    protected abstract boolean moveHit(final Coord c, final int btn);
+    protected boolean moveHit(final Coord c, final int btn) {
+        return ui.modctrl && btn == 3;
+    }
 
     @Override
     public boolean mousedown(final Coord mc, final int button) {

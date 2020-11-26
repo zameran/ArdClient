@@ -125,11 +125,6 @@ public class Speedget extends MovableWidget {
             max = (Integer) args[0];
     }
 
-    @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return btn == 3 && c.isect(Coord.z, sz);
-    }
-
     public void set(int s) {
         wdgmsg("set", s);
     }

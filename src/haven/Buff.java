@@ -426,11 +426,11 @@ public class Buff extends Widget implements ItemInfo.ResOwner, Bufflist.Managed 
 
 
     public boolean mousedown(Coord c, int btn) {
-        if (!(btn == 3 && ui.modmeta)) {
+        if (parent != null && parent instanceof Bufflist && ((Bufflist) parent).moveHit(c, btn)) {
+            return false;
+        } else {
             wdgmsg("cl", c.sub(imgoff), btn, ui.modflags());
             return (true);
-        } else {
-            return false;
         }
     }
 }

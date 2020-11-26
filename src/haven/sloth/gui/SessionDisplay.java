@@ -68,11 +68,6 @@ public class SessionDisplay extends MovableWidget implements ObservableListener<
     }
 
     @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return btn == 3;
-    }
-
-    @Override
     protected void removed() {
         MainFrame.instance.p.sessions.removeListener(this);
     }

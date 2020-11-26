@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 
 public class DamageText extends FloatSprite {
     public static final int id = -14115;
-    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 12);
+    public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 13);
     private static final Color armorcol = new Color(136, 255, 136);
     private static final Color hhpcol = new Color(255, 204, 0);
     private static final Color shpcol = new Color(255, 0, 0);

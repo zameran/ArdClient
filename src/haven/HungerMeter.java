@@ -13,11 +13,6 @@ public class HungerMeter extends MovableWidget {
     }
 
     @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return c.isect(Coord.z, sz);
-    }
-
-    @Override
     public void draw(GOut g) {
         if (glut.bg == null)
             return;

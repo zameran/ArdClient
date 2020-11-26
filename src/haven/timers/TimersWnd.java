@@ -137,14 +137,8 @@ public class TimersWnd extends Window {
         super.resize(WIDTH, portHeight + 60);
     }
 
-
-    @Override
-    public void wdgmsg(Widget sender, String msg, Object... args) {
-        if (sender == cbtn) {
-            hide();
-        } else {
-            super.wdgmsg(sender, msg, args);
-        }
+    public void close() {
+        hide();
     }
 
     @Override

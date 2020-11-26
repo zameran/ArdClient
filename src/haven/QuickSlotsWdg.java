@@ -1,10 +1,11 @@
 package haven;
 
 import haven.res.ui.tt.q.qbuff.QBuff;
+import haven.sloth.gui.MovableWidget;
 
 import java.awt.Color;
 
-public class QuickSlotsWdg extends Widget implements DTarget {
+public class QuickSlotsWdg extends MovableWidget implements DTarget {
     private static final Tex sbg = Resource.loadtex("gfx/hud/slots");
     public static final Coord lc = new Coord(6, 6);
     public static final Coord rc = new Coord(56, 6);
@@ -14,7 +15,7 @@ public class QuickSlotsWdg extends Widget implements DTarget {
     private static final Color qualitybg = new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
 
     public QuickSlotsWdg() {
-        super(new Coord(44 + 44 + 6, 44));
+        super(new Coord(44 + 44 + 6, 44), "QuickSlotsWdg");
     }
 
     @Override
@@ -135,6 +136,9 @@ public class QuickSlotsWdg extends Widget implements DTarget {
 
     @Override
     public boolean mousedown(Coord c, int button) {
+        if (super.mousedown(c, button)) {
+            return true;
+        }
         if (ui.modmeta)
             return true;
         if (ui.modctrl && button == 1 && Config.disablequickslotdrop)
@@ -164,23 +168,23 @@ public class QuickSlotsWdg extends Widget implements DTarget {
         }
     }
 
-    @Override
-    public boolean mouseup(Coord c, int button) {
-        if (dragging != null) {
-            dragging.remove();
-            dragging = null;
-            Utils.setprefc("quickslotsc", this.c);
-            return true;
-        }
-        return super.mouseup(c, button);
-    }
+//    @Override
+//    public boolean mouseup(Coord c, int button) {
+//        if (dragging != null) {
+//            dragging.remove();
+//            dragging = null;
+////            Utils.setprefc("quickslotsc", this.c);
+//            return true;
+//        }
+//        return super.mouseup(c, button);
+//    }
 
-    @Override
-    public void mousemove(Coord c) {
-        if (dragging != null) {
-            this.c = this.c.add(c.x, c.y).sub(dc);
-            return;
-        }
-        super.mousemove(c);
-    }
+//    @Override
+//    public void mousemove(Coord c) {
+//        if (dragging != null) {
+//            this.c = this.c.add(c.x, c.y).sub(dc);
+//            return;
+//        }
+//        super.mousemove(c);
+//    }
 }

@@ -15,11 +15,6 @@ public class FepMeter extends MovableWidget {
     }
 
     @Override
-    protected boolean moveHit(Coord c, int btn) {
-        return c.isect(Coord.z, sz);
-    }
-
-    @Override
     public void draw(GOut g) {
         Coord isz = IMeter.msz;
         Coord off = IMeter.off;

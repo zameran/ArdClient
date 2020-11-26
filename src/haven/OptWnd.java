@@ -2068,6 +2068,22 @@ public class OptWnd extends Window {
                 return Text.render("Auto Clear Damage after fight").tex();
             }
         });
+        appender.add(new CheckBox("Show combat widgets border") {
+            {
+                a = configuration.showcombatborder;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showcombatborder", val);
+                configuration.showcombatborder = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Show combat widgets border for move").tex();
+            }
+        });
         appender.add(new Label("Chat Exempt will force the fight session to have focus unless the chat box has focus."));
         appender.add(new CheckBox("Force Fight Session Focus - Chat Exempt") {
             {

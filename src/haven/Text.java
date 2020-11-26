@@ -54,6 +54,7 @@ public class Text {
     public static final Foundry num11Fnd;
     public static final Foundry num12boldFnd;
     public static final Foundry num13boldFnd;
+    public static final Foundry num14boldFnd;
     public static final Foundry num20Fnd;
     public static final Foundry delfnd;
     public static final Foundry delfnd2;
@@ -144,6 +145,7 @@ public class Text {
         num11Fnd = new Text.Foundry(latin, 11);
         num12boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
         num13boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
+        num14boldFnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 14).aa(true);
 
         delfnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 16);
         delfnd2 = new Text.Foundry(serif.deriveFont(Font.BOLD), 18);

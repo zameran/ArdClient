@@ -29,6 +29,7 @@ package haven;
 
 import haven.sloth.gfx.GobCombatSprite;
 import haven.sloth.gob.AggroMark;
+import haven.sloth.gui.MovableWidget;
 import haven.sloth.gui.fight.Attack;
 import haven.sloth.gui.fight.Attacks;
 import haven.sloth.gui.fight.Card;
@@ -46,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class Fightview extends Widget {
+public class Fightview extends MovableWidget {
     public static Tex bg = Theme.tex("bosq");
     public static int height = 5;
     public static int ymarg = 5;
@@ -69,8 +70,8 @@ public class Fightview extends Widget {
     public boolean invalid = false;
     public double atkcd;
     public GiveButton curgive;
-    private Avaview curava;
-    private Button curpurs;
+    //    private Avaview curava;
+//    private Button curpurs;
     public final Bufflist buffs = add(new Bufflist());
     public Fightview.Relation lastTarget;
 
@@ -431,7 +432,7 @@ public class Fightview extends Widget {
     }
 
     public Fightview() {
-        super(new Coord(width, (bg.sz().y + ymarg) * height));
+        super(new Coord(width, (bg.sz().y + ymarg) * height), "FightView");
         for (DefenseType type : DefenseType.values())
             defweights.put(type, 0.0);
     }
@@ -499,22 +500,22 @@ public class Fightview extends Widget {
     }
 
     private void setcur(Relation rel) {
-        if ((current == null) && (rel != null)) {
-            add(curgive = new GiveButton(0), cgivec);
-            add(curava = new Avaview(Avaview.dasz, rel.gobid, "avacam"), cavac).canactivate = true;
-            add(curpurs = new Button(70, "Chase"), cpursc);
-            curgive.state = rel.give.state;
-        } else if ((current != null) && (rel == null)) {
-            ui.destroy(curgive);
-            ui.destroy(curava);
-            ui.destroy(curpurs);
-            curgive = null;
-            curava = null;
-            curpurs = null;
-        } else if ((current != null) && (rel != null)) {
-            curgive.state = rel.give.state;
-            curava.avagob = rel.gobid;
-        }
+//        if ((current == null) && (rel != null)) {
+//            add(curgive = new GiveButton(0), cgivec);
+//            add(curava = new Avaview(Avaview.dasz, rel.gobid, "avacam"), cavac).canactivate = true;
+//            add(curpurs = new Button(70, "Chase"), cpursc);
+//            curgive.state = rel.give.state;
+//        } else if ((current != null) && (rel == null)) {
+//            ui.destroy(curgive);
+//            ui.destroy(curava);
+//            ui.destroy(curpurs);
+//            curgive = null;
+//            curava = null;
+//            curpurs = null;
+//        } else if ((current != null) && (rel != null)) {
+//            curgive.state = rel.give.state;
+//            curava.avagob = rel.gobid;
+//        }
         current = rel;
 
         if (Config.hlightcuropp) {
@@ -553,8 +554,8 @@ public class Fightview extends Widget {
 
     public void draw(GOut g) {
         int y = 10;
-        if (curava != null)
-            y = curava.c.y + curava.sz.y + 10;
+//        if (curava != null)
+//            y = curava.c.y + curava.sz.y + 10;
         int x = width - bg.sz().x - 10;
         for (Relation rel : lsrel) {
             if (rel == current) {
@@ -575,7 +576,7 @@ public class Fightview extends Widget {
             FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
             final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
             if (gob != null) {
-                g.chcolor(Color.BLUE);
+                g.chcolor(new Color(200, 200, 200));
                 FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
                 FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
             }
@@ -622,16 +623,16 @@ public class Fightview extends Widget {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
-        if (sender == curava) {
-            wdgmsg("click", (int) current.gobid, args[0]);
-            return;
-        } else if (sender == curgive) {
-            wdgmsg("give", (int) current.gobid, args[0]);
-            return;
-        } else if (sender == curpurs) {
-            wdgmsg("prs", (int) current.gobid);
-            return;
-        }
+//        if (sender == curava) {
+//            wdgmsg("click", (int) current.gobid, args[0]);
+//            return;
+//        } else if (sender == curgive) {
+//            wdgmsg("give", (int) current.gobid, args[0]);
+//            return;
+//        } else if (sender == curpurs) {
+//            wdgmsg("prs", (int) current.gobid);
+//            return;
+//        }
         for (Relation rel : lsrel) {
             if (sender == rel.ava) {
                 wdgmsg("click", (int) rel.gobid, args[0]);
@@ -697,6 +698,8 @@ public class Fightview extends Widget {
                 return;
         } else if (msg == "used") {
             use((args[0] == null) ? null : ui.sess.getres((Integer) args[0]));
+            if (current != null)
+                current.checkWeight();
             return;
         } else if (msg == "ruse") {
             Relation rel = getrel((Integer) args[0]);
