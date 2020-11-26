@@ -595,7 +595,9 @@ public class PUtils {
             return (convolvedown(img, tsz, filter));
         if ((tsz.x >= img.getWidth()) && (tsz.y >= img.getHeight()))
             return (convolveup(img, tsz, filter));
-        throw (new IllegalArgumentException("Can only scale images up or down in both dimensions"));
+        System.out.println("Can only scale images up or down in both dimensions");
+        return (img);
+//        throw (new IllegalArgumentException("Can only scale images up or down in both dimensions"));
     }
 
     private static final Convolution uifilter = new Lanczos(3);
