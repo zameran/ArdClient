@@ -152,12 +152,10 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
                 <include name="graaljs.jar"/>
                 <include name="graal-sdk.jar"/>
                 <include name="jackson-core.jar"/>
-                <include name="l10n.jar"/>
                 <include name="tregex.jar"/>
                 <include name="truffle-api.jar"/>
             </fileset>
-            <fileset dir="lib/jogl-natives" includes="*.jar">
-            </fileset>
+            <fileset dir="lib/jogl-natives" includes="*.jar"/>
         </copy>
     </target>
 
@@ -170,9 +168,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
         <delete file="build/scripts"/>
     </target>
 
-    <target name="jars_clean" depends="clean-classes, jars">
-
-    </target>
+    <target name="jars_clean" depends="clean-classes, jars"/>
 
     <target name="dist" depends="rebuild">
         <zip destfile="${basedir}/${name}-${version}.zip" update="false">
@@ -255,12 +251,12 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar"/>
                 <include name="bcprov-jdk15on-160.jar"/>
                 <include name="abcl.jar"/>
                 <include name="abcl-contrib.jar"/>
-                <include name="l10n.jar"/>
             </fileset>
             <fileset dir="lib/jogl-natives"/>
             <fileset dir="build">
                 <include name="hafen.jar"/>
                 <include name="custom-res.jar"/>
+                <include name="l10n.jar"/>
             </fileset>
         </copy>
         <copy todir="update">
