@@ -88,6 +88,7 @@ import static haven.DefSettings.NVSPECCOC;
 import static haven.DefSettings.SHOWKCLAIM;
 import static haven.DefSettings.SHOWPCLAIM;
 import static haven.DefSettings.SHOWVCLAIM;
+import static haven.Gob.createBPRadSprite;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
 
@@ -118,11 +119,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private boolean showgrid;
     private TileOutline gridol;
     private Coord lasttc = Coord.z;
-    public static Gob.Overlay rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
-    public static Gob.Overlay rovlcolumn = new Gob.Overlay(new BPRadSprite(125.0F, 0, BPRadSprite.smatSupports));
-    public static Gob.Overlay rovlbeam = new Gob.Overlay(new BPRadSprite(150.0F, 0, BPRadSprite.smatSupports));
-    public static Gob.Overlay rovltrough = new Gob.Overlay(new BPRadSprite(200.0F, -10.0F, BPRadSprite.smatTrough));
-    public static Gob.Overlay rovlbeehive = new Gob.Overlay(new BPRadSprite(151.0F, -10.0F, BPRadSprite.smatBeehive));
+    //    public static Gob.Overlay rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
+//    public static Gob.Overlay rovlcolumn = new Gob.Overlay(new BPRadSprite(125.0F, 0, BPRadSprite.smatSupports));
+//    public static Gob.Overlay rovlbeam = new Gob.Overlay(new BPRadSprite(150.0F, 0, BPRadSprite.smatSupports));
+//    public static Gob.Overlay rovltrough = new Gob.Overlay(new BPRadSprite(200.0F, -10.0F, BPRadSprite.smatTrough));
+//    public static Gob.Overlay rovlbeehive = new Gob.Overlay(new BPRadSprite(151.0F, -10.0F, BPRadSprite.smatBeehive));
     private long lastmmhittest = System.currentTimeMillis();
     private Coord lasthittestc = Coord.z;
     private GobSelectCallback gobselcb;
@@ -900,31 +901,40 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         rl.add(gob, GLState.compose(extra, xf, gob.olmod, gob.save));
 
         Gob.Overlay rovl = null;
+        String olname = null;
         boolean show = false;
 
         if (gob.type == Type.WOODEN_SUPPORT) {
-            rovl = rovlsupport;
+            rovl = gob.findol(BPRadSprite.getId("rovlsupport"));
+            olname = "rovlsupport";
             show = Config.showminerad;
         } else if (gob.type == Type.STONE_SUPPORT) {
-            rovl = rovlcolumn;
+            rovl = gob.findol(BPRadSprite.getId("rovlcolumn"));
+            olname = "rovlcolumn";
             show = Config.showminerad;
         } else if (gob.type == Type.METAL_SUPPORT) {
-            rovl = rovlbeam;
+            rovl = gob.findol(BPRadSprite.getId("rovlbeam"));
+            olname = "rovlbeam";
             show = Config.showminerad;
         }
 
         if (gob.type == Type.TROUGH) {
-            rovl = rovltrough;
+            rovl = gob.findol(BPRadSprite.getId("rovltrough"));
+            olname = "rovltrough";
             show = Config.showTroughrad;
         } else if (gob.type == Type.BEEHIVE) {
-            rovl = rovlbeehive;
+            rovl = gob.findol(BPRadSprite.getId("rovlbeehive"));
+            olname = "rovlbeehive";
             show = Config.showBeehiverad;
         }
 
-        if (show && !gob.ols.contains(rovl))
-            gob.ols.add(rovl);
-        else if (!show && rovl != null)
-            gob.ols.remove(rovl);
+        if (show) {
+            if (!gob.ols.contains(rovl) && olname != null)
+                gob.ols.add(createBPRadSprite(gob, olname));
+        } else {
+            if (rovl != null)
+                gob.ols.remove(rovl);
+        }
     }
 
     public static class ChangeSet implements OCache.ChangeCallback {

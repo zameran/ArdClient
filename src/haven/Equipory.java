@@ -45,6 +45,7 @@ public class Equipory extends Widget implements DTarget {
     private static final Text.Foundry acf = new Text.Foundry(Text.sans, Text.cfg.def).aa(true);
     private Tex armorclass = null;
     private Tex percexp = null;
+    private Tex intste = null;
     private List<GItem> checkForDrop = new LinkedList<GItem>();
     public static final Coord ecoords[] = {
             new Coord(0, 0 * yo),
@@ -224,6 +225,10 @@ public class Equipory extends Widget implements DTarget {
                 percexp.dispose();
                 percexp = null;
             }
+            if (intste != null) {
+                intste.dispose();
+                intste = null;
+            }
         } else {
             super.addchild(child, args);
         }
@@ -264,6 +269,10 @@ public class Equipory extends Widget implements DTarget {
             if (percexp != null) {
                 percexp.dispose();
                 percexp = null;
+            }
+            if (intste != null) {
+                intste.dispose();
+                intste = null;
             }
             bonuses.update(slots);
         }
@@ -366,6 +375,26 @@ public class Equipory extends Widget implements DTarget {
         }
         if (percexp != null)
             g.image(percexp, new Coord(acx - percexp.sz().x / 2, bg.sz().y - percexp.sz().y - 10));
+        if (intste == null) {
+            int h = 0, s = 0, x;
+            CharWnd chrwdg = null;
+            try {
+                //   chrwdg = ((GameUI) parent).chrwdg;
+                chrwdg = ui.gui.chrwdg;
+                for (CharWnd.Attr attr : chrwdg.base) {
+                    if (attr.attr.nm.contains("int"))
+                        h = attr.attr.comp;
+                }
+                for (CharWnd.SAttr attr : chrwdg.skill)
+                    if (attr.attr.nm.contains("ste"))
+                        s = attr.attr.comp;
+                x = h * s;
+                intste = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Int*Ste: ") + x, Color.BLACK, acf).tex();
+            } catch (Exception e) { // fail silently
+            }
+        }
+        if (intste != null)
+            g.image(intste, new Coord(acx - intste.sz().x / 2, bg.sz().y - intste.sz().y - 20));
     }
 
     public boolean iteminteract(Coord cc, Coord ul) {

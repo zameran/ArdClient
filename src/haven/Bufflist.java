@@ -109,6 +109,7 @@ public class Bufflist extends MovableWidget {
                 continue;
             wdg.draw(g.reclipl(xlate(wdg.c, true), wdg.sz));
         }
+        super.draw(g);
     }
 
     public Buff gettoggle(String name) {

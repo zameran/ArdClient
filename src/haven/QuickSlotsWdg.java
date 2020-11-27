@@ -10,8 +10,6 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
     public static final Coord lc = new Coord(6, 6);
     public static final Coord rc = new Coord(56, 6);
     private static final Coord ssz = new Coord(44, 44);
-    private UI.Grab dragging;
-    private Coord dc;
     private static final Color qualitybg = new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
 
     public QuickSlotsWdg() {
@@ -39,6 +37,7 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
                     drawQualityRight(g, right);
             }
         }
+        super.draw(g);
     }
 
     private void drawitem(GOut g, WItem witem) {
@@ -136,9 +135,8 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
 
     @Override
     public boolean mousedown(Coord c, int button) {
-        if (super.mousedown(c, button)) {
+        if (super.mousedown(c, button))
             return true;
-        }
         if (ui.modmeta)
             return true;
         if (ui.modctrl && button == 1 && Config.disablequickslotdrop)
@@ -147,12 +145,7 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
         if (e != null) {
             WItem w = e.quickslots[c.x <= 47 ? 6 : 7];
             if (w != null) {
-                dragging = null;
                 w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), button);
-                return true;
-            } else if (button == 1) {
-                dragging = ui.grabmouse(this);
-                dc = c;
                 return true;
             }
         }

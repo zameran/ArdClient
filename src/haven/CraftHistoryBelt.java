@@ -39,6 +39,7 @@ public class CraftHistoryBelt extends MovableWidget {
             if (belt[slot] != null)
                 g.image(belt[slot].img, c.add(1, 1));
         }
+        super.draw(g);
     }
 
     @Override

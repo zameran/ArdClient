@@ -24,6 +24,7 @@ public class HungerMeter extends MovableWidget {
         g.frect(off, new Coord((int) Math.round(isz.x * (glut.glut - Math.floor(glut.glut))), isz.y));
         g.chcolor();
         g.image(bg, Coord.z);
+        super.draw(g);
     }
 
     @Override

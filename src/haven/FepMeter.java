@@ -35,6 +35,7 @@ public class FepMeter extends MovableWidget {
         }
         g.chcolor();
         g.image(bg, Coord.z);
+        super.draw(g);
     }
 
     @Override

@@ -1382,7 +1382,7 @@ public class OptWnd extends Window {
             BPRadSprite.smatBeehive = new States.ColState(val);
             if (ui.gui != null) {
                 if (ui.gui.map != null) {
-                    MapView.rovlbeehive = new Gob.Overlay(new BPRadSprite(151.0F, -10.0F, BPRadSprite.smatBeehive));
+//                    MapView.rovlbeehive = new Gob.Overlay(new BPRadSprite(151.0F, -10.0F, BPRadSprite.smatBeehive));
                     ui.gui.map.refreshGobsAll();
                 }
             }
@@ -1391,7 +1391,7 @@ public class OptWnd extends Window {
             BPRadSprite.smatTrough = new States.ColState(val);
             if (ui.gui != null) {
                 if (ui.gui.map != null) {
-                    MapView.rovltrough = new Gob.Overlay(new BPRadSprite(200.0F, -10.0F, BPRadSprite.smatTrough));
+//                    MapView.rovltrough = new Gob.Overlay(new BPRadSprite(200.0F, -10.0F, BPRadSprite.smatTrough));
                     ui.gui.map.refreshGobsAll();
                 }
             }
@@ -1400,8 +1400,8 @@ public class OptWnd extends Window {
             BPRadSprite.smatDanger = new States.ColState(val);
             if (ui.gui != null) {
                 if (ui.gui.map != null) {
-                    Gob.animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
-                    Gob.doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
+//                    Gob.animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
+//                    Gob.doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
                     ui.gui.map.refreshGobsAll();
                 }
             }
@@ -1410,9 +1410,9 @@ public class OptWnd extends Window {
             BPRadSprite.smatSupports = new States.ColState(val);
             if (ui.gui != null) {
                 if (ui.gui.map != null) {
-                    MapView.rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
-                    MapView.rovlcolumn = new Gob.Overlay(new BPRadSprite(125.0F, 0, BPRadSprite.smatSupports));
-                    MapView.rovlbeam = new Gob.Overlay(new BPRadSprite(150.0F, 0, BPRadSprite.smatSupports));
+//                    MapView.rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
+//                    MapView.rovlcolumn = new Gob.Overlay(new BPRadSprite(125.0F, 0, BPRadSprite.smatSupports));
+//                    MapView.rovlbeam = new Gob.Overlay(new BPRadSprite(150.0F, 0, BPRadSprite.smatSupports));
                     ui.gui.map.refreshGobsAll();
                 }
             }
@@ -2117,6 +2117,17 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("showothercombatinfo", val);
                 Config.showothercombatinfo = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Display next attack info below actions") {
+            {
+                a = configuration.showactioninfo;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showactioninfo", val);
+                configuration.showactioninfo = val;
                 a = val;
             }
         });

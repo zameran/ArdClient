@@ -79,8 +79,29 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     private static final Material.Colors dframeWater = new Material.Colors(new Color(0, 0, 255, 200));
     private static final Material.Colors dframeBark = new Material.Colors(new Color(165, 42, 42, 200));
     private static final Material.Colors potDOne = new Material.Colors(DefSettings.GARDENPOTDONECOLOR.get());
-    public static Gob.Overlay animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
-    public static Gob.Overlay doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
+//    public static Gob.Overlay animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
+//    public static Gob.Overlay doubleanimalradius = new Gob.Overlay(new BPRadSprite(200.0F, -20.0F, BPRadSprite.smatDanger));
+
+    public static Overlay createBPRadSprite(Gob gob, String name) {
+        switch (name) {
+            case "animalradius":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.0F, -10.0F, BPRadSprite.smatDanger));
+            case "doubleanimalradius":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -20.0F, BPRadSprite.smatDanger));
+            case "rovlsupport":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 100.0F, 0, BPRadSprite.smatSupports));
+            case "rovlcolumn":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 125.0F, 0, BPRadSprite.smatSupports));
+            case "rovlbeam":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 150.0F, 0, BPRadSprite.smatSupports));
+            case "rovltrough":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 200.0F, -10.0F, BPRadSprite.smatTrough));
+            case "rovlbeehive":
+                return new Overlay(BPRadSprite.getId(name), new BPRadSprite(gob, 151.0F, -10.0F, BPRadSprite.smatBeehive));
+            default:
+                return (null);
+        }
+    }
 
     public static class Overlay implements Rendered {
         public Indir<Resource> res;
@@ -318,7 +339,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             /* XXX: Remove me once local code is changed to use addol(). */
             if (glob.oc.getgob(id) != null) {
                 // FIXME: extend ols with a method for adding sprites without triggering changed.
-                if (item.id != Sprite.GROWTH_STAGE_ID && item != animalradius && item != doubleanimalradius)
+                if (item.id != Sprite.GROWTH_STAGE_ID && item != findol(BPRadSprite.getId("animalradius")) && item != findol(BPRadSprite.getId("doubleanimalradius")))
                     glob.oc.changed(Gob.this);
             }
             return (super.add(item));
@@ -554,6 +575,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             Composite comp = getattr(Composite.class);
             if (comp != null) {
                 sb.append(eq()).append("\n");
+            }
+        }
+        if (ols.size() > 0) {
+            sb.append("Overlays: ").append(ols.size()).append("\n");
+            for (Overlay ol : ols) {
+                if (ol != null)
+                    sb.append(" ").append(ol.name()).append("\n");
             }
         }
         sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");
@@ -1205,18 +1233,20 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 else
                     ols.add(new Gob.Overlay(new PartyMemberOutline(this, new Color(0, 255, 0, 255))));
             }
-            if (Config.showanimalrad && type == Type.DANGANIMAL && Config.showanimalrad && !Config.doubleradius) {
-                boolean hasradius = ols.contains(animalradius);
+            if (Config.showanimalrad && !Config.doubleradius && type == Type.DANGANIMAL) {
+                Overlay ol = findol(BPRadSprite.getId("animalradius"));
+                boolean hasradius = ols.contains(ol);
                 if ((!isDead()) && !hasradius)
-                    ols.add(animalradius);
+                    ols.add(createBPRadSprite(this, "animalradius"));
                 else if (isDead() && hasradius)
-                    ols.remove(animalradius);
-            } else if (Config.showanimalrad && type == Type.DANGANIMAL && Config.showanimalrad && Config.doubleradius) {
-                boolean hasradius = ols.contains(doubleanimalradius);
+                    ols.remove(ol);
+            } else if (Config.showanimalrad && Config.doubleradius && type == Type.DANGANIMAL) {
+                Overlay ol = findol(BPRadSprite.getId("doubleanimalradius"));
+                boolean hasradius = ols.contains(createBPRadSprite(Gob.this, "doubleanimalradius"));
                 if ((!isDead()) && !hasradius)
-                    ols.add(doubleanimalradius);
+                    ols.add(createBPRadSprite(this, "doubleanimalradius"));
                 else if (isDead() && hasradius)
-                    ols.remove(doubleanimalradius);
+                    ols.remove(ol);
             }
 
 

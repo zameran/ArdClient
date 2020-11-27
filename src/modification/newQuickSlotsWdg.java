@@ -15,7 +15,6 @@ import haven.RichText;
 import haven.Tex;
 import haven.TexI;
 import haven.Text;
-import haven.UI;
 import haven.Utils;
 import haven.WItem;
 import haven.Widget;
@@ -43,8 +42,6 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
     private List ttinfo = null;
     public GItem item;
     private double hoverstart;
-    private UI.Grab dragging;
-    private Coord dc;
     private static final Color qualitybg = new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
 
     public newQuickSlotsWdg() {
@@ -86,7 +83,7 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
                 create(g, item.wItem, item.coord, item.slot);
             }
         }
-
+        super.draw(g);
     }
 
     private void create(GOut g, WItem wItem, Coord coord, int slot) {
@@ -228,9 +225,8 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
     }
 
     public boolean mousedown(Coord c, int button) {
-        if (super.mousedown(c, button)) {
+        if (super.mousedown(c, button))
             return true;
-        }
         if (this.ui.modmeta) {
             return true;
         } else if (this.ui.modctrl && button == 1 && Config.disablequickslotdrop) {
@@ -239,16 +235,13 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
             Equipory e = this.ui.gui.getequipory();
             if (e != null) {
                 WItem w = null;
-
                 for (int i = 0; i < 4; ++i) {
                     if (c.x <= (ssz.x + spz.x / 2) * items[i].slot) {
                         w = items[i].wItem;
                         break;
                     }
                 }
-
                 if (w != null) {
-                    this.dragging = null;
                     w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), button);
                     return true;
                 }

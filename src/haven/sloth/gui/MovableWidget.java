@@ -2,6 +2,7 @@ package haven.sloth.gui;
 
 import haven.Coord;
 import haven.Coord2d;
+import haven.GOut;
 import haven.Storage;
 import haven.UI;
 import haven.Widget;
@@ -66,6 +67,8 @@ public abstract class MovableWidget extends Widget {
 
     private UI.Grab dm = null;
     private Coord doff;
+
+    private boolean movableBg;
 
     public MovableWidget(final Coord sz, final String name) {
         super(sz);
@@ -139,6 +142,7 @@ public abstract class MovableWidget extends Widget {
             return true;
         } else if (moveHit(mc, button)) {
             if (!lock) {
+                movableBg = true;
                 dm = ui.grabmouse(this);
                 doff = mc;
                 parent.setfocus(this);
@@ -154,6 +158,7 @@ public abstract class MovableWidget extends Widget {
     public boolean mouseup(final Coord mc, final int button) {
         if (dm != null) {
             //Preference to this if we're in the middle of moving the widget
+            movableBg = false;
             dm.remove();
             dm = null;
             //Ensure user didn't throw the window right off the visible screen...
@@ -181,6 +186,16 @@ public abstract class MovableWidget extends Widget {
             c = c.add(mc.add(doff.inv()));
         } else {
             super.mousemove(mc);
+        }
+    }
+
+    @Override
+    public void draw(GOut g) {
+        super.draw(g);
+        if (movableBg) {
+            g.chcolor(60, 60, 60, 120);
+            g.frect(Coord.z, sz);
+            g.chcolor();
         }
     }
 }

@@ -15,9 +15,6 @@ import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
@@ -107,6 +104,7 @@ public class configuration {
     public static boolean drinkmessage = Utils.getprefb("drinkmessage", false);
     public static boolean autocleardamage = Utils.getprefb("autocleardamage", false);
     public static boolean showcombatborder = Utils.getprefb("showcombatborder", false);
+    public static boolean showactioninfo = Utils.getprefb("showactioninfo", false);
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);

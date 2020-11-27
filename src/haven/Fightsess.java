@@ -201,67 +201,69 @@ public class Fightsess extends Widget {
                                 g.image(actframe, ic.sub(actframeo));
                             }
 
-                            if (fv.current != null) {
-                                if (act.card instanceof Attack) {
-                                    final Attack atk = (Attack) act.card;
-                                    final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
-                                            str(), fv.current.defweights);
+                            if (configuration.showactioninfo) {
+                                if (fv.current != null) {
+                                    if (act.card instanceof Attack) {
+                                        final Attack atk = (Attack) act.card;
+                                        final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
+                                                str(), fv.current.defweights);
 //                                    Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(dmg.a) + "} / $col" + colyellow + "{" + Math.round(dmg.b) + "}}}}", -1).tex();
-                                    Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(dmg.a), colyellow, Math.round(dmg.b)), -1).tex();
+                                        Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(dmg.a), colyellow, Math.round(dmg.b)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                    g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+                                        g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
-                                    final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                                    final int mc = ui.sess.glob.cattr.get("melee").comp;
+                                        final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                                        final int mc = ui.sess.glob.cattr.get("melee").comp;
 
-                                    final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                            ua, mc, act.cards,
-                                            fv.current.defweights, fv.current.estimatedBlockWeight);
+                                        final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                                ua, mc, act.cards,
+                                                fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                    Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
-                                    Tex texa = RichText.render(String.format("$bg%s{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+                                        Tex texa = RichText.render(String.format("$bg%s{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                    g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+                                        g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
 //                                    Math.round(newWeights.get(DefenseType.RED) * 100),
 //                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
 //                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
 //                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
-                                } else if (act.card instanceof Restoration) {
-                                    final Restoration restro = (Restoration) act.card;
-                                    final Map<DefenseType, Double> newWeights = restro.getFutureWeights(act.cards, fv.defweights);
+                                    } else if (act.card instanceof Restoration) {
+                                        final Restoration restro = (Restoration) act.card;
+                                        final Map<DefenseType, Double> newWeights = restro.getFutureWeights(act.cards, fv.defweights);
 //                                    Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
-                                    Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+                                        Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                    g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+                                        g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 35), "%d/%d/%d/%d",
 //                                    Math.round(newWeights.get(DefenseType.RED) * 100),
 //                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
 //                                    Math.round(newWeights.get(DefenseType.BLUE) * 100),
 //                                    Math.round(newWeights.get(DefenseType.YELLOW) * 100));
-                                    if (act.card == Cards.flex) {
-                                        final int ua = ui.sess.glob.cattr.get("unarmed").comp;
-                                        final int mc = ui.sess.glob.cattr.get("melee").comp;
+                                        if (act.card == Cards.flex) {
+                                            final int ua = ui.sess.glob.cattr.get("unarmed").comp;
+                                            final int mc = ui.sess.glob.cattr.get("melee").comp;
 
-                                        final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                                ua, mc, act.cards,
-                                                fv.current.defweights, fv.current.estimatedBlockWeight);
+                                            final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
+                                                    ua, mc, act.cards,
+                                                    fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                        Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(enemyWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(enemyWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(enemyWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(enemyWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
-                                        Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(enemyWeights.get(DefenseType.RED) * 100), colgreen, Math.round(enemyWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(enemyWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(enemyWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+                                            Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(enemyWeights.get(DefenseType.RED) * 100), colgreen, Math.round(enemyWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(enemyWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(enemyWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                        g.chcolor(grey);
 //                                        g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
 //                                        g.chcolor();
-                                        g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+                                            g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
 //                                FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
 //                                        Math.round(enemyWeights.get(DefenseType.RED) * 100),
 //                                        Math.round(enemyWeights.get(DefenseType.GREEN) * 100),
 //                                        Math.round(enemyWeights.get(DefenseType.BLUE) * 100),
 //                                        Math.round(enemyWeights.get(DefenseType.YELLOW) * 100));
+                                        }
                                     }
                                 }
                             }
@@ -396,24 +398,26 @@ public class Fightsess extends Widget {
                             g.atextstroked(Utils.fmt1DecPlace(fv.atkct - now), cdc, 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num11Fnd);
                     }
                     g.image(cdframe, cdc.sub(cdframe.sz().div(2)));
-                    if (fv.current != null && fv.current.estimatedBlockWeight != 0) {
-                        final int stat;
-                        final WeightType type;
-                        if (fv.current.maneuver != null) {
-                            stat = (int) fv.current.maneuver.calculateStat(fv.current.estimatedBlockWeight);
-                            type = fv.current.maneuver.type;
-                        } else {
-                            //An animal, just assume blockweight -> UA
-                            type = WeightType.UA;
-                            stat = (int) fv.current.estimatedBlockWeight;
-                        }
+                    if (configuration.showactioninfo) {
+                        if (fv.current != null && fv.current.estimatedBlockWeight != 0) {
+                            final int stat;
+                            final WeightType type;
+                            if (fv.current.maneuver != null) {
+                                stat = (int) fv.current.maneuver.calculateStat(fv.current.estimatedBlockWeight);
+                                type = fv.current.maneuver.type;
+                            } else {
+                                //An animal, just assume blockweight -> UA
+                                type = WeightType.UA;
+                                stat = (int) fv.current.estimatedBlockWeight;
+                            }
 //                        Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + type + "} : $col" + colgreen + "{" + stat + "}}}}", -1).tex();
-                        Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{%s : %d}}}}", colgrey, ffont, type, stat), -1).tex();
+                            Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{%s : %d}}}}", colgrey, ffont, type, stat), -1).tex();
 //                        g.chcolor(grey);
 //                        g.rect(cdc.add(-tex.sz().x / 2, -50).sub(2, 2), tex.sz().add(2, 2));
 //                        g.chcolor();
-                        g.aimage(tex, cdc.sub(0, cdframe.sz().y / 2), 0.5, 1);
+                            g.aimage(tex, cdc.sub(0, cdframe.sz().y / 2), 0.5, 1);
 //                        FastText.aprintsf(g, cdc.add(0, -50), 0.5, 0.0, "%s: %d", type, stat);
+                        }
                     }
                 }
 

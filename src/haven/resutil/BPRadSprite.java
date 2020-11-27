@@ -1,9 +1,13 @@
 package haven.resutil;
 
 import haven.Config;
+import haven.Coord2d;
 import haven.DefSettings;
 import haven.GLState;
 import haven.GOut;
+import haven.Glob;
+import haven.Gob;
+import haven.Loading;
 import haven.Location;
 import haven.Material;
 import haven.RenderList;
@@ -20,6 +24,13 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class BPRadSprite extends Sprite {
+    public static int getId(String name) {
+        int h = 0;
+        for (int i = 0; i < name.length(); i++)
+            h = (h * 31) + name.charAt(i);
+        return (h);
+    }
+
     public static GLState smatDanger = new ColState(DefSettings.ANIMALDANGERCOLOR.get());
     public static GLState smatSupports = new ColState(DefSettings.SUPPORTDANGERCOLOR.get());
     public static Material.Colors cRackMissing = new Material.Colors(DefSettings.CHEESERACKMISSINGCOLOR.get());
@@ -29,10 +40,10 @@ public class BPRadSprite extends Sprite {
     final VertexArray posa;
     final NormalArray nrma;
     final ShortBuffer sidx;
+    private Coord2d lc;
 
-
-    public BPRadSprite(float rad, float basez, GLState smat) {
-        super(null, null);
+    public BPRadSprite(Owner owner, float rad, float basez, GLState smat) {
+        super(owner, null);
 
         this.smat = smat;
 
@@ -56,6 +67,33 @@ public class BPRadSprite extends Sprite {
         this.posa = new VertexArray(pa);
         this.nrma = new NormalArray(na);
         this.sidx = sa;
+    }
+
+    private void setz(Glob var1, Coord2d var2) {
+        FloatBuffer var3 = this.posa.data;
+        int var4 = this.posa.size() / 2;
+
+        try {
+            float var5 = (float) var1.map.getcz(var2.x, var2.y);
+
+            for (int var6 = 0; var6 < var4; ++var6) {
+                float var7 = (float) var1.map.getcz(var2.x + (double) var3.get(var6 * 3), var2.y - (double) var3.get(var6 * 3 + 1)) - var5;
+                var3.put(var6 * 3 + 2, var7 + 10.0F);
+                var3.put((var4 + var6) * 3 + 2, var7 - 10.0F);
+            }
+        } catch (Loading var8) {
+        }
+
+    }
+
+    public boolean tick(int var1) {
+        Coord2d var2 = ((Gob) this.owner).rc;
+        if (this.lc == null || !this.lc.equals(var2)) {
+            this.setz((Glob) this.owner.context(Glob.class), var2);
+            this.lc = var2;
+        }
+
+        return false;
     }
 
     public boolean setup(RenderList rl) {

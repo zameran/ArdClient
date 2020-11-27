@@ -116,6 +116,7 @@ public class Speedget extends MovableWidget {
             g.image(t, new Coord(x, 0));
             x += t.sz().x;
         }
+        super.draw(g);
     }
 
     public void uimsg(String msg, Object... args) {

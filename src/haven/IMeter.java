@@ -105,6 +105,7 @@ public class IMeter extends MovableWidget {
         } catch (Loading l) {
             //Ignore
         }
+        super.draw(g);
     }
 
     public void uimsg(String msg, Object... args) {
