@@ -97,7 +97,6 @@ public class BeltWnd extends MovableWidget {
             } else {
                 //Check for any pagina int his slot from db
                 data.get(slot).ifPresent(key -> pag = ui.gui.menu.specialpag.get(key));
-
             }
         }
 
@@ -116,8 +115,11 @@ public class BeltWnd extends MovableWidget {
             } else if (pag != null && pag.act() != null) {
                 tt = pag.button().rendertt(true);
                 return tt;
+            } else if (ui.gui != null && ui.gui.menu != null && res != null) {
+                tt = ui.gui.menu.paginafor(res).button().rendertt(true);
+                return tt;
             }
-            return null; //no tt
+            return super.tooltip(c, prev); //no tt
         }
 
         private void use() {
@@ -211,7 +213,7 @@ public class BeltWnd extends MovableWidget {
                     dragging = false;
                 } else if (button == 1 && c.isect(Coord.z, sz)) {
                     use();
-                } else if (button == 3) {
+                } else if (!locked() && button == 3) {
                     ui.gui.wdgmsg("setbelt", slot, 1);
                     reset();
                 }
@@ -223,7 +225,7 @@ public class BeltWnd extends MovableWidget {
         @Override
         public void mousemove(Coord c) {
             super.mousemove(c);
-            if (dm != null && !BeltWnd.this.locked) {
+            if (dm != null && !locked()) {
                 dragging = true;
             }
         }
@@ -272,10 +274,10 @@ public class BeltWnd extends MovableWidget {
     //The actual belt..
     private final String name;
     private Style style;
-    private boolean locked;
 
     private BeltBtn[] btns = new BeltBtn[10];
-    private final IButton rotate, up, down, lock;
+    private final IButton rotate, up, down, ilock;
+    private boolean hidden;
     private final BufferedImage on, off;
 
     //This is all about which slots we "own" and how we split it up between pages
@@ -288,7 +290,6 @@ public class BeltWnd extends MovableWidget {
     //Belt data
     private final BeltData data;
 
-
     //TODO: belts should be IndirSettings
     private BeltWnd(final String name, final BeltData data) {
         super(name);
@@ -297,33 +298,35 @@ public class BeltWnd extends MovableWidget {
         style = Style.valueOf(DefSettings.global.get("belt." + name + ".style", String.class));
         visible = DefSettings.global.get("belt." + name + ".show", Boolean.class);
         page = DefSettings.global.get("belt." + name + ".page", Integer.class);
-        locked = DefSettings.global.get("belt." + name + ".locked", Boolean.class);
+        lock(DefSettings.global.get("belt." + name + ".locked", Boolean.class));
 
         rotate = add(new IButton("custom/belt/default/rotate", "Rotate belt", () -> {
-            switch (style) {
-                case HORIZONTAL:
-                    style = Style.VERTICAL;
-                    break;
-                case VERTICAL:
-                    style = Style.GRID;
-                    break;
-                case GRID:
-                    style = Style.HORIZONTAL;
-                    break;
+            if (!locked()) {
+                switch (style) {
+                    case HORIZONTAL:
+                        style = Style.VERTICAL;
+                        break;
+                    case VERTICAL:
+                        style = Style.GRID;
+                        break;
+                    case GRID:
+                        style = Style.HORIZONTAL;
+                        break;
+                }
+                DefSettings.global.set("belt." + name + ".style", style.toString());
+                reposition();
             }
-            DefSettings.global.set("belt." + name + ".style", style.toString());
-            reposition();
         }));
-        lock = add(new IButton("custom/belt/default/lock", "Lock belt", () -> {
-            locked = !locked;
-            DefSettings.global.set("belt." + name + ".locked", locked);
-            BeltWnd.this.lock.hover = locked ? BeltWnd.this.on : BeltWnd.this.off;
-            BeltWnd.this.lock.up = locked ? BeltWnd.this.off : BeltWnd.this.on;
+        ilock = add(new IButton("custom/belt/default/lock", "Lock belt", () -> {
+            toggleLock();
+            DefSettings.global.set("belt." + name + ".locked", locked());
+            BeltWnd.this.ilock.hover = locked() ? BeltWnd.this.on : BeltWnd.this.off;
+            BeltWnd.this.ilock.up = locked() ? BeltWnd.this.off : BeltWnd.this.on;
         }));
-        on = lock.up;
-        off = lock.hover;
-        lock.hover = locked ? on : off;
-        lock.up = locked ? off : on;
+        on = ilock.up;
+        off = ilock.hover;
+        ilock.hover = locked() ? on : off;
+        ilock.up = locked() ? off : on;
 
         up = add(new IButton("custom/belt/default/up", "Go up a page", () -> {
             page++;
@@ -368,6 +371,7 @@ public class BeltWnd extends MovableWidget {
 
     @Override
     public void draw(GOut g) {
+        hideBtns();
         super.draw(g);
     }
 
@@ -455,7 +459,7 @@ public class BeltWnd extends MovableWidget {
         down.c = new Coord(x * (Inventory.invsq.sz().x + 2) + up.sz.x + 2,
                 y * (Inventory.invsq.sz().y + 2));
         rotate.c = up.c.add(0, up.sz.y + 2);
-        lock.c = rotate.c.add(rotate.sz.x + 2, 0);
+        ilock.c = rotate.c.add(rotate.sz.x + 2, 0);
     }
 
     private void reposition() {
@@ -480,22 +484,41 @@ public class BeltWnd extends MovableWidget {
                     up.c = new Coord(0, n);
                     down.c = new Coord(up.sz.x + 2, n);
                     rotate.c = up.c.add(0, up.sz.y + 2);
-                    lock.c = rotate.c.add(rotate.sz.x + 2, 2);
+                    ilock.c = rotate.c.add(rotate.sz.x + 2, 2);
                     break;
                 case HORIZONTAL:
                     up.c = new Coord(n, 0);
                     down.c = new Coord(n, up.sz.y + 2);
                     rotate.c = up.c.add(up.sz.x + 2, 0);
-                    lock.c = rotate.c.add(0, rotate.sz.y + 2);
+                    ilock.c = rotate.c.add(0, rotate.sz.y + 2);
                     break;
             }
         }
         pack();
     }
 
-
     public void setVisibile(final boolean vis) {
         visible = vis;
         DefSettings.global.set("belt." + name + ".show", visible);
+    }
+
+    public void mousemove(Coord c) {
+        if (c.isect(Coord.z, sz) && hidden) hidden = false;
+        if (!c.isect(Coord.z, sz) && !hidden) hidden = true;
+        super.mousemove(c);
+    }
+
+    private void hideBtns() {
+        if (hidden) {
+            if (rotate.visible) rotate.hide();
+            if (up.visible) up.hide();
+            if (down.visible) down.hide();
+            if (ilock.visible) ilock.hide();
+        } else {
+            if (!rotate.visible) rotate.show();
+            if (!up.visible) up.show();
+            if (!down.visible) down.show();
+            if (!ilock.visible) ilock.show();
+        }
     }
 }

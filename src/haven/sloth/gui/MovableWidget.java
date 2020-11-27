@@ -91,8 +91,12 @@ public abstract class MovableWidget extends Widget {
     }
 
     public void toggleLock() {
-        lock = !lock;
+        lock(!lock);
         savePosition();
+    }
+
+    public void lock(boolean l) {
+        lock = l;
     }
 
     public boolean locked() {
