@@ -33,7 +33,7 @@ public class GobSpeedSprite extends Sprite {
     }
 
     public void draw(GOut g) {
-        if (speed != null) {
+        if (speed != null && lspeed != 0) {
             mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id));
             sc = proj.toscreen(mv.mul4(Coord3f.o), wndsz);
             sczu = proj.toscreen(mv.mul4(Coord3f.zu), wndsz).sub(sc);
