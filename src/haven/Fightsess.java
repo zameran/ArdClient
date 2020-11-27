@@ -95,7 +95,7 @@ public class Fightsess extends Widget {
     public static String colgreen = "[8,103,1]"; //"[0,255,0]";
     public static String colblue = "[8,103,136]";   //"[0,255,255]";
     public static String colyellow = "[203,168,6]";   //"[239,253,63]";
-    public static String colgrey = "[60,60,60,168]";
+    public static String colgrey = "[60,60,60,120]";
     public static String ffont = "[mono]";
     public static Color grey = new Color(30, 30, 30);
 
@@ -289,6 +289,7 @@ public class Fightsess extends Widget {
                     g.rect(Coord.z, sz);
                     g.chcolor();
                 }
+                super.draw(g);
             }
 
             public Object tooltip(Coord c, Widget prev) {
@@ -476,6 +477,7 @@ public class Fightsess extends Widget {
                     g.rect(Coord.z, sz);
                     g.chcolor();
                 }
+                super.draw(g);
             }
 
             public Object tooltip(Coord c, Widget prev) {
@@ -513,7 +515,7 @@ public class Fightsess extends Widget {
 //                        Coord lac = Config.altfightui ? new Coord(cx - 69, 120).add(usesz.div(2)) : pcc.add(usec1);
 //                        Coord lac = new Coord(cx - 69, 120).add(usesz.div(2));
                         Coord lac = lastMoveAnchor;
-                        if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                        if (c.isect(lac, usesz)) {
                             if (lastacttip1 == null)
                                 lastacttip1 = Text.render(lastact.get().layer(Resource.tooltip).t);
                             return (lastacttip1);
@@ -528,7 +530,7 @@ public class Fightsess extends Widget {
 //                        Coord lac = Config.altfightui ? new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2)) : pcc.add(usec2);
 //                        Coord lac = new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2));
                         Coord lac = enemyLastMoveAnchor;
-                        if (c.isect(lac.sub(usesz.div(2)), usesz)) {
+                        if (c.isect(lac, usesz)) {
                             if (lastacttip2 == null)
                                 lastacttip2 = Text.render(lastact.get().layer(Resource.tooltip).t);
                             return (lastacttip2);
