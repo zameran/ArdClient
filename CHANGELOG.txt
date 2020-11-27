@@ -1,3 +1,7 @@
+20201127
+Radiuses now go above the surface. Movable background (CTRL + RMC). Speed sprite (0 invisible). Equipory int*ste. Fix quick slots mouse drag bug.
+~
+
 20201125
 Fixes. Add stump and log type. Movable fight window. Speed sprite. l10n. Now move key is Ctrl+RMC. SHIFT+A improve. Visitor gate Q option. Gob icon fix.
 ~
