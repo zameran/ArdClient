@@ -29,6 +29,7 @@ package haven;
 import haven.overlays.OverlayData;
 import haven.overlays.TextOverlay;
 import haven.overlays.newPlantStageSprite;
+import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
 import haven.resutil.BPRadSprite;
@@ -397,7 +398,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (type == Type.HUMAN && attr.containsKey(GobHealth.class))
                     type = Type.UNKNOWN;
 
-                if (configuration.gobspeedsprite && type == Type.HUMAN || type == Type.ANIMAL || name.startsWith("gfx/kritter/")) {
+                if (configuration.gobspeedsprite && (type == Type.HUMAN || type == Type.ANIMAL || name.startsWith("gfx/kritter/")) && !isDead()) {
                     addol(new Overlay(GobSpeedSprite.id, new GobSpeedSprite(this)));
                     //if(id == ui.gui.map.rlplgob) {
                     //    addol(new Overlay(-4921, new SnowFall(this)));
@@ -591,6 +592,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             sb.append("]");
                         }
                     }
+                }
+                if (dw.spr instanceof Tree) {
+                    Tree treeSprite = (Tree) dw.spr;
+                    sb.append(treeSprite.fscale);
                 }
             }
             sb.append("\n");
@@ -1264,17 +1269,15 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             if (Config.showanimalrad && !Config.doubleradius && type == Type.DANGANIMAL) {
                 Overlay ol = findol(BPRadSprite.getId("animalradius"));
-                boolean hasradius = ols.contains(ol);
-                if ((!isDead()) && !hasradius)
+                if (!isDead() && ol == null)
                     ols.add(createBPRadSprite(this, "animalradius"));
-                else if (isDead() && hasradius)
+                else if (isDead() && ol != null)
                     ols.remove(ol);
             } else if (Config.showanimalrad && Config.doubleradius && type == Type.DANGANIMAL) {
                 Overlay ol = findol(BPRadSprite.getId("doubleanimalradius"));
-                boolean hasradius = ols.contains(createBPRadSprite(Gob.this, "doubleanimalradius"));
-                if ((!isDead()) && !hasradius)
+                if (!isDead() && ol == null)
                     ols.add(createBPRadSprite(this, "doubleanimalradius"));
-                else if (isDead() && hasradius)
+                else if (isDead() && ol != null)
                     ols.remove(ol);
             }
 
