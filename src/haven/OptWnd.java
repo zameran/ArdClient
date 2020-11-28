@@ -3415,6 +3415,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show number in inventory") {
+            {
+                a = configuration.showinvnumber;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showinvnumber", val);
+                configuration.showinvnumber = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Enable speed sprite") {
             {
                 a = configuration.gobspeedsprite;

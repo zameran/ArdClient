@@ -105,6 +105,7 @@ public class configuration {
     public static boolean autocleardamage = Utils.getprefb("autocleardamage", false);
     public static boolean showcombatborder = Utils.getprefb("showcombatborder", false);
     public static boolean showactioninfo = Utils.getprefb("showactioninfo", false);
+    public static boolean showinvnumber = Utils.getprefb("showinvnumber", false);
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);

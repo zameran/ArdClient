@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import modification.configuration;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Inventory extends Widget implements DTarget {
     public static final Tex invsq = Resource.loadtex("gfx/hud/invsq");
@@ -59,6 +61,7 @@ public class Inventory extends Widget implements DTarget {
             return ITEM_COMPARATOR_ASC.compare(o2, o1);
         }
     };
+    public static Map<String, Tex> cachedNumber = new TreeMap<>(Comparator.comparing((a) -> a));
 
     public boolean locked = false;
     public Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
@@ -75,9 +78,20 @@ public class Inventory extends Widget implements DTarget {
         for (c.y = 0; c.y < isz.y; c.y++) {
             for (c.x = 0; c.x < isz.x; c.x++) {
                 g.image(invsq, c.mul(sqsz));
+                if (configuration.showinvnumber)
+                    g.aimage(getNumberText(c.y * isz.x + c.x + ""), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
             }
         }
         super.draw(g);
+    }
+
+    public Tex getNumberText(String text) {
+        Tex tex = cachedNumber.get(text);
+        if (tex == null) {
+            tex = Text.render(text).tex();
+            cachedNumber.put(text, tex);
+        }
+        return (tex);
     }
 
     public Inventory(Coord sz) {
