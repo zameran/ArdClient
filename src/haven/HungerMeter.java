@@ -2,6 +2,8 @@ package haven;
 
 import haven.sloth.gui.MovableWidget;
 
+import java.awt.Color;
+
 public class HungerMeter extends MovableWidget {
     private static final Tex bg = Resource.loadtex("hud/meter/hungermeter");
 
@@ -24,6 +26,9 @@ public class HungerMeter extends MovableWidget {
         g.frect(off, new Coord((int) Math.round(isz.x * (glut.glut - Math.floor(glut.glut))), isz.y));
         g.chcolor();
         g.image(bg, Coord.z);
+        if (Config.showmetertext) {
+            g.atextstroked(String.format("%.2f%%:%d%%", glut.lglut * 100, Math.round(glut.gmod * 100)), sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
+        }
         super.draw(g);
     }
 

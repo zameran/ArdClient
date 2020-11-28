@@ -145,6 +145,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public boolean drinkingWater, lastDrinkingSucessful;
     public CraftWindow makewnd;
     public BeltWnd fbelt, nbelt, npbelt;
+    public FepMeter fepmeter;
+    public HungerMeter hungermeter;
     public MapPointer pointer;
     public Cal cal;
     public QuestHelper questhelper;
@@ -849,9 +851,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void addcmeter(Widget meter) {
-        int x = (meters.size() % 3) * (IMeter.fsz.x + 5);
-        int y = (meters.size() / 3) * (IMeter.fsz.y + 2);
-        add(meter, portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
+        Coord metc = new Coord(0, portrait.c.y + portrait.sz.y + 50);
+        for (Widget m : cmeters) {
+            metc = metc.add(new Coord(0, IMeter.fsz.y));
+        }
+        add(meter, metc);
         // ulpanel.add(meter);
         cmeters.add(meter);
         updcmeters();
@@ -1092,10 +1096,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             chrwdg = add((CharWnd) child, new Coord(300, 50));
             if (!Config.autowindows.get("Character Sheet").selected)
                 chrwdg.hide();
-            if (Config.hungermeter)
-                addcmeter(new HungerMeter(chrwdg.glut, "HungerMeter"));
-            if (Config.fepmeter)
-                addcmeter(new FepMeter(chrwdg.feps, "FepMeter"));
+            addcmeter(hungermeter = new HungerMeter(chrwdg.glut, "HungerMeter"));
+            hungermeter.show(Config.hungermeter);
+            addcmeter(fepmeter = new FepMeter(chrwdg.feps, "FepMeter"));
+            fepmeter.show(Config.fepmeter);
         } else if (place == "craft") {
             final Widget mkwdg = child;
             if (craftwnd != null) {

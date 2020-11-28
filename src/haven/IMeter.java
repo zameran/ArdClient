@@ -97,7 +97,8 @@ public class IMeter extends MovableWidget {
                 g.frect(off, new Coord(w, msz.y));
                 if (Config.showmetertext) {
                     g.chcolor();
-                    g.atextstroked(meterinfo, new Coord(msz.x / 2 + 10, msz.y / 2 - 1), 0, 0, Color.WHITE, Color.BLACK, Text.num10Fnd);
+//                    new Coord(msz.x / 2 + 10, msz.y / 2 - 1)
+                    g.atextstroked(meterinfo, sz.div(2).add(10, -1), 0.5, 0.5, Color.WHITE, Color.BLACK, Text.num10Fnd);
                 }
             }
             g.chcolor();
@@ -147,16 +148,14 @@ public class IMeter extends MovableWidget {
                         }
                     }
                 }
-                if (Config.showmetertext) {
-                    meterinfo = tt;
-                    if (meterinfo.contains("ow")) {
-                        meterinfo = args[0].toString().split(" ")[2];
-                    } else {
-                        meterinfo = args[0].toString().split(" ")[1];
-                    }
-                    if (meterinfo.contains("/")) {
-                        meterinfo = Integer.toString(ui.sess.details.shp);
-                    }
+                meterinfo = tt;
+                if (meterinfo.contains("ow")) {
+                    meterinfo = args[0].toString().split(" ")[2];
+                } else {
+                    meterinfo = args[0].toString().split(" ")[1];
+                }
+                if (meterinfo.contains("/")) {
+                    meterinfo = Integer.toString(ui.sess.details.shp);
                 }
             }
         }

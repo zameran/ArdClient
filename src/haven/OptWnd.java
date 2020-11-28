@@ -1127,7 +1127,7 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(display, new Coord(620, 350)));
         appender.setVerticalMargin(VERTICAL_MARGIN);
 
-        appender.add(new CheckBox("Show Session Display - Requires Logout") {
+        appender.add(new CheckBox("Show Session Display") {
             {
                 a = Config.sessiondisplay;
             }
@@ -1158,7 +1158,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.add(new CheckBox("Show IMeter Text - Requires Logout") {
+        appender.add(new CheckBox("Show IMeter Text") {
             {
                 a = Config.showmetertext;
             }
@@ -2622,6 +2622,9 @@ public class OptWnd extends Window {
                 Utils.setprefb("hungermeter", val);
                 Config.hungermeter = val;
                 a = val;
+                if (ui.gui != null) {
+                    ui.gui.hungermeter.show(val);
+                }
             }
         });
         appender.add(new CheckBox("Show fepmeter") {
@@ -2633,6 +2636,9 @@ public class OptWnd extends Window {
                 Utils.setprefb("fepmeter", val);
                 Config.fepmeter = val;
                 a = val;
+                if (ui.gui != null) {
+                    ui.gui.fepmeter.show(val);
+                }
             }
         });
         appender.add(new CheckBox("Show Craft/Build history toolbar") {

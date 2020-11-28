@@ -77,7 +77,7 @@ public class Inventory extends Widget implements DTarget {
             for (c.x = 0; c.x < isz.x; c.x++) {
                 g.image(invsq, c.mul(sqsz));
                 if (configuration.showinvnumber)
-                    g.aimage(Text.render(c.y * isz.x + c.x + "").tex(), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
+                    g.aimage(Text.render(c.y * isz.x + c.x + 1 + "").tex(), c.mul(sqsz).add(invsq.sz().div(2)), 0.5, 0.5);
             }
         }
         super.draw(g);

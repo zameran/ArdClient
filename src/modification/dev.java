@@ -4,6 +4,7 @@ import haven.AuthClient;
 import haven.Coord;
 import haven.GItem;
 import haven.Resource;
+import haven.UI;
 import haven.Utils;
 import haven.Widget;
 
@@ -151,6 +152,9 @@ public class dev {
         StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
         int stackTraceElementsLength = stackTraceElements.length;
 
+        UI ui = null;
+        if (widget.ui != null) ui = widget.ui;
+
         boolean skip_log = false;
 //        for (String s : msg_log_skip) {
 //            if (s.equals(name) && msg_log_skip_boolean) skip_log = true;
@@ -190,7 +194,14 @@ public class dev {
 
 //            if (name != null) System.out.print(" || " + name);
             if (type != null) System.out.print(" || " + type);
-            if (parent != -1) System.out.print(" || " + parent);
+            if (parent != -1) {
+                System.out.print(" || ");
+                if (ui != null)
+                    System.out.print(widget.ui.widgets.get(parent) + "(");
+                System.out.print(parent);
+                if (ui != null)
+                    System.out.print(")");
+            }
 
             argsMethod(pargs);
             argsMethod(cargs);
