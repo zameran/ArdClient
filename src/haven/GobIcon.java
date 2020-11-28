@@ -51,32 +51,6 @@ public class GobIcon extends GAttrib {
         this.res = res;
     }
 
-    public static class Ref implements Indir<Resource> {
-        public Resource res;
-        public String resnm;
-
-        public Ref(String resnm) {
-            this.resnm = resnm;
-        }
-
-        public Resource get() {
-            try {
-                if (res == null)
-                    res = Resource.remote().load(resnm).get();
-            } catch (Exception e) {
-            }
-            return (res);
-        }
-
-        public String toString() {
-            return ("<Resource Icon " + res + ">");
-        }
-
-        private void reset() {
-            res = null;
-        }
-    }
-
     public Tex tex() {
         return (img().tex());
     }

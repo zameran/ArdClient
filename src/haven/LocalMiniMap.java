@@ -1124,7 +1124,7 @@ public class LocalMiniMap extends Widget {
             for (Gob gob : oc) {
                 try {
                     GobIcon icon = gob.getattr(GobIcon.class);
-                    if (icon != null) {
+                    if (icon != null && icon.res != null && icon.res.get() != null) {
                         GobIcon.Setting conf = iconconf.get(icon.res.get());
                         if ((conf != null) && conf.show) {
                             DisplayIcon disp = pmap.get(gob);

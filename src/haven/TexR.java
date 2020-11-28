@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.dev;
+
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import java.awt.Graphics;
@@ -33,6 +35,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -106,9 +109,33 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
                  * that this is a bug in ImageIO. */
                 public BufferedImage run() {
                     try {
-                        return (ImageIO.read(new ByteArrayInputStream(data)));
+                        BufferedImage bimg = ImageIO.read(new ByteArrayInputStream(data));
+                        if (dev.decodeCode) {
+                            try {
+                                decode(bimg);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        return (bimg);
                     } catch (IOException e) {
                         throw (new RuntimeException("Invalid image data in " + getres().name, e));
+                    }
+                }
+
+                public void decode(BufferedImage img) throws Exception {
+                    String name = getres().name;
+                    File dir = new File("decode" + File.separator + name.replace("/", File.separator) + "(v" + id + ")");
+                    dir.mkdirs();
+                    String filename = "tex_" + name.substring(name.lastIndexOf('/') + 1) + ".png";
+                    File outputfile = new File(dir, filename);
+                    if (!outputfile.exists()) {
+                        if (img == null) {
+                            dev.resourceLog("tex", outputfile.getPath(), "NULL");
+                            return;
+                        }
+                        ImageIO.write(img, "png", outputfile);
+                        dev.resourceLog("tex", outputfile.getPath(), "CREATED");
                     }
                 }
             }));

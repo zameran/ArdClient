@@ -1,5 +1,6 @@
 package modification;
 
+import haven.Indir;
 import haven.Resource;
 import haven.Tex;
 import haven.Utils;
@@ -40,5 +41,31 @@ public class resources {
             if (p < 0) return (gobname);
             return gobname.substring(p + 1, p + 2).toUpperCase() + gobname.substring(p + 2);
         } else return gobname;
+    }
+
+    public static class IndirResource implements Indir<Resource> {
+        public Resource res;
+        public String resnm;
+
+        public IndirResource(String resnm) {
+            this.resnm = resnm;
+        }
+
+        public Resource get() {
+            try {
+                if (res == null)
+                    res = Resource.remote().load(resnm).get();
+            } catch (Exception e) {
+            }
+            return (res);
+        }
+
+        public String toString() {
+            return ("<Resource Icon " + res + ">");
+        }
+
+        private void reset() {
+            res = null;
+        }
     }
 }

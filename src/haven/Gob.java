@@ -29,6 +29,8 @@ package haven;
 import haven.overlays.OverlayData;
 import haven.overlays.TextOverlay;
 import haven.overlays.newPlantStageSprite;
+import haven.res.lib.vmat.Materials;
+import haven.res.lib.vmat.VarSprite;
 import haven.resutil.BPRadSprite;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
@@ -422,13 +424,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             lastname = lastname.substring(0, lastname.length() - "log".length());
 
                         String icon = fistname + "/mm" + lastname;
-                        GobIcon.Ref res = new GobIcon.Ref(icon);
+                        resources.IndirResource res = new resources.IndirResource(icon);
                         if (res.get() != null)
                             setattr(new GobIcon(this, res));
                     } else if (type == Type.BOULDER) {
                         String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-
-                        GobIcon.Ref res = new GobIcon.Ref(icon);
+                        resources.IndirResource res = new resources.IndirResource(icon);
                         if (res.get() != null)
                             setattr(new GobIcon(this, res));
                     }
@@ -567,9 +568,32 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 sb.append("Held By: ").append(heldby.holder.id).append(" - ").append(heldby.holder.resname().orElse("Unknown")).append("\n");
             }
         }
+//        sb.append(attr.entrySet()).append("\n");
         ResDrawable dw = getattr(ResDrawable.class);
         if (dw != null) {
-            sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf)).append(". Peek: ").append(dw.sdt.peekrbuf(0)).append("\n");
+            sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf));
+            if (dw.spr != null) {
+                sb.append(", ").append("[").append(dw.spr.getClass().getName().replace("$", "§")).append("]");
+                if (dw.spr instanceof VarSprite) {
+                    VarSprite varSprite = (VarSprite) dw.spr;
+//                    sb.append("\n").append("[").append(varSprite.mats()).append("]");
+                    if (varSprite.mats() instanceof Materials) {
+                        Materials materials = (Materials) varSprite.mats();
+                        for (Map.Entry<Integer, Material> entry : materials.mats.entrySet()) {
+                            sb.append("\n").append("[").append(entry.getKey()).append(":");
+                            for (GLState gl : entry.getValue().states) {
+//                            sb.append(":[").append(gl).append("]");
+                                if (gl instanceof TexGL.TexDraw) {
+                                    TexGL.TexDraw texDraw = (TexGL.TexDraw) gl;
+                                    sb.append(texDraw.tex);
+                                }
+                            }
+                            sb.append("]");
+                        }
+                    }
+                }
+            }
+            sb.append("\n");
             sb.append("sdt: ").append(dw.sdtnum()).append("\n");
         } else {
             Composite comp = getattr(Composite.class);
@@ -580,8 +604,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (ols.size() > 0) {
             sb.append("Overlays: ").append(ols.size()).append("\n");
             for (Overlay ol : ols) {
-                if (ol != null)
-                    sb.append(" ").append(ol.name()).append("\n");
+                if (ol != null) {
+                    sb.append("ol: ").append("i[").append(ol.id).append("]");
+                    if (ol.res != null && ol.res.get() != null) sb.append(", r[").append(ol.res.get()).append("]");
+                    if (ol.spr != null) sb.append(", s[").append(ol.spr).append("]");
+//                    if (ol.sdt != null) sb.append(", d").append(Arrays.toString(ol.sdt.rbuf));
+                    sb.append("\n");
+                }
             }
         }
         sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");

@@ -52,14 +52,14 @@ public class configuration {
         if (sess == null)
             name = "";
         else
-            name = " \u2013 " + sess.username;
+            name = sess.username + " \u2013 ";
 
         if (configuration.customTitleBoolean)
             title = configuration.defaultUtilsCustomTitle;
         else
             title = defaultTitle;
 
-        return title + name;
+        return name + title;
     }
 
     public static Coord savedHavenPanelSize = Utils.getprefc("havpansz", new Coord(800, 600));

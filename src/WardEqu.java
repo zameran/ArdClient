@@ -6,11 +6,15 @@ import haven.GOut;
 import haven.Resource;
 import haven.UI;
 import haven.Widget;
+import modification.dev;
 
 import static haven.Inventory.invsq;
 
 /* >wdg: WardEqu */
 public class WardEqu extends Equipory {
+    static {
+        dev.checkFileVersion("ui/wd-equ", 8);
+    }
     public static final Resource.Image dicon = Resource.remote().loadwait("ui/wd-equ").layer(Resource.imgc);
     public final boolean[] dis = new boolean[ecoords.length];
 
