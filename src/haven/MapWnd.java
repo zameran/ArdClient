@@ -561,8 +561,15 @@ public class MapWnd extends Window {
             g.aimage(names.apply(mark.nm).tex(), new Coord(5, itemh / 2), 0, 0.5);
         }
 
+        protected void itemclick(Marker mark, int button) {
+            if (button == 1)
+                change(mark);
+            if (button == 3)
+                change2(mark);
+        }
+
         public void change(Marker mark) {
-            change2(mark);
+            //change2(mark);
             if (mark != null)
                 view.center(new SpecLocator(mark.seg, mark.tc));
         }
