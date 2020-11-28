@@ -31,7 +31,7 @@ public class BeltWnd extends MovableWidget {
         private boolean dragging = false;
         private UI.Grab dm = null;
         //tooltip
-        private BufferedImage tt;
+        private Object tt;
 
         private BeltBtn(final int key) {
             super(Inventory.invsq.sz());
@@ -93,6 +93,7 @@ public class BeltWnd extends MovableWidget {
             pag = null;
             if (ui.gui != null && ui.gui.belt[slot] != null) {
                 res = ui.gui.belt[slot];
+                pag = ui.gui.menu.paginafor(res);
                 data.remove(slot);
             } else {
                 //Check for any pagina int his slot from db
@@ -112,13 +113,30 @@ public class BeltWnd extends MovableWidget {
             if (tt != null) {
                 //cached tt
                 return tt;
-            } else if (pag != null && pag.act() != null) {
-                tt = pag.button().rendertt(true);
+            } else if (pag != null) {
+                if (pag.act() != null) {
+                    tt = pag.button().rendertt(true);
+                } else {
+                    tt = Text.render(res.get().layer(Resource.tooltip).t).tex();
+                }
                 return tt;
-            } else if (ui.gui != null && ui.gui.menu != null && res != null) {
-                tt = ui.gui.menu.paginafor(res).button().rendertt(true);
-                return tt;
-            }
+            }/* else if (ui.gui != null && ui.gui.menu != null && res != null) {
+                MenuGrid.PagButton pagb = ui.gui.menu.paginafor(res).button();
+                Resource.AButton ab = pagb.res.layer(Resource.action);
+                if (ab != null) {
+                    tt = pagb.rendertt(true);
+                    return tt;
+                } else {
+                    if (res.get() != null) {
+                        Resource.Tooltip tpl = res.get().layer(Resource.tooltip);
+                        if (tpl != null) {
+                            pag.info();
+                            tt = Text.render(tpl.t).tex();
+                            return tt;
+                        }
+                    }
+                }
+            }*/
             return super.tooltip(c, prev); //no tt
         }
 
@@ -232,10 +250,12 @@ public class BeltWnd extends MovableWidget {
 
         @Override
         public boolean drop(Coord cc, Coord ul) {
-            //This is for dropping inventory items on our mouse to a hotkey
-            ui.gui.wdgmsg("setbelt", slot, 0);
-            //reset for now and wait for server to send us uimsg if this was valid drop
-            reset();
+            if (!locked()) {
+                //This is for dropping inventory items on our mouse to a hotkey
+                ui.gui.wdgmsg("setbelt", slot, 0);
+                //reset for now and wait for server to send us uimsg if this was valid drop
+                reset();
+            }
             return true;
         }
 
