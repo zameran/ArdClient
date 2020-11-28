@@ -1,6 +1,5 @@
 package haven.overlays;
 
-
 import haven.Camera;
 import haven.Config;
 import haven.Coord;
@@ -28,8 +27,7 @@ public class newPlantStageSprite extends Sprite {
     private final boolean multistg, offsetmultisg;
 
     Tex stg(int stg, int stgmax, Color clr) {
-        Tex tex = Text.renderstroked(String.format("%d/%d", stg, stgmax), clr, Color.BLACK, Text.num12boldFnd).tex();
-        return tex;
+        return Text.renderstroked(String.format("%d/%d", stg, stgmax), clr, Color.BLACK, Text.num12boldFnd).tex();
     }
 
     Tex stg(int stg, int stgmax, Color clr, Color border) {

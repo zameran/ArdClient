@@ -31,6 +31,7 @@ import haven.res.ui.tt.Wear;
 import haven.resutil.Curiosity;
 import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
+import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -154,6 +155,7 @@ public class Window extends MovableWidget implements DTarget {
     @RName("wnd")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
+            dev.sysPrintStackTrace("window create");
             Coord sz = (Coord) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
             boolean lg = (args.length > 2) && ((Integer) args[2] != 0);

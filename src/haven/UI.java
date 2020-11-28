@@ -225,29 +225,11 @@ public class UI {
 
                 pwdg.addchild(wdg, pargs);
 
-                if (pwdg instanceof Window) {
-                    // here be horrors... FIXME
-                    GameUI gui = null;
-                    for (Widget w : rwidgets.keySet()) {
-                        if (w instanceof GameUI) {
-                            gui = (GameUI) w;
-                            break;
-                        }
-                    }
+                if (pwdg instanceof Window && gui != null)
                     processWindowContent(parent, gui, (Window) pwdg, wdg);
-                }
             } else {
-                if (wdg instanceof Window) {
-                    // here be horrors... FIXME
-                    GameUI gui = null;
-                    for (Widget w : rwidgets.keySet()) {
-                        if (w instanceof GameUI) {
-                            gui = (GameUI) w;
-                            break;
-                        }
-                    }
+                if (wdg instanceof Window && gui != null)
                     processWindowCreation(id, gui, (Window) wdg);
-                }
             }
             bind(wdg, id);
             if (type.contains("rchan"))
@@ -255,6 +237,7 @@ public class UI {
             if (wdg instanceof FightWnd) {
                 fightwnd = new WeakReference<>((FightWnd) wdg);
             }
+            dev.sysLogRemote("newwidget", wdg, id, type, parent, pargs, cargs);
         }
         next_predicted_id = id + 1;
     }
@@ -278,6 +261,7 @@ public class UI {
                     throw (new UIException("Null parent widget " + parent + " for " + id, null, pargs));
             }
             pwdg.addchild(wdg, pargs);
+            dev.sysLogRemote("addwidget", wdg, id, null, parent, pargs, (Object) null);
         }
     }
 
@@ -415,6 +399,7 @@ public class UI {
             if (widgets.containsKey(id)) {
                 Widget wdg = widgets.get(id);
                 destroy(wdg);
+                dev.sysLogRemote("destroy", wdg, id, null, -1, null, (Object) null);
             }
         }
     }

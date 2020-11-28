@@ -95,7 +95,6 @@ public class dev {
                 } catch (Exception e) {
                     System.out.print(e);
                 }
-
             }
 
             int a;
@@ -148,14 +147,14 @@ public class dev {
         }
     }
 
-    public static void sysLogRemote(String who, Widget widget, int id, String name, String type, int parent, Object[] pargs, Object... cargs) {
+    public static void sysLogRemote(String who, Widget widget, int id, String type, int parent, Object[] pargs, Object... cargs) {
         StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
         int stackTraceElementsLength = stackTraceElements.length;
 
         boolean skip_log = false;
-        for (String s : msg_log_skip) {
-            if (s.equals(name) && msg_log_skip_boolean) skip_log = true;
-        }
+//        for (String s : msg_log_skip) {
+//            if (s.equals(name) && msg_log_skip_boolean) skip_log = true;
+//        }
 
         if (stackTraceElements[1].getMethodName().equals("run") && oldSender.equals(serverSender)) {
             if (oldStackTraceElementClass.equals(stackTraceElements[1].getClassName()) &&
@@ -171,15 +170,25 @@ public class dev {
 
         if (!skip_log && logging) {
             System.out.print("[" + LocalTime.now() + "]");
-            System.out.print(" || ");
-            for (int i = 1; i < stackTraceElementsLength; i++) {
-                System.out.print("{" + stackTraceElements[i].getClassName() + "(" + stackTraceElements[i].getMethodName() + ")(" + stackTraceElements[i].getLineNumber() + ")");
-                if (i != stackTraceElementsLength - 1) System.out.print(">");
-            }
+//            System.out.print(" || ");
+//            for (int i = 1; i < stackTraceElementsLength; i++) {
+//                System.out.print("{" + stackTraceElements[i].getClassName() + "(" + stackTraceElements[i].getMethodName() + ")(" + stackTraceElements[i].getLineNumber() + ")");
+//                if (i != stackTraceElementsLength - 1) System.out.print(">");
+//            }
             System.out.print(" || " + who);
-            System.out.print(" || " + widget + "(" + id + ") ");
+            if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
 
-            if (name != null) System.out.print(" || " + name);
+            System.out.print(" || " + widget + "(" + id + ")");
+            if (widget instanceof GItem) {
+                try {
+                    Resource res = ((GItem) widget).getres();
+                    System.out.print("[" + res + "]");
+                } catch (Exception e) {
+                    System.out.print(e);
+                }
+            }
+
+//            if (name != null) System.out.print(" || " + name);
             if (type != null) System.out.print(" || " + type);
             if (parent != -1) System.out.print(" || " + parent);
 

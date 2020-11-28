@@ -26,8 +26,6 @@
 
 package haven;
 
-import modification.configuration;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;

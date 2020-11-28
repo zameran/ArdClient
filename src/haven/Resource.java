@@ -488,7 +488,7 @@ public class Resource implements Serializable {
                 }
                 if (error != null)
                     if (dev.skipexceptions) {
-                        boostprio(1);
+                        res = Resource.remote().loadwait("gfx/hud/equip/missing");
                         System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
                     } else {
                         throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));

@@ -3,8 +3,10 @@ package modification;
 import haven.Indir;
 import haven.Resource;
 import haven.Tex;
+import haven.Text;
 import haven.Utils;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,6 +68,67 @@ public class resources {
 
         private void reset() {
             res = null;
+        }
+    }
+
+    public static Map<Kit, Tex> cachedTex = new HashMap<>();
+
+    public static Tex getCachedTex(Kit kit) {
+        for (Map.Entry<Kit, Tex> entry : cachedTex.entrySet())
+            if (entry.getKey().equals(kit))
+                return (entry.getValue());
+        return (null);
+    }
+
+    public static Tex getCachedTex(String text) {
+        Kit kit = new Kit(text);
+        Tex tex = getCachedTex(kit);
+        if (tex == null) {
+            tex = Text.render(text).tex();
+            cachedTex.put(kit, tex);
+        }
+        return (tex);
+    }
+
+    public static Tex getCachedTex(String text, Color color, Color bgcol, Text.Foundry fnd) {
+        Kit kit = new Kit(text, color, bgcol, fnd);
+        Tex tex = getCachedTex(kit);
+        if (tex == null) {
+            tex = Text.renderstroked(text, color, bgcol, fnd).tex();
+            cachedTex.put(kit, tex);
+        }
+        return (tex);
+    }
+
+    public static class Kit {
+        public String text;
+        public Color color;
+        public Color bgcol;
+        public Text.Foundry fnd;
+
+        public Kit(String text, Color color, Color bgcol, Text.Foundry fnd) {
+            this.text = text;
+            this.color = color;
+            this.bgcol = bgcol;
+            this.fnd = fnd;
+        }
+
+        public Kit(String text) {
+            this(text, null, null, null);
+        }
+
+        public boolean equals(Kit kit) {
+            if (!text.equals(kit.text)) return (false);
+
+            if (color != null && kit.color != null && color.equals(kit.color)) return (false);
+            if (bgcol != null && kit.bgcol != null && bgcol.equals(kit.bgcol)) return (false);
+            if (fnd != null && kit.fnd != null && fnd.equals(kit.fnd)) return (false);
+
+            if ((color != null && kit.color == null) || (color == null && kit.color != null)) return (false);
+            if ((bgcol != null && kit.bgcol == null) || (bgcol == null && kit.bgcol != null)) return (false);
+            if ((fnd != null && kit.fnd == null) || (fnd == null && kit.fnd != null)) return (false);
+
+            return (true);
         }
     }
 }

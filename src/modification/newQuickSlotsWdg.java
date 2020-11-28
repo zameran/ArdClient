@@ -304,23 +304,17 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
             }
 
             if (sl >= 0) {
-                Widget it = items[sl].wItem;
+                WItem it = items[sl].wItem;
                 if (it != null) {
-                    if (it != this) {
-                        if (it instanceof WItem) {
-                            double ps = ((WItem) it).hoverstart;
-                            if (now - ps < 1.0D) {
-                                this.hoverstart = now;
-                            } else {
-                                this.hoverstart = ps;
-                            }
-                        } else {
-                            this.hoverstart = now;
-                        }
+                    double ps = it.hoverstart;
+                    if (now - ps < 1.0D) {
+                        this.hoverstart = now;
+                    } else {
+                        this.hoverstart = ps;
                     }
 
                     try {
-                        List info = items[sl].gItem.info();
+                        List<ItemInfo> info = items[sl].gItem.info();
                         if (info.size() < 1) {
                             return null;
                         } else {
@@ -343,8 +337,8 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
                                 return this.longtip;
                             }
                         }
-                    } catch (Exception var10) {
-                        var10.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         return "...";
                     }
                 } else {
