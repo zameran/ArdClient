@@ -3904,6 +3904,16 @@ public class OptWnd extends Window {
         };
         appender.addRow(new Label("Base URL: "), baseurl);
         appender.addRow(new Label("res/"), textEntry, hashid);
+        appender.addRow(new Button(50, "Download") {
+            public void click() {
+                try {
+                    Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);
+                    dev.resourceLog("Resource", "DOWNLOAD", res);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         devPanel.pack();

@@ -58,6 +58,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -819,6 +820,12 @@ public class Resource implements Serializable {
             }
         }
         return (_remote);
+    }
+
+    public static Pool remote(String URL) throws MalformedURLException {
+        synchronized (Resource.class) {
+            return new Pool(new HttpSource(new URL(URL)));
+        }
     }
 
     public static void addurl(URL url) {
