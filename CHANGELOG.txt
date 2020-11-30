@@ -1,3 +1,7 @@
+20201130
+Update. Fixes.
+~
+
 20201128
 Inventory slot numbers. Buff longtip fix. Gob info improved. Double radius fix. Map marks left right clicks.
 ~
