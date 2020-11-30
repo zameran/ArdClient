@@ -3930,6 +3930,28 @@ public class OptWnd extends Window {
                     e.printStackTrace();
                 }
             }
+        }, new Button(50, "Remove") {
+            public void click() {
+                if (hashid.text != null && !hashid.text.equals("")) {
+                    try {
+                        File basedir = HashDirCache.findbase();
+                        File file = new File(basedir, hashid.text);
+                        if (!file.exists()) {
+                            dev.resourceLog("Resource", "NOT FOUND", file.getAbsolutePath());
+                        } else {
+                            if (file.delete()) {
+                                dev.resourceLog("Resource", "DELETED", file.getAbsolutePath());
+                            } else {
+                                dev.resourceLog("Resource", "NOT DELETED", file.getAbsolutePath());
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    dev.resourceLog("Resource", "TEXT NOT FOUND");
+                }
+            }
         });
 
         devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
