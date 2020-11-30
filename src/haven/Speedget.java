@@ -94,7 +94,8 @@ public class Speedget extends MovableWidget {
 
     @Override
     protected void removed() {
-        ui.gui.speed = null;
+        if (ui.gui != null)
+            ui.gui.speed = null;
         ui.sess.details.removeSpeedget();
     }
 
