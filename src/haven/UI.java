@@ -169,6 +169,12 @@ public class UI {
         w.binded();
     }
 
+    public Widget getwidget(int id) {
+        synchronized (widgets) {
+            return (widgets.get(id));
+        }
+    }
+
     public void drawafter(AfterDraw ad) {
         synchronized (afterdraws) {
             afterdraws.add(ad);
