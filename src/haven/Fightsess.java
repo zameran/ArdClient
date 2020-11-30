@@ -95,7 +95,7 @@ public class Fightsess extends Widget {
     public static String colgreen = "[8,103,1]"; //"[0,255,0]";
     public static String colblue = "[8,103,136]";   //"[0,255,255]";
     public static String colyellow = "[203,168,6]";   //"[239,253,63]";
-    public static String colgrey = "[60,60,60,120]";
+    public static String colgrey = "[60,60,60,180]";
     public static String ffont = "[mono]";
     public static Color grey = new Color(30, 30, 30);
 
@@ -221,7 +221,7 @@ public class Fightsess extends Widget {
                                                 ua, mc, act.cards,
                                                 fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                    Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
-                                        Tex texa = RichText.render(String.format("$bg%s{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
+                                        Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
@@ -773,12 +773,15 @@ public class Fightsess extends Widget {
 
     public void uimsg(String msg, Object... args) {
         if (msg == "act") {
-            int n = (Integer) args[0];
-            if (args.length > 1) {
-                Indir<Resource> res = ui.sess.getres((Integer) args[1]);
-                actions[n] = new Action(res, n);
-            } else {
-                actions[n] = null;
+            try {
+                int n = (Integer) args[0];
+                if (args.length > 1) {
+                    Indir<Resource> res = ui.sess.getres((Integer) args[1]);
+                    actions[n] = new Action(res, n);
+                } else {
+                    actions[n] = null;
+                }
+            } catch (Loading e) {
             }
         } else if (msg == "acool") {
             int n = (Integer) args[0];

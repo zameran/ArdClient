@@ -1252,8 +1252,8 @@ public class MenuGrid extends Widget {
                 String[] ad = r.pag.act().ad;
                 if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
                     lastCraft = r.pag;
-                    ui.gui.histbelt.push(r.pag);
                 }
+                ui.gui.histbelt.push(r.pag);
                 if (Config.confirmmagic && r.res.name.startsWith("paginae/seid/") && !r.res.name.equals("paginae/seid/rawhide")) {
                     Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
                         @Override

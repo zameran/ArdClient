@@ -7,8 +7,8 @@ import static haven.Inventory.invsq;
 public class CraftHistoryBelt extends MovableWidget {
     private static final int SIZE = 8;
     private MenuGrid.Pagina[] belt = new MenuGrid.Pagina[SIZE];
-    private static final Coord vsz = new Coord(34, 450);
-    private static final Coord hsz = new Coord(450, 34);
+    private static final Coord vsz = new Coord(invsq.sz().x, invsq.sz().x * SIZE + (2 * (SIZE - 1)));
+    private static final Coord hsz = new Coord(invsq.sz().y * SIZE + (2 * (SIZE - 1)), invsq.sz().y);
     private boolean vertical;
 
     public CraftHistoryBelt(boolean vertical) {
@@ -65,7 +65,7 @@ public class CraftHistoryBelt extends MovableWidget {
                         sz = vsz;
                         vertical = true;
                     }
-                    Utils.setprefb("histbelt_vertical", vertical);
+//                    Utils.setprefb("histbelt_vertical", vertical);
                 }
                 return true;
             }

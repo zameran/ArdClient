@@ -81,6 +81,11 @@ public class IButton extends SIWidget {
         this.tooltip = tooltip;
     }
 
+    public IButton action(Runnable action) {
+        this.action = action;
+        return (this);
+    }
+
     public void draw(BufferedImage buf) {
         Graphics g = buf.getGraphics();
         if (a)

@@ -118,6 +118,10 @@ public class Button extends SIWidget {
         this.cont = cont;
     }
 
+    public Button action(Runnable action) {
+        this.action = action;
+        return (this);
+    }
 
     public void autosize(boolean on) {
         if (autosized != on) {

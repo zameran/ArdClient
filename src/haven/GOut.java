@@ -566,6 +566,10 @@ public class GOut {
         checkerr();
     }
 
+    public void frect2(Coord ul, Coord br) {
+        frect(ul, br.sub(ul));
+    }
+
     public void frect(Coord c1, Coord c2, Coord c3, Coord c4) {
         st.set(cur2d);
         apply();

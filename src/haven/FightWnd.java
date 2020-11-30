@@ -231,8 +231,8 @@ public class FightWnd extends Widget {
             List<ItemInfo> info = info();
             l.cmp.add(rendericon(), Coord.z);
             ItemInfo.Name nm = ItemInfo.find(ItemInfo.Name.class, info);
-            l.cmp.add(namef.render(nm.str.text).img, new Coord(0, l.cmp.sz.y + 10));
-            l.cmp.sz = l.cmp.sz.add(0, 10);
+            l.cmp.add(namef.render(nm.str.text).img, new Coord(0, l.cmp.sz.y + UI.scale(10)));
+            l.cmp.sz = l.cmp.sz.add(0, UI.scale(10));
             for (ItemInfo inf : info) {
                 if ((inf != nm) && (inf instanceof ItemInfo.Tip)) {
                     l.add((ItemInfo.Tip) inf);
@@ -330,7 +330,7 @@ public class FightWnd extends Widget {
         Coord dp;
 
         public Actions(int w, int h) {
-            super(w, h, attrf.height() + 2);
+            super(w, h, attrf.height() + UI.scale(2));
         }
 
         protected Action listitem(int n) {
@@ -413,14 +413,14 @@ public class FightWnd extends Widget {
                 g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
             }
             int ty = (itemh - act.rnm.sz().y) / 2;
-            g.image(act.rnm.tex(), new Coord(itemh + 2, ty));
+            g.image(act.rnm.tex(), new Coord(itemh + UI.scale(2), ty));
 
             if (act.ra == null)
                 act.ra = Text.num12boldFnd.render(String.valueOf(act.a));
-            g.aimage(act.ra.tex(), new Coord(sz.x - 15, ty), 1.0, 0.0);
-            g.aimage(act.ru.tex(), new Coord(sz.x - 45, ty), 1.0, 0.0);
-            g.aimage(add[da == idx ? 1 : 0], new Coord(sz.x - 10, itemh / 2), 1.0, 0.5);
-            g.aimage(sub[ds == idx ? 1 : 0], new Coord(sz.x - 25, itemh / 2), 1.0, 0.5);
+            g.aimage(act.ra.tex(), new Coord(sz.x - UI.scale(15), ty), 1.0, 0.0);
+            g.aimage(act.ru.tex(), new Coord(sz.x - UI.scale(45), ty), 1.0, 0.0);
+            g.aimage(add[da == idx ? 1 : 0], new Coord(sz.x - UI.scale(10), itemh / 2), 1.0, 0.5);
+            g.aimage(sub[ds == idx ? 1 : 0], new Coord(sz.x - UI.scale(25), itemh / 2), 1.0, 0.5);
         }
 
         public void change(final Action act) {
@@ -484,7 +484,7 @@ public class FightWnd extends Widget {
         private boolean onsub(Coord c, int idx) {
             Coord ic = c.sub(0, (idx - sb.val) * itemh);
             int by = (itemh - sub[0].sz().y) / 2;
-            return (ic.isect(new Coord(sz.x - 25 - add[0].sz().x, by), add[0].sz()));
+            return (ic.isect(new Coord(sz.x - UI.scale(25) - add[0].sz().x, by), add[0].sz()));
         }
 
         public void drag(Action act) {
@@ -616,7 +616,7 @@ public class FightWnd extends Widget {
         private boolean anim = false;
 
         private BView() {
-            super(new Coord(((invsq.sz().x + 2) * (order.length - 1)) + (10 * ((order.length - 1) / 5)) + 60, 0).add(invsq.sz().x, invsq.sz().y + 35));
+            super(new Coord(((invsq.sz().x + UI.scale(2)) * (order.length - 1)) + (UI.scale(10) * ((order.length - 1) / 5)) + 60, 0).add(invsq.sz().x, invsq.sz().y + 35));
         }
 
         private Coord itemc(int i) {
@@ -899,16 +899,16 @@ public class FightWnd extends Widget {
             if (n == edit) {
                 if (redit == null)
                     redit = attrf.render(nmed.line);
-                g.aimage(redit.tex(), new Coord(20, itemh / 2), 0.0, 0.5);
+                g.aimage(redit.tex(), new Coord(UI.scale(20), itemh / 2), 0.0, 0.5);
                 if (hasfocus && (((Utils.rtime() - focusstart) % 1.0) < 0.5)) {
                     int cx = redit.advance(nmed.point);
                     g.chcolor(255, 255, 255, 255);
-                    Coord co = new Coord(20 + cx + 1, (g.sz.y - redit.sz().y) / 2);
+                    Coord co = new Coord(UI.scale(20) + cx + UI.scale(1), (g.sz.y - redit.sz().y) / 2);
                     g.line(co, co.add(0, redit.sz().y), 1);
                     g.chcolor();
                 }
             } else {
-                g.aimage(saves[n].tex(), new Coord(20, itemh / 2), 0.0, 0.5);
+                g.aimage(saves[n].tex(), new Coord(UI.scale(20), itemh / 2), 0.0, 0.5);
             }
             if (n == usesave)
                 g.aimage(Theme.timg("chkbox/small", 1), new Coord(itemh / 2, itemh / 2), 0.5, 0.5);
@@ -1056,7 +1056,7 @@ public class FightWnd extends Widget {
             saves[i] = unused;
 
         Dropbox<Pair<String, Integer>> filterDropdown = getFilterDropdown();
-        add(filterDropdown, new Coord(276 + 235 + 5 - filterDropdown.sz.x, 15));
+        add(filterDropdown, new Coord(270 + 230 - filterDropdown.sz.x, 15));
         Frame.around(this, Collections.singletonList(filterDropdown));
 
         schoolsDropdown = new Dropbox<Pair<Text, Integer>>(250, saves.length, saves[0].sz().y) {
@@ -1086,8 +1086,6 @@ public class FightWnd extends Widget {
                 load(item.b);
                 use(item.b);
             }
-
-
         };
 
 
@@ -1095,7 +1093,7 @@ public class FightWnd extends Widget {
         Frame.around(this, Collections.singletonList(info));
 
         add(CharWnd.settip(new Img(CharWnd.catf.render("Martial Arts & Combat Schools").tex()), "gfx/hud/chr/tips/combat"), 0, 0);
-        actlist = add(new Actions(235, actionsListHeight()), new Coord(276, 35).add(wbox.btloff()));
+        actlist = add(new Actions(235, actionsListHeight()), new Coord(265, 35).add(wbox.btloff()));
         Frame.around(this, Collections.singletonList(actlist));
         Widget p = add(new BView(), 77, 200);
 
@@ -1162,7 +1160,7 @@ public class FightWnd extends Widget {
                 ui.gui.add(renwnd, new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200));
                 renwnd.show();
             }
-        }, 405, 277);
+        }, 395, 277);
 
         pack();
     }

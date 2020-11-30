@@ -72,6 +72,7 @@ public class resources {
     }
 
     public static Map<Kit, Tex> cachedTex = new HashMap<>();
+    public static Map<String, IndirResource> cachedRes = new HashMap<>();
 
     public static Tex getCachedTex(Kit kit) {
         for (Map.Entry<Kit, Tex> entry : cachedTex.entrySet())
@@ -130,5 +131,14 @@ public class resources {
 
             return (true);
         }
+    }
+
+    public static IndirResource getCachedRes(String text) {
+        IndirResource res = cachedRes.get(text);
+        if (res == null) {
+            res = new resources.IndirResource(text);
+            cachedRes.put(text, res);
+        }
+        return (res);
     }
 }

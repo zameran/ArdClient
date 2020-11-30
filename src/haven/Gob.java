@@ -425,12 +425,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                             lastname = lastname.substring(0, lastname.length() - "log".length());
 
                         String icon = fistname + "/mm" + lastname;
-                        resources.IndirResource res = new resources.IndirResource(icon);
+                        resources.IndirResource res = resources.getCachedRes(icon);
                         if (res.get() != null)
                             setattr(new GobIcon(this, res));
                     } else if (type == Type.BOULDER) {
                         String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-                        resources.IndirResource res = new resources.IndirResource(icon);
+                        resources.IndirResource res = resources.getCachedRes(icon);
                         if (res.get() != null)
                             setattr(new GobIcon(this, res));
                     }
@@ -574,7 +574,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (dw != null) {
             sb.append("ResDraw: ").append(Arrays.toString(dw.sdt.rbuf));
             if (dw.spr != null) {
-                sb.append(", ").append("[").append(dw.spr.getClass().getName().replace("$", "§")).append("]");
+                sb.append(", ").append("[").append(dw.spr.getClass().getName()).append("]");
                 if (dw.spr instanceof VarSprite) {
                     VarSprite varSprite = (VarSprite) dw.spr;
 //                    sb.append("\n").append("[").append(varSprite.mats()).append("]");
