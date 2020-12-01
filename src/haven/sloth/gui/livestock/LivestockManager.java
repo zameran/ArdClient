@@ -47,7 +47,7 @@ public class LivestockManager extends Window {
     }
 
     public void show(final String tab) {
-        if (configuration.forcelivestock) {
+        if (configuration.forcelivestockopen) {
             tabs.changetab(tab);
             if (!visible) {
                 show();

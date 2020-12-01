@@ -339,6 +339,8 @@ public class Resource implements Serializable {
 
         public InputStream get(String name) throws FileNotFoundException {
             String full = "/" + base + "/" + name + ".res";
+            if (name.contains("cupboard") && !Config.flatcupboards)
+                return null;
             InputStream s = Resource.class.getResourceAsStream(full);
             if (s == null)
                 throw (new FileNotFoundException("Could not find resource locally: " + full));
@@ -1198,7 +1200,7 @@ public class Resource implements Serializable {
         public void init() {
         }
 
-        public void decode() throws Exception {
+        public void decode() {
             File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             dir.mkdirs();
             String filename = name.substring(name.lastIndexOf('/') + 1) + ".png";
@@ -1209,8 +1211,16 @@ public class Resource implements Serializable {
                     dev.resourceLog("image", outputfile.getPath(), "NULL");
                     return;
                 }
-                ImageIO.write(img, "png", outputfile);
-                dev.resourceLog("image", outputfile.getPath(), "CREATED");
+                new Thread("decode image " + outputfile.getPath()) {
+                    public void run() {
+                        try {
+                            ImageIO.write(img, "png", outputfile);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        dev.resourceLog("image", outputfile.getPath(), "CREATED");
+                    }
+                }.start();
             }
         }
     }
@@ -1425,17 +1435,25 @@ public class Resource implements Serializable {
         public void init() {
         }
 
-        public void decode() throws Exception {
+        public void decode() {
             File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             dir.mkdirs();
             String filename = name.substring(name.lastIndexOf('.') + 1) + ".class";
             File f = new File(dir, filename);
             if (!f.exists()) {
-                FileOutputStream fout = new FileOutputStream(f);
-                fout.write(data);
-                fout.flush();
-                fout.close();
-                dev.resourceLog("code", f.getPath(), "CREATED");
+                new Thread("decode code " + f.getPath()) {
+                    public void run() {
+                        try {
+                            FileOutputStream fout = new FileOutputStream(f);
+                            fout.write(data);
+                            fout.flush();
+                            fout.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        dev.resourceLog("code", f.getPath(), "CREATED");
+                    }
+                }.start();
             }
         }
     }
@@ -1466,8 +1484,16 @@ public class Resource implements Serializable {
             Path path = Paths.get("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             Files.createDirectories(path);
             if (!Files.exists(path.resolve(name))) {
-                Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                dev.resourceLog("src", path.resolve(name), "CREATED");
+                new Thread("decode src " + path.resolve(name)) {
+                    public void run() {
+                        try {
+                            Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        dev.resourceLog("src", path.resolve(name), "CREATED");
+                    }
+                }.start();
             }
         }
     }

@@ -3442,6 +3442,27 @@ public class OptWnd extends Window {
                 configuration.forcelivestock = val;
                 a = val;
             }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("After inspect an animal open Livestock Manager Sloth").tex();
+            }
+        });
+        appender.add(new CheckBox("New livestock manager autoopen - Request New livestock manager") {
+            {
+                a = configuration.forcelivestockopen;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("forcelivestockopen", val);
+                configuration.forcelivestockopen = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Auto Open Livestock Manager Sloth").tex();
+            }
         });
         appender.add(new CheckBox("Show player id in Kith & Kin") {
             {

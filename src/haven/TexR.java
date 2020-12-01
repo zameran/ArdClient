@@ -123,19 +123,28 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
                     }
                 }
 
-                public void decode(BufferedImage img) throws Exception {
+                public void decode(BufferedImage img) {
                     String name = getres().name;
                     File dir = new File("decode" + File.separator + name.replace("/", File.separator) + "(v" + id + ")");
                     dir.mkdirs();
                     String filename = "tex_" + name.substring(name.lastIndexOf('/') + 1) + ".png";
                     File outputfile = new File(dir, filename);
                     if (!outputfile.exists()) {
-                        if (img == null) {
-                            dev.resourceLog("tex", outputfile.getPath(), "NULL");
-                            return;
-                        }
-                        ImageIO.write(img, "png", outputfile);
-                        dev.resourceLog("tex", outputfile.getPath(), "CREATED");
+                        new Thread("decode tex " + outputfile.getPath()) {
+                            public void run() {
+                                try {
+                                    if (img == null) {
+                                        dev.resourceLog("tex", outputfile.getPath(), "NULL");
+                                        return;
+                                    }
+                                    ImageIO.write(img, "png", outputfile);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                dev.resourceLog("tex", outputfile.getPath(), "CREATED");
+                            }
+                        }.start();
+
                     }
                 }
             }));

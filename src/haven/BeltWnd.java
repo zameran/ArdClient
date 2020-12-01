@@ -91,13 +91,16 @@ public class BeltWnd extends MovableWidget {
             tt = null;
             res = null;
             pag = null;
-            if (ui.gui != null && ui.gui.belt[slot] != null) {
-                res = ui.gui.belt[slot];
-                pag = ui.gui.menu.paginafor(res);
-                data.remove(slot);
-            } else {
-                //Check for any pagina int his slot from db
-                data.get(slot).ifPresent(key -> pag = ui.gui.menu.specialpag.get(key));
+            if (ui.gui != null) {
+                if (ui.gui.belt[slot] != null) {
+                    res = ui.gui.belt[slot];
+                    pag = ui.gui.menu.paginafor(res);
+                    data.remove(slot);
+                } else {
+                    //Check for any pagina int his slot from db
+                    if (ui.gui.menu != null)
+                        data.get(slot).ifPresent(key -> pag = ui.gui.menu.specialpag.get(key));
+                }
             }
         }
 

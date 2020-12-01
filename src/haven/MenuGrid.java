@@ -616,7 +616,7 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::windows::livestockamber",
+        addSpecial(new SpecialPagina(this, "paginae::windows::livestock",
                 Resource.local().load("paginae/amber/livestock"),
                 (pag) -> {
                     if (ui.gui != null) {
@@ -625,8 +625,8 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
-        addSpecial(new SpecialPagina(this, "paginae::windows::livestock",
-                Resource.local().load("paginae/amber/livestock"),
+        addSpecial(new SpecialPagina(this, "management::livestocksloth",
+                Resource.local().load("custom/paginae/default/wnd/livestock"),
                 (pag) -> {
                     if (ui.gui != null) {
 //                        ui.gui.livestockwnd.show(!ui.gui.livestockwnd.visible);

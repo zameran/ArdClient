@@ -21,7 +21,8 @@ public class QuestWnd extends Window {
     @Override
     public void cdestroy(Widget w) {
         hide();
-        ui.gui.qqview = null;
+        if (ui.gui != null)
+            ui.gui.qqview = null;
         super.cdestroy(w);
     }
 
