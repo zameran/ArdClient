@@ -147,7 +147,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public CraftHistoryBelt histbelt;
     private ErrorSysMsgCallback errmsgcb;
     public StudyWnd studywnd;
-    //    public LivestockManager livestockwnd;
+    public haven.livestock.LivestockManager livestockwnd;
     public ItemClickCallback itemClickCallback;
     public boolean drinkingWater, lastDrinkingSucessful;
     public CraftWindow makewnd;
@@ -335,8 +335,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         syslog = chat.add(new ChatUI.Log("System"));
         opts.c = sz.sub(opts.sz).div(2);
         pointer = add(new MapPointer());
-//        livestockwnd = add(new LivestockManager(), new Coord(0, sz.y - 200));
-//        livestockwnd.hide();
+        livestockwnd = add(new haven.livestock.LivestockManager(), new Coord(0, sz.y - 200));
+        livestockwnd.hide();
         foragehelper = add(new ForageHelperWnd());
         foragehelper.hide();
         scwnd = add(new SkillnCredoWnd());
