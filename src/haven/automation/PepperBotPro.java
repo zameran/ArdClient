@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class PepperBotPro extends Window implements GobSelectCallback {
-    private Coord a, b;
+    private Coord ca, cb;
     private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
     private Gob barrel, hfire, water, cauldron, htable, grinder;
     private ArrayList<Gob> crops1, crops2, crops3, crops4 = new ArrayList<Gob>();
@@ -128,7 +128,7 @@ public class PepperBotPro extends Window implements GobSelectCallback {
                 }
 
 
-                if (a != null && b != null && allowrun) {
+                if (ca != null && cb != null && allowrun) {
                     PepperBotProRun bf = new PepperBotProRun(crops1, crops2, crops3, crops4, tables1, tables2, tables3, tables4, true, barrel, water, cauldron, section, hfire, direction);
 
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
@@ -149,8 +149,8 @@ public class PepperBotPro extends Window implements GobSelectCallback {
                     PBotUtils.sysMsg(ui, "No grinder Selected.", Color.white);
                     allowrun = false;
                 }
-                if (a != null && b != null && allowrun) {
-                    PepperGrinderRun bf = new PepperGrinderRun(a, b, grinder, section, direction);
+                if (ca != null && cb != null && allowrun) {
+                    PepperGrinderRun bf = new PepperGrinderRun(ca, cb, grinder, section, direction);
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
                     new Thread(bf).start();
                     this.parent.destroy();
@@ -229,8 +229,8 @@ public class PepperBotPro extends Window implements GobSelectCallback {
     private class selectingarea implements Runnable {
         @Override
         public void run() {
-            a = null;
-            b = null;
+            ca = null;
+            cb = null;
             PBotUtils.selectArea(ui);
             //gui.map.PBotAPISelect = true;
             // while(gui.map.PBotAPISelect)
@@ -374,23 +374,23 @@ public class PepperBotPro extends Window implements GobSelectCallback {
 
     public void areaselect(Coord a, Coord b) {
         System.out.println("Area select triggered.");
-        this.a = a;
-        this.b = b;
+        this.ca = a;
+        this.cb = b;
         if (section == 1) {
-            crops1 = Crops(true, this.a, this.b);
-            tables1 = Tables(this.a, this.b);
+            crops1 = Crops(true, this.ca, this.cb);
+            tables1 = Tables(this.ca, this.cb);
             sec1.settext("Crops : " + crops1.size() + " Tables : " + tables1.size());
         } else if (section == 2) {
-            crops2 = Crops(true, this.a, this.b);
-            tables2 = Tables(this.a, this.b);
+            crops2 = Crops(true, this.ca, this.cb);
+            tables2 = Tables(this.ca, this.cb);
             sec2.settext("Crops : " + crops2.size() + " Tables : " + tables2.size());
         } else if (section == 3) {
-            crops3 = Crops(true, this.a, this.b);
-            tables3 = Tables(this.a, this.b);
+            crops3 = Crops(true, this.ca, this.cb);
+            tables3 = Tables(this.ca, this.cb);
             sec3.settext("Crops : " + crops3.size() + " Tables : " + tables3.size());
         } else if (section == 4) {
-            crops4 = Crops(true, this.a, this.b);
-            tables4 = Tables(this.a, this.b);
+            crops4 = Crops(true, this.ca, this.cb);
+            tables4 = Tables(this.ca, this.cb);
             sec4.settext("Crops : " + crops4.size() + " Tables : " + tables4.size());
         }
         PBotUtils.mapInteractLeftClick(ui, 0);

@@ -27,7 +27,7 @@ import java.util.List;
 import static haven.OCache.posres;
 
 public class PepperBot extends Window implements AreaSelectCallback, GobSelectCallback {
-    private Coord a, b;
+    private Coord ca, cb;
     private boolean containeronly = false, replant = true, replantcontainer = false;
     private static final Text.Foundry infof = new Text.Foundry(Text.sans, 10).aa(true);
     private CheckBox replantChkbox, fillContainerChkbox, replantBarrelChkbox;
@@ -114,8 +114,8 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
                 }
 
 
-                if (a != null && b != null && allowrun) {
-                    PepperBotRun bf = new PepperBotRun(a, b, true, false, false, barrel, water, cauldron, section, hfire, direction);
+                if (ca != null && cb != null && allowrun) {
+                    PepperBotRun bf = new PepperBotRun(ca, cb, true, false, false, barrel, water, cauldron, section, hfire, direction);
 
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
                     new Thread(bf).start();
@@ -135,8 +135,8 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
                     PBotUtils.sysMsg(ui, "No grinder Selected.", Color.white);
                     allowrun = false;
                 }
-                if (a != null && b != null && allowrun) {
-                    PepperGrinderRun bf = new PepperGrinderRun(a, b, grinder, section, direction);
+                if (ca != null && cb != null && allowrun) {
+                    PepperGrinderRun bf = new PepperGrinderRun(ca, cb, grinder, section, direction);
                     ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
                     new Thread(bf).start();
                     this.parent.destroy();
@@ -228,8 +228,8 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
     }
 
     public void areaselect(Coord a, Coord b) {
-        this.a = a.mul(MCache.tilesz2);
-        this.b = b.mul(MCache.tilesz2).add(11, 11);
+        this.ca = a.mul(MCache.tilesz2);
+        this.cb = b.mul(MCache.tilesz2).add(11, 11);
         PBotUtils.sysMsg(ui, "Area selected!", Color.WHITE);
         ui.gui.map.unregisterAreaSelect();
     }
