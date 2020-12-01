@@ -1,5 +1,6 @@
 package haven;
 
+import haven.sloth.gui.ResizableWnd;
 import integrations.mapv4.MappingClient;
 
 import java.awt.Graphics2D;

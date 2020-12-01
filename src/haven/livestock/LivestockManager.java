@@ -10,7 +10,7 @@ import haven.GOut;
 import haven.GameUI;
 import haven.Label;
 import haven.MapView;
-import haven.ResizableWnd;
+import haven.sloth.gui.ResizableWnd;
 import haven.Resource;
 import haven.Scrollport;
 import haven.Tex;

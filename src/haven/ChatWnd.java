@@ -1,5 +1,7 @@
 package haven;
 
+import haven.sloth.gui.ResizableWnd;
+
 public class ChatWnd extends ResizableWnd {
     private final ChatUI chat;
     private boolean minimized;
