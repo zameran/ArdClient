@@ -623,6 +623,8 @@ public class Audio {
                     play(clip.get());
                 } catch (Loading e) {
                     queue(this);
+                } catch (Exception exc) {
+                    exc.printStackTrace();
                 }
             }
         });
