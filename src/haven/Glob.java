@@ -105,8 +105,8 @@ public class Glob {
 
     public static class CAttr extends Observable {
         public static final Text.Foundry fnd = new Text.Foundry(Text.sans, 12);
-        String nm;
-        int base, comp;
+        public String nm;
+        public int base, comp;
         private Text.Line compLine = null;
         public Tex comptex;
 

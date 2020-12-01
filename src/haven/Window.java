@@ -150,12 +150,12 @@ public class Window extends MovableWidget implements DTarget {
     //close position, close size
     public Coord ctl, csz;
     private boolean hidable = false, hidden;
+    private Runnable destroyHook = null;
     private final Collection<Widget> twdgs = new LinkedList<Widget>();
 
     @RName("wnd")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
-            dev.sysPrintStackTrace("window create");
             Coord sz = (Coord) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
             boolean lg = (args.length > 2) && ((Integer) args[2] != 0);
@@ -770,6 +770,17 @@ public class Window extends MovableWidget implements DTarget {
             }
         }
         super.mousemove(c);
+    }
+
+    public void setDestroyHook(final Runnable r) {
+        this.destroyHook = r;
+    }
+
+    @Override
+    public void destroy() {
+        if (destroyHook != null)
+            destroyHook.run();
+        super.destroy();
     }
 
     public void close() {

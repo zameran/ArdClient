@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.pbot.PBotUtils;
+
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.annotation.ElementType;
@@ -473,6 +475,8 @@ public class Widget {
                     } else {
                         throw (new RuntimeException("Invalid scaling operand: " + a));
                     }
+                } else if (op == 'm') {
+                    if (ui != null && ui.gui != null) PBotUtils.sysMsg(ui, "Unknown position operation: " + op);
                 } else if (Character.isWhitespace(op)) {
                 } else {
                     throw (new RuntimeException("Unknown position operation: " + op));
@@ -576,7 +580,8 @@ public class Widget {
         if (canfocus)
             setcanfocus(false);
         unlink();
-        parent.cdestroy(this);
+        if (parent != null)
+            parent.cdestroy(this);
     }
 
     public void cdestroy(Widget w) {
@@ -1413,6 +1418,13 @@ public class Widget {
         visible = false;
         if (canfocus && (parent != null))
             parent.delfocusable(this);
+    }
+
+    public void toggleVisibility() {
+        if (visible)
+            hide();
+        else
+            show();
     }
 
     public void show() {

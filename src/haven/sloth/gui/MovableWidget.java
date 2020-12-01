@@ -3,7 +3,7 @@ package haven.sloth.gui;
 import haven.Coord;
 import haven.Coord2d;
 import haven.GOut;
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.UI;
 import haven.Widget;
 
@@ -58,7 +58,7 @@ public abstract class MovableWidget extends Widget {
         });
     }
 
-    public static final double VISIBLE_PER = 0.8;
+    public static final double VISIBLE_PER = 0.9;
 
     //Database key
     private final String key;
@@ -166,15 +166,15 @@ public abstract class MovableWidget extends Widget {
             dm.remove();
             dm = null;
             //Ensure user didn't throw the window right off the visible screen...
-            if ((c.x + sz.x * VISIBLE_PER) > parent.sz.x) {
-                c.x = parent.sz.x - sz.x;
+            if ((c.x + (sz.x * (1 - VISIBLE_PER))) > parent.sz.x) {
+                c.x = (int) Math.round(parent.sz.x - sz.x * (1 - VISIBLE_PER));
             } else if ((c.x + (sz.x * VISIBLE_PER)) < 0) {
-                c.x = 0;
+                c.x = -(int) Math.round(sz.x * VISIBLE_PER);
             }
-            if ((c.y + sz.y * VISIBLE_PER) > parent.sz.y) {
-                c.y = parent.sz.y - sz.y;
+            if ((c.y + (sz.x * (1 - VISIBLE_PER))) > parent.sz.y) {
+                c.y = (int) Math.round(parent.sz.y - sz.y * (1 - VISIBLE_PER));
             } else if ((c.y + (sz.y * VISIBLE_PER)) < 0) {
-                c.y = 0;
+                c.y = -(int) Math.round(sz.y * VISIBLE_PER);
             }
             savePosition();
             return true;

@@ -26,6 +26,8 @@
 
 package haven;
 
+import modification.configuration;
+
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.text.Collator;
@@ -149,7 +151,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
 
         public Text rname() {
             if ((rname == null) || !rname.text.equals(name))
-                rname = Text.render(name);
+                rname = Text.render(name + (configuration.kinid ? (" (" + id + ")") : ""));
             return (rname);
         }
 
@@ -229,7 +231,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         private BuddyInfo(Coord sz, Buddy buddy) {
             super(sz);
             this.buddy = buddy;
-            this.ava = adda(new Avaview(Avaview.dasz, -1, "avacam"), sz.x / 2, 10, 0.5, 0);
+//            this.ava = adda(new Avaview(Avaview.dasz, -1, "avacam"), sz.x / 2, 10, 0.5, 0);
+            this.ava = adda(new Avaview(new Coord(sz.x, (int) (sz.y * 0.60)), -1, "bdavacam"), 0, 0, 0, 0);
             this.nick = add(new TextEntry(sz.x - 20, buddy.name) {
                 {
                     dshow = true;
@@ -596,6 +599,13 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         for (int i = 0; i < 8; i++)
             buf.append(charset.charAt((int) (Math.random() * charset.length())));
         return (buf.toString());
+    }
+
+    /**
+     * For scripting API
+     */
+    public Buddy[] buddies() {
+        return buddies.toArray(new Buddy[0]);
     }
 
     public void setpwd(String pass) {

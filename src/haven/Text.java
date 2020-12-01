@@ -45,7 +45,7 @@ public class Text {
     public static final Font mono;
     public static final Font fraktur;
     public static final Font dfont;
-    public static final Foundry std;
+    public static final Foundry std, std12, std16;
 
     public static final Font latin;
     public static final Foundry labelFnd;
@@ -150,6 +150,8 @@ public class Text {
         delfnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 16);
         delfnd2 = new Text.Foundry(serif.deriveFont(Font.BOLD), 18);
         std = new Foundry(sans, Text.cfg.def);
+        std12 = new Foundry(new Font("Sans", Font.PLAIN, 12), 12);
+        std16 = new Foundry(sans, 16);
         labelFnd = new Foundry(sans, Text.cfg.label);
 
         switch (Resource.language) {

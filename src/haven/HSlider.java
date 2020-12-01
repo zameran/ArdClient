@@ -90,6 +90,19 @@ public class HSlider extends Widget {
         return (true);
     }
 
+    public boolean mousewheel(Coord c, int amount) {
+        final int v;
+        if (ui.modshift)
+            v = amount * 10;
+        else if (ui.modctrl)
+            v = amount * 5;
+        else
+            v = amount;
+        val = Math.max(Math.min(val - v, max), min);
+        changed();
+        return (true);
+    }
+
     public void changed() {
     }
 

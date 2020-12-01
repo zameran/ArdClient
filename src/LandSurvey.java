@@ -1,5 +1,6 @@
 import haven.BGL;
 import haven.Button;
+import haven.Config;
 import haven.Coord;
 import haven.Coord3f;
 import haven.FastMesh;
@@ -7,6 +8,7 @@ import haven.GLState;
 import haven.GOut;
 import haven.GameUI;
 import haven.HSlider;
+import haven.IButton;
 import haven.Label;
 import haven.Loading;
 import haven.Location;
@@ -19,6 +21,7 @@ import haven.States.ColState;
 import haven.States.DepthOffset;
 import haven.States.PointSize;
 import haven.Text;
+import haven.Theme;
 import haven.UI;
 import haven.Utils;
 import haven.VertexBuf;
@@ -47,7 +50,10 @@ public class LandSurvey extends Window {
     final Location dloc;
     final Label albl, zdlbl, wlbl, dlbl;
     final HSlider zset;
-    int tz;
+    int tz, defz;
+
+    public IButton plus, minus;
+    public Label zvalue, value;
 
     public LandSurvey(Coord ul, Coord br, int tz) {
         super(Coord.z, "Land survey", true);
@@ -69,28 +75,33 @@ public class LandSurvey extends Window {
         wlbl = add(new Label("..."), UI.scale(0, 30));
         dlbl = add(new Label("..."), UI.scale(0, 45));
         zset = add(new HSlider(UI.scale(225), -1, 1, tz) {
-            private int defval = tz;
-
             public void changed() {
                 LandSurvey.this.tz = val;
+                changeVal(String.format("%s%d", (val > defz) ? "+" : "", val - defz));
                 upd = true;
                 sendtz = System.currentTimeMillis() + 500;
             }
 
-            public void tick(double dt) {
-                if (defval == Integer.MIN_VALUE) {
-                    try {
-                        defval = autoz();
-                    } catch (Loading l) {
-                    }
-                }
-                super.tick(dt);
-            }
-
             public Object tooltip(Coord c, Widget prev) {
-                return Text.render(String.format("Z: %d, %s%d", val, (val > defval) ? "+" : "", val - defval)).tex();
+                return Text.render(String.format("Z: %d, %s%d", val, (val > defz) ? "+" : "", val - defz)).tex();
             }
         }, UI.scale(0, 60));
+        zvalue = add(new Label("Z"), UI.scale(0, 70));
+        value = add(new Label("...") {
+            public boolean mousewheel(Coord c, int amount) {
+                final int v;
+                if (ui.modshift)
+                    v = amount * 10;
+                else if (ui.modctrl)
+                    v = amount * 5;
+                else
+                    v = amount;
+                wheel(-v);
+                return (true);
+            }
+        }, UI.scale(0, 70));
+        plus = add(new IButton(Theme.fullres("buttons/circular/small/add"), this::plus), UI.scale(0, 70));
+        minus = add(new IButton(Theme.fullres("buttons/circular/small/sub"), this::minus), UI.scale(0, 70));
         add(new Button(UI.scale(100), "Make level") {
             public void click() {
                 LandSurvey.this.wdgmsg("lvl", LandSurvey.this.tz);
@@ -104,6 +115,29 @@ public class LandSurvey extends Window {
         pack();
     }
 
+    public void changeVal(String text) {
+        zvalue.settext("z: " + tz);
+        value.settext(text);
+        value.move(UI.scale(new Coord(asz.x / 2, value.c.y)), 0.5, 0);
+        plus.move(UI.scale(new Coord(value.c.x + value.sz.x + 5, value.c.y)));
+        minus.move(UI.scale(new Coord(value.c.x - 5, value.c.y)), 1, 0);
+    }
+
+    public void plus() {
+        zset.val++;
+        zset.changed();
+    }
+
+    public void minus() {
+        zset.val--;
+        zset.changed();
+    }
+
+    public void wheel(int a) {
+        zset.val += a;
+        zset.changed();
+    }
+
     public static Widget mkwidget(UI ui, Object... args) {
         Coord ul = (Coord) args[0];
         Coord br = (Coord) args[1];
@@ -114,6 +148,8 @@ public class LandSurvey extends Window {
     protected void attached() {
         super.attached();
         this.mv = getparent(GameUI.class).map;
+        this.defz = autoz();
+        changeVal(zset.val - defz + "");
         this.dsp = new Display();
     }
 
@@ -227,7 +263,8 @@ public class LandSurvey extends Window {
         super.tick(dt);
         if (tz == Integer.MIN_VALUE) {
             try {
-                zset.val = tz = autoz();
+                zset.val = defz = tz = autoz();
+                changeVal(0 + "");
                 olseq = mv.ui.sess.glob.map.olseq;
                 upd = true;
             } catch (Loading l) {

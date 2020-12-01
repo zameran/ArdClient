@@ -646,17 +646,20 @@ public class CharWnd extends Window {
                 cbv = attr.base;
                 ccv = attr.comp;
 
+//                ccv + " " + tbv + " " + cbv    260 205 200
                 if (ccv > cbv) {
-                    if (tbv > ccv) {
-                        Text buffed = attrf.render(Integer.toString(tbv + (ccv - cbv)), tbuff);
-                        g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
+                    Text buffed;
+                    if (tbv > cbv) {
+//                        buffed = attrf.render(Integer.toString(tbv + (ccv - cbv)), tbuff);
+                        buffed = attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff);
                     } else {
-                        Text buffed = attrf.render(Integer.toString(ccv), buff);
-                        g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
+                        buffed = attrf.render(Integer.toString(ccv), buff);
                     }
+                    g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
                 } else if (ccv < cbv) {
                     if (tbv > cbv) {
-                        Text buffed = attrf.render(Integer.toString(tbv + (cbv - ccv)), tbuff);
+//                        Text buffed = attrf.render(Integer.toString(tbv + (cbv - ccv)), tbuff);
+                        Text buffed = attrf.render(Integer.toString(ccv + (tbv - cbv)), tbuff);
                         g.aimage(buffed.tex(), cn.add(sz.x - 35, 1), 1, 0.5);
                     } else {
                         Text debuffed = attrf.render(Integer.toString(ccv), debuff);
@@ -664,13 +667,13 @@ public class CharWnd extends Window {
                     }
                 }
 
+                Text base;
                 if (tbv > cbv) {
-                    Text base = attrf.render(Integer.toString(tbv), tbuff);
-                    g.aimage(base.tex(), cn.add(sz.x - 65, 1), 1, 0.5);
+                    base = attrf.render(Integer.toString(tbv), tbuff);
                 } else {
-                    Text base = attrf.render(Integer.toString(cbv), Color.WHITE);
-                    g.aimage(base.tex(), cn.add(sz.x - 65, 1), 1, 0.5);
+                    base = attrf.render(Integer.toString(cbv), Color.WHITE);
                 }
+                g.aimage(base.tex(), cn.add(sz.x - 65, 1), 1, 0.5);
             }
         }
 
@@ -940,14 +943,29 @@ public class CharWnd extends Window {
         public final String nm;
         public final Indir<Resource> res;
         public boolean has = false;
+        public boolean on = false;
         private String sortkey;
         private Tex small;
+
+        public int crl, crlt, crql, crqlt;
+        public int qid;
 
         private Credo(String nm, Indir<Resource> res, boolean has) {
             this.nm = nm;
             this.res = res;
             this.has = has;
             this.sortkey = nm;
+        }
+
+        private Credo(String nm, Indir<Resource> res, boolean has,
+                      int crl, int crlt, int crql, int crqlt, int qid) {
+            this(nm, res, has);
+            this.on = true;
+            this.crl = crl;
+            this.crlt = crlt;
+            this.crql = crql;
+            this.crqlt = crqlt;
+            this.qid = qid;
         }
 
         public String rendertext() {

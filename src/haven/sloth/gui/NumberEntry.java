@@ -57,6 +57,10 @@ public class NumberEntry extends Widget {
         this.max = max;
     }
 
+    public void setValue(final int val) {
+        entry.settext(val + "");
+    }
+
     private void change(final int dir) {
         final int val;
         if (ui.modshift)

@@ -6,8 +6,12 @@ import haven.sloth.gob.Alerted;
 import haven.sloth.gob.Deleted;
 import haven.sloth.gob.Hidden;
 import haven.sloth.gob.Movable;
+import haven.sloth.gui.chr.CredoTree;
+import haven.sloth.gui.chr.SkillTree;
+import haven.sloth.io.ForagableData;
 import haven.sloth.io.HiddenWndData;
 import haven.sloth.io.HighlightData;
+import haven.sloth.io.Storage;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -374,6 +378,9 @@ public class DefSettings {
             HiddenWndData.init();
             OverlayData.init();
             CustomQualityList.init();
+            ForagableData.init(optint.get());
+            SkillTree.init(optint.get());
+            CredoTree.init(optint.get());
 //            MovableWidget.initialization();
             //Internal lookups are no longer needed
             optint.get().close();

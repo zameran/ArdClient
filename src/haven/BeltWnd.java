@@ -218,13 +218,13 @@ public class BeltWnd extends MovableWidget {
                 dm = null;
                 if (dragging) {
                     if (res != null) {
-                        if (ui.dropthing(ui.root, ui.mc, res.get())) {
+                        if (!locked() && ui.dropthing(ui.root, ui.mc, res.get())) {
                             reset();
                             //delete anything that might already belong to this slot
                             ui.gui.wdgmsg("setbelt", slot, 1);
                         }
                     } else {
-                        if (ui.dropthing(ui.root, ui.mc, pag)) {
+                        if (!locked() && ui.dropthing(ui.root, ui.mc, pag)) {
                             reset();
                         }
                     }
@@ -269,13 +269,13 @@ public class BeltWnd extends MovableWidget {
             //don't drop things on yourself..
             if (!dragging) {
                 //Dropping "things" on us, mainly menugrid items
-                if (thing instanceof Resource) {
+                if (!locked() && thing instanceof Resource) {
                     //Normal server-side menu items
                     ui.gui.wdgmsg("setbelt", slot, ((Resource) thing).name);
                     //reset for now and wait for server to send us uimsg if this was valid drop
                     reset();
                     return true;
-                } else if (thing instanceof MenuGrid.SpecialPagina) {
+                } else if (!locked() && thing instanceof MenuGrid.SpecialPagina) {
                     //Not normal stuff.
                     setPag((MenuGrid.SpecialPagina) thing);
                     //delete anything that might already belong to this slot

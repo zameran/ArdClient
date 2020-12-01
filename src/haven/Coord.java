@@ -34,6 +34,7 @@ import static java.lang.Math.PI;
 public class Coord implements Comparable<Coord>, java.io.Serializable {
     public int x, y;
     public static Coord z = new Coord(0, 0);
+    public static Coord o = new Coord(1, 1);
     public static Coord[] uecw = {new Coord(0, -1), new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0)};
     public static Coord[] uccw = {new Coord(0, 0), new Coord(1, 0), new Coord(1, 1), new Coord(0, 1)};
     public static Coord[] upcw = {new Coord(0, -1), new Coord(1, -1), new Coord(1, 0), new Coord(1, 1),
@@ -118,6 +119,10 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
         return (new Coord(x * fx, y * fy));
     }
 
+    public Coord mul(float fx, float fy) {
+        return new Coord((int) (x * fx), (int) (y * fy));
+    }
+
     public Coord mul(double f) {
         return (new Coord((int) Math.round(x * f), (int) Math.round(y * f)));
     }
@@ -142,12 +147,28 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
         return (div(new Coord(d, d)));
     }
 
+    public Coord div(int x, int y) {
+        return new Coord(Utils.floordiv(this.x, x), Utils.floordiv(this.y, y));
+    }
+
+    public Coord div(double x, double y) {
+        return new Coord(Utils.floordiv(this.x, x), Utils.floordiv(this.y, y));
+    }
+
     public Coord div(double d) {
         return new Coord((int) (x / d), (int) (y / d));
     }
 
     public Coord mod(Coord d) {
         return (new Coord(Utils.floormod(x, d.x), Utils.floormod(y, d.y)));
+    }
+
+    public Coord min(final Coord d) {
+        return new Coord(Math.min(x, d.x), Math.min(y, d.y));
+    }
+
+    public Coord max(final Coord d) {
+        return new Coord(Math.max(x, d.x), Math.max(y, d.y));
     }
 
     public Coord copy() {

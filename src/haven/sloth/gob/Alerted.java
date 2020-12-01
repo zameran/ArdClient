@@ -5,7 +5,7 @@ import haven.Audio;
 import haven.Config;
 import haven.Gob;
 import haven.Resource;
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.purus.pbot.PBotDiscord;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;

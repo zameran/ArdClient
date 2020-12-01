@@ -30,7 +30,6 @@ import haven.automation.Discord;
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
 import haven.automation.Traverse;
-import haven.livestock.LivestockManager;
 import haven.overlays.OverlayManager;
 import haven.purus.DrinkWater;
 import haven.purus.ItemClickCallback;
@@ -40,9 +39,15 @@ import haven.purus.pbot.PBotUtils;
 import haven.resutil.FoodInfo;
 import haven.sloth.gob.Mark;
 import haven.sloth.gui.DeletedManager;
+import haven.sloth.gui.DowseWnd;
+import haven.sloth.gui.ForageHelperWnd;
+import haven.sloth.gui.ForageWizardWnd;
 import haven.sloth.gui.HiddenManager;
 import haven.sloth.gui.HighlightManager;
 import haven.sloth.gui.SoundManager;
+import haven.sloth.gui.chr.SkillnCredoWnd;
+import haven.sloth.gui.livestock.LivestockManager;
+import haven.sloth.gui.script.ScriptManager;
 import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.dev;
@@ -62,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import static haven.Action.TOGGLE_CHARACTER;
 import static haven.Action.TOGGLE_EQUIPMENT;
@@ -97,6 +103,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private Boolean temporarilyswimming = false;
     public CharWnd chrwdg;
     public Speedget speed;
+    private ScriptManager scripts;
     public MapWnd mapfile;
     public Widget qqview;
     public QuestWnd questwnd;
@@ -140,7 +147,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public CraftHistoryBelt histbelt;
     private ErrorSysMsgCallback errmsgcb;
     public StudyWnd studywnd;
-    public LivestockManager livestockwnd;
+    //    public LivestockManager livestockwnd;
     public ItemClickCallback itemClickCallback;
     public boolean drinkingWater, lastDrinkingSucessful;
     public CraftWindow makewnd;
@@ -152,6 +159,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public QuestHelper questhelper;
     public Thread DrinkThread;
     public CraftDBWnd craftwnd = null;
+
+    public final List<DowseWnd> dowsewnds = new ArrayList<>();
+    public ForageHelperWnd foragehelper;
+    public ForageWizardWnd forageWzrWnd;
+    public SkillnCredoWnd scwnd;
+    public LivestockManager lm;
     public long inspectedgobid = 0;//used for attaching inspected qualities to gobs.
 
     @RName("gameui")
@@ -322,8 +335,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         syslog = chat.add(new ChatUI.Log("System"));
         opts.c = sz.sub(opts.sz).div(2);
         pointer = add(new MapPointer());
-        livestockwnd = add(new LivestockManager(), new Coord(0, sz.y - 200));
-        livestockwnd.hide();
+//        livestockwnd = add(new LivestockManager(), new Coord(0, sz.y - 200));
+//        livestockwnd.hide();
+        foragehelper = add(new ForageHelperWnd());
+        foragehelper.hide();
+        scwnd = add(new SkillnCredoWnd());
+        scwnd.hide();
+        lm = add(new haven.sloth.gui.livestock.LivestockManager());
+        lm.hide();
+        scripts = add(new ScriptManager());
+        scripts.hide();
         this.questhelper = add(new QuestHelper(), new Coord(0, sz.y - 200));
         this.questhelper.hide();
         hidden = add(new HiddenManager());
@@ -1139,6 +1160,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             questwnd.add(child, Coord.z);
         } else if (place == "misc") {
             Coord c;
+            if (child instanceof Window && ((Window) child).cap != null &&
+                    haven.sloth.gui.livestock.LivestockManager.animals.contains(Resource.getLocString(Resource.BUNDLE_WINDOW, ((Window) child).cap.text))) {
+                if (configuration.forcelivestock) {
+                    lm.addAnimal((Window) child);
+                    return;
+                }
+            }
             if (args[1] instanceof Coord) {
                 c = (Coord) args[1];
             } else if (args[1] instanceof Coord2d) {
@@ -1553,6 +1581,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             map.refreshGobsAll();
     }
 
+    void toggleScripts() {
+        if (scripts != null && scripts.show(!scripts.visible)) {
+            scripts.raise();
+            fitwdg(scripts);
+            setfocus(scripts);
+        }
+    }
 
     void toggleHighlight() {
         if (highlighted != null && highlighted.show(!highlighted.visible)) {
@@ -1632,6 +1667,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             mapfile.raise();
             fitwdg(mapfile);
             setfocus(mapfile);
+        }
+    }
+
+    public void toggleForageHelper() {
+        if (foragehelper != null && foragehelper.show(!foragehelper.visible)) {
+            foragehelper.raise();
+            fitwdg(foragehelper);
+            setfocus(foragehelper);
         }
     }
 
@@ -1965,6 +2008,28 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     public boolean mousedown(Coord c, int button) {
         return (super.mousedown(c, button));
+    }
+
+    @Override
+    public boolean mousewheel(Coord c, int amount) {
+        if (fv != null && ui.modctrl) {
+            fv.scroll(amount);
+            return true;
+        } else {
+            return super.mousewheel(c, amount);
+        }
+    }
+
+    public void makeDowseWnd(final Coord2d startc, final double a1, final double a2, final Consumer<Color> changeCol, final Runnable onClose) {
+        synchronized (dowsewnds) {
+            dowsewnds.add(add(new DowseWnd(startc, a1, a2, changeCol, onClose)));
+        }
+    }
+
+    public void remDowseWnd(final DowseWnd wnd) {
+        synchronized (dowsewnds) {
+            dowsewnds.removeIf(wdg -> wdg == wnd);
+        }
     }
 
     public void resize(Coord sz) {

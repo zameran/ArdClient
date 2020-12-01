@@ -1,6 +1,5 @@
 package haven.sloth.io;
 
-import haven.Storage;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;
 

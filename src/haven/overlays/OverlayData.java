@@ -1,6 +1,6 @@
 package haven.overlays;
 
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;
 

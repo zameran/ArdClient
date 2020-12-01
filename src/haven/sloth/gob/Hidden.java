@@ -5,7 +5,7 @@ import haven.GAttrib;
 import haven.Gob;
 import haven.RenderList;
 import haven.States;
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.sloth.gfx.HitboxMesh;
 import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.util.ObservableCollection;

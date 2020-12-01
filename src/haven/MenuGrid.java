@@ -67,6 +67,7 @@ import haven.purus.StockpileFiller;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
+import haven.sloth.gui.ForageWizardWnd;
 import haven.sloth.util.ObservableCollection;
 import modification.configuration;
 
@@ -488,6 +489,8 @@ public class MenuGrid extends Widget {
 
     public MenuGrid() {
         super(bgsz.mul(gsz).add(1, 1));
+//        paginae.add(paginafor(Resource.local().load("custom/paginae/default/management")));
+//        paginae.add(paginafor(Resource.local().load("custom/paginae/default/scripts")));
         addSpecial(new SpecialPagina(this, "paginae::amber::coal12",
                 Resource.local().load("paginae/amber/coal12"),
                 (pag) -> {
@@ -617,8 +620,10 @@ public class MenuGrid extends Widget {
                 Resource.local().load("paginae/amber/livestock"),
                 (pag) -> {
                     if (ui.gui != null) {
-                        ui.gui.livestockwnd.show(!ui.gui.livestockwnd.visible);
-                        ui.gui.livestockwnd.raise();
+//                        ui.gui.livestockwnd.show(!ui.gui.livestockwnd.visible);
+//                        ui.gui.livestockwnd.raise();
+                        ui.gui.lm.show(!ui.gui.lm.visible);
+                        ui.gui.lm.raise();
                     }
                 }
         ));
@@ -1062,6 +1067,29 @@ public class MenuGrid extends Widget {
                 Resource.local().load("paginae/decks/deck5"),
                 (pag) -> ui.gui.changeDecks(4)));
 
+        addSpecial(new SpecialPagina(this, "management::foragewizard",
+                Resource.local().load("custom/paginae/default/wnd/foragewizard"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        if (ui.gui.forageWzrWnd == null) {
+                            ui.gui.forageWzrWnd = ui.gui.add(new ForageWizardWnd());
+                            ui.gui.forageWzrWnd.show();
+                        } else {
+                            ui.gui.forageWzrWnd.show(!ui.gui.forageWzrWnd.visible);
+                        }
+                        ui.gui.forageWzrWnd.raise();
+                    }
+                }
+        ));
+        addSpecial(new SpecialPagina(this, "management::scripts",
+                Resource.local().load("custom/paginae/default/wnd/scripts"),
+                (pag) -> ui.gui.toggleScripts()));
+        addSpecial(new SpecialPagina(this, "management::foragehelper",
+                Resource.local().load("custom/paginae/default/wnd/foragehelper"),
+                (pag) -> ui.gui.toggleForageHelper()));
+        addSpecial(new SpecialPagina(this, "management::skillsncredo",
+                Resource.local().load("custom/paginae/default/wnd/skillsncredo"),
+                (pag) -> ui.gui.scwnd.toggleVisibility()));
     }
 
     protected void updlayout() {

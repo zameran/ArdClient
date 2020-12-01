@@ -89,7 +89,8 @@ public class BPRadSprite extends Sprite {
     public boolean tick(int var1) {
         Coord2d var2 = ((Gob) this.owner).rc;
         if (this.lc == null || !this.lc.equals(var2)) {
-            this.setz((Glob) this.owner.context(Glob.class), var2);
+            if (!Config.disableelev)
+                this.setz((Glob) this.owner.context(Glob.class), var2);
             this.lc = var2;
         }
 

@@ -3,7 +3,7 @@ package haven.sloth.gui;
 import haven.Coord;
 import haven.GOut;
 import haven.Resource;
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.Tex;
 import haven.UI;
 import haven.Window;

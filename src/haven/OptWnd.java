@@ -3432,6 +3432,28 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("New livestock manager") {
+            {
+                a = configuration.forcelivestock;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("forcelivestock", val);
+                configuration.forcelivestock = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Show player id in Kith & Kin") {
+            {
+                a = configuration.kinid;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("kinid", val);
+                configuration.kinid = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Enable speed sprite") {
             {
                 a = configuration.gobspeedsprite;
@@ -3916,12 +3938,11 @@ public class OptWnd extends Window {
             }
 
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Enter resource name and get its hash").tex();
+                return Text.render("Enter resource name and get its hash (type Enter)").tex();
             }
         };
         appender.addRow(new Label("Base URL: "), baseurl);
-        appender.addRow(new Label("res/"), textEntry, hashid);
-        appender.addRow(new Button(50, "Download") {
+        appender.addRow(new Label("res/"), textEntry, new Button(50, "Download") {
             public void click() {
                 try {
                     Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);
@@ -3930,7 +3951,8 @@ public class OptWnd extends Window {
                     e.printStackTrace();
                 }
             }
-        }, new Button(50, "Remove") {
+        });
+        appender.addRow(new Label("%appdata%/Haven and Hearth/"), hashid, new Button(50, "Remove") {
             public void click() {
                 if (hashid.text != null && !hashid.text.equals("")) {
                     try {

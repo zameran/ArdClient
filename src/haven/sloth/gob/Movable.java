@@ -10,7 +10,7 @@ import haven.Loading;
 import haven.Moving;
 import haven.RenderList;
 import haven.States;
-import haven.Storage;
+import haven.sloth.io.Storage;
 import haven.UI;
 import haven.sloth.gfx.GobPathSprite;
 
