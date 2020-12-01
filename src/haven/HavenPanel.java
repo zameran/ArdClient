@@ -740,7 +740,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                     if (ui != null) {
                         if (!DefSettings.PAUSED.get()) {
                             int fwaited = 0;
-                            Debug.cycle();
+                            Debug.cycle(ui.modflags());
                             UI ui = this.ui;
                             then = System.currentTimeMillis();
                             CPUProfile.Frame curf = null;
@@ -807,7 +807,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory,
                                 throw (new InterruptedException());
                         } else {
                             //Things that must run each frame, even when paused
-                            Debug.cycle();
+                            Debug.cycle(ui.modflags());
                             synchronized (ui) {
                                 if (ui.sess != null)
                                     ui.sess.glob.ctick();

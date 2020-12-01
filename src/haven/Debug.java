@@ -36,18 +36,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.Arrays;
 
 public class Debug {
+    public static final int FRAME_DEBUG_KEY = java.awt.event.KeyEvent.VK_F8;
     public static boolean kf1, kf2, kf3, kf4;
     public static boolean pk1, pk2, pk3, pk4;
+    public static boolean fdk, pfdk, ff;
     public static PrintWriter log = new PrintWriter(System.err);
 
-    public static void cycle() {
+    public static void cycle(int modflags) {
         pk1 = kf1;
         pk2 = kf2;
         pk3 = kf3;
         pk4 = kf4;
+        kf1 = (modflags & 1) != 0;
+        kf2 = (modflags & 2) != 0;
+        kf3 = (modflags & 4) != 0;
+        kf4 = (modflags & 8) != 0;
+        ff = fdk && !pfdk;
+        pfdk = fdk;
     }
 
     public static void dumpimage(BufferedImage img, File path) {
@@ -67,30 +76,33 @@ public class Debug {
     }
 
     public static File somedir(String basename) {
-        return (new File(basename));
+        String home = System.getProperty("user.home", null);
+        if (home == null)
+            return (new File(basename));
+        return (new File(new File(home), basename));
     }
 
     public static void dump(Object... stuff) {
-        if(stuff.length > 0) {
+        if (stuff.length > 0) {
             System.err.print(stuff[0]);
-            for(int i = 1; i < stuff.length; i++) {
+            for (int i = 1; i < stuff.length; i++) {
                 System.err.print(' ');
-                if(stuff[i] instanceof Object[]) {
-                    System.err.print(Arrays.asList((Object[])stuff[i]));
-                } else if(stuff[i] instanceof byte[]) {
-                    byte[] ba = (byte[])stuff[i];
-                    if(ba.length < 32) {
+                if (stuff[i] instanceof Object[]) {
+                    System.err.print(Arrays.asList((Object[]) stuff[i]));
+                } else if (stuff[i] instanceof byte[]) {
+                    byte[] ba = (byte[]) stuff[i];
+                    if (ba.length < 32) {
                         System.err.print(Utils.byte2hex(ba));
                     } else {
                         System.err.println();
                         Utils.hexdump(ba, System.err, 0);
                     }
-                } else if(stuff[i] instanceof int[]) {
-                    Utils.dumparr((int[])stuff[i], System.err, false);
-                } else if(stuff[i] instanceof float[]) {
-                    Utils.dumparr((float[])stuff[i], System.err, false);
-                } else if(stuff[i] instanceof short[]) {
-                    Utils.dumparr((short[])stuff[i], System.err, false);
+                } else if (stuff[i] instanceof int[]) {
+                    Utils.dumparr((int[]) stuff[i], System.err, false);
+                } else if (stuff[i] instanceof float[]) {
+                    Utils.dumparr((float[]) stuff[i], System.err, false);
+                } else if (stuff[i] instanceof short[]) {
+                    Utils.dumparr((short[]) stuff[i], System.err, false);
                 } else {
                     System.err.print(stuff[i]);
                 }
@@ -136,6 +148,20 @@ public class Debug {
             return (new java.io.PrintWriter(new java.io.FileWriter("/tmp/dbdump-" + dumpseq++)));
         } catch (java.io.IOException e) {
             throw (new RuntimeException(e));
+        }
+    }
+
+    public static class DataException extends RuntimeException {
+        public final Serializable data;
+
+        public DataException(String msg, Throwable cause, Serializable data) {
+            super(msg, cause);
+            this.data = data;
+        }
+
+        public DataException(String msg, Serializable data) {
+            super(msg);
+            this.data = data;
         }
     }
 }

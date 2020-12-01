@@ -383,7 +383,8 @@ public class Widget {
                 if (Character.isDigit(op)) {
                     int e;
                     for (e = i; (e < spec.length()) && Character.isDigit(spec.charAt(e)); e++) ;
-                    st.push(Integer.parseInt(spec.substring(i - 1, e)));
+                    int v = Integer.parseInt(spec.substring(i - 1, e));
+                    st.push(v);
                     i = e;
                 } else if (op == '!') {
                     st.push(args[off++]);
@@ -415,9 +416,11 @@ public class Widget {
                 } else if (op == 's') {
                     st.push(((Widget) st.pop()).sz);
                 } else if (op == 'w') {
-                    synchronized (ui) {
-                        st.push(ui.widgets.get((Integer) st.pop()));
-                    }
+                    int id = (Integer) st.pop();
+                    Widget w = ui.getwidget(id);
+                    if (w == null)
+                        throw (new RuntimeException("Invalid widget ID: " + id));
+                    st.push(w);
                 } else if (op == 'x') {
                     st.push(((Coord) st.pop()).x);
                 } else if (op == 'y') {
@@ -490,7 +493,11 @@ public class Widget {
 
     public void addchild(Widget child, Object... args) {
         if (args[0] instanceof Coord) {
-            add(child, (Coord) args[0]);
+            Coord c = (Coord) args[0];
+            String opt = (args.length > 1) ? (String) args[1] : "";
+            if (opt.indexOf('u') < 0)
+                c = UI.scale(c);
+            add(child, c);
         } else if (args[0] instanceof Coord2d) {
             add(child, ((Coord2d) args[0]).mul(new Coord2d(this.sz.sub(child.sz))).round());
         } else if (args[0] instanceof String) {
@@ -547,8 +554,16 @@ public class Widget {
         }
     }
 
+    public Coord parentpos(Widget in, Coord c) {
+        return (parentpos(in).add(c));
+    }
+
     public Coord rootpos() {
         return (parentpos(ui.root));
+    }
+
+    public Coord rootpos(Coord c) {
+        return (rootpos().add(c));
     }
 
     public Coord rootxlate(Coord c) {
@@ -787,6 +802,10 @@ public class Widget {
 
     public void draw(GOut g) {
         draw(g, true);
+    }
+
+    public boolean checkhit(Coord c) {
+        return (true);
     }
 
     public boolean mousedown(Coord c, int button) {

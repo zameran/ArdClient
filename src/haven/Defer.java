@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Defer extends ThreadGroup {
     private static final Map<ThreadGroup, Defer> groups = new WeakHashMap<ThreadGroup, Defer>();
@@ -227,9 +228,11 @@ public class Defer extends ThreadGroup {
         }
     }
 
+    private static final AtomicInteger threadno = new AtomicInteger(0);
+
     private class Worker extends HackThread {
         private Worker() {
-            super(Defer.this, null, "Worker thread");
+            super(Defer.this, null, "Worker thread #" + threadno.getAndIncrement());
             setDaemon(true);
         }
 

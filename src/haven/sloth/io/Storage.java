@@ -1,9 +1,11 @@
 package haven.sloth.io;
 
 import com.google.common.flogger.FluentLogger;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteDataSource;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -79,6 +81,16 @@ public class Storage {
         }
     }
 
+    public PreparedStatement ensurePrepare(final String sql) {
+        try {
+            return prepare(sql);
+        } catch (SQLException se) {
+            logger.atSevere().withCause(se).log("Failed to prepare statement needed");
+            System.exit(0);
+        }
+        return null;
+    }
+
     public void close() {
         try {
             conn.close();
@@ -88,9 +100,16 @@ public class Storage {
     }
 
     private Connection mkcon(final String jdbc) throws SQLException {
-        final Connection con = DriverManager.getConnection(jdbc);
-        con.setAutoCommit(false);
-        return con;
+        final SQLiteDataSource ds = new SQLiteDataSource();
+        ds.setUrl(jdbc);
+        ds.setPageSize(4096);
+        ds.setCacheSize(2000);
+        ds.setEnforceForeignKeys(true);
+        ds.setJournalMode(SQLiteConfig.JournalMode.WAL.name());
+        final SQLiteConnection scon = ds.getConnection(null, null);
+        scon.setAutoCommit(false);
+        scon.setBusyTimeout(15000);
+        return scon;
     }
 
     @FunctionalInterface
@@ -135,5 +154,26 @@ public class Storage {
                 logger.atSevere().withCause(se).log("Failed to commit transaction");
             }
         });
+    }
+
+    /**
+     * These are not done async
+     */
+    public synchronized void writeAndWait(final SQLCallback callback) {
+        final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        try {
+            callback.run(conn);
+            conn.commit();
+        } catch (SQLException se) {
+            try {
+                conn.rollback();
+            } catch (SQLException se2) {
+                //Eat it.
+            }
+            for (final StackTraceElement ele : stack) {
+                logger.atSevere().log(ele.toString());
+            }
+            logger.atSevere().withCause(se).log("Failed to commit transaction");
+        }
     }
 }
