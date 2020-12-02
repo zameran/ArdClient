@@ -10,7 +10,6 @@ import haven.GOut;
 import haven.GameUI;
 import haven.Label;
 import haven.MapView;
-import haven.sloth.gui.ResizableWnd;
 import haven.Resource;
 import haven.Scrollport;
 import haven.Tex;
@@ -18,6 +17,7 @@ import haven.TextEntry;
 import haven.Utils;
 import haven.Widget;
 import haven.purus.pbot.PBotUtils;
+import haven.sloth.gui.ResizableWnd;
 
 import java.awt.Color;
 import java.util.ArrayList;
