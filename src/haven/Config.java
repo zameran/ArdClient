@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 import static haven.Utils.getprop;
 
@@ -552,45 +553,51 @@ public class Config {
         put("mare", new CheckListboxItem("Tamed Mares"));
     }};
 
-    public final static HashMap<String, CheckListboxItem> flowermenus = new HashMap<String, CheckListboxItem>(37) {{
-        put("Pick", new CheckListboxItem("Pick", Resource.BUNDLE_FLOWER));
-        put("Drink", new CheckListboxItem("Drink", Resource.BUNDLE_FLOWER));
-        put("Harvest", new CheckListboxItem("Harvest", Resource.BUNDLE_FLOWER));
-        put("Eat", new CheckListboxItem("Eat", Resource.BUNDLE_FLOWER));
-        put("Split", new CheckListboxItem("Split", Resource.BUNDLE_FLOWER));
-        put("Kill", new CheckListboxItem("Kill", Resource.BUNDLE_FLOWER));
-        put("Slice", new CheckListboxItem("Slice", Resource.BUNDLE_FLOWER));
-        put("Pluck", new CheckListboxItem("Pluck", Resource.BUNDLE_FLOWER));
-        put("Empty", new CheckListboxItem("Empty", Resource.BUNDLE_FLOWER));
-        put("Clean", new CheckListboxItem("Clean", Resource.BUNDLE_FLOWER));
-        put("Skin", new CheckListboxItem("Skin", Resource.BUNDLE_FLOWER));
-        put("Flay", new CheckListboxItem("Flay", Resource.BUNDLE_FLOWER));
-        put("Collect bones", new CheckListboxItem("Collect bones", Resource.BUNDLE_FLOWER));
-        put("Crumble", new CheckListboxItem("Crumble", Resource.BUNDLE_FLOWER));
-        put("Butcher", new CheckListboxItem("Butcher", Resource.BUNDLE_FLOWER));
-        put("Giddyup!", new CheckListboxItem("Giddyup!", Resource.BUNDLE_FLOWER));
-        put("Break", new CheckListboxItem("Break", Resource.BUNDLE_FLOWER));
-        put("Man the helm", new CheckListboxItem("Man the helm", Resource.BUNDLE_FLOWER));
-        put("Cargo", new CheckListboxItem("Cargo", Resource.BUNDLE_FLOWER));
-        put("Sleep", new CheckListboxItem("Sleep", Resource.BUNDLE_FLOWER));
-        put("Shear wool", new CheckListboxItem("Shear wool", Resource.BUNDLE_FLOWER));
-        put("Harvest wax", new CheckListboxItem("Harvest wax", Resource.BUNDLE_FLOWER));
-        put("Slice up", new CheckListboxItem("Slice up", Resource.BUNDLE_FLOWER));
-        put("Chip stone", new CheckListboxItem("Chip stone", Resource.BUNDLE_FLOWER));
-        put("Study", new CheckListboxItem("Study", Resource.BUNDLE_FLOWER));
-        put("Peer into", new CheckListboxItem("Peer into", Resource.BUNDLE_FLOWER));
-        put("Tether horse", new CheckListboxItem("Tether horse", Resource.BUNDLE_FLOWER));
-        put("Wring neck", new CheckListboxItem("Wring neck", Resource.BUNDLE_FLOWER));
-        put("Open", new CheckListboxItem("Open", Resource.BUNDLE_FLOWER));
-        put("Inspect", new CheckListboxItem("Inspect", Resource.BUNDLE_FLOWER));
-        put("Slaughter", new CheckListboxItem("Slaughter", Resource.BUNDLE_FLOWER));
-        put("Crack open", new CheckListboxItem("Crack Open", Resource.BUNDLE_FLOWER));
-        put("Collect coal", new CheckListboxItem("Collect Coal", Resource.BUNDLE_FLOWER));
-        put("Pick leaf", new CheckListboxItem("Pick Leaf", Resource.BUNDLE_FLOWER));
-        put("Ride", new CheckListboxItem("Ride", Resource.BUNDLE_FLOWER));
-        put("Scale", new CheckListboxItem("Scale", Resource.BUNDLE_FLOWER));
-        put("Pick mushrooms", new CheckListboxItem("Pick mushrooms", Resource.BUNDLE_FLOWER));
+    public static CheckListbox flowerlist = null;
+    public static TextEntry petalsearch = null;
+    public final static Map<String, CheckListboxItem> flowermenus = new TreeMap<String, CheckListboxItem>() {{
+        Utils.loadcollection("petalcol").forEach(petal -> put(petal, new CheckListboxItem(petal, Resource.BUNDLE_FLOWER)));
     }};
+
+//    public final static HashMap<String, CheckListboxItem> flowermenus = new HashMap<String, CheckListboxItem>(37) {{
+//        put("Pick", new CheckListboxItem("Pick", Resource.BUNDLE_FLOWER));
+//        put("Drink", new CheckListboxItem("Drink", Resource.BUNDLE_FLOWER));
+//        put("Harvest", new CheckListboxItem("Harvest", Resource.BUNDLE_FLOWER));
+//        put("Eat", new CheckListboxItem("Eat", Resource.BUNDLE_FLOWER));
+//        put("Split", new CheckListboxItem("Split", Resource.BUNDLE_FLOWER));
+//        put("Kill", new CheckListboxItem("Kill", Resource.BUNDLE_FLOWER));
+//        put("Slice", new CheckListboxItem("Slice", Resource.BUNDLE_FLOWER));
+//        put("Pluck", new CheckListboxItem("Pluck", Resource.BUNDLE_FLOWER));
+//        put("Empty", new CheckListboxItem("Empty", Resource.BUNDLE_FLOWER));
+//        put("Clean", new CheckListboxItem("Clean", Resource.BUNDLE_FLOWER));
+//        put("Skin", new CheckListboxItem("Skin", Resource.BUNDLE_FLOWER));
+//        put("Flay", new CheckListboxItem("Flay", Resource.BUNDLE_FLOWER));
+//        put("Collect bones", new CheckListboxItem("Collect bones", Resource.BUNDLE_FLOWER));
+//        put("Crumble", new CheckListboxItem("Crumble", Resource.BUNDLE_FLOWER));
+//        put("Butcher", new CheckListboxItem("Butcher", Resource.BUNDLE_FLOWER));
+//        put("Giddyup!", new CheckListboxItem("Giddyup!", Resource.BUNDLE_FLOWER));
+//        put("Break", new CheckListboxItem("Break", Resource.BUNDLE_FLOWER));
+//        put("Man the helm", new CheckListboxItem("Man the helm", Resource.BUNDLE_FLOWER));
+//        put("Cargo", new CheckListboxItem("Cargo", Resource.BUNDLE_FLOWER));
+//        put("Sleep", new CheckListboxItem("Sleep", Resource.BUNDLE_FLOWER));
+//        put("Shear wool", new CheckListboxItem("Shear wool", Resource.BUNDLE_FLOWER));
+//        put("Harvest wax", new CheckListboxItem("Harvest wax", Resource.BUNDLE_FLOWER));
+//        put("Slice up", new CheckListboxItem("Slice up", Resource.BUNDLE_FLOWER));
+//        put("Chip stone", new CheckListboxItem("Chip stone", Resource.BUNDLE_FLOWER));
+//        put("Study", new CheckListboxItem("Study", Resource.BUNDLE_FLOWER));
+//        put("Peer into", new CheckListboxItem("Peer into", Resource.BUNDLE_FLOWER));
+//        put("Tether horse", new CheckListboxItem("Tether horse", Resource.BUNDLE_FLOWER));
+//        put("Wring neck", new CheckListboxItem("Wring neck", Resource.BUNDLE_FLOWER));
+//        put("Open", new CheckListboxItem("Open", Resource.BUNDLE_FLOWER));
+//        put("Inspect", new CheckListboxItem("Inspect", Resource.BUNDLE_FLOWER));
+//        put("Slaughter", new CheckListboxItem("Slaughter", Resource.BUNDLE_FLOWER));
+//        put("Crack open", new CheckListboxItem("Crack Open", Resource.BUNDLE_FLOWER));
+//        put("Collect coal", new CheckListboxItem("Collect Coal", Resource.BUNDLE_FLOWER));
+//        put("Pick leaf", new CheckListboxItem("Pick Leaf", Resource.BUNDLE_FLOWER));
+//        put("Ride", new CheckListboxItem("Ride", Resource.BUNDLE_FLOWER));
+//        put("Scale", new CheckListboxItem("Scale", Resource.BUNDLE_FLOWER));
+//        put("Pick mushrooms", new CheckListboxItem("Pick mushrooms", Resource.BUNDLE_FLOWER));
+//    }};
 
     public final static HashMap<String, CheckListboxItem> autowindows = new HashMap<String, CheckListboxItem>(10) {{
         put("Inventory", new CheckListboxItem("Inventory"));

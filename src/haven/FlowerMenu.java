@@ -29,6 +29,7 @@ package haven;
 
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.HeldBy;
+import modification.configuration;
 
 import java.awt.Color;
 import java.util.function.Consumer;
@@ -363,6 +364,7 @@ public class FlowerMenu extends Widget {
         opts = new Petal[CLOSEFORMENU.get() ? options.length + 1 : options.length];
 
         for (int i = 0; i < options.length; i++) {
+            configuration.addPetal(options[i]);
             if (AMBERMENU.get()) {
                 add(opts[i] = new Petal(options[i]));
             } else {
@@ -374,6 +376,7 @@ public class FlowerMenu extends Widget {
         }
 
         if (CLOSEFORMENU.get()) {
+            configuration.addPetal("Close");
             if (AMBERMENU.get()) {
                 add(opts[opts.length - 1] = new Petal("Close"));
             } else {

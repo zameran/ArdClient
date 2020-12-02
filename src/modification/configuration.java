@@ -1,5 +1,7 @@
 package modification;
 
+import haven.CheckListboxItem;
+import haven.Config;
 import haven.Coord;
 import haven.Gob;
 import haven.MainFrame;
@@ -511,4 +513,16 @@ public class configuration {
     }
 
     public static SnowThread snowThread;
+
+    public static void addPetal(String name) {
+        List<String> list = new ArrayList<>(Config.flowermenus.keySet());
+        if (Config.flowermenus.get(name) == null) {
+            list.add(name);
+            CheckListboxItem ci = new CheckListboxItem(name);
+            Config.flowermenus.put(name, ci);
+            if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text.equals(""))
+                Config.flowerlist.items.add(ci);
+            Utils.setcollection("petalcol", Config.flowermenus.keySet());
+        }
+    }
 }

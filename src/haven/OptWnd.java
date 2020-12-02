@@ -59,6 +59,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.jar.JarEntry;
@@ -2120,7 +2121,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Display next attack info below actions") {
+        appender.add(new CheckBox("Display additional info about actions and the enemy") {
             {
                 a = configuration.showactioninfo;
             }
@@ -2200,17 +2201,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Alternative combat UI") {
-            {
-                a = Config.altfightui;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("altfightui", val);
-                Config.altfightui = val;
-                a = val;
-            }
-        });
+//        appender.add(new CheckBox("Alternative combat UI") {
+//            {
+//                a = Config.altfightui;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("altfightui", val);
+//                Config.altfightui = val;
+//                a = val;
+//            }
+//        });
         appender.add(new CheckBox("Simplified opening indicators") {
             {
                 a = Config.combaltopenings;
@@ -4002,12 +4003,16 @@ public class OptWnd extends Window {
     }
 
     private void initFlowermenus() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(flowermenus, new Coord(620, 350)));
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(flowermenus);
+        final WidgetVerticalAppender appender2 = new WidgetVerticalAppender(flowermenus);
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+        appender2.setVerticalMargin(VERTICAL_MARGIN);
+        appender2.setHorizontalMargin(HORIZONTAL_MARGIN);
+        appender2.setX(150);
 
-        flowermenus.add(new Label("Autopick Clusters:"), new Coord(150, 0));
+        appender2.add(new Label("Autopick Clusters:"));
         CheckListbox clusterlist = new CheckListbox(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
@@ -4018,11 +4023,10 @@ public class OptWnd extends Window {
         Utils.loadprefchklist("clustersel", Config.autoclusters);
         clusterlist.items.addAll(Config.autoclusters.values());
         // clusterlist.items.addAll(Config.autoclusters.values());
-        flowermenus.add(clusterlist, new Coord(150, 20));
+        appender2.add(clusterlist);
 
-
-        flowermenus.add(new Label("Automatic selecton:"), new Coord(0, 0));
-        CheckListbox flowerlist = new CheckListbox(140, 17) {
+        appender.add(new Label("Automatic selecton:"));
+        Config.flowerlist = new CheckListbox(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {
                 super.itemclick(itm, button);
@@ -4030,9 +4034,35 @@ public class OptWnd extends Window {
             }
         };
         Utils.loadprefchklist("flowersel", Config.flowermenus);
-        flowerlist.items.addAll(Config.flowermenus.values());
+        Config.flowerlist.items.addAll(Config.flowermenus.values());
         //  flowerlist.items.addAll(Config.flowermenus.values());
-        flowermenus.add(flowerlist, new Coord(0, 20));
+        appender.add(Config.flowerlist);
+        Config.petalsearch = new TextEntry(140, "") {
+            @Override
+            public void changed() {
+                update();
+            }
+
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (btn == 3) {
+                    settext("");
+                    update();
+                    return true;
+                } else {
+                    return super.mousedown(mc, btn);
+                }
+            }
+
+            public void update() {
+                Config.flowerlist.items.clear();
+                for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
+                    if (entry.getKey().toLowerCase().contains(text.toLowerCase()))
+                        Config.flowerlist.items.add(entry.getValue());
+                }
+            }
+        };
+        appender.add(Config.petalsearch);
 
         flowermenus.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         flowermenus.pack();

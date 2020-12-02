@@ -627,7 +627,8 @@ public class Fightsess extends Widget {
     //private static final Text.Furnace ipf3 = new PUtils.BlurFurn(new Text.Foundry(Text.serif, 18, new Color(128, 128, 255)).aa(true), 1, 1, new Color(48, 48, 96));
     private final Text.UText<?> ip = new Text.UText<Integer>(ipf) {
         public String text(Integer v) {
-            return (Config.altfightui ? v.toString() : "IP: " + v);
+//            return (Config.altfightui ? v.toString() : "IP: " + v);
+            return v.toString();
         }
 
         public Integer value() {
@@ -637,7 +638,8 @@ public class Fightsess extends Widget {
     };
     private final Text.UText<?> oip = new Text.UText<Integer>(ipf) {
         public String text(Integer v) {
-            return (Config.altfightui ? v.toString() : "IP: " + v);
+//            return (Config.altfightui ? v.toString() : "IP: " + v);
+            return v.toString();
         }
 
         public Integer value() {
