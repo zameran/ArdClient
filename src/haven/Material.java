@@ -286,8 +286,8 @@ public class Material extends GLState {
 
     public static class Res extends Resource.Layer implements Resource.IDLayer<Integer> {
         public final int id;
-        private transient List<GLState> states = new LinkedList<GLState>();
-        private transient List<Resolver> left = new LinkedList<Resolver>();
+        private transient List<GLState> states = new LinkedList<>();
+        private transient List<Resolver> left = new LinkedList<>();
         private transient Material m;
         private boolean mipmap = false, linear = false;
 
@@ -465,13 +465,7 @@ public class Material extends GLState {
             String nm = cl.getAnnotation(ResName.class).value();
             if (ResCons.class.isAssignableFrom(cl)) {
                 final ResCons scons;
-                try {
-                    scons = cl.asSubclass(ResCons.class).newInstance();
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
+                scons = Utils.construct(cl.asSubclass(ResCons.class));
                 rnames.put(nm, new ResCons2() {
                     public Res.Resolver cons(Resource res, Object... args) {
                         final GLState ret = scons.cons(res, args);
@@ -484,22 +478,16 @@ public class Material extends GLState {
                     }
                 });
             } else if (ResCons2.class.isAssignableFrom(cl)) {
-                try {
-                    rnames.put(nm, cl.asSubclass(ResCons2.class).newInstance());
-                } catch (InstantiationException e) {
-                    throw (new Error(e));
-                } catch (IllegalAccessException e) {
-                    throw (new Error(e));
-                }
+                rnames.put(nm, Utils.construct(cl.asSubclass(ResCons2.class)));
             } else if (GLState.class.isAssignableFrom(cl)) {
-                final Constructor<? extends GLState> cons;
+                Constructor<? extends GLState> cons;
                 try {
                     cons = cl.asSubclass(GLState.class).getConstructor(Resource.class, Object[].class);
                 } catch (NoSuchMethodException e) {
                     throw (new Error("No proper constructor for res-consable GL state " + cl.getName(), e));
                 }
                 rnames.put(nm, new ResCons2() {
-                    public Res.Resolver cons(final Resource res, final Object... args) {
+                    public Res.Resolver cons(Resource res, Object... args) {
                         return (new Res.Resolver() {
                             public void resolve(Collection<GLState> buf) {
                                 buf.add(Utils.construct(cons, res, args));
@@ -521,19 +509,21 @@ public class Material extends GLState {
             while (!buf.eom()) {
                 String nm = buf.string();
                 Object[] args = buf.list();
-                if (nm.equals("linear")) {
-                    /* XXX: These should very much be removed and
-                     * specified directly in the texture layer
-                     * instead. */
-                    ret.linear = true;
-                } else if (nm.equals("mipmap")) {
-                    ret.mipmap = true;
-                } else {
+//                if (nm.equals("linear")) {
+//                    /* XXX: These should very much be removed and
+//                     * specified directly in the texture layer
+//                     * instead. */
+//                    ret.linear = true;
+//                } else if (nm.equals("mipmap")) {
+//                    ret.mipmap = true;
+//                } else {
                     ResCons2 cons = rnames.get(nm);
-                    if (cons == null)
-                        throw (new Resource.LoadException("Unknown material part name: " + nm, res));
+                if (cons != null)
                     ret.left.add(cons.cons(res, args));
-                }
+                else
+                    new Resource.LoadWarning(res, "unknown material part name in %s: %s", res.name, nm).issue();
+                    ret.left.add(cons.cons(res, args));
+//                }
             }
             return (ret);
         }

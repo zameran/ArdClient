@@ -109,14 +109,8 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
                  * that this is a bug in ImageIO. */
                 public BufferedImage run() {
                     try {
-                        BufferedImage bimg = ImageIO.read(new ByteArrayInputStream(data));
-                        if (dev.decodeCode) {
-                            try {
-                                decode(bimg);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        BufferedImage bimg = Resource.readimage(new ByteArrayInputStream(data));
+                        if (dev.decodeCode) decode(bimg);
                         return (bimg);
                     } catch (IOException e) {
                         throw (new RuntimeException("Invalid image data in " + getres().name, e));
@@ -183,7 +177,7 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
         }
 
         public String toString() {
-            return ("TexR(" + getres().name + ", " + id + ")");
+            return ("#<texr " + getres().name + "(" + id + ")>");
         }
 
         public String loadname() {

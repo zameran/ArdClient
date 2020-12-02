@@ -1099,13 +1099,7 @@ public class Resource implements Serializable {
             } catch (IOException e) {
                 throw (new LoadException(e, Resource.this));
             }
-            if (dev.decodeCode) {
-                try {
-                    decode();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            if (dev.decodeCode) decode();
             /*if (img == null)
                 throw (new LoadException("Invalid image data in " + name, Resource.this));*/
             sz = Utils.imgsz(img);
@@ -1423,13 +1417,7 @@ public class Resource implements Serializable {
             name = buf.string();
             data = buf.bytes();
 //            configuration.resourceLog("Code " + name + " " + data);
-            if (dev.decodeCode)
-                try {
-                    decode();
-                } catch (Exception ex) {
-                    System.out.println("Error Code: " + ex.getMessage());
-                }
-            //Ardenneses pro fucking code do not touch ever
+            if (dev.decodeCode) decode();
         }
 
         public void init() {
@@ -1469,24 +1457,19 @@ public class Resource implements Serializable {
             name = buf.string();
             data = buf.bytes();
 
-            if (dev.decodeCode)
-                try {
-                    decode();
-                } catch (Exception ex) {
-                    System.out.println("Error Code: " + ex.getMessage());
-                }
+            if (dev.decodeCode) decode();
         }
 
         public void init() {
         }
 
-        public void decode() throws Exception {
+        public void decode() {
             Path path = Paths.get("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
-            Files.createDirectories(path);
             if (!Files.exists(path.resolve(name))) {
                 new Thread("decode src " + path.resolve(name)) {
                     public void run() {
                         try {
+                            Files.createDirectories(path);
                             Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -1777,6 +1760,39 @@ public class Resource implements Serializable {
         }
 
         public void init() {
+        }
+
+        public void decode() {
+            File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
+            dir.mkdirs();
+            if (seq == null) {
+                dev.resourceLog("midi", dir.getPath(), "NULL");
+                return;
+            }
+            int[] types = MidiSystem.getMidiFileTypes(seq);
+            if (types.length == 0) {
+                dev.resourceLog("midi", dir.getPath(), "FAIL TYPE");
+                return;
+            } else {
+                for (int i : types) {
+                    String filename = name.substring(name.lastIndexOf('/') + 1) + "_" + i + ".mid";
+                    File outputfile = new File(dir, filename);
+                    if (!outputfile.exists()) {
+
+                        new Thread("decode midi " + outputfile.getPath()) {
+                            public void run() {
+                                try {
+                                    MidiSystem.write(seq, i, outputfile);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                dev.resourceLog("midi", outputfile.getPath(), "CREATED");
+                            }
+                        }.start();
+                    }
+                }
+            }
+
         }
     }
 

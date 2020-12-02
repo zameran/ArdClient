@@ -29,6 +29,7 @@ package haven;
 import haven.Composited.Desc;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -37,6 +38,7 @@ public class Avaview extends PView {
     public static final Tex missing = Resource.loadtex("gfx/hud/equip/missing");
     public static final Coord dasz = missing.sz();
     public Color color = Color.WHITE;
+    public FColor clearcolor = FColor.BLACK;
     public long avagob;
     public Desc avadesc;
     public Resource.Resolver resmap = null;
@@ -58,7 +60,7 @@ public class Avaview extends PView {
             if (args[0] != null)
                 avagob = Utils.uint32((Integer) args[0]);
             if ((args.length > 1) && (args[1] != null))
-                sz = (Coord) args[1];
+                sz = UI.scale((Coord) args[1]);
             if ((args.length > 2) && (args[2] != null))
                 camnm = (String) args[2];
             return (new Avaview(sz, avagob, camnm));
@@ -112,6 +114,8 @@ public class Avaview extends PView {
             this.color = (Color) args[0];
         } else if (msg == "pop") {
             pop(Desc.decode(ui.sess, args));
+        } else if (msg == "bg") {
+            clearcolor = new FColor((Color) args[0]);
         } else {
             super.uimsg(msg, args);
         }
@@ -125,6 +129,21 @@ public class Avaview extends PView {
 
     public void pop(Desc ava) {
         pop(ava, null);
+    }
+
+    private Collection<ResData> nposes = null, lposes = null;
+    private boolean nposesold;
+
+    public void chposes(Collection<ResData> poses, boolean interp) {
+        nposes = poses;
+        nposesold = !interp;
+    }
+
+    private void updposes() {
+        if (nposes == null) {
+            nposes = lposes;
+            nposesold = true;
+        }
     }
 
     private static final OwnerContext.ClassResolver<Avaview> ctxr = new OwnerContext.ClassResolver<Avaview>()
@@ -144,7 +163,22 @@ public class Avaview extends PView {
         public <T> T context(Class<T> cl) {
             return (ctxr.context(cl, Avaview.this));
         }
+
+        @Deprecated
+        public Glob glob() {
+            return (context(Glob.class));
+        }
+
+        public Coord3f getc() {
+            return (Coord3f.o);
+        }
+
+        public double getv() {
+            return (0);
+        }
     }
+
+    private final AvaOwner avaowner = new AvaOwner();
 
     private void initcomp(Composite gc) {
         if ((comp == null) || (comp.skel != gc.comp.skel)) {

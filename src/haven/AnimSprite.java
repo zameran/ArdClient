@@ -38,25 +38,29 @@ public class AnimSprite extends Sprite {
     public static final Factory fact = new Factory() {
         public Sprite create(Owner owner, Resource res, Message sdt) {
             if (res.layer(MeshAnim.Res.class) == null)
-                return null;
+                return (null);
             CheckListboxItem itm = Config.disableanim.get(res.name);
             if (itm != null && itm.selected)
                 return null;
-            return (new AnimSprite(owner, res, sdt));
+            return (new AnimSprite(owner, res, sdt) {
+                public String toString() {
+                    return(String.format("#<anim-sprite %s>", res.name));
+                }
+            });
         }
     };
 
     private AnimSprite(Owner owner, Resource res, Message sdt) {
         super(owner, res);
         int mask = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        Collection<MeshAnim.Anim> anims = new LinkedList<MeshAnim.Anim>();
+        Collection<MeshAnim.Anim> anims = new LinkedList<>();
         for (MeshAnim.Res ar : res.layers(MeshAnim.Res.class)) {
             if ((ar.id < 0) || (((1 << ar.id) & mask) != 0))
                 anims.add(ar.make());
         }
         this.anims = anims.toArray(new MeshAnim.Anim[0]);
         MorphedMesh.Morpher.Factory morph = MorphedMesh.combine(this.anims);
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<Rendered> rl = new LinkedList<>();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             if ((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & mask) != 0))) {
                 boolean stat = true;
@@ -72,6 +76,14 @@ public class AnimSprite extends Sprite {
                     rl.add(mr.mat.get().apply(new MorphedMesh(mr.m, morph)));
             }
         }
+        Owner rec = null;
+        for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
+            if ((lr.id < 0) || (((1 << lr.id) & mask) != 0)) {
+                if (rec == null)
+                    rec = new RecOwner();
+                rl.add(lr.l.make(rec));
+            }
+        }
         parts = rl.toArray(new Rendered[0]);
     }
 
@@ -82,7 +94,6 @@ public class AnimSprite extends Sprite {
     }
 
     public boolean tick(int idt) {
-
         boolean ret = false;
         float dt = idt / 1000.0f;
         for (MeshAnim.Anim anim : anims)

@@ -58,9 +58,9 @@ public class LatentMat extends GLState.Abstract {
     }
 
     @Material.ResName("latent")
-    public static class $latent implements Material.ResCons {
-        public GLState cons(Resource res, Object... args) {
-            return (new LatentMat(((String) args[0]).intern()));
+    public static class $latent implements Material.ResCons2 {
+        public Material.Res.Resolver cons(Resource res, Object... args) {
+            return ((buf) -> buf.add(new LatentMat(((String) args[0]).intern())));
         }
     }
 }

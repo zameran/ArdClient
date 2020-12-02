@@ -38,6 +38,7 @@ import static haven.Utils.c2fa;
 
 public class Light implements Rendered {
     public float[] amb, dif, spc;
+    public int prio;
 
     private static final float[] defamb = {0.0f, 0.0f, 0.0f, 1.0f};
     private static final float[] defdif = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -69,6 +70,11 @@ public class Light implements Rendered {
         this.amb = c2fa(amb);
         this.dif = c2fa(dif);
         this.spc = c2fa(spc);
+    }
+
+    public Light prio(int prio) {
+        this.prio = prio;
+        return (this);
     }
 
     public void enable(GOut g, int idx) {
@@ -199,6 +205,13 @@ public class Light implements Rendered {
             } else {
                 throw (new Resource.LoadException("Unknown lighting type: " + nm, res));
             }
+//            switch ((String) args[0]) {
+//                case "def":
+//                case "n":
+//                    return (null);
+//                default:
+//                    throw (new RuntimeException(String.format("%s using non-default lighting", res.name)));
+//            }
         }
     }
 
@@ -319,30 +332,66 @@ public class Light implements Rendered {
                     (int) (buf.cpfloat() * 255.0)));
         }
 
+        private static Color cold2(Message buf) {
+            return (new Color((int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0)));
+        }
+
         public Res(Resource res, Message buf) {
             res.super();
-            this.id = buf.int16();
-            this.amb = cold(buf);
-            this.dif = cold(buf);
-            this.spc = cold(buf);
-            while (!buf.eom()) {
-                int t = buf.uint8();
-                if (t == 1) {
-                    hatt = true;
-                    ac = (float) buf.cpfloat();
-                    al = (float) buf.cpfloat();
-                    aq = (float) buf.cpfloat();
-                } else if (t == 2) {
-                    float x = (float) buf.cpfloat();
-                    float y = (float) buf.cpfloat();
-                    float z = (float) buf.cpfloat();
-                    dir = new Coord3f(x, y, z);
-                } else if (t == 3) {
-                    hexp = true;
-                    exp = (float) buf.cpfloat();
-                } else {
-                    throw (new Resource.LoadException("Unknown light data: " + t, getres()));
+            int ver = buf.uint8();
+            if (ver == 0) {
+                this.id = buf.int8();
+                this.amb = cold(buf);
+                this.dif = cold(buf);
+                this.spc = cold(buf);
+                while (!buf.eom()) {
+                    int t = buf.uint8();
+                    if (t == 1) {
+                        hatt = true;
+                        ac = (float) buf.cpfloat();
+                        al = (float) buf.cpfloat();
+                        aq = (float) buf.cpfloat();
+                    } else if (t == 2) {
+                        float x = (float) buf.cpfloat();
+                        float y = (float) buf.cpfloat();
+                        float z = (float) buf.cpfloat();
+                        dir = new Coord3f(x, y, z);
+                    } else if (t == 3) {
+                        hexp = true;
+                        exp = (float) buf.cpfloat();
+                    } else {
+                        throw (new Resource.LoadException("Unknown light data: " + t, getres()));
+                    }
                 }
+            } else if (ver == 1) {
+                this.id = buf.int16();
+                this.amb = cold2(buf);
+                this.dif = cold2(buf);
+                this.spc = cold2(buf);
+                while (!buf.eom()) {
+                    int t = buf.uint8();
+                    if (t == 1) {
+                        hatt = true;
+                        ac = buf.float32();
+                        al = buf.float32();
+                        aq = buf.float32();
+                    } else if (t == 2) {
+                        float x = buf.float32();
+                        float y = buf.float32();
+                        float z = buf.float32();
+                        dir = new Coord3f(x, y, z);
+                    } else if (t == 3) {
+                        hexp = true;
+                        exp = buf.float32();
+                    } else {
+                        throw (new Resource.LoadException("Unknown light data: " + t, getres()));
+                    }
+                }
+            } else {
+                throw (new Resource.LoadException("Unknown light version: " + ver, getres()));
             }
         }
 

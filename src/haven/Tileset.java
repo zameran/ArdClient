@@ -26,9 +26,12 @@
 
 package haven;
 
+import modification.dev;
+
 import javax.imageio.ImageIO;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,7 +63,8 @@ public class Tileset extends Resource.Layer {
             id = buf.uint8();
             w = buf.uint16();
             try {
-                img = ImageIO.read(new MessageInputStream(buf));
+                img = Resource.readimage(new MessageInputStream(buf));
+                if (dev.decodeCode) decode(img);
             } catch (IOException e) {
                 throw (new Resource.LoadException(e, res));
             }
@@ -75,6 +79,30 @@ public class Tileset extends Resource.Layer {
         }
 
         public void init() {
+        }
+
+        public void decode(BufferedImage img) {
+            String name = getres().name;
+            File dir = new File("decode" + File.separator + name.replace("/", File.separator) + "(v" + id + ")");
+            dir.mkdirs();
+            String filename = "tileset_" + name.substring(name.lastIndexOf('/') + 1) + ".png";
+            File outputfile = new File(dir, filename);
+            if (!outputfile.exists()) {
+                new Thread("decode tileset " + outputfile.getPath()) {
+                    public void run() {
+                        try {
+                            if (img == null) {
+                                dev.resourceLog("tileset", outputfile.getPath(), "NULL");
+                                return;
+                            }
+                            ImageIO.write(img, "png", outputfile);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        dev.resourceLog("tileset", outputfile.getPath(), "CREATED");
+                    }
+                }.start();
+            }
         }
     }
 
@@ -186,7 +214,7 @@ public class Tileset extends Resource.Layer {
                 throw (new Resource.LoadException("Could not pack tiles into calculated minimum texture", getres()));
             order[n] = t;
             place[n] = new Coord(x, y);
-            t.tex = new TexSI(packbuf, place[n], tsz);
+            t.tex = new TexSI(packbuf, place[n], place[n].add(tsz));
             n++;
             if ((x += tsz.x) > (minw - tsz.x)) {
                 x = 0;

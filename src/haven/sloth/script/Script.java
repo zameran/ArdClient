@@ -69,7 +69,6 @@ public abstract class Script extends Thread {
     public void interrupt() {
         intp = true;
         super.interrupt();
-        super.stop();
     }
 
     private boolean intp() {
@@ -198,6 +197,7 @@ public abstract class Script extends Thread {
                     logger.atSevere().withCause(t).log("Script %s [%d] died, review logs", name(), sid);
                 }
             }
+            session.context.remove(sid);
         }
 
         endDiscord();

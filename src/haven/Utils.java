@@ -80,6 +80,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -344,6 +345,39 @@ public class Utils {
                 CheckListboxItem itm = (CheckListboxItem) entry.getValue();
                 if (itm.selected)
                     jsonarr += "\"" + entry.getKey() + "\",";
+            }
+            if (jsonarr.length() > 0)
+                jsonarr = jsonarr.substring(0, jsonarr.length() - 1);
+            Utils.setpref(prefname, "[" + jsonarr + "]");
+        } catch (SecurityException e) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static ArrayList<String> loadcollection(String prefname) {
+        ArrayList<String> a = new ArrayList<>();
+        try {
+            String jsonstr = Utils.getpref(prefname, null);
+            if (jsonstr != null) {
+                JSONArray ja = new JSONArray(jsonstr);
+                for (int i = 0; i < ja.length(); i++) {
+                    if (!a.contains(ja.getString(i)))
+                        a.add(ja.getString(i));
+                }
+            }
+        } catch (SecurityException e) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return a;
+    }
+
+    public static void setcollection(String prefname, Set<String> val) {
+        try {
+            String jsonarr = "";
+            for (String item : val) {
+                jsonarr += "\"" + item + "\",";
             }
             if (jsonarr.length() > 0)
                 jsonarr = jsonarr.substring(0, jsonarr.length() - 1);
