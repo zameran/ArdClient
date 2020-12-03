@@ -1099,6 +1099,9 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "management::skillsncredo",
                 Resource.local().load("custom/paginae/default/wnd/skillsncredo"),
                 (pag) -> ui.gui.scwnd.toggleVisibility()));
+        addSpecial(new SpecialPagina(this, "management::slothtimers",
+                Resource.local().load("custom/paginae/default/wnd/slothtimers"),
+                (pag) -> ui.gui.toggleTimers()));
     }
 
     protected void updlayout() {

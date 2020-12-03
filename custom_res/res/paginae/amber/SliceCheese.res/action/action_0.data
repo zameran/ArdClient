@@ -1,0 +1,17 @@
+#ABUTTON LAYER FOR RES amber-resrd//\res\paginae\amber\SliceCheese.res
+#String pr
+paginae/amber/amber
+#uint16 pver
+1
+#String name
+Cheese! Slices Trays Containing Cheese In Visible Inventory
+#String preq
+
+#uint16 hk
+0
+#uint16 ad length
+2
+#String ad[0]
+@
+#String ad[1]
+SliceCheese
