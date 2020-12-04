@@ -31,6 +31,7 @@ import haven.res.ui.tt.q.qbuff.QBuff;
 import modification.configuration;
 
 import java.awt.Color;
+import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Inventory extends Widget implements DTarget {
-    public static final Tex invsq = Resource.loadtex("gfx/hud/invsq");
-    public static final Coord sqsz = new Coord(33, 33);
+    public static final Coord sqsz = UI.scale(new Coord(33, 33));
+    public static final Tex invsq/* = Resource.loadtex("gfx/hud/invsq")*/;
     public boolean dropul = true;
     public Coord isz;
     public static final Comparator<WItem> ITEM_COMPARATOR_ASC = new Comparator<WItem>() {
@@ -64,10 +65,44 @@ public class Inventory extends Widget implements DTarget {
     public boolean locked = false;
     public Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
 
+    static {
+        Coord sz = sqsz.add(1, 1);
+        WritableRaster buf = PUtils.imgraster(sz);
+        for (int i = 1, y = sz.y - 1; i < sz.x - 1; i++) {
+            buf.setSample(i, 0, 0, 20);
+            buf.setSample(i, 0, 1, 28);
+            buf.setSample(i, 0, 2, 21);
+            buf.setSample(i, 0, 3, 167);
+            buf.setSample(i, y, 0, 20);
+            buf.setSample(i, y, 1, 28);
+            buf.setSample(i, y, 2, 21);
+            buf.setSample(i, y, 3, 167);
+        }
+        for (int i = 1, x = sz.x - 1; i < sz.y - 1; i++) {
+            buf.setSample(0, i, 0, 20);
+            buf.setSample(0, i, 1, 28);
+            buf.setSample(0, i, 2, 21);
+            buf.setSample(0, i, 3, 167);
+            buf.setSample(x, i, 0, 20);
+            buf.setSample(x, i, 1, 28);
+            buf.setSample(x, i, 2, 21);
+            buf.setSample(x, i, 3, 167);
+        }
+        for (int y = 1; y < sz.y - 1; y++) {
+            for (int x = 1; x < sz.x - 1; x++) {
+                buf.setSample(x, y, 0, 36);
+                buf.setSample(x, y, 1, 52);
+                buf.setSample(x, y, 2, 38);
+                buf.setSample(x, y, 3, 125);
+            }
+        }
+        invsq = new TexI(PUtils.rasterimg(buf));
+    }
+
     @RName("inv")
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
-            return new Inventory((Coord) args[0]);
+            return (new Inventory((Coord) args[0]));
         }
     }
 
@@ -84,7 +119,8 @@ public class Inventory extends Widget implements DTarget {
     }
 
     public Inventory(Coord sz) {
-        super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
+//        super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
+        super(sqsz.mul(sz).add(1, 1));
         isz = sz;
     }
 
@@ -136,7 +172,7 @@ public class Inventory extends Widget implements DTarget {
     public void uimsg(String msg, Object... args) {
         if (msg == "sz") {
             isz = (Coord) args[0];
-            resize(invsq.sz().add(new Coord(-1, -1)).mul(isz).add(new Coord(1, 1)));
+            resize(invsq.sz().add(UI.scale(new Coord(-1, -1))).mul(isz).add(UI.scale(new Coord(1, 1))));
         } else if (msg == "mode") {
             dropul = (((Integer) args[0]) == 0);
         } else {

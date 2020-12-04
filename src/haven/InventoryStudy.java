@@ -136,34 +136,36 @@ public class InventoryStudy extends Inventory {
         super.cdestroy(w);
         if (!(w instanceof WItem))
             return;
-        GItem item = ((WItem) w).item;
-        try {
-            haven.resutil.Curiosity ci = ItemInfo.find(haven.resutil.Curiosity.class, item.info());
-            if (ci != null && ((WItem) w).itemmeter.get() > 0.99) {
-                Resource.Tooltip tt = item.resource().layer(Resource.Tooltip.class);
-                if (tt != null)
-                    ui.gui.syslog.append(tt.t + " LP: " + ci.exp, Color.LIGHT_GRAY);
+        if (ui.gui != null) {
+            GItem item = ((WItem) w).item;
+            try {
+                haven.resutil.Curiosity ci = ItemInfo.find(haven.resutil.Curiosity.class, item.info());
+                if (ci != null && ((WItem) w).itemmeter.get() > 0.99) {
+                    Resource.Tooltip tt = item.resource().layer(Resource.Tooltip.class);
+                    if (tt != null)
+                        ui.gui.syslog.append(tt.t + " LP: " + ci.exp, Color.LIGHT_GRAY);
 
-                if (!Config.alarmstudy.equals("None"))
-                    Audio.play(Resource.local().loadwait(Config.alarmstudy), Config.studyalarmvol);
+                    if (!Config.alarmstudy.equals("None"))
+                        Audio.play(Resource.local().loadwait(Config.alarmstudy), Config.studyalarmvol);
 
-                if (Config.autostudy) {
-                    Window invwnd = ui.gui.getwnd("Inventory");
-                    Window cupboard = ui.gui.getwnd("Cupboard");
-                    Resource res = item.resource();
-                    if (res != null) {
-                        if (!replacecurio(invwnd, res, ((WItem) w).c) && cupboard != null)
-                            replacecurio(cupboard, res, ((WItem) w).c);
+                    if (Config.autostudy) {
+                        Window invwnd = ui.gui.getwnd("Inventory");
+                        Window cupboard = ui.gui.getwnd("Cupboard");
+                        Resource res = item.resource();
+                        if (res != null) {
+                            if (!replacecurio(invwnd, res, ((WItem) w).c) && cupboard != null)
+                                replacecurio(cupboard, res, ((WItem) w).c);
+                        }
                     }
                 }
+            } catch (Loading l) {
             }
-        } catch (Loading l) {
-        }
 
-        if (Config.studybuff && getFreeSpace() > 0) {
-            Buff tgl = ui.gui.buffs.gettoggle("brain");
-            if (tgl == null)
-                ui.gui.buffs.addchild(new Buff(Bufflist.buffbrain.indir()));
+            if (Config.studybuff && getFreeSpace() > 0) {
+                Buff tgl = ui.gui.buffs.gettoggle("brain");
+                if (tgl == null)
+                    ui.gui.buffs.addchild(new Buff(Bufflist.buffbrain.indir()));
+            }
         }
     }
 

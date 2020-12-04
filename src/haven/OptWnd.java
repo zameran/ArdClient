@@ -3437,17 +3437,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Resource info on item") {
-            {
-                a = Config.resinfo;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("resinfo", val);
-                Config.resinfo = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("Show base quality fep on food") {
             {
                 a = FoodInfo.showbaseq;

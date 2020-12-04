@@ -171,7 +171,7 @@ public abstract class MovableWidget extends Widget {
             } else if ((c.x + (sz.x * VISIBLE_PER)) < 0) {
                 c.x = -(int) Math.round(sz.x * VISIBLE_PER);
             }
-            if ((c.y + (sz.x * (1 - VISIBLE_PER))) > parent.sz.y) {
+            if ((c.y + (sz.y * (1 - VISIBLE_PER))) > parent.sz.y) {
                 c.y = (int) Math.round(parent.sz.y - sz.y * (1 - VISIBLE_PER));
             } else if ((c.y + (sz.y * VISIBLE_PER)) < 0) {
                 c.y = -(int) Math.round(sz.y * VISIBLE_PER);

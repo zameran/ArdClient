@@ -49,14 +49,7 @@ public class CraftHistoryBelt extends MovableWidget {
         }
         int slot = beltslot(c);
         if (slot != -1) {
-            if (button == 1 && belt[slot] != null) {
-                String[] ad = belt[slot].act().ad;
-                if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
-                    MenuGrid g = ui.gui.menu;
-                    g.lastCraft = g.getPagina(ad[1]);
-                }
-                ui.gui.act(ad);
-            } else if (button == 1 && belt[slot] == null) {
+            if (button == 1) {
                 if (ui.modshift) {
                     if (vertical) {
                         sz = hsz;
@@ -65,13 +58,26 @@ public class CraftHistoryBelt extends MovableWidget {
                         sz = vsz;
                         vertical = true;
                     }
-//                    Utils.setprefb("histbelt_vertical", vertical);
+                    Utils.setprefb("histbelt_vertical", vertical);
+                } else if (belt[slot] != null) {
+                    String[] ad = belt[slot].act().ad;
+                    if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
+                        MenuGrid g = ui.gui.menu;
+                        g.lastCraft = g.getPagina(ad[1]);
+                    }
+//                ui.gui.act(ad);
+                    act(belt[slot]);
                 }
-                return true;
             }
             return true;
         }
         return false;
+    }
+
+    public void act(MenuGrid.Pagina act) {
+        if (ui.gui != null) {
+            ui.gui.menu.use(act.button(), false);
+        }
     }
 
 //    @Override

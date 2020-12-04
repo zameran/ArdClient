@@ -229,7 +229,7 @@ public class newQuickSlotsWdg extends MovableWidget implements DTarget {
             return true;
         if (this.ui.modmeta) {
             return true;
-        } else if (this.ui.modctrl && button == 1 && Config.disablequickslotdrop) {
+        } else if (ui.modctrl && button == 1 && Config.disablequickslotdrop) {
             return true;
         } else {
             Equipory e = this.ui.gui.getequipory();

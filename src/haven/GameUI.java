@@ -2024,12 +2024,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     @Override
     public boolean mousewheel(Coord c, int amount) {
-        if (fv != null && ui.modctrl) {
+        if (fs != null && fv != null && ui.modctrl) {
             fv.scroll(amount);
             return true;
-        } else {
-            return super.mousewheel(c, amount);
         }
+        return super.mousewheel(c, amount);
     }
 
     public void makeDowseWnd(final Coord2d startc, final double a1, final double a2, final Consumer<Color> changeCol, final Runnable onClose) {

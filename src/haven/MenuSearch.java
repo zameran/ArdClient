@@ -101,7 +101,8 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
 
     @Override
     protected void removed() {
-        ui.gui.menu.paginae.removeListener(this);
+        if (ui.gui != null)
+            ui.gui.menu.paginae.removeListener(this);
     }
 
     private void refilter() {

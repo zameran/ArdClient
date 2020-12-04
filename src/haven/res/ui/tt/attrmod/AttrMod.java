@@ -4,63 +4,59 @@ import haven.CharWnd;
 import haven.Coord;
 import haven.ItemInfo;
 import haven.ItemInfo.Tip;
-import haven.PUtils;
 import haven.Resource;
-import haven.Resource.Image;
 import haven.Resource.Resolver;
-import haven.Resource.Tooltip;
 import haven.RichText;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
+
+import static haven.PUtils.convolvedown;
 
 public class AttrMod extends Tip {
     public final Collection<AttrMod.Mod> mods;
     private static String buff = "128,255,128";
     private static String debuff = "255,128,128";
 
-    public AttrMod(Owner var1, Collection<AttrMod.Mod> var2) {
-        super(var1);
-        this.mods = var2;
-        StringBuilder sinfo = new StringBuilder();
+    public AttrMod(Owner owner, Collection<AttrMod.Mod> mods) {
+        super(owner);
+        this.mods = mods;
+        /*StringBuilder sinfo = new StringBuilder();
         for (Mod mod : mods) {
             sinfo.append(mod.toString()).append(" ");
-        }
+        }*/
     }
 
-    public static BufferedImage modimg(Collection<AttrMod.Mod> var0) {
-        ArrayList var1 = new ArrayList(var0.size());
-        Iterator var2 = var0.iterator();
+    public static BufferedImage modimg(Collection<AttrMod.Mod> mods) {
+        Collection<BufferedImage> imgs = new LinkedList<>();
 
-        while (var2.hasNext()) {
-            AttrMod.Mod var3 = (AttrMod.Mod) var2.next();
-            BufferedImage var4 = RichText.render(String.format("%s $col[%s]{%s%d}", ((Tooltip) var3.attr.layer(Resource.tooltip)).t, var3.mod < 0 ? debuff : buff, Character.valueOf((char) (var3.mod < 0 ? '-' : '+')), Math.abs(var3.mod)), 0, new Object[0]).img;
-            BufferedImage var5 = PUtils.convolvedown(((Image) var3.attr.layer(Resource.imgc)).img, new Coord(var4.getHeight(), var4.getHeight()), CharWnd.iconfilter);
-            var1.add(catimgsh(0, new BufferedImage[]{var5, var4}));
+        for (AttrMod.Mod mod : mods) {
+            BufferedImage head = RichText.render(String.format("%s $col[%s]{%s%d}", mod.attr.layer(Resource.tooltip).t, mod.mod < 0 ? debuff : buff, mod.mod < 0 ? '-' : '+', Math.abs(mod.mod)), 0).img;
+            BufferedImage icon = convolvedown((mod.attr.layer(Resource.imgc)).img, new Coord(head.getHeight(), head.getHeight()), CharWnd.iconfilter);
+            imgs.add(catimgsh(0, icon, head));
         }
 
-        return catimgs(0, (BufferedImage[]) var1.toArray(new BufferedImage[0]));
+        return catimgs(0, imgs.toArray(new BufferedImage[0]));
     }
 
     public BufferedImage tipimg() {
-        return modimg(this.mods);
+        return modimg(mods);
     }
 
     public static class Fac implements InfoFactory {
         public Fac() {
         }
 
-        public ItemInfo build(Owner var1, Object... var2) {
-            Resolver var3 = (Resolver) var1.context(Resolver.class);
-            ArrayList var4 = new ArrayList();
+        public ItemInfo build(Owner owner, Object... attr) {
+            Resolver resolver = owner.context(Resolver.class);
+            Collection<Mod> mods = new LinkedList<>();
 
-            for (int var5 = 1; var5 < var2.length; var5 += 2) {
-                var4.add(new AttrMod.Mod((Resource) var3.getres((Integer) var2[var5]).get(), (Integer) var2[var5 + 1]));
+            for (int i = 1; i < attr.length; i += 2) {
+                mods.add(new AttrMod.Mod(resolver.getres((Integer) attr[i]).get(), (Integer) attr[i + 1]));
             }
 
-            return new AttrMod(var1, var4);
+            return new AttrMod(owner, mods);
         }
     }
 
@@ -68,9 +64,9 @@ public class AttrMod extends Tip {
         public final Resource attr;
         public final int mod;
 
-        public Mod(Resource var1, int var2) {
-            this.attr = var1;
-            this.mod = var2;
+        public Mod(Resource res, int mod) {
+            this.attr = res;
+            this.mod = mod;
         }
     }
 }

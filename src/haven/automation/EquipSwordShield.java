@@ -199,11 +199,28 @@ public class EquipSwordShield implements Runnable {
 
     private HashMap<WItem, Integer> getWeapon(Inventory inv) {
         HashMap<WItem, Integer> map = new HashMap<>();
-        int priority;
-        WItem weapon = inv.getItemPartial("Sword");
+        int priority = 0;
+
+        WItem righthand = gui.getequipory().quickslots[7];
+        WItem lefthand = gui.getequipory().quickslots[6];
+
+        WItem weapon = null;
+        if ((righthand == null || !righthand.name.get().contains("Sword")) && (lefthand == null || !lefthand.name.get().contains("Sword"))) {
+            List<WItem> weapons = inv.getItemsPartial("Sword");
+            if (weapons.size() > 0) {
+                weapons.sort(Comparator.comparingDouble(o -> o.item.quality().q));
+                weapon = weapons.get(weapons.size() - 1);
+            }
+        }
         priority = 3;
         if (weapon == null) {
-            weapon = inv.getItemPartial("shield");
+            if ((righthand == null || !righthand.name.get().contains("shield")) && (lefthand == null || !lefthand.name.get().contains("shield"))) {
+                List<WItem> weapons = inv.getItemsPartial("shield");
+                if (weapons.size() > 0) {
+                    weapons.sort(Comparator.comparingDouble(o -> o.item.quality().q));
+                    weapon = weapons.get(weapons.size() - 1);
+                }
+            }
             priority = 2;
         }
         if (weapon != null)
@@ -214,10 +231,28 @@ public class EquipSwordShield implements Runnable {
     private HashMap<WItem, Integer> getWeaponQuickBelt(InventoryBelt inv) {
         HashMap<WItem, Integer> map = new HashMap<>();
         int priority = 0;
-        WItem weapon = inv.getItemPartial("Sword");
+
+        WItem righthand = gui.getequipory().quickslots[7];
+        WItem lefthand = gui.getequipory().quickslots[6];
+
+        WItem weapon = null;
+        if ((righthand == null || !righthand.name.get().contains("Sword")) && (lefthand == null || !lefthand.name.get().contains("Sword"))) {
+            List<WItem> weapons = inv.getItemsPartial("Sword");
+            if (weapons.size() > 0) {
+                weapons.sort(Comparator.comparingDouble(o -> o.item.quality().q));
+                weapon = weapons.get(weapons.size() - 1);
+            }
+
+        }
         priority = 3;
         if (weapon == null) {
-            weapon = inv.getItemPartial("shield");
+            if ((righthand == null || !righthand.name.get().contains("shield")) && (lefthand == null || !lefthand.name.get().contains("shield"))) {
+                List<WItem> weapons = inv.getItemsPartial("shield");
+                if (weapons.size() > 0) {
+                    weapons.sort(Comparator.comparingDouble(o -> o.item.quality().q));
+                    weapon = weapons.get(weapons.size() - 1);
+                }
+            }
             priority = 2;
         }
         if (weapon != null)

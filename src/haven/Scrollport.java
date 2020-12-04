@@ -96,8 +96,10 @@ public class Scrollport extends Widget {
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        bar.ch(amount * step);
-        return (true);
+        if (!super.mousewheel(c, amount)) {
+            bar.ch(amount * step);
+        }
+        return true;
     }
 
     public void addchild(Widget child, Object... args) {

@@ -40,6 +40,7 @@ import haven.factories.SeamarriageFactory;
 import haven.factories.WoodlandrealmFactory;
 import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
+import haven.res.ui.tt.attrmod.AttrMod;;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -120,7 +121,6 @@ public abstract class ItemInfo {
 
     @Resource.PublishedCode(name = "tt", instancer = FactMaker.class)
     public static interface InfoFactory {
-        // public ItemInfo build(Owner owner, Object... args);
         public default ItemInfo build(Owner owner, Raw raw, Object... args) {
             return (build(owner, args));
         }
@@ -284,7 +284,7 @@ public abstract class ItemInfo {
         }
 
         public void layout(Layout l) {
-            BufferedImage t = tipimg((l.width == 0) ? 200 : l.width);
+            BufferedImage t = tipimg((l.width == 0) ? UI.scale(200) : l.width);
             if (t != null)
                 l.cmp.add(t, new Coord(0, l.cmp.sz.y + 10));
         }
@@ -398,7 +398,7 @@ public abstract class ItemInfo {
         return (ret);
     }
 
-    public synchronized static BufferedImage longtip(List<ItemInfo> info) {
+    public static BufferedImage longtip(List<ItemInfo> info) {
         Layout l = new Layout();
         synchronized (Collections.unmodifiableList(info)) {
             for (ItemInfo ii : info) {
@@ -413,13 +413,15 @@ public abstract class ItemInfo {
         return (l.render());
     }
 
-    public synchronized static BufferedImage shorttip(List<ItemInfo> info) {
+    public static BufferedImage shorttip(List<ItemInfo> info) {
         Layout l = new Layout();
-        for (ItemInfo ii : info) {
-            if (ii instanceof Tip) {
-                Tip tip = ((Tip) ii).shortvar();
-                if (tip != null)
-                    l.add(tip);
+        synchronized (Collections.unmodifiableList(info)) {
+            for (ItemInfo ii : info) {
+                if (ii instanceof Tip) {
+                    Tip tip = ((Tip) ii).shortvar();
+                    if (tip != null)
+                        l.add(tip);
+                }
             }
         }
         if (l.tips.size() < 1)
@@ -468,6 +470,7 @@ public abstract class ItemInfo {
 
         customFactories.put("ui/tt/armor", new ArmorFactory());
         customFactories.put("ui/tt/wear", new WearFactory());
+        customFactories.put("ui/tt/attrmod", new AttrMod.Fac());;
     }
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
@@ -581,7 +584,7 @@ public abstract class ItemInfo {
                 List<Object> slots = (List<Object>) Reflect.getFieldValue(info, "sub");
                 parseAttrMods(bonuses, slots);
             }
-            parseAttrMods(bonuses, ItemInfo.findall("haven.res.ui.tt.attrmod.AttrMod", infos));
+            parseAttrMods(bonuses, ItemInfo.findall(AttrMod.class, infos));
         } catch (Exception ignored) {
         }
         Pair<Integer, Integer> wear = ItemInfo.getArmor(infos);

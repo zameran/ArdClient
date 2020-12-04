@@ -2,11 +2,9 @@ import haven.CharWnd;
 import haven.Coord;
 import haven.GItem.NumberInfo;
 import haven.GSprite;
-import haven.GSprite.ImageSprite;
-import haven.Glob;
 import haven.ItemInfo;
 import haven.ItemInfo.Tip;
-import haven.PUtils;
+import haven.Loading;
 import haven.ResData;
 import haven.Resource;
 import haven.RichText;
@@ -14,30 +12,25 @@ import haven.Text;
 import haven.Utils;
 import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.attrmod.AttrMod;
-import haven.res.ui.tt.defn.DefName;
-import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static haven.PUtils.convolvedown;
 
 
 public class ISlots extends Tip implements NumberInfo {
     public static final Text ch = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Gilding:"));
     public final Collection<SItem> s = new ArrayList<SItem>();
     public final int left;
-    public final double pmin;
-    public final double pmax;
+    public final double pmin, pmax;
     public final Resource[] attrs;
-    public static final String chc = "192,192,255";
-    public static final Object[] defn = new Object[]{new DefName()};
 
     public ISlots(Owner owner, int left, double pmin, double pmax, Resource[] attrs) {
         super(owner);
@@ -47,39 +40,28 @@ public class ISlots extends Tip implements NumberInfo {
         this.attrs = attrs;
     }
 
-    public void layout(Layout layout) {
-        layout.cmp.add(ch.img, new Coord(0, layout.cmp.sz.y));
-        BufferedImage chanceImg;
+    public static final String chc = "192,192,255";
+
+    public void layout(Layout l) {
+        l.cmp.add(ch.img, new Coord(0, l.cmp.sz.y));
         if (attrs.length > 0) {
             String chanceStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Chance: $col[%s]{%d%%} to $col[%s]{%d%%}");
-            chanceImg = RichText.render(String.format(chanceStr,
-                    chc,
-                    Long.valueOf(Math.round(100.0D * pmin)),
-                    chc,
-                    Long.valueOf(Math.round(100.0D * pmax))),
-                    0,
-                    new Object[0]).img;
-            int szy = chanceImg.getHeight();
-            byte cx = 10;
-            int cy = layout.cmp.sz.y;
-            layout.cmp.add(chanceImg, new Coord(cx, cy));
-            int iconX = cx + chanceImg.getWidth() + 10;
-
-            for (int i = 0; i < attrs.length; ++i) {
-                BufferedImage iconImg = PUtils.convolvedown((attrs[i].layer(Resource.imgc)).img, new Coord(szy, szy), CharWnd.iconfilter);
-                layout.cmp.add(iconImg, new Coord(iconX, cy));
-                iconX += iconImg.getWidth() + 2;
+            BufferedImage head = RichText.render(String.format(chanceStr, chc, Math.round(100 * pmin), chc, Math.round(100 * pmax)), 0).img;
+            int h = head.getHeight();
+            int x = 10, y = l.cmp.sz.y;
+            l.cmp.add(head, new Coord(x, y));
+            x += head.getWidth() + 10;
+            for (int i = 0; i < attrs.length; i++) {
+                BufferedImage icon = convolvedown(attrs[i].layer(Resource.imgc).img, new Coord(h, h), CharWnd.iconfilter);
+                l.cmp.add(icon, new Coord(x, y));
+                x += icon.getWidth() + 2;
             }
         } else {
             String chanceStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Chance: $col[%s]{%d%%}");
-            chanceImg = RichText.render(String.format(chanceStr,
-                    chc, Integer.valueOf((int) Math.round(100.0D * pmin))),
-                    0,
-                    new Object[0]).img;
-            layout.cmp.add(chanceImg, new Coord(10, layout.cmp.sz.y));
+            BufferedImage head = RichText.render(String.format(chanceStr, chc, (int) Math.round(100 * pmin)), 0).img;
+            l.cmp.add(head, new Coord(10, l.cmp.sz.y));
         }
 
-        Iterator sItemIterator = s.iterator();
         Map<Resource, Integer> totalAttr = new HashMap<Resource, Integer>();
         int sitems = 0;
 
@@ -101,12 +83,11 @@ public class ISlots extends Tip implements NumberInfo {
         }
         if (totalAttr.size() > 0) sitems++;
 
-        while (sItemIterator.hasNext()) {
-            SItem sItem = (SItem) sItemIterator.next();
-            sItem.layout(layout);
+        for (SItem si : s) {
+            si.layout(l);
             sitems++;
 
-            for (ItemInfo ii : sItem.info) {
+            for (ItemInfo ii : si.info) {
                 if (ii instanceof AttrMod) {
                     for (AttrMod.Mod mod : ((AttrMod) ii).mods) {
                         boolean exist = false;
@@ -125,14 +106,14 @@ public class ISlots extends Tip implements NumberInfo {
         }
 
         if (left > 0) {
-            String gildStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Gildable ×%d");
+            String gildStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Gildable \u00d7%d");
             String gild2Str = Resource.getLocString(Resource.BUNDLE_LABEL, "Gildable");
-            layout.cmp.add(Text.slotFnd.render(left > 1 ? String.format(gildStr, Integer.valueOf(left)) : gild2Str).img, new Coord(10, layout.cmp.sz.y));
+            l.cmp.add(Text.slotFnd.render(left > 1 ? String.format(gildStr, left) : gild2Str).img, new Coord(10, l.cmp.sz.y));
         }
 
         if (totalAttr.size() > 0 && sitems > 1) {
             BufferedImage totalString = RichText.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Total:")).img;
-            layout.cmp.add(totalString, new Coord(0, layout.cmp.sz.y));
+            l.cmp.add(totalString, new Coord(0, l.cmp.sz.y));
 
             List<AttrMod.Mod> lmods = new ArrayList<>();
             List<Map.Entry<Resource, Integer>> sortAttr = totalAttr.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList());
@@ -141,7 +122,7 @@ public class ISlots extends Tip implements NumberInfo {
             }
 
             BufferedImage tip = AttrMod.modimg(lmods);
-            layout.cmp.add(tip, new Coord(10, layout.cmp.sz.y));
+            l.cmp.add(tip, new Coord(10, l.cmp.sz.y));
         }
     }
 
@@ -151,42 +132,27 @@ public class ISlots extends Tip implements NumberInfo {
         return r1.name.compareTo(r2.name);
     }
 
-    public int order() {
-        return 200;
-    }
+    public static final Object[] defn = new Object[]{Loading.waitfor(Resource.remote().load("ui/tt/defn"))};
 
-    public int itemnum() {
-        return s.size();
-    }
-
-    public Color numcolor() {
-        return left > 0 ? new Color(0, 169, 224) : Color.WHITE;
-    }
-
-    public static class SItem {
-        private final ISlots islots;
+    public class SItem {
         public final Resource res;
         public final GSprite spr;
         public final List<ItemInfo> info;
         public final String name;
 
-        public SItem(ISlots iSlots, ResData resData, Object[] args) {
-            this.islots = iSlots;
-            this.res = resData.res.get();
-            Spec spriteSpec = new Spec(resData, iSlots.owner, Utils.extend(new Object[]{ISlots.defn}, args));
-            this.spr = spriteSpec.spr();
-            this.name = spriteSpec.name();
-            Spec infoSpec = new Spec(resData, iSlots.owner, args);
-            this.info = infoSpec.info();
+        public SItem(ResData sdt, Object[] raw) {
+            this.res = sdt.res.get();
+            Spec spec1 = new Spec(sdt, owner, Utils.extend(new Object[]{defn}, raw));
+            this.spr = spec1.spr();
+            this.name = spec1.name();
+            Spec spec2 = new Spec(sdt, owner, raw);
+            this.info = spec2.info();
         }
 
         private BufferedImage img() {
-            return spr instanceof ImageSprite ? ((ImageSprite) spr).image() : (res.layer(Resource.imgc)).img;
-        }
-
-
-        public Glob glob() {
-            return islots.owner.glob();
+            if (spr instanceof GSprite.ImageSprite)
+                return (((GSprite.ImageSprite) spr).image());
+            return (res.layer(Resource.imgc).img);
         }
 
         public List<ItemInfo> info() {
@@ -197,17 +163,29 @@ public class ISlots extends Tip implements NumberInfo {
             return res;
         }
 
-        public void layout(Layout layout) {
-            BufferedImage iconImg = PUtils.convolvedown(img(), new Coord(16, 16), CharWnd.iconfilter);
-            BufferedImage nameImg = Text.render(name).img;
-            BufferedImage tipImg = ItemInfo.longtip(info);
-            byte cx = 10;
-            int cy = layout.cmp.sz.y;
-            layout.cmp.add(iconImg, new Coord(cx, cy));
-            layout.cmp.add(nameImg, new Coord(cx + 16 + 3, cy + (16 - nameImg.getHeight()) / 2));
-            if (tipImg != null) {
-                layout.cmp.add(tipImg, new Coord(cx + 16, cy + 16));
-            }
+        public void layout(Layout l) {
+            BufferedImage icon = convolvedown(img(), new Coord(16, 16), CharWnd.iconfilter);
+            BufferedImage lbl = Text.render(name).img;
+            BufferedImage sub = longtip(info);
+            int x = 10, y = l.cmp.sz.y;
+            l.cmp.add(icon, new Coord(x, y));
+            l.cmp.add(lbl, new Coord(x + 16 + 3, y + ((16 - lbl.getHeight()) / 2)));
+            if (sub != null)
+                l.cmp.add(sub, new Coord(x + 16, y + 16));
         }
+    }
+
+    public int order() {
+        return (200);
+    }
+
+    public int itemnum() {
+        return (s.size());
+    }
+
+    public static final Color avail = new Color(128, 192, 255);
+
+    public Color numcolor() {
+        return ((left > 0) ? avail : Color.WHITE);
     }
 }
