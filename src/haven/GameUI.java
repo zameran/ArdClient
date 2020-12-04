@@ -45,6 +45,7 @@ import haven.sloth.gui.ForageWizardWnd;
 import haven.sloth.gui.HiddenManager;
 import haven.sloth.gui.HighlightManager;
 import haven.sloth.gui.SoundManager;
+import haven.sloth.gui.Timer.TimersWnd;
 import haven.sloth.gui.chr.SkillnCredoWnd;
 import haven.sloth.gui.livestock.LivestockManager;
 import haven.sloth.gui.script.ScriptManager;
@@ -159,6 +160,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public QuestHelper questhelper;
     public Thread DrinkThread;
     public CraftDBWnd craftwnd = null;
+    private TimersWnd timers;
 
     public final List<DowseWnd> dowsewnds = new ArrayList<>();
     public ForageHelperWnd foragehelper;
@@ -339,6 +341,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         livestockwnd.hide();
         foragehelper = add(new ForageHelperWnd());
         foragehelper.hide();
+        timers = add(new TimersWnd());
+        timers.hide();
         scwnd = add(new SkillnCredoWnd());
         scwnd.hide();
         lm = add(new haven.sloth.gui.livestock.LivestockManager());
@@ -1579,6 +1583,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         Utils.setprefb("showboundingboxes", Config.showboundingboxes);
         if (map != null)
             map.refreshGobsAll();
+    }
+
+    void toggleTimers() {
+        if (timers != null && timers.show(!timers.visible)) {
+            timers.raise();
+            fitwdg(timers);
+            setfocus(timers);
+        }
     }
 
     void toggleScripts() {
