@@ -1,10 +1,9 @@
 package haven;
 
-public class AltBeltWnd extends Widget implements DTarget {
+import haven.sloth.gui.MovableWidget;
+
+public class AltBeltWnd extends MovableWidget implements DTarget {
     public boolean dt = false;
-    public final String origcap;
-    private UI.Grab dm = null;
-    private Coord doff;
 
     @RName("alt-wnd-belt")
     public static class $_ implements Factory {
@@ -16,7 +15,7 @@ public class AltBeltWnd extends Widget implements DTarget {
     }
 
     public AltBeltWnd(Coord sz, String cap) {
-        origcap = cap;
+        super("alt-wnd-belt");
         resize(sz);
     }
 
@@ -39,38 +38,38 @@ public class AltBeltWnd extends Widget implements DTarget {
         }
     }
 
-    @Override
-    public boolean mousedown(Coord c, int button) {
-        if (super.mousedown(c, button))
-            return true;
+//    @Override
+//    public boolean mousedown(Coord c, int button) {
+//        if (super.mousedown(c, button))
+//            return true;
 
-        if (button == 1) {
-            dm = ui.grabmouse(this);
-            doff = c;
-        }
-        return true;
-    }
+//        if (button == 1) {
+//            dm = ui.grabmouse(this);
+//            doff = c;
+//        }
+//        return true;
+//    }
 
-    @Override
-    public boolean mouseup(Coord c, int button) {
-        if (dm != null) {
-            dm.remove();
-            dm = null;
-            Utils.setprefc(origcap + "_c", this.c);
-        } else {
-            super.mouseup(c, button);
-        }
-        return (true);
-    }
-
-    @Override
-    public void mousemove(Coord c) {
-        if (dm != null) {
-            this.c = this.c.add(c.add(doff.inv()));
-        } else {
-            super.mousemove(c);
-        }
-    }
+//    @Override
+//    public boolean mouseup(Coord c, int button) {
+//        if (dm != null) {
+//            dm.remove();
+//            dm = null;
+//            Utils.setprefc(origcap + "_c", this.c);
+//        } else {
+//            super.mouseup(c, button);
+//        }
+//        return (true);
+//    }
+//
+//    @Override
+//    public void mousemove(Coord c) {
+//        if (dm != null) {
+//            this.c = this.c.add(c.add(doff.inv()));
+//        } else {
+//            super.mousemove(c);
+//        }
+//    }
 
     @Override
     public void wdgmsg(Widget sender, String msg, Object... args) {
