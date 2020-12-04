@@ -81,6 +81,11 @@ public class configuration {
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
     public static boolean showbeehivestatus = Utils.getprefb("showbeehivestatus", false);
+    public static boolean showtreeberry = Utils.getprefb("showtreeberry", false);
+    public static int showtreeberryamb = Utils.getprefi("showtreeberryamb", Color.WHITE.hashCode());
+    public static int showtreeberrydif = Utils.getprefi("showtreeberrydif", Color.BLUE.hashCode());
+    public static int showtreeberryspc = Utils.getprefi("showtreeberryspc", Color.RED.hashCode());
+    public static int showtreeberryemi = Utils.getprefi("showtreeberryemi", Color.BLACK.hashCode());
     public static boolean morethanquility = Utils.getprefb("morethanquility", false);
     public static int morethancolor = Utils.getprefi("morethancolor", -1);
     public static int morethancoloroutline = Utils.getprefi("morethancoloroutline", Color.RED.hashCode());
@@ -90,6 +95,9 @@ public class configuration {
     public static boolean kinid = Utils.getprefb("kinid", false);
     public static boolean forcelivestock = Utils.getprefb("forcelivestock", false);
     public static boolean forcelivestockopen = Utils.getprefb("forcelivestockopen", false);
+    public static boolean resizableworld = Utils.getprefb("resizableworld", false);
+    public static double worldsize = Utils.getprefd("worldsize", 1f);
+    public static boolean transparencyworld = Utils.getprefb("transparencyworld", false);
 
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead", "Spring Water")) {{
         sort(new Comparator<String>() {

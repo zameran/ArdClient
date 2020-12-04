@@ -595,7 +595,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
                 if (dw.spr instanceof Tree) {
                     Tree treeSprite = (Tree) dw.spr;
-                    sb.append(treeSprite.fscale);
+                    sb.append(", ").append(treeSprite.fscale);
                 }
             }
             sb.append("\n");
@@ -1000,6 +1000,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
             }
 
+            if (configuration.resizableworld) {
+                float scale = (float) configuration.worldsize;
+                rl.prepc(new Location(new Matrix4f(
+                        scale, 0, 0, 0,
+                        0, scale, 0, 0,
+                        0, 0, scale, 0,
+                        0, 0, 0, 1)));
+            }
+            if (configuration.transparencyworld) {
+                rl.prepc(WaterTile.surfmat);
+            }
+
             final GobHealth hlt = getattr(GobHealth.class);
             if (hlt != null)
                 rl.prepc(hlt.getfx());
@@ -1026,6 +1038,27 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     rl.prepc(cupboardempty);
                 //if(ols.size()>0)
                 //  rl.prepc(cupboardfull);
+            }
+            if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
+                int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+                if (stage == 32) {
+                    rl.prepc(Rendered.eyesort);
+//                    rl.prepc(Rendered.deflt);
+//                    rl.prepc(Rendered.first);
+//                    rl.prepc(Rendered.last);
+//                    rl.prepc(Rendered.postfx);
+                    rl.prepc(Rendered.postpfx);
+//                    rl.prepc(States.vertexcolor);
+//                    rl.prepc(WaterTile.surfmat);
+//                    rl.prepc(Light.vlights); //plights vlights
+//                    rl.prepc(WaterTile.wfog);
+                    rl.prepc(new Material.Colors(
+                            new Color(configuration.showtreeberryamb, true),
+                            new Color(configuration.showtreeberrydif, true),
+                            new Color(configuration.showtreeberryspc, true),
+                            new Color(configuration.showtreeberryemi, true)
+                    ));
+                }
             }
             if (Config.showshedstatus && type == Type.SHED) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);

@@ -3381,6 +3381,62 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.addRow(new CheckBox("Show tree berry status") {
+            {
+                a = configuration.showtreeberry;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showtreeberry", val);
+                configuration.showtreeberry = val;
+                a = val;
+            }
+        }, new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryamb, true), val -> {
+            configuration.showtreeberryamb = val.hashCode();
+            Utils.setprefi("showtreeberryamb", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberrydif, true), val -> {
+            configuration.showtreeberrydif = val.hashCode();
+            Utils.setprefi("showtreeberrydif", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryspc, true), val -> {
+            configuration.showtreeberryspc = val.hashCode();
+            Utils.setprefi("showtreeberryspc", val.hashCode());
+        }), new ColorPreview(new Coord(20, 20), new Color(configuration.showtreeberryemi, true), val -> {
+            configuration.showtreeberryemi = val.hashCode();
+            Utils.setprefi("showtreeberryemi", val.hashCode());
+        }));
+        appender.addRow(new CheckBox("Resizable World") {
+            {
+                a = configuration.resizableworld;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("resizableworld", val);
+                configuration.resizableworld = val;
+                a = val;
+            }
+        }, new HSlider(200, 1, 500, (int) (configuration.worldsize * 100)) {
+            @Override
+            public void changed() {
+                configuration.worldsize = val / 100f;
+                Utils.setprefd("worldsize", configuration.worldsize);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("World size density: " + configuration.worldsize + "x").tex();
+            }
+        });
+        appender.add(new CheckBox("Transparency World") {
+            {
+                a = configuration.transparencyworld;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("transparencyworld", val);
+                configuration.transparencyworld = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Resource info on item") {
             {
                 a = Config.resinfo;
@@ -3581,7 +3637,7 @@ public class OptWnd extends Window {
                         configuration.blizzarddensity = val;
                         Utils.setprefi("blizzarddensity", configuration.blizzarddensity);
 
-                        if (ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
+                        if (configuration.blizzardoverlay && ui != null && ui.gui != null && ui.sess != null && ui.sess.glob != null && ui.sess.glob.oc != null) {
                             synchronized (ui.sess.glob.oc) {
                                 OCache oc = ui.sess.glob.oc;
 
