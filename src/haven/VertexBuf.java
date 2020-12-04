@@ -643,6 +643,15 @@ public class VertexBuf {
 
         public void init() {
         }
+
+        public String toString() {
+            StringBuilder sb  = new StringBuilder();
+            sb.append("<VertexRes ");
+            sb.append(id).append(" ");
+            sb.append(b);
+            sb.append(">");
+            return sb.toString();
+        }
     }
 
     @Resource.LayerName("vbuf")

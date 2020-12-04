@@ -251,5 +251,84 @@ public interface RenderLink {
         public Integer layerid() {
             return (id);
         }
+
+        public String toString() {
+            StringBuilder sb  = new StringBuilder();
+            sb.append("<rlink ");
+            sb.append(id).append(" ");
+            sb.append("Layers: ");
+            if (l instanceof MeshMat) {
+                MeshMat mm = (MeshMat) l;
+                sb.append("[(MeshMat) ");
+                if (mm.srcres != null) {
+                    sb.append("((srcres):(").append(mm.srcres).append(") ");
+//                    for (Resource.Layer layer : mm.srcres.layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                if (mm.mesh != null) {
+                    sb.append("((mesh):(").append(mm.mesh).append("(").append(mm.meshid).append(")").append(") ");
+//                    for (Resource.Layer layer : mm.mesh.get().layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                if (mm.mat != null) {
+                    sb.append("((mat):(").append(mm.mat).append("(").append(mm.matid).append(")").append(") ");
+//                    for (Resource.Layer layer : mm.mat.get().layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                sb.append("]");
+            }
+            if (l instanceof AmbientLink) {
+                AmbientLink al = (AmbientLink) l;
+                sb.append("[(AmbientLink) ");
+                if (al.res != null) {
+                    sb.append("((res):(").append(al.res).append(") ");
+//                    for (Resource.Layer layer : mm.srcres.layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                sb.append("]");
+            }
+            if (l instanceof Collect) {
+                Collect cl = (Collect) l;
+                sb.append("[(Collect) ");
+                if (cl.from != null) {
+                    sb.append("((from):(").append(cl.from).append(") ");
+//                    for (Resource.Layer layer : mm.srcres.layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                sb.append("(").append(cl.meshid).append(")").append("(").append(cl.meshmask).append(")");
+                sb.append("]");
+            }
+            if (l instanceof Parameters) {
+                Parameters pl = (Parameters) l;
+                sb.append("[(Parameters) ");
+                if (pl.res != null) {
+                    sb.append("((res):(").append(pl.res).append(") ");
+//                    for (Resource.Layer layer : mm.srcres.layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                if (pl.lres != null) {
+                    sb.append("((lres):(").append(pl.lres).append(") ");
+//                    for (Resource.Layer layer : mm.mesh.get().layers()) {
+//                        sb.append("[").append(layer).append("]");
+//                    }
+                    sb.append(")");
+                }
+                sb.append("]");
+            }
+            sb.append(">");
+            return sb.toString();
+        }
     }
 }

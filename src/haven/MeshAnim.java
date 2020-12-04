@@ -365,5 +365,15 @@ public class MeshAnim {
 
         public void init() {
         }
+
+        public String toString() {
+            StringBuilder sb  = new StringBuilder();
+            sb.append("<MeshAnimRes ");
+            sb.append(id).append(" ");
+            sb.append(rnd).append(" ");
+            sb.append(a);
+            sb.append(">");
+            return sb.toString();
+        }
     }
 }

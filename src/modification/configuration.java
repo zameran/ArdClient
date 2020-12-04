@@ -111,6 +111,7 @@ public class configuration {
     public static boolean showcombatborder = Utils.getprefb("showcombatborder", false);
     public static boolean showactioninfo = Utils.getprefb("showactioninfo", false);
     public static boolean showinvnumber = Utils.getprefb("showinvnumber", false);
+    public static boolean moredetails = Utils.getprefb("moredetails", false);
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);

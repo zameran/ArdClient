@@ -2519,6 +2519,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("More Detailed Shift+Mouseover tooltips - Request Detailed tooltip") {
+            {
+                a = configuration.moredetails;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("moredetails", val);
+                configuration.moredetails = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Show quick hand slots") {
             {
                 a = Config.quickslots;
@@ -3910,6 +3921,17 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("skipexceptions", val);
                 dev.skipexceptions = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Resource loading debug log") {
+            {
+                a = dev.reslog;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("reslog", val);
+                dev.reslog = val;
                 a = val;
             }
         });

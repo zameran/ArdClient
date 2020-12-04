@@ -195,4 +195,15 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
 
     public void init() {
     }
+
+    public String toString() {
+        StringBuilder sb  = new StringBuilder();
+        sb.append("<TexR ");
+        sb.append(layerid()).append(" ");
+        sb.append(off).append(" ");
+        sb.append(sz).append(" ");
+        sb.append(tex());
+        sb.append(">");
+        return sb.toString();
+    }
 }

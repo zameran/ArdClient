@@ -331,6 +331,21 @@ public class Material extends GLState {
         public Integer layerid() {
             return (id);
         }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<MaterialRes ");
+            sb.append(layerid()).append(" ");
+//            for (GLState gl : states) {
+//                sb.append(gl).append(" ");
+//            }
+//            for (Resolver reso : left) {
+//                sb.append(reso).append(" ");
+//            }
+//            sb.append(m);
+            sb.append(">");
+            return sb.toString();
+        }
     }
 
     @Resource.LayerName("mat")
@@ -517,12 +532,12 @@ public class Material extends GLState {
 //                } else if (nm.equals("mipmap")) {
 //                    ret.mipmap = true;
 //                } else {
-                    ResCons2 cons = rnames.get(nm);
+                ResCons2 cons = rnames.get(nm);
                 if (cons != null)
                     ret.left.add(cons.cons(res, args));
                 else
                     new Resource.LoadWarning(res, "unknown material part name in %s: %s", res.name, nm).issue();
-                    ret.left.add(cons.cons(res, args));
+                ret.left.add(cons.cons(res, args));
 //                }
             }
             return (ret);

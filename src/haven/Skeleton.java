@@ -1263,5 +1263,13 @@ public class Skeleton {
 //                return (GLState.compose(buf));
 //            });
 //        }
+
+        public String toString() {
+            StringBuilder sb  = new StringBuilder();
+            sb.append("<BoneOffset ");
+            sb.append(layerid()).append(" ");
+            sb.append(">");
+            return sb.toString();
+        }
     }
 }

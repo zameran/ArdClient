@@ -17,6 +17,7 @@ public class dev {
     public static boolean loadLog = false;
     public static boolean decodeCode = Utils.getprefb("decodeCode", false);
     public static boolean skipexceptions = Utils.getprefb("skipexceptions", false);
+    public static boolean reslog = Utils.getprefb("reslog", false);
 
     public static boolean msg_log_skip_boolean = false;     //allow chosen skip
     public static ArrayList<String> msg_log_skip = new ArrayList<String>() {{       //chosen msg

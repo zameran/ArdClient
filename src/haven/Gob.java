@@ -620,6 +620,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         }
         sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");
         sb.append("Position: ").append(getc()).append("\n");
+        if (configuration.moredetails) {
+            sb.append("Layers: ").append("\n");
+            for (Resource.Layer l : getres().layers()) {
+                sb.append("--").append(l).append("\n");
+            }
+        }
         return sb.toString();
     }
 
