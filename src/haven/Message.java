@@ -222,6 +222,14 @@ public abstract class Message {
         return (new Color(uint8(), uint8(), uint8(), uint8()));
     }
 
+    public float float8() {
+        return (Utils.mfdec((byte) int8()));
+    }
+
+    public float float16() {
+        return (Utils.hfdec((short) int16()));
+    }
+
     public float float32() {
         int off = rget(4);
         return (Utils.float32d(rbuf, off));
@@ -262,7 +270,7 @@ public abstract class Message {
     }
 
     public Object[] list() {
-        ArrayList<Object> ret = new ArrayList<Object>();
+        ArrayList<Object> ret = new ArrayList<>();
         list:
         while (true) {
             if (eom())
@@ -355,9 +363,21 @@ public abstract class Message {
         return (this);
     }
 
+    public Message addint8(byte num) {
+        wensure(1);
+        wbuf[wh++] = num;
+        return (this);
+    }
+
     public Message adduint8(int num) {
         wensure(1);
         wbuf[wh++] = (byte) num;
+        return (this);
+    }
+
+    public Message addint16(short num) {
+        int off = wget(2);
+        Utils.int16e(num, wbuf, off);
         return (this);
     }
 
@@ -396,6 +416,12 @@ public abstract class Message {
         return (this);
     }
 
+    public Message addcoord16(Coord c) {
+        addint16((short) c.x);
+        addint16((short) c.y);
+        return this;
+    }
+
     public Message addcoord(Coord c) {
         addint32(c.x);
         addint32(c.y);
@@ -408,6 +434,14 @@ public abstract class Message {
         adduint8(color.getBlue());
         adduint8(color.getAlpha());
         return (this);
+    }
+
+    public Message addfloat8(float num) {
+        return (addint8(Utils.mfenc(num)));
+    }
+
+    public Message addfloat16(float num) {
+        return (addint16(Utils.hfenc(num)));
     }
 
     public Message addfloat32(float num) {
@@ -428,7 +462,7 @@ public abstract class Message {
                 adduint8(T_NIL);
             } else if (o instanceof Integer) {
                 adduint8(T_INT);
-                addint32(((Integer) o).intValue());
+                addint32(((Integer) o));
             } else if (o instanceof String) {
                 adduint8(T_STR);
                 addstring((String) o);
@@ -450,10 +484,14 @@ public abstract class Message {
                 addcolor((Color) o);
             } else if (o instanceof Float) {
                 adduint8(T_FLOAT32);
-                addfloat32(((Float) o).floatValue());
+                addfloat32(((Float) o));
             } else if (o instanceof Double) {
                 adduint8(T_FLOAT64);
                 addfloat64(((Double) o).floatValue());
+            } else if (o instanceof Coord2d) {
+                adduint8(T_FCOORD64);
+                addfloat64(((Coord2d) o).x);
+                addfloat64(((Coord2d) o).y);
             } else {
                 throw (new RuntimeException("Cannot encode a " + o.getClass() + " as TTO"));
             }
