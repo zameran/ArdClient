@@ -1870,10 +1870,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     return false;
                 } else if (movingto != null) {
                     if (pathfindGob != null) {
-                        GobHitbox.BBox box = GobHitbox.getBBox(pathfindGob);
-                        GobHitbox.BBox pbox = GobHitbox.getBBox(pl);
-                        if (box != null && pbox != null) {
-                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box.a.x, box.a.y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox.a.x, pbox.a.y), 2) * 2) + 2;
+                        GobHitbox.BBox[] box = GobHitbox.getBBox(pathfindGob);
+                        GobHitbox.BBox[] pbox = GobHitbox.getBBox(pl);
+                        if (box != null && pbox != null && box.length == 1 && box[0].points.length == 4 && pbox.length == 1 && pbox[0].points.length == 4) {
+                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box[0].points[0].x, box[0].points[0].y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox[0].points[0].x, pbox[0].points[0].y), 2) * 2) + 2;
                         } else
                             return movingto.dist(pl.rc) <= 5;
                     } else
@@ -2478,8 +2478,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             }
                         }
                     } else if (Config.pf && curs != null && !curs.name.equals("gfx/hud/curs/study") && gob != null) {
-                        //  purusPfRightClick(gob, (int) args[8], clickb, 0, null);
-                        pathtoRightClick(gob, 0);
+                        if (clickb == 3) {
+                            //  purusPfRightClick(gob, (int) args[8], clickb, 0, null);
+                            pathtoRightClick(gob, 0);
+                        } else if (clickb == 1) {
+                            pathto(gob);
+                        }
                     } else {
                         args = Utils.extend(args, gobargs);
                         if (clickb == 1 || gobargs.length > 0) {
@@ -2764,7 +2768,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (!ntt.equals(lasttt)) {
                 lasttt = null;
                 try {
-                    tt = RichText.render(ntt, 300);
+                    String t = RichText.Parser.quote(ntt);
+                    tt = RichText.render(t, 1000);
                 } catch (Exception e) {
                     e.printStackTrace();
                     tt = null;

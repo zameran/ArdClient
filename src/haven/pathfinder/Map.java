@@ -144,12 +144,12 @@ public class Map {
     }
 
     public void addGob(Gob gob) {
-        GobHitbox.BBox bbox = GobHitbox.getBBox(gob);
-        if (bbox == null)
+        GobHitbox.BBox[] bbox = GobHitbox.getBBox(gob);
+        if (bbox == null || bbox.length != 1 || bbox[0].points.length != 4)
             return;
 
-        Coord bboxa = bbox.a;
-        Coord bboxb = bbox.b;
+        Coord bboxa = new Coord(bbox[0].points[0]);
+        Coord bboxb = new Coord(bbox[0].points[2]);
 
         // gob coordinate relative to the origin (player's location)
         int gcx = origin - (plc.x - gob.rc.floor().x);
@@ -233,12 +233,12 @@ public class Map {
     }
 
     public void excludeGob(Gob gob) {
-        GobHitbox.BBox bbox = GobHitbox.getBBox(gob);
-        if (bbox == null)
+        GobHitbox.BBox bbox[] = GobHitbox.getBBox(gob);
+        if (bbox == null || bbox.length != 1 || bbox[0].points.length != 4)
             return;
 
-        Coord bboxa = bbox.a;
-        Coord bboxb = bbox.b;
+        Coord bboxa = new Coord(bbox[0].points[0]);
+        Coord bboxb = new Coord(bbox[0].points[2]);
 
         // gob coordinate relative to the origin (player's location)
         int gcx = origin - (plc.x - gob.rc.floor().x);

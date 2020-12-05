@@ -16,12 +16,12 @@ public class PathfinderIsInsideBoundBoxTest {
     @Parameterized.Parameters()
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {new Coord(869, 841), 5.565857541244563, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), true},
-                {new Coord(869, 841), 5.565857541244563 - Math.PI, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), true},
-                {new Coord(869, 841), 5.565857541244563 - 2 * Math.PI, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), true},
-                {new Coord(869, 841), -5.565857541244563, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), false},
-                {new Coord(869, 841), -5.565857541244563 + Math.PI, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), false},
-                {new Coord(869, 841), -5.565857541244563 + 2 * Math.PI, new BBox(new Coord(-10, -2), new Coord(10, 2)), new Coord(874, 836), false},
+                {new Coord(869, 841), 5.565857541244563, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), true},
+                {new Coord(869, 841), 5.565857541244563 - Math.PI, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), true},
+                {new Coord(869, 841), 5.565857541244563 - 2 * Math.PI, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), true},
+                {new Coord(869, 841), -5.565857541244563, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), false},
+                {new Coord(869, 841), -5.565857541244563 + Math.PI, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), false},
+                {new Coord(869, 841), -5.565857541244563 + 2 * Math.PI, new BBox[]{new BBox(new Coord(-10, -2), new Coord(10, 2))}, new Coord(874, 836), false},
         });
     }
 
@@ -32,7 +32,7 @@ public class PathfinderIsInsideBoundBoxTest {
     public double gobA;
 
     @Parameterized.Parameter(2)
-    public BBox gobBBox;
+    public BBox gobBBox[];
 
     @Parameterized.Parameter(3)
     public Coord point;

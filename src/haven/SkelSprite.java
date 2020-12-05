@@ -46,6 +46,7 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     public final Pose pose;
     public PoseMod[] mods = new PoseMod[0];
     public MeshAnim.Anim[] manims = new MeshAnim.Anim[0];
+    public int curfl;
     private Morpher.Factory mmorph;
     private final PoseMorph pmorph;
     private Pose oldpose;
@@ -61,14 +62,27 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         }
     };
 
-    protected SkelSprite(Owner owner, Resource res, Message sdt) {
+    public SkelSprite(Owner owner, Resource res, int fl) {
         super(owner, res);
-        skel = res.layer(Skeleton.Res.class).s;
-        pose = skel.new Pose(skel.bindpose);
-        pmorph = new PoseMorph(pose);
-        int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        chposes(fl, true);
-        chparts(fl);
+        Skeleton.Res sr = res.layer(Skeleton.Res.class);
+        if (sr != null) {
+            skel = sr.s;
+            pose = skel.new Pose(skel.bindpose);
+            pmorph = new PoseMorph(pose);
+        } else {
+            skel = null;
+            pose = null;
+            pmorph = null;
+        }
+        update(fl, true);
+    }
+
+    public SkelSprite(Owner owner, Resource res) {
+        this(owner, res, 0xffff0000);
+    }
+
+    public SkelSprite(Owner owner, Resource res, Message sdt) {
+        this(owner, res, sdt.eom() ? 0xffff0000 : decnum(sdt));
     }
 
     /* XXX: It's ugly to snoop inside a wrapping, but I can't think of
@@ -175,10 +189,25 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         rebuild();
     }
 
+    private void update(int fl, boolean old) {
+        chmanims(fl);
+        if (skel != null)
+            chposes(fl, old);
+        chparts(fl);
+        this.curfl = fl;
+    }
+
+    public void update(int fl) {
+        update(fl, false);
+    }
+
+    public void update() {
+        update(curfl);
+    }
+
     public void update(Message sdt) {
         int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        chposes(fl, false);
-        chparts(fl);
+        update(fl);
     }
 
     public boolean setup(RenderList rl) {

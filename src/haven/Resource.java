@@ -103,6 +103,7 @@ public class Resource implements Serializable {
     public static Class<Audio> audio = Audio.class;
     public static Class<Tooltip> tooltip = Tooltip.class;
     public static Class<Src> src = Src.class;
+    public static Class<Obst> obst = Obst.class;
 
     public static final String language = Utils.getpref("language", "en");
     public static final String BUNDLE_TOOLTIP = "tooltip";
@@ -416,10 +417,12 @@ public class Resource implements Serializable {
 
         private Loading(Pool.Queued res) {
             super("Waiting for resource " + res.name + "...");
+            if (dev.reslog) dev.sysPrintStackTrace(res + " Loading");
             this.res = res;
         }
 
         public String toString() {
+            if (dev.reslog) dev.sysPrintStackTrace(res + "Loading toString");
             return ("#<Resource " + res.name + ">");
         }
 
@@ -903,6 +906,10 @@ public class Resource implements Serializable {
         return (new Coord(buf.int16(), buf.int16()));
     }
 
+    public static Coord2d c2ddec(Message buf) {
+        return (new Coord2d(buf.int16(), buf.int16()));
+    }
+
     public abstract class Layer implements Serializable {
         public abstract void init();
 
@@ -1269,9 +1276,74 @@ public class Resource implements Serializable {
                 for (int o = 0; o < cn; o++)
                     ep[epid][o] = cdec(buf);
             }
+//            dev.resourceLog("neg", Resource.this, toString());
         }
 
         public void init() {
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<Neg ");
+            sb.append(cc);
+            sb.append(bc);
+            sb.append(bs);
+            sb.append(sz);
+            for (Coord[] ac : ep) {
+                if (ac.length > 0) {
+                    sb.append("[");
+                    for (Coord c : ac) {
+                        sb.append(c);
+                    }
+                    sb.append("]");
+                }
+            }
+            sb.append(">");
+            return sb.toString();
+        }
+    }
+
+    @LayerName("obst")
+    public class Obst extends Layer {
+        public int vc;
+        public Coord2d[][] ep;
+        public String id;
+
+        public Obst(Message buf) {
+            int ver = buf.uint8();
+            if (ver >= 2) {
+                id = buf.string();
+            }
+
+            int points = buf.uint8();
+            int[] boxes = new int[points];
+            ep = new Coord2d[points][];
+            for (int i = 0; i < points; i++) {
+                boxes[i] = buf.uint8();
+                ep[i] = new Coord2d[boxes[i]];
+            }
+            for (int i = 0; i < points; i++) {
+                for (int j = 0; j < boxes[i]; j++) {
+                    ep[i][j] = new Coord2d(buf.float16() * 11, buf.float16() * 11);
+                }
+                vc += boxes[i];
+            }
+
+//            dev.resourceLog("Obst", name, vc, id, Arrays.toString(vertices));
+        }
+
+        public void init() {
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<Obst ");
+            sb.append(name).append(" ");
+            sb.append(vc).append(" ");
+            sb.append(id).append(" ");
+            sb.append(Arrays.deepToString(ep));
+            sb.append(">");
+            return sb.toString();
         }
     }
 
@@ -1752,6 +1824,7 @@ public class Resource implements Serializable {
         public Music(Message buf) {
             try {
                 seq = MidiSystem.getSequence(new MessageInputStream(buf));
+                if (dev.decodeCode) decode();
             } catch (InvalidMidiDataException e) {
                 throw (new LoadException("Invalid MIDI data", Resource.this));
             } catch (IOException e) {
@@ -1832,6 +1905,10 @@ public class Resource implements Serializable {
         }
     }
 
+    public Collection<Layer> layers() {
+        return (layers);
+    }
+
     public <L extends Layer> Collection<L> layers(final Class<L> cl) {
         used = true;
         return (new DefaultCollection<L>() {
@@ -1881,7 +1958,9 @@ public class Resource implements Serializable {
         else if (ver != this.ver)
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         while (!in.eom()) {
-            LayerFactory<?> lc = ltypes.get(in.string());
+            String title = in.string();
+//            dev.resourceLog("DECODING", this.name + ":" + this.ver, title);
+            LayerFactory<?> lc = ltypes.get(title);
             int len = in.int32();
             if (lc == null) {
                 in.skip(len);

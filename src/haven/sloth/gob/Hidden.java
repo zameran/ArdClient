@@ -5,8 +5,8 @@ import haven.GAttrib;
 import haven.Gob;
 import haven.RenderList;
 import haven.States;
-import haven.sloth.io.Storage;
 import haven.sloth.gfx.HitboxMesh;
+import haven.sloth.io.Storage;
 import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;
@@ -71,7 +71,7 @@ public class Hidden extends GAttrib {
     }
 
     //private HitboxSprite spr = null;
-    private HitboxMesh mesh = null;
+    private HitboxMesh[] mesh = null;
 
     public Hidden(final Gob g) {
         super(g);
@@ -79,19 +79,21 @@ public class Hidden extends GAttrib {
     }
 
     public void setup(RenderList rl) {
-        if (mesh != null) {
-            rl.prepo(States.xray);
-            rl.add(mesh, null);
+        if (mesh != null && mesh.length > 0) {
+            for (HitboxMesh m : mesh) {
+                rl.prepo(States.xray);
+                rl.add(m, null);
+            }
         }
     }
 
     private void make() {
         gob.res().ifPresent((res) -> {
-            final Hitbox hb = Hitbox.hbfor(gob, true);
-            if (hb != null) {
-                mesh = HitboxMesh.makehb(hb.size(), hb.offset());
+            final Hitbox[] hb = Hitbox.hbfor(gob, true);
+            if (hb != null && hb.length > 0) {
+                mesh = HitboxMesh.makehb(hb);
             } else {
-                mesh = HitboxMesh.makehb(new Coord(11, 11), Coord.z);
+                mesh = HitboxMesh.makehb(new Hitbox[]{new Hitbox(new Coord(11, 11), Coord.z)});
             }
         });
     }

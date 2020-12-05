@@ -47,7 +47,6 @@ public class StaticSprite extends Sprite {
 
     public StaticSprite(Owner owner, Resource res, Rendered[] parts) {
         super(owner, res);
-        //  System.out.println(res.name);
         this.parts = parts;
     }
 
@@ -59,20 +58,24 @@ public class StaticSprite extends Sprite {
         this(owner, res, lsparts(res, sdt));
     }
 
-    public static Rendered[] lsparts(Resource res, Message sdt) {
+    public static Rendered[] lsparts(Owner owner, Resource res, Message sdt) {
         int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        Collection<Rendered> rl = new LinkedList<Rendered>();
+        Collection<Rendered> rl = new LinkedList<>();
         for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
             if ((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & fl) != 0)))
                 rl.add(mr.mat.get().apply(mr.m));
         }
         for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
             if ((lr.id < 0) || (((1 << lr.id) & fl) != 0))
-                rl.add(lr.l.make());
+                rl.add(lr.l.make(owner));
         }
         if (res.layer(Resource.audio, "amb") != null)
             rl.add(new ActAudio.Ambience(res));
         return (rl.toArray(new Rendered[0]));
+    }
+
+    public static Rendered[] lsparts(Resource res, Message sdt) {
+        return (lsparts(null, res, sdt));
     }
 
     public boolean setup(RenderList r) {

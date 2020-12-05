@@ -21,7 +21,7 @@ import java.util.List;
 public abstract class Pathfinder {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     static final Coord[][] dirs = new Coord[1][4];
-    private static Hitbox plhb;
+    private static Hitbox[] plhb;
 
     static {
         plhb = Hitbox.hbfor("gfx/borka/body");
@@ -92,14 +92,24 @@ public abstract class Pathfinder {
      * Are we on a bad tile and is our gob hitbox overlapping another
      */
     private boolean hitGob(final Coord mc) {
-        final Coord c = mc.add(plhb.offset());
-        final Coord br = c.add(plhb.size());
+//        final Coord c = mc.add(plhb.offset());
+//        final Coord br = c.add(plhb.size());
 
-        Coord xy = new Coord(0, 0);
-        for (xy.x = c.x; xy.x < br.x; ++xy.x)
-            for (xy.y = c.y; xy.y < br.y; ++xy.y)
-                if (ui.sess.glob.gobhitmap.checkHit(xy))
-                    return true;
+        for (Hitbox gb : plhb) {
+            for (int i = 0; i < gb.points.length; i++) {
+                Coord xy = new Coord(0, 0);
+                int i1 = i == gb.points.length - 1 ? 0 : i + 1;
+                for (xy.x = mc.add(new Coord(gb.points[i])).x; xy.x < mc.add(new Coord(gb.points[i1])).x; ++xy.x)
+                    for (xy.y = mc.add(new Coord(gb.points[i])).y; xy.y < mc.add(new Coord(gb.points[i1])).y; ++xy.y)
+                        if (ui.sess.glob.gobhitmap.checkHit(xy))
+                            return true;
+            }
+        }
+//        Coord xy = new Coord(0, 0);
+//        for (xy.x = c.x; xy.x < br.x; ++xy.x)
+//            for (xy.y = c.y; xy.y < br.y; ++xy.y)
+//                if (ui.sess.glob.gobhitmap.checkHit(xy))
+//                    return true;
         return false;
     }
 
@@ -109,16 +119,29 @@ public abstract class Pathfinder {
      * TODO: plhb is problem slightly too big for this since tiles will let you usually overlap a bit
      */
     private boolean hitOnBoat(final Coord mc) {
-        final Coord c = mc.add(plhb.offset());
-        final Coord br = c.add(plhb.size());
+//        final Coord c = mc.add(plhb.offset());
+//        final Coord br = c.add(plhb.size());
 
-        Coord xy = new Coord(0, 0);
-        for (xy.x = c.x; xy.x < br.x; ++xy.x)
-            for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
-                    return true;
+        for (Hitbox gb : plhb) {
+            for (int i = 0; i < gb.points.length; i++) {
+                Coord xy = new Coord(0, 0);
+                int i1 = i == gb.points.length - 1 ? 0 : i + 1;
+                for (xy.x = mc.add(new Coord(gb.points[i])).x; xy.x < mc.add(new Coord(gb.points[i1])).x; ++xy.x)
+                    for (xy.y = mc.add(new Coord(gb.points[i])).y; xy.y < mc.add(new Coord(gb.points[i1])).y; ++xy.y) {
+                        final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+                        if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
+                            return true;
+                    }
             }
+        }
+
+//        Coord xy = new Coord(0, 0);
+//        for (xy.x = c.x; xy.x < br.x; ++xy.x)
+//            for (xy.y = c.y; xy.y < br.y; ++xy.y) {
+//                final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+//                if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
+//                    return true;
+//            }
         return false;
     }
 
@@ -129,16 +152,29 @@ public abstract class Pathfinder {
      * Especially the case in caves, not so much with ridges...
      */
     private boolean hitOnLand(final Coord mc) {
-        final Coord c = mc.add(plhb.offset());
-        final Coord br = c.add(plhb.size());
+//        final Coord c = mc.add(plhb.offset());
+//        final Coord br = c.add(plhb.size());
 
-        Coord xy = new Coord(0, 0);
-        for (xy.x = c.x; xy.x < br.x; ++xy.x)
-            for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                if (t != Tile.SHALLOWWATER && t != null)
-                    return true;
+        for (Hitbox gb : plhb) {
+            for (int i = 0; i < gb.points.length; i++) {
+                Coord xy = new Coord(0, 0);
+                int i1 = i == gb.points.length - 1 ? 0 : i + 1;
+                for (xy.x = mc.add(new Coord(gb.points[i])).x; xy.x < mc.add(new Coord(gb.points[i1])).x; ++xy.x)
+                    for (xy.y = mc.add(new Coord(gb.points[i])).y; xy.y < mc.add(new Coord(gb.points[i1])).y; ++xy.y) {
+                        final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+                        if (t != Tile.SHALLOWWATER && t != null)
+                            return true;
+                    }
             }
+        }
+
+//        Coord xy = new Coord(0, 0);
+//        for (xy.x = c.x; xy.x < br.x; ++xy.x)
+//            for (xy.y = c.y; xy.y < br.y; ++xy.y) {
+//                final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+//                if (t != Tile.SHALLOWWATER && t != null)
+//                    return true;
+//            }
         return false;
     }
 

@@ -2,6 +2,7 @@ package haven.sloth.script.pathfinding;
 
 import com.google.common.flogger.FluentLogger;
 import haven.Coord;
+import haven.Coord2d;
 import haven.Gob;
 import haven.OCache;
 import haven.UI;
@@ -227,74 +228,104 @@ public class GobHitmap {
 
     private List<Coord> fill(final Gob g) {
         final List<Coord> coords = new ArrayList<>();
-        final Hitbox hb = Hitbox.hbfor(g);
+        final Hitbox[] hb = Hitbox.hbfor(g);
         if (hb != null) {
-            if (hb.canHit()) {
-                final Coord hoff = new Coord(hb.offset());
-                final Coord hsz = new Coord(hb.size());
-                final double gd = Math.toDegrees(g.a);
-                if (gd == 90 || gd == 270) {
-                    //Easy case, simple rotations
-                    //Reverse the axis
-                    int tmp = hoff.x;
-                    hoff.x = hoff.y;
-                    hoff.y = tmp;
-                    tmp = hsz.x;
-                    hsz.x = hsz.y;
-                    hsz.y = tmp;
-                } else if (gd != 0 && gd != 180) {
-                    //some angle that's not trival
-                    //idea: calculate the four corner points
-                    //draw line between these four corner points
-                    //then do a fill within these 4 lines that will fill any
-                    //point not filled within it already and check for more until
-                    //no more are found
+            for (Hitbox h : hb) {
+                if (h.canHit()) {
+//                    final Coord hoff = new Coord(hb.offset());
+//                    final Coord hsz = new Coord(hb.size());
+//                    final double gd = Math.toDegrees(g.a);
 
-                    //Only problem is making sure that initial point within the four lines
-                    // is actually within (half-way point between two opposite corners to get
-                    // center of rectangle hitbox)
-                    Coord
-                            tl = hoff,
-                            tr = hoff.add(hsz.x, 0),
-                            bl = hoff.add(0, hsz.y),
-                            br = hoff.add(hsz);
-                    //rotate
-                    tl = tl.rot((float) g.a);
-                    tr = tr.rot((float) g.a);
-                    bl = bl.rot((float) g.a);
-                    br = br.rot((float) g.a);
+                    ArrayList<Coord2d> coord2ds = new ArrayList<>();
+                    for (int j = 0; j < h.points.length; j++) {
+                        Coord2d c = h.points[j];
+                        c = c.rotate((float) g.a);
+                        final Coord gc = g.getc().round();
+                        c = new Coord2d(gc).add(c);
+                        coord2ds.add(c);
+                    }
 
-                    //translate back
-                    final Coord gc = g.getc().round();
-                    tl = gc.add(tl);
-                    tr = gc.add(tr);
-                    bl = gc.add(bl);
-                    br = gc.add(br);
+                    for (int i = 0; i < coord2ds.size(); i++) {
+                        int i1 = i == coord2ds.size() - 1 ? 0 : i + 1;
+                        drawline(new Coord(coord2ds.get(i)), new Coord(coord2ds.get(i1)), g, coords);
+                    }
 
-                    //Draw lines
-                    drawline(tl, tr, g, coords);
-                    drawline(tr, br, g, coords);
-                    drawline(bl, br, g, coords);
-                    drawline(tl, bl, g, coords);
+                    int count = 0;
+                    double allx = 0;
+                    double ally = 0;
+                    for (int i = 0; i < coord2ds.size(); i++) {
+                        allx += coord2ds.get(i).x;
+                        ally += coord2ds.get(i).y;
+                        count++;
+                    }
+                    final Coord center = new Coord((int) (allx / count), (int) (ally / count));
 
-                    //Fill from center
-                    final Coord center = new Coord((tl.x + br.x) / 2.0f, (tl.y + br.y) / 2.0f);
                     fillspace(center, g, coords);
                     return coords;
+
+//                    if (gd == 90 || gd == 270) {
+                        //Easy case, simple rotations
+                        //Reverse the axis
+//                        int tmp = hoff.x;
+//                        hoff.x = hoff.y;
+//                        hoff.y = tmp;
+//                        tmp = hsz.x;
+//                        hsz.x = hsz.y;
+//                        hsz.y = tmp;
+//                    } else if (gd != 0 && gd != 180) {
+                        //some angle that's not trival
+                        //idea: calculate the four corner points
+                        //draw line between these four corner points
+                        //then do a fill within these 4 lines that will fill any
+                        //point not filled within it already and check for more until
+                        //no more are found
+
+                        //Only problem is making sure that initial point within the four lines
+                        // is actually within (half-way point between two opposite corners to get
+                        // center of rectangle hitbox)
+//                        Coord
+//                                tl = hoff,
+//                                tr = hoff.add(hsz.x, 0),
+//                                bl = hoff.add(0, hsz.y),
+//                                br = hoff.add(hsz);
+                        //rotate
+//                        tl = tl.rot((float) g.a);
+//                        tr = tr.rot((float) g.a);
+//                        bl = bl.rot((float) g.a);
+//                        br = br.rot((float) g.a);
+
+                        //translate back
+//                        final Coord gc = g.getc().round();
+//                        tl = gc.add(tl);
+//                        tr = gc.add(tr);
+//                        bl = gc.add(bl);
+//                        br = gc.add(br);
+
+                        //Draw lines
+//                        drawline(tl, tr, g, coords);
+//                        drawline(tr, br, g, coords);
+//                        drawline(bl, br, g, coords);
+//                        drawline(tl, bl, g, coords);
+
+                        //Fill from center
+//                        final Coord center = new Coord((tl.x + br.x) / 2.0f, (tl.y + br.y) / 2.0f);
+//                        fillspace(center, g, coords);
+//                        return coords;
+//                    }
+
+                    //Handle gd = 0, 90, 180 or 270
+//                    Coord off = g.getc().round().add(hoff);
+//                    Coord br = off.add(hsz);
+
+//                    int x, y;
+//                    for (x = off.x; x < br.x; ++x)
+//                        for (y = off.y; y < br.y; ++y) {
+//                            final Coord c = new Coord(x, y);
+//                            map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+//                            map.get(c).add(g);
+//                            coords.add(c);
+//                        }
                 }
-
-                //Handle gd = 0, 90, 180 or 270
-                Coord off = g.getc().round().add(hoff);
-                Coord br = off.add(hsz);
-
-                int x, y;
-                for (x = off.x; x < br.x; ++x)
-                    for (y = off.y; y < br.y; ++y) {
-                        final Coord c = new Coord(x, y);
-                        map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
-                        map.get(c).add(g);
-                        coords.add(c);
-                    }
             }
         } else {
             logger.atFine().log("No hitbox found for %s", g.resname());

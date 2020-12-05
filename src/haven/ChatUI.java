@@ -801,6 +801,18 @@ public class ChatUI extends Widget {
         }
     }
 
+    public static class BotChat extends SimpleChat {
+        public BotChat() {
+            super(false, "Bot");
+        }
+
+        @Override
+        public void send(String text) {
+            ui.sess.details.context.dispatchmsg(this, "msg", text);
+            uimsg("msg", text);
+        }
+    }
+
     public static class MultiChat extends EntryChannel {
         public final int urgency;
         protected final String name;

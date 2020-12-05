@@ -93,8 +93,8 @@ public class Pathfinder implements Runnable {
                 // need to exclude destination gob so it won't get into TO candidates list
                 if (this.gob != null && this.gob.id == gob.id)
                     continue;
-                GobHitbox.BBox box = GobHitbox.getBBox(gob);
-                if (box != null && isInsideBoundBox(gob.rc.floor(), gob.a, box, player.rc.floor())) {
+                GobHitbox.BBox[] box = GobHitbox.getBBox(gob);
+                if (box != null && box.length == 1 && box[0].points.length == 4 && isInsideBoundBox(gob.rc.floor(), gob.a, box, player.rc.floor())) {
                     m.excludeGob(gob);
                     continue;
                 }
@@ -212,9 +212,9 @@ public class Pathfinder implements Runnable {
         terminate = true;
     }
 
-    static public boolean isInsideBoundBox(Coord gobRc, double gobA, GobHitbox.BBox gobBBox, Coord point) {
+    static public boolean isInsideBoundBox(Coord gobRc, double gobA, GobHitbox.BBox[] gobBBox, Coord point) {
         final Coordf relative = new Coordf(point.sub(gobRc)).rotate(-gobA);
-        return relative.x >= gobBBox.a.x && relative.x <= gobBBox.b.x &&
-                relative.y >= gobBBox.a.y && relative.y <= gobBBox.b.y;
+        return relative.x >= gobBBox[0].points[0].x && relative.x <= gobBBox[0].points[0].x &&
+                relative.y >= gobBBox[0].points[0].y && relative.y <= gobBBox[0].points[0].y;
     }
 }

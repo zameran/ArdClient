@@ -132,16 +132,16 @@ public class Pathfinder extends Thread {
                 for (Gob gob : gui.ui.sess.glob.oc) {
                     if (gob.isplayer())
                         continue;
-                    GobHitbox.BBox box = GobHitbox.getBBox(gob);
-                    if (box != null && !whitelistedGobs.contains(gob.getres().name)) {
+                    GobHitbox.BBox[] box = GobHitbox.getBBox(gob);
+                    if (box != null && box.length == 1 && box[0].points.length == 4 && !whitelistedGobs.contains(gob.getres().name)) {//FIXME
                         Coord2d rel = gob.rc.sub(origin);
 
                         Coord2d[] points = new Coord2d[4];
 
-                        points[0] = new Coord2d(box.a.x, box.a.y).rotate(gob.a).add(rel);
-                        points[1] = new Coord2d(box.a.x, box.b.y).rotate(gob.a).add(rel);
-                        points[2] = new Coord2d(box.b.x, box.b.y).rotate(gob.a).add(rel);
-                        points[3] = new Coord2d(box.b.x, box.a.y).rotate(gob.a).add(rel);
+                        points[0] = box[0].points[0].rotate(gob.a).add(rel);
+                        points[1] = box[0].points[1].rotate(gob.a).add(rel);
+                        points[2] = box[0].points[2].rotate(gob.a).add(rel);
+                        points[3] = box[0].points[3].rotate(gob.a).add(rel);
 
                         double maxY = Double.max(Double.max(points[0].y, points[1].y), Double.max(points[2].y, points[3].y));
                         double minY = Double.min(Double.min(points[0].y, points[1].y), Double.min(points[2].y, points[3].y));

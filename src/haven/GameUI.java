@@ -125,6 +125,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private int dangerradius = 1;
     public WeakReference<Speedget> speedget;
     public ChatUI.Channel syslog;
+    public ChatUI.Channel botlog;
     public Window hidden, deleted, alerted, highlighted, overlayed, gobspawner;
     public double prog = -1;
     private boolean afk = false;
@@ -335,6 +336,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (Config.autowindows.get("Chat") != null && Config.autowindows.get("Chat").selected)
             chatwnd.visible = false;
         syslog = chat.add(new ChatUI.Log("System"));
+        botlog = chat.add(new ChatUI.BotChat());
         opts.c = sz.sub(opts.sz).div(2);
         pointer = add(new MapPointer());
         livestockwnd = add(new haven.livestock.LivestockManager(), new Coord(0, sz.y - 200));

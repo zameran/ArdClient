@@ -353,7 +353,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
-    private HitboxMesh hitboxmesh;
+    private HitboxMesh hitboxmesh[];
     private boolean pathfinding_blackout = false;
     private List<Coord> hitboxcoords;
 
@@ -395,7 +395,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //Figure out our type first
                 type = Type.getType(name);
                 //checks for mannequins and changes their type to prevent unknown alarms
-                if (type == Type.HUMAN && attr.containsKey(GobHealth.class))
+                if (type == Type.HUMAN && getattr(GobHealth.class) != null)
                     type = Type.UNKNOWN;
 
                 if (configuration.gobspeedsprite && (type == Type.HUMAN || type == Type.ANIMAL || name.startsWith("gfx/kritter/")) && !isDead()) {
@@ -414,27 +414,38 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (name.endsWith("log"))
                     type = Type.LOG;
 
-                if (getattr(GobIcon.class) == null) {
-                    if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
-                        String fistname1 = name.substring(0, name.lastIndexOf('/'));
-                        String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
-                        String lastname = name.replace(fistname, "");
-                        if (lastname.endsWith("stump"))
-                            lastname = lastname.substring(0, lastname.length() - "stump".length());
-                        if (lastname.endsWith("log"))
-                            lastname = lastname.substring(0, lastname.length() - "log".length());
+                Defer.later(() -> {
+                    if (getattr(GobIcon.class) == null) {
+                        if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
+                            String fistname1 = name.substring(0, name.lastIndexOf('/'));
+                            String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
+                            String lastname = name.replace(fistname, "");
+                            if (lastname.endsWith("stump"))
+                                lastname = lastname.substring(0, lastname.length() - "stump".length());
+                            if (lastname.endsWith("log"))
+                                lastname = lastname.substring(0, lastname.length() - "log".length());
 
-                        String icon = fistname + "/mm" + lastname;
-                        resources.IndirResource res = resources.getCachedRes(icon);
-                        if (res.get() != null)
-                            setattr(new GobIcon(this, res));
-                    } else if (type == Type.BOULDER) {
-                        String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-                        resources.IndirResource res = resources.getCachedRes(icon);
-                        if (res.get() != null)
-                            setattr(new GobIcon(this, res));
+                            String icon = fistname + "/mm" + lastname;
+                            try {
+                                resources.IndirResource res = resources.getCachedRes(icon);
+                                if (res.get() != null)
+                                    setattr(new GobIcon(this, res));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else if (type == Type.BOULDER) {
+                            String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
+                            try {
+                                resources.IndirResource res = resources.getCachedRes(icon);
+                                if (res.get() != null)
+                                    setattr(new GobIcon(this, res));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }
+                    return null;
+                });
 
                 //Check for any special attributes we should attach
                 Alerted.checkAlert(name, this);
@@ -456,9 +467,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
 
                 res().ifPresent((res) -> { //should always be present once name is discovered
-                    final Hitbox hitbox = Hitbox.hbfor(this, true);
+                    final Hitbox[] hitbox = Hitbox.hbfor(this, true);
                     if (hitbox != null) {
-                        hitboxmesh = HitboxMesh.makehb(hitbox.size(), hitbox.offset());
+                        hitboxmesh = HitboxMesh.makehb(hitbox);
                         updateHitmap();
                     }
                 });
@@ -515,8 +526,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             resname().ifPresent(this::discovered);
         }
 
-        for (GAttrib a : attr.values())
-            a.ctick(dt);
+        synchronized (attr) {
+            for (GAttrib a : attr.values())
+                a.ctick(dt);
+        }
         final Iterator<Pair<GAttrib, Consumer<Gob>>> ditr = dattrs.iterator();
         while (ditr.hasNext()) {
             final Pair<GAttrib, Consumer<Gob>> pair = ditr.next();
@@ -737,8 +750,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
 
     public void tick() {
-        for (GAttrib a : attr.values())
-            a.tick();
+        synchronized (attr) {
+            for (GAttrib a : attr.values())
+                a.tick();
+        }
         loadrattr();
     }
 
@@ -749,8 +764,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 hitboxcoords = null;
             }
         }
-        for (GAttrib a : attr.values())
-            a.dispose();
+        synchronized (attr) {
+            for (GAttrib a : attr.values())
+                a.dispose();
+        }
         for (ResAttr.Cell rd : rdata) {
             if (rd.attr != null)
                 rd.attr.dispose();
@@ -841,7 +858,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         if (a instanceof haven.sloth.gob.Rendered)
             renderedattrs.add((haven.sloth.gob.Rendered) a);
         Class<? extends GAttrib> ac = attrclass(a.getClass());
-        attr.put(ac, a);
+        synchronized (attr) {
+            attr.put(ac, a);
+        }
         if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
             final UI ui = glob.ui.get();
             if (ui != null) {
@@ -866,14 +885,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     }
 
     public <C extends GAttrib> C getattr(Class<C> c) {
-        GAttrib attr = this.attr.get(attrclass(c));
-        if (!c.isInstance(attr))
-            return (null);
-        return (c.cast(attr));
+        synchronized (attr) {
+            GAttrib attr = this.attr.get(attrclass(c));
+            if (!c.isInstance(attr))
+                return (null);
+            return (c.cast(attr));
+        }
     }
 
     public void delattr(Class<? extends GAttrib> c) {
-        attr.remove(attrclass(c));
+        synchronized (attr) {
+            attr.remove(attrclass(c));
+        }
         if (attrclass(c) == Moving.class && gobpath != null) {
             ols.remove(gobpath);
             gobpath = null;
@@ -1010,6 +1033,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             if (configuration.transparencyworld) {
                 rl.prepc(WaterTile.surfmat);
+                rl.prepc(States.xray);
             }
 
             final GobHealth hlt = getattr(GobHealth.class);
@@ -1197,18 +1221,17 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             try {
                 if (d != null) {
                     if (Config.hidegobs && type == Type.TREE && Config.hideTrees) {
-                        GobHitbox.BBox bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay) {
-                            rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, true)), null);
-                        }
+                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                        if (bbox != null && Config.showoverlay)
+                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
                     } else if (Config.hidegobs && type == Type.BUSH && Config.hideBushes) { //bushes
-                        GobHitbox.BBox bbox = GobHitbox.getBBox(this);
+                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                         if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, true)), null);
+                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
                     } else if (Config.hidegobs && type == Type.BOULDER && Config.hideboulders) {
-                        GobHitbox.BBox bbox = GobHitbox.getBBox(this);
+                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                         if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, true)), null);
+                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
                     } else {
                         d.setup(rl);
                     }
@@ -1244,9 +1267,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 return false;
             }
             if (Config.showboundingboxes) {
-                GobHitbox.BBox bbox = GobHitbox.getBBox(this);
+                GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                 if (bbox != null)
-                    rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, false)), null);
+                    rl.add(new Overlay(new GobHitbox(this, bbox, false)), null);
             }
             if (Config.showplantgrowstage) {
                 if ((type != null && type == Type.PLANT) || (type != null && type == Type.MULTISTAGE_PLANT)) {
@@ -1328,9 +1351,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (ki != null)
                 rl.add(ki.fx, null);
 
-            if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null)
-                rl.add(hitboxmesh, null);
-
+            if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {
+                for (HitboxMesh mesh : hitboxmesh)
+                    rl.add(mesh, null);
+            }
         }
         return (false);
     }
@@ -1347,15 +1371,17 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             return ((seq == DYNAMIC) ? null : seq);
         } else if (getattr(Hidden.class) == null) {
             int rs = 0;
-            for (GAttrib attr : attr.values()) {
-                Object as = attr.staticp();
-                if (as == Rendered.CONSTANS) {
-                } else if (as instanceof Static) {
-                } else if (as == SemiStatic.class) {
-                    rs = Math.max(rs, 1);
-                } else {
-                    rs = 2;
-                    break;
+            synchronized (attr) {
+                for (GAttrib attr : attr.values()) {
+                    Object as = attr.staticp();
+                    if (as == Rendered.CONSTANS) {
+                    } else if (as instanceof Static) {
+                    } else if (as == SemiStatic.class) {
+                        rs = Math.max(rs, 1);
+                    } else {
+                        rs = 2;
+                        break;
+                    }
                 }
             }
             synchronized (ols) {

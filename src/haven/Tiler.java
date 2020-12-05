@@ -276,13 +276,7 @@ public abstract class Tiler {
             public Object run() {
                 for (Class<?> cl : dolda.jglob.Loader.get(ResName.class).classes()) {
                     String nm = cl.getAnnotation(ResName.class).value();
-                    try {
-                        rnames.put(nm, (Factory) cl.newInstance());
-                    } catch (InstantiationException e) {
-                        throw (new Error(e));
-                    } catch (IllegalAccessException e) {
-                        throw (new Error(e));
-                    }
+                    rnames.put(nm, Utils.construct(cl.asSubclass(Factory.class)));
                 }
                 return (null);
             }

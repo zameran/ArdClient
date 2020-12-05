@@ -219,7 +219,7 @@ public class Widget {
                 ver = Integer.parseInt(name.substring(p + 1));
                 name = name.substring(0, p);
             }
-            Indir<Resource> res = Resource.remote().load(name, ver);
+            Indir<Resource> res = Resource.remote().load(name, ver, 10);
             while (true) {
                 try {
                     return (res.get().getcode(Factory.class, true));
@@ -276,13 +276,7 @@ public class Widget {
     }
 
 
-    public <T extends Widget> T add(T child, Coord c) {
-        if (child instanceof AltBeltWnd)    // FIXME. this is ugly
-            child.c = Utils.getprefc(((AltBeltWnd) child).origcap + "_c", c);
-        else
-            child.c = c;
-        return (add(child));
-    }
+
 
     private <T extends Widget> T add0(T child) {
         if ((child.ui == null) && (this.ui != null))
@@ -307,10 +301,10 @@ public class Widget {
         }
     }
 
-    //  public <T extends Widget> T add(T child, Coord c) {
-    //        child.c = c;
-    //    return (add(child));
-    //  }
+    public <T extends Widget> T add(T child, Coord c) {
+        child.c = c;
+        return (add(child));
+    }
 
     public <T extends Widget> T add(T child, int x, int y) {
         return (add(child, new Coord(x, y)));
@@ -590,8 +584,8 @@ public class Widget {
     }
 
     public void destroy() {
-        for (Widget wdg = child; wdg != null; wdg = wdg.next)
-            wdg.reqdestroy();
+//        for (Widget wdg = child; wdg != null; wdg = wdg.next)
+//            wdg.reqdestroy();
         if (canfocus)
             setcanfocus(false);
         unlink();
