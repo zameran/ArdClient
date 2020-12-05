@@ -66,7 +66,7 @@ public class Glob {
     public Indir<Resource> sky1 = null, sky2 = null;
     public double skyblend = 0.0;
     private Map<Indir<Resource>, Object> wmap = new HashMap<Indir<Resource>, Object>();
-    public static haven.timers.TimersThread timersThread;
+//    public static haven.timers.TimersThread timersThread;
     public String servertime;
     public Tex servertimetex;
     public int moonid = 0;

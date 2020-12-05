@@ -43,12 +43,17 @@ public class TimerEditWnd extends Window {
         add(txtminutes, new Coord(285, 30));
 
         Button add = new Button(60, "Add", () -> {
-            long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
-            long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
-            long duration = ((60 * hours + minutes) * 60) * 3;
-            TimerData.addTimer(txtname.text, duration);
-            ui.destroy(this);
+            try {
+                long hours = Long.parseLong(txthours.text.equals("") ? "0" : txthours.text);
+                long minutes = Long.parseLong(txtminutes.text.equals("") ? "0" : txtminutes.text);
+                long duration = ((60 * hours + minutes) * 60) * 3;
+                TimerData.addTimer(txtname.text, duration);
+                ui.destroy(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
+        add(add, new Coord(15, 70));
 
         Button cancel = new Button(60, "Cancel") {
             @Override

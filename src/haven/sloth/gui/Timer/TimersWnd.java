@@ -3,6 +3,7 @@ package haven.sloth.gui.Timer;
 
 import haven.Button;
 import haven.Coord;
+import haven.Text;
 import haven.Widget;
 import haven.Window;
 import haven.sloth.io.TimerData;
@@ -20,6 +21,16 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
                 parent.parent.add(new TimerEditWnd("Create New Timer"),
                         new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200)));
         add(btna, new Coord(0, 10));
+        Button btnl = new Button(100, "Load") {
+            public void click() {
+                TimerData.oldload();
+                ui.destroy(this);
+            }
+            public Object tooltip(Coord c, Widget prev) {
+                return Text.render("Load old amber timers and delete them").tex();
+            }
+        };
+        add(btnl, new Coord(btna.c.x + btna.sz.x + 10, 10));
         TimerData.listenTimers(this);
         pack();
     }

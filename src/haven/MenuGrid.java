@@ -607,15 +607,18 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
+//        addSpecial(new SpecialPagina(this, "paginae::windows::timers",
+//                Resource.local().load("paginae/amber/timers"),
+//                (pag) -> {
+//                    if (ui.gui != null) {
+//                        ui.gui.timerswnd.show(!ui.gui.timerswnd.visible);
+//                        ui.gui.timerswnd.raise();
+//                    }
+//                }
+//        ));
         addSpecial(new SpecialPagina(this, "paginae::windows::timers",
                 Resource.local().load("paginae/amber/timers"),
-                (pag) -> {
-                    if (ui.gui != null) {
-                        ui.gui.timerswnd.show(!ui.gui.timerswnd.visible);
-                        ui.gui.timerswnd.raise();
-                    }
-                }
-        ));
+                (pag) -> ui.gui.toggleTimers()));
         addSpecial(new SpecialPagina(this, "paginae::windows::livestock",
                 Resource.local().load("paginae/amber/livestock"),
                 (pag) -> {
@@ -1099,9 +1102,9 @@ public class MenuGrid extends Widget {
         addSpecial(new SpecialPagina(this, "management::skillsncredo",
                 Resource.local().load("custom/paginae/default/wnd/skillsncredo"),
                 (pag) -> ui.gui.scwnd.toggleVisibility()));
-        addSpecial(new SpecialPagina(this, "management::slothtimers",
-                Resource.local().load("custom/paginae/default/wnd/slothtimers"),
-                (pag) -> ui.gui.toggleTimers()));
+//        addSpecial(new SpecialPagina(this, "management::slothtimers",
+//                Resource.local().load("custom/paginae/default/wnd/slothtimers"),
+//                (pag) -> ui.gui.toggleTimers()));
     }
 
     protected void updlayout() {

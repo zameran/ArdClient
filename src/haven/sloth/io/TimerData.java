@@ -1,8 +1,13 @@
 package haven.sloth.io;
 
 import com.google.common.flogger.FluentLogger;
+import haven.Config;
+import haven.Glob;
+import haven.Utils;
 import haven.sloth.util.ObservableCollection;
 import haven.sloth.util.ObservableListener;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -52,6 +57,28 @@ public class TimerData extends Thread {
                 stmt.executeUpdate();
             }
         });
+//        oldload();
+    }
+
+    public static void oldload() {
+        JSONObject[] tstarr = Utils.getprefjsona("timers", null);
+        if (tstarr == null)
+            return;
+        int tinit = timers.size();
+        for (int i = 0; i < tstarr.length; i++) {
+            JSONObject t = tstarr[i];
+            long start = 0;
+            try {
+                start = t.getLong("start");
+            } catch (JSONException e) {
+            }
+            Timer timer = new Timer(tinit + i, t.getString("name"), t.getLong("duration") / 1000 * 3);
+            addTimer(timer);
+            if (start > 0)
+                timer.makeInstance((long) (start / 1000 * Glob.SERVER_TIME_RATIO));
+        }
+        JSONObject[] timersjson = new JSONObject[0];
+        Utils.setprefjsona("timers", timersjson);
     }
 
     public static class Timer {
@@ -140,6 +167,20 @@ public class TimerData extends Thread {
             try (final ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
                     timers.add(new Timer(keys.getInt(1), name, duration));
+                }
+            }
+        });
+    }
+
+    public static void addTimer(Timer timer) {
+        Storage.dynamic.write(sql -> {
+            final PreparedStatement stmt = Storage.dynamic.prepare("INSERT INTO timer (name, duration) VALUES (?, ?)");
+            stmt.setString(1, timer.name);
+            stmt.setLong(2, timer.duration);
+            stmt.executeUpdate();
+            try (final ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    timers.add(timer);
                 }
             }
         });
