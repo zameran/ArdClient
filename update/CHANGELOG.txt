@@ -1,3 +1,7 @@
+20201205
+Hitboxes. Sloth pathfinder doesn't work. Lua/lisp scripts. Funny options. Petal collector. Fixes. Timer fix.
+~
+
 20201201.1
 Fixes.
 ~
