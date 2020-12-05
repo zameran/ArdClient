@@ -28,7 +28,7 @@ public class LuaScript extends Script {
         final LuaValue session = CoerceJavaToLua.coerce(myself().session);
         globals.set("script", script);
         globals.set("session", session);
-        final LuaValue chunk = globals.loadfile(String.format("scripts/sloth/%s.lua", name()));
+        final LuaValue chunk = globals.loadfile(String.format("data/scripts/%s.lua", name()));
         chunk.call();
     }
 }

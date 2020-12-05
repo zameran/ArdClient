@@ -129,8 +129,12 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
 
     <target name="scripts" depends="build-env">
         <mkdir dir="scripts"/>
+        <mkdir dir="data"/>
         <copy todir="build/scripts">
             <fileset dir="scripts"/>
+        </copy>
+        <copy todir="build/data">
+            <fileset dir="etc/data"/>
         </copy>
     </target>
 
@@ -178,6 +182,7 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         <delete file="build/custom-res"/>
         <delete file="build/modification"/>
         <delete file="build/scripts"/>
+        <delete file="build/data"/>
     </target>
 
     <target name="jars_clean" depends="clean-classes, jars"/>
@@ -286,7 +291,10 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
             </fileset>
         </copy>
         <copy todir="update/scripts">
-            <fileset dir="scripts/" includes="**"/>
+            <fileset dir="scripts/"/>
+        </copy>
+        <copy todir="update/data">
+            <fileset dir="etc/data"/>
         </copy>
         <copy todir="update/modification">
             <fileset dir="modification/"/>

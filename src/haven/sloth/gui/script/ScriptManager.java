@@ -129,7 +129,7 @@ public class ScriptManager extends Window implements ObservableMapListener<Long,
         }
 
         private void refresh() {
-            final File dir = new File("scripts/sloth/");
+            final File dir = new File("data/scripts/");
             scripts.clear();
             if (dir.exists()) {
                 final File[] files = dir.listFiles((fdir, name) -> (name.endsWith(".lisp") || name.endsWith(".lua"))

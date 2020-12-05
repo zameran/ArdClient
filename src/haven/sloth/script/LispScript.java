@@ -10,7 +10,7 @@ public class LispScript extends Script {
     private static final Interpreter engine = Interpreter.createInstance();
 
     public static void reloadConfig() {
-        Load.load("scripts/sloth/lib/_config.lisp");
+        Load.load("data/scripts/lib/_config.lisp");
     }
 
     private final String script;
@@ -27,6 +27,6 @@ public class LispScript extends Script {
 
     @Override
     public void script_run() {
-        Load.load(String.format("scripts/sloth/%s.lisp", script));
+        Load.load(String.format("data/scripts/%s.lisp", script));
     }
 }

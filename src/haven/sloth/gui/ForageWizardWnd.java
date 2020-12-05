@@ -63,7 +63,7 @@ public class ForageWizardWnd extends Window {
             });
             load.add(new Button(200, "Load", () -> {
                 if (files.sel != null) {
-                    ui.sess.details.context.dispatchmsg(this, "load-data", "scripts/sloth/forage/" + files.sel + ".dat");
+                    ui.sess.details.context.dispatchmsg(this, "load-data", "data/scripts/forage/" + files.sel + ".dat");
                     ui.destroy(this);
                 }
             }));
@@ -83,7 +83,7 @@ public class ForageWizardWnd extends Window {
                 basic.add(new CheckBox("Logout on bad animals", (val) -> logoutonanimals = val, true));
                 basic.add(new Button(150, "Save", () -> {
                     if (!filename.text.equals("") && foragables.size() > 0 && points.size() > 0) {
-                        ui.sess.details.context.dispatchmsg(this, "new-data", "scripts/sloth/forage/" + filename.text + ".dat", radius.value(),
+                        ui.sess.details.context.dispatchmsg(this, "new-data", "data/scripts/forage/" + filename.text + ".dat", radius.value(),
                                 useboat, crawl, logoutonplayers, logoutonanimals,
                                 foragables.toArray(new String[0]), points.toArray(new Coord2d[0]), rpoints.toArray(new Coord2d[0]));
                         ui.destroy(this);
@@ -156,7 +156,7 @@ public class ForageWizardWnd extends Window {
     }
 
     private List<String> getSavedData() {
-        final File dir = new File("scripts/sloth/forage/");
+        final File dir = new File("data/scripts/forage/");
         if (!dir.exists() && !dir.mkdirs())
             return new ArrayList<>();
         else {
