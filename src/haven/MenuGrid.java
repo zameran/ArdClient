@@ -1076,20 +1076,20 @@ public class MenuGrid extends Widget {
                 Resource.local().load("paginae/decks/deck5"),
                 (pag) -> ui.gui.changeDecks(4)));
 
-        addSpecial(new SpecialPagina(this, "management::foragewizard",
-                Resource.local().load("custom/paginae/default/wnd/foragewizard"),
-                (pag) -> {
-                    if (ui.gui != null) {
-                        if (ui.gui.forageWzrWnd == null) {
-                            ui.gui.forageWzrWnd = ui.gui.add(new ForageWizardWnd());
-                            ui.gui.forageWzrWnd.show();
-                        } else {
-                            ui.gui.forageWzrWnd.show(!ui.gui.forageWzrWnd.visible);
-                        }
-                        ui.gui.forageWzrWnd.raise();
-                    }
-                }
-        ));
+//        addSpecial(new SpecialPagina(this, "management::foragewizard",
+//                Resource.local().load("custom/paginae/default/wnd/foragewizard"),
+//                (pag) -> {
+//                    if (ui.gui != null) {
+//                        if (ui.gui.forageWzrWnd == null) {
+//                            ui.gui.forageWzrWnd = ui.gui.add(new ForageWizardWnd());
+//                            ui.gui.forageWzrWnd.show();
+//                        } else {
+//                            ui.gui.forageWzrWnd.show(!ui.gui.forageWzrWnd.visible);
+//                        }
+//                        ui.gui.forageWzrWnd.raise();
+//                    }
+//                }
+//        ));
         addSpecial(new SpecialPagina(this, "management::scripts",
                 Resource.local().load("custom/paginae/default/wnd/scripts"),
                 (pag) -> ui.gui.toggleScripts()));
