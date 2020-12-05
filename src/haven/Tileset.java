@@ -214,7 +214,7 @@ public class Tileset extends Resource.Layer {
                 throw (new Resource.LoadException("Could not pack tiles into calculated minimum texture", getres()));
             order[n] = t;
             place[n] = new Coord(x, y);
-            t.tex = new TexSI(packbuf, place[n], place[n].add(tsz));
+            t.tex = new TexSI(packbuf, place[n], tsz);
             n++;
             if ((x += tsz.x) > (minw - tsz.x)) {
                 x = 0;
