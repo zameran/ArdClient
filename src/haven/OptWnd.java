@@ -4100,9 +4100,16 @@ public class OptWnd extends Window {
                 super.itemclick(itm, button);
                 Utils.setprefchklst("flowersel", Config.flowermenus);
             }
+            protected void drawitemname(GOut g, CheckListboxItem itm) {
+                Text t = Text.render(Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name));
+                Tex T = t.tex();
+                g.image(T, new Coord(2, 2), t.sz());
+                T.dispose();
+            }
         };
         Utils.loadprefchklist("flowersel", Config.flowermenus);
         Config.flowerlist.items.addAll(Config.flowermenus.values());
+        Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
         //  flowerlist.items.addAll(Config.flowermenus.values());
         appender.add(Config.flowerlist);
         Config.petalsearch = new TextEntry(140, "") {
@@ -4125,12 +4132,28 @@ public class OptWnd extends Window {
             public void update() {
                 Config.flowerlist.items.clear();
                 for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
-                    if (entry.getKey().toLowerCase().contains(text.toLowerCase()))
+                    if (Resource.getLocString(Resource.BUNDLE_FLOWER, entry.getKey()).toLowerCase().contains(text.toLowerCase()))
                         Config.flowerlist.items.add(entry.getValue());
                 }
+                Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
         };
         appender.add(Config.petalsearch);
+        appender.add(new Button(140, "Clear") {
+            @Override
+            public boolean mousedown(Coord mc, int btn) {
+                if (ui.modctrl && btn == 1) {
+                    Config.flowermenus.clear();
+                    Config.flowerlist.items.clear();
+                    Utils.setcollection("petalcol", Config.flowermenus.keySet());
+                    Utils.setprefchklst("flowersel", Config.flowermenus);
+                }
+                return (true);
+            }
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Clear all list if something went wrong (CTRL + LMC)").tex();
+            }
+        });
 
         flowermenus.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         flowermenus.pack();

@@ -556,7 +556,7 @@ public class Config {
     public static CheckListbox flowerlist = null;
     public static TextEntry petalsearch = null;
     public final static Map<String, CheckListboxItem> flowermenus = new TreeMap<String, CheckListboxItem>() {{
-        Utils.loadcollection("petalcol").forEach(petal -> put(petal, new CheckListboxItem(petal, Resource.BUNDLE_FLOWER)));
+        Utils.loadcollection("petalcol").forEach(petal -> put(petal, new CheckListboxItem(petal)));
     }};
 
 //    public final static HashMap<String, CheckListboxItem> flowermenus = new HashMap<String, CheckListboxItem>(37) {{

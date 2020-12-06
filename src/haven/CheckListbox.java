@@ -48,6 +48,10 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
     protected void drawitem(GOut g, CheckListboxItem itm, int idx) {
         if (itm.selected)
             g.image(chk, new Coord(sz.x - sb.sz.x - chk.sz().x - 3, -1), new Coord(itemh, itemh));
+        drawitemname(g, itm);
+    }
+
+    protected void drawitemname(GOut g, CheckListboxItem itm) {
         Text t = Text.render(itm.name);
         Tex T = t.tex();
         g.image(T, new Coord(2, 2), t.sz());
