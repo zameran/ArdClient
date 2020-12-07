@@ -55,7 +55,8 @@ public class StaticSprite extends Sprite {
     }
 
     public StaticSprite(Owner owner, Resource res, Message sdt) {
-        this(owner, res, lsparts(res, sdt));
+        super(owner, res);
+        this.parts = lsparts(new RecOwner(), res, sdt);
     }
 
     public static Rendered[] lsparts(Owner owner, Resource res, Message sdt) {

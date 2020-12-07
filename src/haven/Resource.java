@@ -1995,6 +1995,10 @@ public class Resource implements Serializable {
         return (indir);
     }
 
+    public static Image loadrimg(String name) {
+        return (local().loadwait(name).layer(imgc));
+    }
+
     public static BufferedImage loadimg(String name) {
         return (local().loadwait(name).layer(imgc).img);
     }
