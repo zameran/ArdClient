@@ -530,7 +530,7 @@ public class Fightsess extends Widget {
 //                        Coord lac = Config.altfightui ? new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2)) : pcc.add(usec2);
 //                        Coord lac = new Coord(cx + 69 - usesz.x, 120).add(usesz.div(2));
                         Coord lac = enemyLastMoveAnchor;
-                        if (c.isect(lac, usesz)) {
+                        if (c.isect(lac.sub(usesz.x / 2, 0), usesz)) {
                             if (lastacttip2 == null)
                                 lastacttip2 = Text.render(lastact.get().layer(Resource.tooltip).t);
                             return (lastacttip2);
