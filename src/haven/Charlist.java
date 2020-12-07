@@ -84,7 +84,7 @@ public class Charlist extends Widget {
         Button btn = new Button(90, "Log out") {
             @Override
             public void click() {
-                Session sess = ((RemoteUI) ui.rcvr).sess;
+                Session sess = ui.sess;
                 synchronized (sess) {
                     sess.close();
                 }
