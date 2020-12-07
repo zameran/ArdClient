@@ -1,6 +1,8 @@
 package modification;
 
 import haven.AuthClient;
+import haven.CheckListbox;
+import haven.CheckListboxItem;
 import haven.Coord;
 import haven.GItem;
 import haven.Resource;
@@ -11,6 +13,9 @@ import haven.Widget;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class dev {
     public static boolean logging = Utils.getprefb("msglogging", false);      //allow log in console
@@ -19,10 +24,28 @@ public class dev {
     public static boolean skipexceptions = Utils.getprefb("skipexceptions", false);
     public static boolean reslog = Utils.getprefb("reslog", false);
 
-    public static boolean msg_log_skip_boolean = false;     //allow chosen skip
+    public static boolean msg_log_skip_boolean = Utils.getprefb("skiplogmsg", false);
     public static ArrayList<String> msg_log_skip = new ArrayList<String>() {{       //chosen msg
         addAll(Arrays.asList("glut", "click"));
     }};
+
+
+    public static CheckListbox msglist = null;
+    public final static Map<String, CheckListboxItem> msgmenus = new TreeMap<String, CheckListboxItem>() {{
+        Utils.loadcollection("msgcollection").forEach(msg -> put(msg, new CheckListboxItem(msg)));
+    }};
+
+    public static void addMsg(String name) {
+        List<String> list = new ArrayList<>(msgmenus.keySet());
+        if (msgmenus.get(name) == null) {
+            list.add(name);
+            CheckListboxItem ci = new CheckListboxItem(name);
+            msgmenus.put(name, ci);
+            if (msglist != null)
+                msglist.items.add(ci);
+            Utils.setcollection("msgcollection", msgmenus.keySet());
+        }
+    }
 
     public static String serverSender = "_SERVER_MSG";
     public static String clientSender = "_CLIENT_MSG";
@@ -63,8 +86,8 @@ public class dev {
         int max_msg_length = 10;
 
         boolean skip_log = false;
-        for (String s : msg_log_skip) {
-            if (s.equals(msg) && msg_log_skip_boolean) skip_log = true;
+        for (Map.Entry<String, CheckListboxItem> entry : msgmenus.entrySet()) {
+            if (msg_log_skip_boolean && entry.getKey().toLowerCase().equals(msg) && entry.getValue().selected) skip_log = true;
         }
 
         if (stackTraceElements[1].getMethodName().equals("uimsg")) {
@@ -112,6 +135,7 @@ public class dev {
 				for (int i = 4 + a; i < max_wdg_length; i++)
 					System.out.print(" ");*/
             System.out.print(" || " + msg);
+            addMsg(msg);
 			/*for (int i = msg.length(); i < max_msg_length; i++)
 				System.out.print(" ");*/
             System.out.print(" || [" + args.length + "]:");

@@ -4066,6 +4066,33 @@ public class OptWnd extends Window {
             }
         });
 
+        final WidgetVerticalAppender appender3 = new WidgetVerticalAppender(devPanel);
+        appender3.setX(620 - 140 - 10);
+
+        appender3.add(new CheckBox("Skip msg!") {
+            {
+                a = dev.msg_log_skip_boolean;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("skiplogmsg", val);
+                dev.msg_log_skip_boolean = val;
+                a = val;
+            }
+        });
+
+        dev.msglist = new CheckListbox(140, 15) {
+            @Override
+            protected void itemclick(CheckListboxItem itm, int button) {
+                super.itemclick(itm, button);
+                Utils.setprefchklst("msgsel", dev.msgmenus);
+            }
+        };
+        Utils.loadprefchklist("msgsel", dev.msgmenus);
+        dev.msglist.items.addAll(dev.msgmenus.values());
+        dev.msglist.items.sort(Comparator.comparing(o -> o.name));
+        appender3.add(dev.msglist);
+
         devPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         devPanel.pack();
     }
