@@ -5,8 +5,13 @@ import haven.Coord2d;
 import haven.GameUI;
 import haven.MenuGrid;
 import haven.MenuGrid.Pagina;
+import modification.dev;
 
 public class RosterButton extends MenuGrid.PagButton {
+    static {
+        dev.checkFileVersion("ui/croster", 42);
+    }
+
     public final GameUI gui;
     public RosterWindow wnd;
 
@@ -26,13 +31,18 @@ public class RosterButton extends MenuGrid.PagButton {
             wnd = new RosterWindow();
             wnd.addroster(rost);
             gui.addchild(wnd, "misc", new Coord2d(0.3, 0.3), new Object[]{"id", "croster"});
+            synchronized (RosterWindow.rosters) {
+                RosterWindow.rosters.put(pag.scm.ui.sess.glob, wnd);
+            }
         } else {
             wnd.addroster(rost);
         }
     }
 
     public void use() {
-        if (wnd == null) {
+        if (pag.scm.ui.modshift) {
+            pag.scm.wdgmsg("act", "croster", "a");
+        } else if (wnd == null) {
             pag.scm.wdgmsg("act", "croster");
         } else {
             if (wnd.show(!wnd.visible)) {

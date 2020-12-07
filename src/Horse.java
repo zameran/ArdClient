@@ -3,8 +3,12 @@
 
 import haven.GOut;
 import haven.res.ui.croster.Entry;
+import modification.dev;
 
 public class Horse extends Entry {
+	static {
+		dev.checkFileVersion("gfx/hud/rosters/horse", 24);
+	}
     public int meat, milk;
     public int meatq, milkq, hideq;
     public int seedq;
@@ -16,7 +20,7 @@ public class Horse extends Entry {
 
     public void draw(GOut g) {
         drawbg(g);
-        drawcol(g, HorseRoster.cols.get(0), 0, name, null, 0);
+        drawcol(g, HorseRoster.cols.get(0), 0, this, namerend, 0);
         drawcol(g, HorseRoster.cols.get(1), 1, q, quality, 1);
         drawcol(g, HorseRoster.cols.get(2), 1, end, null, 2);
         drawcol(g, HorseRoster.cols.get(3), 1, stam, null, 3);

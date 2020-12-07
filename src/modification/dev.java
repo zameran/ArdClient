@@ -246,12 +246,17 @@ public class dev {
     }
 
     public static void checkFileVersion(String resname, int curver) {
-        Resource res = Resource.remote().loadwait(resname);
-        if (res == null) {
-            System.out.printf("[i] Resource [%s(%d)] not found!", resname, curver);
-            return;
+        try {
+            Resource res = Resource.remote().loadwait(resname);
+
+            if (res == null) {
+                System.out.printf("[i] Resource [%s(%d)] not found!", resname, curver);
+                return;
+            }
+            if (curver != res.ver)
+                System.out.printf("[i] Resource [%s] (old %d). Please update!", res, curver);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (curver != res.ver)
-            System.out.printf("[i] Resource [%s] (old %d). Please update!", res, curver);
     }
 }

@@ -7,10 +7,14 @@ import haven.Loading;
 import haven.Resource;
 import haven.Tex;
 import haven.UI;
+import modification.dev;
 
 import java.util.Comparator;
 
 public class Column<E extends Entry> {
+    static {
+        dev.checkFileVersion("ui/croster", 42);
+    }
     public final Tex head;
     public final String tip;
     public final Comparator<? super E> order;

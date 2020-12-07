@@ -25,10 +25,10 @@ public class GoatTable extends AnimalTable {
         final Avaview ava = getAV(animal);
         final Widget name = ava.next;
         final Widget brand;
-        if (((Label) name.next).texts.contains("Born to")) {
-            brand = name.next.next;
+        if (((Label) name.next.next).texts.contains("Born to")) {
+            brand = name.next.next.next;
         } else {
-            brand = name.next;
+            brand = name.next.next;
         }
 
         final Label sex = new Label(male ? "M" : "F");

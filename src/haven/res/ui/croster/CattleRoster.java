@@ -8,12 +8,14 @@ import haven.GOut;
 import haven.GameUI;
 import haven.Indir;
 import haven.Loading;
+import haven.MenuGrid;
 import haven.MenuGrid.Pagina;
 import haven.Resource;
 import haven.Scrollbar;
 import haven.Tex;
 import haven.UI;
 import haven.Widget;
+import modification.dev;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +29,16 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
+    static {
+        dev.checkFileVersion("ui/croster", 42);
+    }
     public static final int WIDTH = UI.scale(900);
     public static final Comparator<Entry> namecmp = (a, b) -> a.name.compareTo(b.name);
     public static final int HEADH = UI.scale(40);
     public final Map<Long, T> entries = new HashMap<>();
     public final Scrollbar sb;
     public final Widget entrycont;
+    public int entryseq = 0;
     public List<T> display = Collections.emptyList();
     public boolean dirty = true;
     public Comparator<? super T> order = namecmp;
@@ -179,12 +185,14 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         entries.put(entry.id, entry);
         entrycont.add(entry, Coord.z);
         dirty = true;
+        entryseq++;
     }
 
     public void delentry(long id) {
         T entry = entries.remove(id);
         entry.destroy();
         dirty = true;
+        entryseq++;
     }
 
     public void delentry(T entry) {
@@ -203,10 +211,16 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         } else if (msg == "rm") {
             delentry((Long) args[0]);
         } else if (msg == "addto") {
-            GameUI gui = (GameUI) ui.getwidget((Integer) args[0]);
-            Pagina pag = gui.menu.paginafor(ui.sess.getres((Integer) args[1]));
-//            RosterButton btn = (RosterButton) Loading.waitfor(pag::button);
-            RosterButton btn = new RosterButton(pag);
+            Widget wdg = ui.getwidget((Integer) args[0]);
+//            System.out.println(wdg);
+            GameUI gui = (GameUI) wdg;
+            Indir<Resource> res = ui.sess.getres((Integer) args[1]);
+//            System.out.println(res);
+            Pagina pag = gui.menu.paginafor(res);
+//            System.out.println(pag);
+            MenuGrid.PagButton pagButton = Loading.waitfor(pag::button);
+//            System.out.println(pagButton);
+            RosterButton btn = pagButton instanceof RosterButton ? (RosterButton) pagButton : new RosterButton(pag);
             btn.add(this);
         } else {
             super.uimsg(msg, args);

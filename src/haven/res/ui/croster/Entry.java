@@ -1,6 +1,7 @@
 /* Preprocessed source code */
 package haven.res.ui.croster;
 
+import haven.BuddyWnd;
 import haven.CharWnd;
 import haven.CheckBox;
 import haven.Coord;
@@ -9,20 +10,29 @@ import haven.Tex;
 import haven.UI;
 import haven.Utils;
 import haven.Widget;
+import modification.dev;
 
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.function.Function;
 
 public class Entry extends Widget {
+    static {
+        dev.checkFileVersion("ui/croster", 42);
+    }
+
     public static final int WIDTH = CattleRoster.WIDTH;
     public static final int HEIGHT = UI.scale(20);
     public static final Coord SIZE = new Coord(WIDTH, HEIGHT);
     public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32);
     public static final Function<Integer, String> percent = v -> String.format("%d%%", v);
     public static final Function<Number, String> quality = v -> Long.toString(Math.round(v.doubleValue()));
+    public static final Function<Entry, Tex> namerend = e -> {
+        return (CharWnd.attrf.render(e.name, BuddyWnd.gc[e.grp]).tex());
+    };
     public final long id;
     public String name;
+    public int grp;
     public double q;
     public int idx;
     public CheckBox mark;
@@ -52,7 +62,11 @@ public class Entry extends Widget {
         if (!Utils.eq(rendv[idx], val)) {
             if (rend[idx] != null)
                 rend[idx].dispose();
-            rend[idx] = CharWnd.attrf.render(String.valueOf(fmt.apply(val))).tex();
+            Object rval = fmt.apply(val);
+            if (rval instanceof Tex)
+                rend[idx] = (Tex) rval;
+            else
+                rend[idx] = CharWnd.attrf.render(String.valueOf(rval)).tex();
             rendv[idx] = val;
         }
         Coord sz = rend[idx].sz();

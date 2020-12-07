@@ -631,6 +631,17 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 }
             }
         }
+
+        if (attr.size() > 0) {
+            sb.append("GAttribs: ").append(attr.size()).append("\n");
+            for (GAttrib ga : attr.values()) {
+                if (ga != null) {
+                    sb.append("ga: ").append("[").append(ga).append("]");
+                    sb.append("\n");
+                }
+            }
+        }
+
         sb.append("Angle: ").append(Math.toDegrees(a)).append("\n");
         sb.append("Position: ").append(getc()).append("\n");
         if (configuration.moredetails) {
@@ -937,7 +948,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             ResAttr attr;
             try {
                 attr = rd.resid.get().getcode(ResAttr.Factory.class, true).mkattr(this, rd.dat.clone());
-            } catch (Loading l) {
+            } catch (Exception l) {
                 continue;
             }
             ResAttr.Cell<?> rc = getrattr(rattrclass(attr.getClass()));

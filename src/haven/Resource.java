@@ -89,6 +89,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 
 public class Resource implements Serializable {
     public static Resource fake = new Resource(null, "fake", -1);
@@ -386,10 +387,9 @@ public class Resource implements Serializable {
 
         public InputStream get(String name) throws IOException {
             URL resurl = encodeurl(new URL(baseurl, name + ".res"));
+            return (new RetryingInputStream() {
+                protected InputStream create() throws IOException {
             URLConnection c;
-            int tries = 0;
-            while (true) {
-                try {
                     if (resurl.getProtocol().equals("https"))
                         c = ssl.connect(resurl);
                     else
@@ -400,11 +400,8 @@ public class Resource implements Serializable {
                     c.setUseCaches(false);
                     c.addRequestProperty("User-Agent", "Haven/1.0");
                     return (c.getInputStream());
-                } catch (ConnectException e) {
-                    if (++tries >= 5)
-                        throw (new IOException("Connection failed five times", e));
                 }
-            }
+            });
         }
 
         public String toString() {
@@ -426,14 +423,13 @@ public class Resource implements Serializable {
             return ("#<Resource " + res.name + ">");
         }
 
-        public boolean canwait() {
-            return (true);
-        }
-
-        public void waitfor() throws InterruptedException {
+        public void waitfor(Runnable callback, Consumer<Waiting> reg) {
             synchronized (res) {
-                while (!res.done) {
-                    res.wait();
+                if (res.done) {
+                    reg.accept(Waitable.Waiting.dummy);
+                    callback.run();
+                } else {
+                    reg.accept(res.wq.add(callback));
                 }
             }
         }
@@ -467,8 +463,9 @@ public class Resource implements Serializable {
         }
 
         private class Queued extends Named implements Prioritized, Serializable {
-            volatile int prio;
             transient final Collection<Queued> rdep = new LinkedList<Queued>();
+            final Waitable.Queue wq = new Waitable.Queue();
+            volatile int prio;
             Queued awaiting;
             volatile boolean done = false;
             Resource res;
@@ -514,7 +511,7 @@ public class Resource implements Serializable {
                         i.remove();
                         dq.prior(this);
                     }
-                    this.notifyAll();
+                    wq.wnotify();
                 }
                 if (res != null) {
                     synchronized (cache) {
@@ -822,7 +819,7 @@ public class Resource implements Serializable {
         if (_remote == null) {
             synchronized (Resource.class) {
                 if (_remote == null) {
-                    Pool remote = new Pool(local());
+                    Pool remote = new Pool(local(), new JarSource("res-preload"));
                     if (prscache != null)
                         remote.add(new CacheSource(prscache));
                     _remote = remote;
@@ -1062,7 +1059,7 @@ public class Resource implements Serializable {
     public class Image extends Layer implements Comparable<Image>, IDLayer<Integer> {
         public transient BufferedImage img, rawimage;
         private transient BufferedImage scaled;
-        transient private TexI tex, rawtex;
+        private transient TexI tex, rawtex;
         public final int z, subz;
         public final boolean nooff;
         public final int id;
