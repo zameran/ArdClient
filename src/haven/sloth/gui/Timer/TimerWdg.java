@@ -91,29 +91,27 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
             add(new TimerInstWdg(inst));
         }
         pack();
-        parent.pack();
+        getparent(TimersWnd.class).pack();
     }
 
     @Override
     public void added(TimerData.TimerInstance item) {
         add(new TimerInstWdg(item));
         pack();
-        parent.pack();
+        getparent(TimersWnd.class).pack();
     }
 
     @Override
     public void remove(TimerData.TimerInstance item) {
         ui.destroy(find(item));
         pack();
-        parent.pack();
+        getparent(TimersWnd.class).pack();
     }
 
     public void pack() {
         int y = base_height;
-        Widget next;
 
-        for (Widget wdg = child; wdg != null; wdg = next) {
-            next = wdg.next;
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof TimerInstWdg) {
                 wdg.c = new Coord(wdg.c.x, y);
                 y += wdg.sz.y;
@@ -123,10 +121,7 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     }
 
     public TimerInstWdg find(TimerData.TimerInstance t) {
-        Widget next;
-
-        for (Widget wdg = child; wdg != null; wdg = next) {
-            next = wdg.next;
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof TimerInstWdg) {
                 TimerInstWdg tw = (TimerInstWdg) wdg;
                 if (tw.inst == t)
@@ -152,12 +147,19 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
             Label lblinf = new Label("has finished running");
             add(lblinf, new Coord(300 / 2 - lblinf.sz.x / 2, 50));
 
-            add(new Button(60, "Close") {
+            adda(new Button(60, "Close") {
                 @Override
                 public void click() {
                     parent.reqdestroy();
                 }
-            }, new Coord(300 / 2 - 60 / 2, 90));
+            }, new Coord(sz.x / 4, 90), 0.5, 0);
+            adda(new Button(60, "Close & Restart") {
+                @Override
+                public void click() {
+                    TimerWdg.this.start();
+                    parent.reqdestroy();
+                }
+            }, new Coord(sz.x / 4 * 3, 90), 0.5, 0);
         }
 
         public void close() {

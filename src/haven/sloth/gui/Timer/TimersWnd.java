@@ -3,6 +3,8 @@ package haven.sloth.gui.Timer;
 
 import haven.Button;
 import haven.Coord;
+import haven.GOut;
+import haven.Scrollport;
 import haven.Text;
 import haven.Widget;
 import haven.Window;
@@ -13,6 +15,7 @@ import java.util.Collection;
 
 public class TimersWnd extends Window implements ObservableListener<TimerData.Timer> {
     public static final int width = 460;
+    public final Scrollport port;
 
     public TimersWnd() {
         super(Coord.z, "Timers", "Timers");
@@ -26,11 +29,24 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
                 TimerData.oldload();
                 ui.destroy(this);
             }
+
             public Object tooltip(Coord c, Widget prev) {
                 return Text.render("Load old amber timers and delete them").tex();
             }
         };
         add(btnl, new Coord(btna.c.x + btna.sz.x + 10, 10));
+
+        port = new Scrollport(new Coord(width - 20 - 15, 0), 30) {
+            @Override
+            public void draw(GOut g) {
+                g.chcolor(0, 0, 0, 128);
+                g.frect(Coord.z, sz);
+                g.chcolor();
+                super.draw(g);
+            }
+        };
+        add(port, btna.c.add(0, btna.sz.y + 10));
+
         TimerData.listenTimers(this);
         pack();
     }
@@ -38,14 +54,14 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
     @Override
     public void init(Collection<TimerData.Timer> base) {
         for (final TimerData.Timer timer : base) {
-            TimersWnd.this.add(new TimerWdg(timer));
+            port.cont.add(new TimerWdg(timer));
         }
         pack();
     }
 
     @Override
     public void added(TimerData.Timer item) {
-        TimersWnd.this.add(new TimerWdg(item));
+        port.cont.add(new TimerWdg(item));
         pack();
     }
 
@@ -56,10 +72,7 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
     }
 
     public TimerWdg find(TimerData.Timer t) {
-        Widget next;
-
-        for (Widget wdg = child; wdg != null; wdg = next) {
-            next = wdg.next;
+        for (Widget wdg = port.cont.child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof TimerWdg) {
                 TimerWdg tw = (TimerWdg) wdg;
                 if (tw.time == t)
@@ -71,16 +84,18 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
     }
 
     public void pack() {
-        int y = 35;
-        Widget next;
-
-        for (Widget wdg = child; wdg != null; wdg = next) {
-            next = wdg.next;
+        int y = 0;
+        for (Widget wdg = port.cont.child; wdg != null; wdg = wdg.next) {
             if (wdg instanceof TimerWdg) {
                 wdg.c = new Coord(wdg.c.x, y);
                 y += wdg.sz.y;
             }
         }
+        int portHeight = Math.min(y, 400);
+        port.resize(port.sz.x, portHeight);
+        port.cont.update();
+        port.bar.resize(portHeight);
+        port.bar.changed();
         super.pack();
     }
 
