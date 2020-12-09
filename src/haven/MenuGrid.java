@@ -64,10 +64,10 @@ import haven.purus.Farmer;
 import haven.purus.Farmer2;
 import haven.purus.FlowerPicker;
 import haven.purus.StockpileFiller;
+import haven.purus.StockpileFiller2;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
-import haven.sloth.gui.ForageWizardWnd;
 import haven.sloth.util.ObservableCollection;
 import modification.configuration;
 
@@ -859,11 +859,23 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
+//        addSpecial(new SpecialPagina(this, "paginae::purus::stockpilefill",
+//                Resource.local().load("paginae/purus/stockpilefill"),
+//                (pag) -> {
+//                    if (ui.gui != null) {
+//                        StockpileFiller spf = new StockpileFiller();
+//                        ui.gui.add(spf, new Coord(ui.gui.sz.x / 2 - spf.sz.x / 2, ui.gui.sz.y / 2 - spf.sz.y / 2 - 200));
+//                        synchronized (GobSelectCallback.class) {
+//                            ui.gui.map.registerGobSelect(spf);
+//                        }
+//                    }
+//                }
+//        ));
         addSpecial(new SpecialPagina(this, "paginae::purus::stockpilefill",
                 Resource.local().load("paginae/purus/stockpilefill"),
                 (pag) -> {
                     if (ui.gui != null) {
-                        StockpileFiller spf = new StockpileFiller();
+                        StockpileFiller2 spf = new StockpileFiller2();
                         ui.gui.add(spf, new Coord(ui.gui.sz.x / 2 - spf.sz.x / 2, ui.gui.sz.y / 2 - spf.sz.y / 2 - 200));
                         synchronized (GobSelectCallback.class) {
                             ui.gui.map.registerGobSelect(spf);

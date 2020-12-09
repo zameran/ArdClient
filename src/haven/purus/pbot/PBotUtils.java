@@ -95,12 +95,15 @@ public class PBotUtils {
 //        return pfRightClick(PBotAPI.modeui(), gob, mod);
 //    }
 
-    public static void pfGobClick(UI ui, Gob gob, int btn, int mod) {
+    public static boolean pfGobClick(UI ui, Gob gob, int btn, int mod) {
         ui.gui.map.purusPfRightClick(gob, -1, btn, mod, "");
         try {
             ui.gui.map.pastaPathfinder.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+        synchronized (ui.gui.map) {
+            return ui.gui.map.foundPath;
         }
     }
 
@@ -1421,8 +1424,16 @@ public class PBotUtils {
      * @param gob Gob to right click
      * @param mod 1 = shift, 2 = ctrl, 4 = alt
      */
-    public static void pfRightClick(UI ui, Gob gob, int mod) {
+    public static boolean pfRightClick(UI ui, Gob gob, int mod) {
         ui.gui.map.purusPfRightClick(gob, -1, 3, mod, null);
+        try {
+            ui.gui.map.pastaPathfinder.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        synchronized (ui.gui.map) {
+            return ui.gui.map.foundPath;
+        }
     }
 
 //    public static void pfRightClick(Gob gob, int mod) {
@@ -1875,10 +1886,11 @@ public class PBotUtils {
     }
 
     public static boolean pfmove(UI ui, int x, int y) {
-        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfLeftClick(ui, x, y);
     }
 
 //    public static boolean pfmove(int x, int y) {
@@ -1886,10 +1898,11 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmove(UI ui, double x, double y) {
-        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfLeftClick(ui, x, y);
     }
 
 //    public static boolean pfmove(double x, double y) {
@@ -1897,10 +1910,11 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmovegob(UI ui, PBotGob gob) {
-        boolean yea = ui.gui.map.pathto(gob.gob);
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathto(gob.gob);
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfGobClick(ui, gob.gob, 1, 0);
     }
 
 //    public static boolean pfmovegob(PBotGob gob) {
@@ -1908,10 +1922,11 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmovegob(UI ui, Gob gob) {
-        boolean yea = ui.gui.map.pathto(gob);
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathto(gob);
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfGobClick(ui, gob, 1, 0);
     }
 
 //    public static boolean pfmovegob(Gob gob) {
@@ -1920,10 +1935,11 @@ public class PBotUtils {
 
     //new boshaw pf right clicks.
     public static boolean PathfinderRightClick(UI ui, Gob gob, int mod) {
-        boolean yea = ui.gui.map.pathtoRightClick(gob, mod);
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathtoRightClick(gob, mod);
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfRightClick(ui, gob, mod);
     }
 
 //    public static boolean PathfinderRightClick(Gob gob, int mod) {
@@ -1931,10 +1947,11 @@ public class PBotUtils {
 //    }
 
     public static boolean PathfinderRightClick(UI ui, PBotGob gob, int mod) {
-        boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
-        while (!ui.gui.map.isclearmovequeue())
-            PBotUtils.sleep(10);
-        return yea;
+//        boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
+//        while (!ui.gui.map.isclearmovequeue())
+//            PBotUtils.sleep(10);
+//        return yea;
+        return pfRightClick(ui, gob, mod);
     }
 
 //    public static boolean PathfinderRightClick(PBotGob gob, int mod) {

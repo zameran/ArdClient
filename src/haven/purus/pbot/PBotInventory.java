@@ -61,6 +61,20 @@ public class PBotInventory {
         return items;
     }
 
+    public PBotItem getInventoryItemByNames(String... pattern) {
+        List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
+        for (PBotItem item : getInventoryContents()) {
+            String name = item.getName();
+            if (name == null)
+                continue;
+            for (Pattern p : patterns) {
+                if (p.matcher(name).matches())
+                    return (item);
+            }
+        }
+        return (null);
+    }
+
     /**
      * @param pattern Regex pattern(s) matching item resnames
      * @return List of items with resname matching at least one of the given patterns
@@ -76,6 +90,18 @@ public class PBotInventory {
             }
         }
         return items;
+    }
+
+    public PBotItem getInventoryItemByResnames(String... pattern) {
+        List<Pattern> patterns = Arrays.stream(pattern).map(Pattern::compile).collect(Collectors.toList());
+        for (PBotItem item : getInventoryContents()) {
+            String name = item.getResname();
+            for (Pattern p : patterns) {
+                if (p.matcher(name).matches())
+                    return (item);
+            }
+        }
+        return (null);
     }
 
     public List<PBotItem> getInventoryContainsResnames(List<String> resnames) {

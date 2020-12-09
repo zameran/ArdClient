@@ -72,7 +72,7 @@ public class PBotGobAPI {
      * @return List of all gobs in radius
      */
     public static List<PBotGob> findObjectsByNames(UI ui, int radius, String... names) {
-        Coord2d plc = PBotUtils.player(ui).rc;
+        Coord2d plc = PBotGobAPI.player(ui).gob.rc;
         double min = radius;
 
         List<PBotGob> list = new ArrayList<PBotGob>();

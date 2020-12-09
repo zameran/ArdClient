@@ -1956,7 +1956,7 @@ public class Resource implements Serializable {
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         while (!in.eom()) {
             String title = in.string();
-//            dev.resourceLog("DECODING", this.name + ":" + this.ver, title);
+//            dev.resourceLog("DECODING", this, title);
             LayerFactory<?> lc = ltypes.get(title);
             int len = in.int32();
             if (lc == null) {

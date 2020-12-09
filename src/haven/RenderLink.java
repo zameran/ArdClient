@@ -186,6 +186,7 @@ public interface RenderLink {
                 Function<Object[], Rendered> make = Utils.smthfun(cl, "mkrlink", Rendered.class, Sprite.Owner.class, Resource.class, Object[].class);
                 return ((owner, res, args) -> make.apply(new Object[]{owner, res, args}));
             } catch (NoSuchMethodException e) {
+                e.printStackTrace();
             }
             if (Rendered.class.isAssignableFrom(cl)) {
                 Class<? extends Rendered> scl = cl.asSubclass(Rendered.class);
@@ -193,6 +194,7 @@ public interface RenderLink {
                     Function<Object[], ? extends Rendered> make = Utils.consfun(scl, Sprite.Owner.class, Resource.class, Object[].class);
                     return ((owner, res, args) -> make.apply(new Object[]{owner, res, args}));
                 } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
                 }
             }
             throw (new RuntimeException("Could not find any suitable construct for dynamic renderlink"));
@@ -208,7 +210,6 @@ public interface RenderLink {
     public class Res extends Resource.Layer implements Resource.IDLayer<Integer> {
         public transient final RenderLink l;
         public final int id;
-        public Indir<Resource> mesh;
 
         public Res(Resource res, Message buf) {
             res.super();
@@ -221,7 +222,7 @@ public interface RenderLink {
                 id = buf.int16();
                 t = buf.uint8();
             } else {
-                throw (new Resource.LoadException("Invalid renderlink version: " + lver, getres()));
+                throw (new Resource.LoadException("Invalid renderlink version: " + lver, res));
             }
             if (t == 0) {
                 l = MeshMat.parse(res, buf);
@@ -232,17 +233,9 @@ public interface RenderLink {
             } else if (t == 3) {
                 l = Parameters.parse(res, buf);
             } else {
-                mesh = null;
-                throw (new Resource.LoadException("Invalid renderlink type: " + t, getres()));
+                throw (new Resource.LoadException("Invalid renderlink type: " + t, res));
             }
-        }
-
-        public Optional<Resource> mesh() {
-            try {
-                return mesh != null ? Optional.of(mesh.get()) : Optional.empty();
-            } catch (Loading l) {
-                return Optional.empty();
-            }
+            System.out.println(res + " " + l);
         }
 
         public void init() {
