@@ -1,3 +1,7 @@
+20201209
+Stockpiler beta. Timers.
+~
+
 20201208
 Fix livestock manager. Roster.
 ~
