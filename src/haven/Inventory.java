@@ -193,15 +193,13 @@ public class Inventory extends Widget implements DTarget {
                                 if (colorIdentical == null) {
                                     colorIdentical = g.quality().color;
                                 }
-                                if (item.qq.color != colorIdentical) {
+                                if (!item.qq.color.equals(colorIdentical)) {
                                     continue;
                                 }
                             }
                         }
-                        item.item.wdgmsg("drop", Coord.z);
-                    } else {
-                        item.item.wdgmsg("drop", Coord.z);
                     }
+                    item.item.wdgmsg("drop", Coord.z);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
