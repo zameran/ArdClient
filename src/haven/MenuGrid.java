@@ -509,6 +509,15 @@ public class MenuGrid extends Widget {
                     }
                 }
         ));
+        addSpecial(new SpecialPagina(this, "paginae::amber::wood5",
+                Resource.local().load("paginae/amber/blockshed"),
+                (pag) -> {
+                    if (ui.gui != null) {
+                        Thread t = new Thread(new AddWoodToSmokeShed(ui.gui, 5), "AddWoodToSmokeShed");
+                        t.start();
+                    }
+                }
+        ));
         addSpecial(new SpecialPagina(this, "paginae::amber::branchoven",
                 Resource.local().load("paginae/amber/branchoven"),
                 (pag) -> {
