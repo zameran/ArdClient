@@ -170,6 +170,14 @@ public class GobHitbox extends Sprite {
 //            return bboxWallseg;
         else if (name.endsWith("/hwall"))
             return bboxHwall;
+        
+        if (name.endsWith("/consobj")) {
+            ResDrawable rd = gob.getattr(ResDrawable.class);
+            if (rd != null && rd.sdt.rbuf.length >=4) {
+                MessageBuf buf = rd.sdt.clone();
+                return new BBox[]{new BBox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
+            }
+        }
 
         Resource.Neg neg = res.layer(Resource.Neg.class);
         if (neg == null) {

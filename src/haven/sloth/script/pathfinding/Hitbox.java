@@ -4,7 +4,10 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
+import haven.GobHitbox;
+import haven.MessageBuf;
 import haven.RenderLink;
+import haven.ResDrawable;
 import haven.Resource;
 import haven.sloth.gob.Type;
 import haven.sloth.util.ResHashMap;
@@ -62,12 +65,12 @@ public class Hitbox {
         hitboxes.put("gfx/terobjs/arch/hwall", new Hitbox[]{new Hitbox(new Coord(-1, 0), new Coord(1, 11))});
 
         //animals
-        hitboxes.put("gfx/kritter/horse", new Hitbox[]{new Hitbox(new Coord(-8, -4), new Coord(16, 8))});
-        hitboxes.put("gfx/kritter/cattle/calf", new Hitbox[]{new Hitbox(new Coord(-9, -3), new Coord(18, 6))});
-        hitboxes.put("gfx/kritter/cattle/cattle", new Hitbox[]{new Hitbox(new Coord(-12, -4), new Coord(24, 8))});
-        hitboxes.put("gfx/kritter/pig", new Hitbox[]{new Hitbox(new Coord(-6, -3), new Coord(12, 6))});
-        hitboxes.put("gfx/kritter/goat", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(12, 4))});
-        hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(12, 4))});
+        hitboxes.put("gfx/kritter/horse", new Hitbox[]{new Hitbox(new Coord(-8, -4), new Coord(8, 4))});
+        hitboxes.put("gfx/kritter/cattle/calf", new Hitbox[]{new Hitbox(new Coord(-9, -3), new Coord(9, 3))});
+        hitboxes.put("gfx/kritter/cattle/cattle", new Hitbox[]{new Hitbox(new Coord(-12, -4), new Coord(12, 4))});
+        hitboxes.put("gfx/kritter/pig", new Hitbox[]{new Hitbox(new Coord(-6, -3), new Coord(6, 3))});
+        hitboxes.put("gfx/kritter/goat", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
+        hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
 
         hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
         hitboxes.put("gfx/terobjs/smelter", new Hitbox[]{new Hitbox(new Coord(-12, -12), new Coord(12, 20))});
@@ -133,6 +136,13 @@ public class Hitbox {
                     }
                 }
                 return hitbox.get();
+            }
+            if (res.name.endsWith("/consobj")) {
+                ResDrawable rd = gob.getattr(ResDrawable.class);
+                if (rd != null && rd.sdt.rbuf.length >=4) {
+                    MessageBuf buf = rd.sdt.clone();
+                    return new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
+                }
             }
 
             Resource.Neg neg = res.layer(Resource.Neg.class);
