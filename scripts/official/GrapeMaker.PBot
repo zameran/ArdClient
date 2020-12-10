@@ -82,7 +82,7 @@ const pressBtn = () => {
 	
 	PBotUtils.sleep(1000); //wait
 
-	if (PBotCharacterAPI.getStamina() < 60)
+	if (PBotCharacterAPI.getStamina(ui) < 60)
         if (!PBotUtils.drink(ui, true)) {
         	PBotUtils.sysMsg(ui, "Ran out of water!");
         	return;
@@ -275,7 +275,7 @@ const startBtn = () => {
 				PBotUtils.sysMsg(ui, "Winepress not found");
 				break;
 			}
-			while (PBotUtils.player().isMoving() && !shouldStop()) {
+			while (PBotUtils.player(ui).isMoving() && !shouldStop()) {
 				PBotUtils.sleep(1000);
 			}
 		}
