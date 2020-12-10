@@ -29,6 +29,7 @@ package haven;
 import haven.Resource.AButton;
 import haven.automation.AddBranchesToOven;
 import haven.automation.AddCoalToSmelter;
+import haven.automation.AddWoodToSmokeShed;
 import haven.automation.ButcherFish;
 import haven.automation.CoalToSmelters;
 import haven.automation.Coracleslol;
