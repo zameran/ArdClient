@@ -150,30 +150,30 @@ public class FlowerMenu extends Widget {
             for (Petal p : opts) {
                 p.move(p.ta + ((1 - s) * PI), p.rad * s);
                 p.a = s;
-                if (s == 1.0) {
-                    CheckListboxItem itm = Config.flowermenus.get(p.name);
-                    if (itm != null && itm.selected && !ui.modctrl && (!ignoreAutoSetting || p.name.equals("Peer into")) ||
-                            p.name.equals(nextAutoSel) && System.currentTimeMillis() - nextAutoSelTimeout < 2000) {
-                        nextAutoSel = null;
-                        try {
-                            if (p.name.equals("Cargo") && ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) != null) {
-                                ui.root.wdgmsg("gk", 27);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        choose(p);
-                        try {
-                            if (p.name.contains("Giddy") && Config.horseautorun) {
-                                horsemounter = new Thread(new FlowerMenu.horsemounter());
-                                horsemounter.start();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    }
-                }
+//                if (s == 1.0) {
+//                    CheckListboxItem itm = Config.flowermenus.get(p.name);
+//                    if (itm != null && itm.selected && !ui.modctrl && (!ignoreAutoSetting || p.name.equals("Peer into")) ||
+//                            p.name.equals(nextAutoSel) && System.currentTimeMillis() - nextAutoSelTimeout < 2000) {
+//                        nextAutoSel = null;
+//                        try {
+//                            if (p.name.equals("Cargo") && ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) != null) {
+//                                ui.root.wdgmsg("gk", 27);
+//                            }
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        choose(p);
+//                        try {
+//                            if (p.name.contains("Giddy") && Config.horseautorun) {
+//                                horsemounter = new Thread(new FlowerMenu.horsemounter());
+//                                horsemounter.start();
+//                            }
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        break;
+//                    }
+//                }
             }
         }
     }
@@ -464,9 +464,26 @@ public class FlowerMenu extends Widget {
                 wdgmsg("cl", -1);
                 lastSel = null;
             } else {
+                try {
+                    if (option.name.equals("Cargo") && ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) != null) {
+                        ui.root.wdgmsg("gk", 27);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 wdgmsg("cl", option.num, ui.modflags());
                 lastSel = option.name;
                 MapView.pllastcc = null;
+
+                try {
+                    if (option.name.contains("Giddy") && Config.horseautorun) {
+                        horsemounter = new Thread(new FlowerMenu.horsemounter());
+                        horsemounter.start();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             callback.accept(option != null ? option.num : -1);
