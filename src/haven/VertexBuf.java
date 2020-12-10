@@ -609,7 +609,7 @@ public class VertexBuf {
 
         public VertexRes(Resource res, Message buf) {
             res.super();
-            List<AttribArray> bufs = new LinkedList<>();
+            List<AttribArray> bufs = new LinkedList<AttribArray>();
             int fl = buf.uint8();
             int ver = (fl & 0xf);
             if (ver >= 2)
@@ -634,11 +634,7 @@ public class VertexBuf {
                     cons.cons(bufs, res, buf, num);
                 }
             }
-            this.b = new VertexBuf(bufs.toArray(new AttribArray[0])) {
-                public String toString() {
-                    return (String.format("#<vertexbuf %s>", res.name));
-                }
-            };
+            this.b = new VertexBuf(bufs.toArray(new AttribArray[0]));
         }
 
         public void init() {

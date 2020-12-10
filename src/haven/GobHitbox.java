@@ -161,8 +161,8 @@ public class GobHitbox extends Sprite {
 //        }
 
 
-//        if (name.endsWith("/smelter"))
-//            return bboxSmelter;
+        if (name.endsWith("/smelter"))
+            return bboxSmelter;
 //        else if (name.endsWith("brickwallseg") || name.endsWith("brickwallcp") ||
 //                name.endsWith("palisadeseg") || name.endsWith("palisadecp") ||
 //                name.endsWith("poleseg") || name.endsWith("polecp") ||

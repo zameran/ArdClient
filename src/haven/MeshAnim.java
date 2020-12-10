@@ -37,55 +37,24 @@ import java.util.Random;
 public class MeshAnim {
     public final Frame[] frames;
     public final float len;
-    public final int minv, maxv;
 
     public MeshAnim(Frame[] frames, float len) {
         this.frames = frames;
         this.len = len;
-        int min = -1, max = -1;
-        for (int i = 0; i < frames.length; i++) {
-            if (frames[i].minv < 0)
-                continue;
-            if ((min < 0) || (frames[i].minv < min))
-                min = frames[i].minv;
-            if ((max < 0) || (frames[i].maxv > max))
-                max = frames[i].maxv;
-        }
-//        if (min < 0)
-//            throw (new RuntimeException("No animated vertex in meshanim"));
-        this.minv = min;
-        this.maxv = max;
     }
 
     public static class Frame {
         public final float time;
         public final int[] idx;
         public final float[] pos, nrm;
-        public final int minv, maxv;
 
         public Frame(float time, int[] idx, float[] pos, float[] nrm) {
             this.time = time;
             this.idx = idx;
             this.pos = pos;
             this.nrm = nrm;
-            if (idx.length > 0) {
-                int min = idx[0], max = idx[0];
-                for (int i = 1; i < idx.length; i++) {
-                    min = Math.min(min, idx[i]);
-                    max = Math.max(max, idx[i]);
-                }
-                this.minv = min;
-                this.maxv = max;
-            } else {
-                this.minv = -1;
-                this.maxv = -1;
             }
         }
-    }
-
-    public boolean hasnrm() {
-        return (frames[0].nrm != null);
-    }
 
     public boolean animp(FastMesh mesh) {
         int min = -1, max = -1;
@@ -364,16 +333,6 @@ public class MeshAnim {
         }
 
         public void init() {
-        }
-
-        public String toString() {
-            StringBuilder sb  = new StringBuilder();
-            sb.append("<MeshAnimRes ");
-            sb.append(id).append(" ");
-            sb.append(rnd).append(" ");
-            sb.append(a);
-            sb.append(">");
-            return sb.toString();
         }
     }
 }

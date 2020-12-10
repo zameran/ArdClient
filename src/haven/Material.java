@@ -331,21 +331,6 @@ public class Material extends GLState {
         public Integer layerid() {
             return (id);
         }
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("<MaterialRes ");
-            sb.append(layerid()).append(" ");
-//            for (GLState gl : states) {
-//                sb.append(gl).append(" ");
-//            }
-//            for (Resolver reso : left) {
-//                sb.append(reso).append(" ");
-//            }
-//            sb.append(m);
-            sb.append(">");
-            return sb.toString();
-        }
     }
 
     @Resource.LayerName("mat")

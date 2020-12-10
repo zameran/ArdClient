@@ -235,7 +235,6 @@ public interface RenderLink {
             } else {
                 throw (new Resource.LoadException("Invalid renderlink type: " + t, res));
             }
-            System.out.println(res + " " + l);
         }
 
         public void init() {

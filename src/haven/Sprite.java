@@ -79,14 +79,6 @@ public abstract class Sprite implements Rendered {
         }
     }
 
-//    public static interface CDel {
-//        public void delete();
-//    }
-//
-//    public static interface CUpd {
-//        public void update(Message sdt);
-//    }
-
     public static class FactMaker implements Resource.PublishedCode.Instancer {
         public Factory make(Class<?> cl, Resource ires, Object... args) {
             if (Factory.class.isAssignableFrom(cl))
@@ -100,20 +92,6 @@ public abstract class Sprite implements Rendered {
                 });
             } catch (NoSuchMethodException e) {
             }
-//            if (Sprite.class.isAssignableFrom(cl)) {
-//                Class<? extends Sprite> scl = cl.asSubclass(Sprite.class);
-//                try {
-//                    Function<Object[], ? extends Sprite> make = Utils.consfun(scl, Owner.class, Resource.class);
-//                    return ((owner, res, sdt) -> make.apply(new Object[]{owner, res}));
-//                } catch (NoSuchMethodException e) {
-//                }
-//                try {
-//                    Function<Object[], ? extends Sprite> make = Utils.consfun(scl, Owner.class, Resource.class, Message.class);
-//                    return ((owner, res, sdt) -> make.apply(new Object[]{owner, res, sdt}));
-//                } catch (NoSuchMethodException e) {
-//                }
-//            }
-//            throw (new RuntimeException("Could not find any suitable constructor for dynamic sprite"));
             if (Sprite.class.isAssignableFrom(cl))
                 return (mkdynfact(cl.asSubclass(Sprite.class)));
             return (null);
@@ -189,12 +167,6 @@ public abstract class Sprite implements Rendered {
                 return (ret);
         }
         throw (new ResourceException("Does not know how to draw resource " + res.name, res));
-//        return (new Sprite(owner, res) {
-//            @Override
-//            public boolean setup(RenderList d) {
-//                return false;
-//            }
-//        });
     }
 
     public void draw(GOut g) {

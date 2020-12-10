@@ -70,6 +70,7 @@ public class Hitbox {
         hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(12, 4))});
 
         hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
+        hitboxes.put("gfx/terobjs/smelter", new Hitbox[]{new Hitbox(new Coord(-12, -12), new Coord(12, 20))});
     }
 
     //Offset and Size with a "buffer" around it to avoid clipping

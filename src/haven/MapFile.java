@@ -51,7 +51,6 @@ import java.util.function.Function;
 import static haven.MCache.cmaps;
 
 public class MapFile {
-    private static final float EPSILON = 0.01f;
     public static boolean debug = false;
     private static final int NOZ = Integer.MIN_VALUE;
     private static MapFile instance = null;
@@ -526,7 +525,7 @@ public class MapFile {
         };
 
         private boolean brokenp(Tiler t, Coord tc, final Tiler[] tilers, final boolean[] tlcache) {
-            double bz = ((Ridges.RidgeTile) t).breakz() + EPSILON;  //The distance at which a ridge is formed
+            int bz = ((Ridges.RidgeTile) t).breakz();  //The distance at which a ridge is formed
             //Look at the four tiles around us to get the minimum break distance
             for (Coord ec : tecs) {
                 t = tiler(gettile(tc.add(ec)), tilers, tlcache);
