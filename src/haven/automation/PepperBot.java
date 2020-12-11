@@ -39,13 +39,15 @@ public class PepperBot extends Window implements AreaSelectCallback, GobSelectCa
     private int direction = 1;
     List<WItem> ItemList;
     public boolean allowrun;
-    private final Label lblc4, lblc3;
+    private Label lblc4, lblc3;
     private final int travel = 20000;
     public int xx, yy;
 
     public PepperBot() {
         super(new Coord(180, 290), "Pepper Bot");
+    }
 
+    public void added() {
         int y = 0;
         final Label lbl5 = new Label("Setup Selected", infof);
         add(lbl5, new Coord(20, y));

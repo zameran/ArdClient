@@ -27,11 +27,13 @@ public class PepperBotPro extends Window implements GobSelectCallback {
     private int section = 1;
     private int direction = 1;
     public boolean allowrun;
-    private final Label lblc4, lblc3, sec1, sec2, sec3, sec4;
+    private Label lblc4, lblc3, sec1, sec2, sec3, sec4;
 
     public PepperBotPro() {
         super(new Coord(180, 430), "Pepper Bot");
+    }
 
+    public void added() {
         int y = 0;
         final Label lbl5 = new Label("Setup Selected", infof);
         add(lbl5, new Coord(20, y));
