@@ -1,3 +1,7 @@
+20201211
+Fixes. Smoke shed loader. Flowermenu cargo and diggyup fix.
+~
+
 20201209
 Stockpiler beta. Timers.
 ~
