@@ -54,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
@@ -81,6 +82,20 @@ public class MapFileWidget extends Widget {
     public static int zoomlvls = 7;
     private static final double[] scaleFactors = new double[]{1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
+
+    public static Map<String, Tex> cachedTextTex = new HashMap<>();
+    public static Map<String, Tex> cachedImageTex = new HashMap<>();
+
+    public static Tex getCachedTextTex(String text) {
+        Tex tex = cachedTextTex.get(text);
+        if (tex == null) {
+            Text.Foundry fnd = new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
+            tex = Text.renderstroked(text, Color.white, Color.BLACK, fnd).tex();
+            cachedTextTex.put(text, tex);
+        }
+        return (tex);
+    }
+
 
     public MapFileWidget(MapFile file, Coord sz) {
         super();
@@ -226,34 +241,17 @@ public class MapFileWidget extends Widget {
         }
 
         public void draw(GOut g, Coord c) {
-            float scale = (zoom + 1 + 5f) / (zoomlvls - 1);
-            Text.Foundry fnd = configuration.scalingmarks ? new Text.Foundry(latin.deriveFont(Font.BOLD), Math.round(12 / scale)).aa(true) : new Text.Foundry(latin.deriveFont(Font.BOLD), 12).aa(true);
             if (m instanceof PMarker) {
                 Coord ul = c.sub(flagcc);
-                Coord sflagcc = flagcc.div(scale);
-                Coord sul = c.sub(sflagcc);
                 g.chcolor(((PMarker) m).color);
-                if (configuration.scalingmarks) {
-                    Coord scalesz = flagfg.sz.div(scale);
-                    Tex iflagfg = new TexI(PUtils.uiscale(flagfg.img, scalesz));
-                    g.image(iflagfg, sul);
-                } else
-                    g.image(flagfg, ul);
+                g.image(flagfg, ul);
                 g.chcolor();
-                if (configuration.scalingmarks) {
-                    Coord scalesz = flagbg.sz.div(scale);
-                    Tex iflagbg = new TexI(PUtils.uiscale(flagbg.img, scalesz));
-                    g.image(iflagbg, sul);
-                } else
-                    g.image(flagbg, ul);
+                g.image(flagbg, ul);
                 if (Config.mapdrawflags) {
-                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, fnd).tex();
+//                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, fnd).tex();
+                    Tex tex = getCachedTextTex(m.nm);
                     if (tex != null) {
-                        if (configuration.scalingmarks) {
-//                            Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
-                            g.image(tex, sul.add(sflagcc.x / 2, -20).sub(tex.sz().x / 2, 0));
-                        } else
-                            g.image(tex, ul.add(flagfg.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+                        g.aimage(tex, ul.add(flagfg.sz.x / 2, -20), 0.5, 0);
                     }
                 }
             } else if (m instanceof SMarker) {
@@ -273,27 +271,28 @@ public class MapFileWidget extends Widget {
                 }
                 if (img != null) {
                     //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
-                    Coord scc = cc.div(scale);
+                    int size = 20;
+                    Tex itex = cachedImageTex.get(img.getres().name);
+                    if (itex == null) {
+                        itex = new TexI(img.img);
+                        if ((itex.sz().x > size) || (itex.sz().y > size)) {
+                            BufferedImage buf = img.img;
+                            buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
+                            itex = new TexI(buf);
+                        }
+                        cachedImageTex.put(img.getres().name, itex);
+                    }
+                    g.image(itex, c.sub(cc));
+
                     if (Config.mapdrawquests) {
                         if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
-                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
-                            if (tex != null) {
-                                if (configuration.scalingmarks) {
-                                    Coord scalesz = img.sz.div(scale);
-                                    Tex iimg = new TexI(PUtils.uiscale(img.img, scalesz));
-//                                    Tex itex = new TexI(PUtils.uiscale(((TexI) tex).back, tex.sz().div(scale)));
-                                    g.image(tex, c.sub(scc).add(iimg.sz().x / 2, -20).sub(tex.sz().x / 2, 0));
-                                } else
-                                    g.image(tex, c.sub(cc).add(img.sz.x / 2, -20).sub(tex.sz().x / 2, 0));
+//                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
+                            Tex ttex = getCachedTextTex(sm.nm);
+                            if (ttex != null) {
+                                g.aimage(ttex, c.sub(cc).add(itex.sz().x / 2, -20), 0.5, 0);
                             }
                         }
                     }
-                    if (configuration.scalingmarks) {
-                        Coord scalesz = img.sz.div(scale);
-                        Tex iimg = new TexI(PUtils.uiscale(img.img, scalesz));
-                        g.image(iimg, c.sub(scc));
-                    } else
-                        g.image(img, c.sub(cc));
                 }
             }
         }

@@ -392,8 +392,25 @@ public class MapWnd extends Window {
                 final Location loc = resolve(player);
                 Coord ploc = xlate(resolve(player));
                 if (ploc != null) {
+                    double angle = 0;
+                    if (mv.player() != null)
+                        angle = mv.player().geta();
+
                     g.chcolor(255, 0, 0, 255);
-                    g.image(plx, ploc.sub(plx.sz().div(2)));
+//                    g.image(plx, ploc.sub(plx.sz().div(2)));
+
+                    final Coord coord1 = new Coord(8, 0).rotate(angle).add(ploc);
+                    final Coord coord2 = new Coord(0, -5).rotate(angle).add(ploc);
+                    final Coord coord3 = new Coord(0, -1).rotate(angle).add(ploc);
+                    final Coord coord4 = new Coord(-8, -1).rotate(angle).add(ploc);
+                    final Coord coord5 = new Coord(-8, 1).rotate(angle).add(ploc);
+                    final Coord coord6 = new Coord(0, 1).rotate(angle).add(ploc);
+                    final Coord coord7 = new Coord(0, 5).rotate(angle).add(ploc);
+                    g.poly(coord1, coord2, coord3, coord4, coord5, coord6, coord7);
+                    g.chcolor(Color.BLACK);
+                    g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
+                    g.chcolor();
+
                     final Set<Long> ignore;
                     if (Config.mapdrawparty)
                         ignore = drawparty(g, loc);
