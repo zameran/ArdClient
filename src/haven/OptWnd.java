@@ -4164,6 +4164,9 @@ public class OptWnd extends Window {
                 }
                 Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Right Click to clear entry").tex();
+            }
         };
         appender.add(Config.petalsearch);
         appender.add(new Button(140, "Clear") {
@@ -4178,7 +4181,7 @@ public class OptWnd extends Window {
                 return (true);
             }
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Clear all list if something went wrong (CTRL + LMC)").tex();
+                return Text.render("Clear all list if something went wrong (CTRL + LMB). Don't click!").tex();
             }
         });
 
