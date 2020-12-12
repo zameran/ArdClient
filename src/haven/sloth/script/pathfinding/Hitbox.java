@@ -30,7 +30,7 @@ public class Hitbox {
         hitboxes.put("gfx/terobjs/plants", NOHIT);
 
         //misc
-        hitboxes.put("gfx/terobjs/consobj", new Hitbox[]{new Hitbox(new Coord(-4, -4), new Coord(8, 8))});
+//        hitboxes.put("gfx/terobjs/consobj", new Hitbox[]{new Hitbox(new Coord(-4, -4), new Coord(8, 8))});
         hitboxes.put("gfx/terobjs/skeleton", new Hitbox[]{new Hitbox(new Coord(-4, -4), new Coord(8, 8))});
         hitboxes.put("gfx/terobjs/clue", NOHIT);
         hitboxes.put("gfx/terobjs/boostspeed", NOHIT);
@@ -43,9 +43,9 @@ public class Hitbox {
 
         //walls
         //XXX: loftar's real hitbox size for this is certainly a decimal..
-        final Hitbox[] wallseg = new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))};
-        final Hitbox[] gate = new Hitbox[]{new Hitbox(new Coord(-5, -10), new Coord(5, 10))};
-        final Hitbox[] biggate = new Hitbox[]{new Hitbox(new Coord(-5, -16), new Coord(5, 16))};
+//        final Hitbox[] wallseg = new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))};
+//        final Hitbox[] gate = new Hitbox[]{new Hitbox(new Coord(-5, -10), new Coord(5, 10))};
+//        final Hitbox[] biggate = new Hitbox[]{new Hitbox(new Coord(-5, -16), new Coord(5, 16))};
 //        hitboxes.put("gfx/terobjs/arch/brickwallcp", wallseg);
 //        hitboxes.put("gfx/terobjs/arch/brickwallseg", wallseg);
 //        hitboxes.put("gfx/terobjs/arch/brickwallgate", gate);
@@ -62,18 +62,17 @@ public class Hitbox {
 //        hitboxes.put("gfx/terobjs/arch/drystonewallcp", wallseg);
 //        hitboxes.put("gfx/terobjs/arch/drystonewallgate", gate);
 //        hitboxes.put("gfx/terobjs/arch/drystonewallbiggate", biggate);
-        hitboxes.put("gfx/terobjs/arch/hwall", new Hitbox[]{new Hitbox(new Coord(-1, 0), new Coord(1, 11))});
+//        hitboxes.put("gfx/terobjs/arch/hwall", new Hitbox[]{new Hitbox(new Coord(-1, 0), new Coord(1, 11))});
 
         //animals
         hitboxes.put("gfx/kritter/horse", new Hitbox[]{new Hitbox(new Coord(-8, -4), new Coord(8, 4))});
         hitboxes.put("gfx/kritter/cattle/calf", new Hitbox[]{new Hitbox(new Coord(-9, -3), new Coord(9, 3))});
-        hitboxes.put("gfx/kritter/cattle/cattle", new Hitbox[]{new Hitbox(new Coord(-12, -4), new Coord(12, 4))});
+//        hitboxes.put("gfx/kritter/cattle/cattle", new Hitbox[]{new Hitbox(new Coord(-12, -4), new Coord(12, 4))});
         hitboxes.put("gfx/kritter/pig", new Hitbox[]{new Hitbox(new Coord(-6, -3), new Coord(6, 3))});
         hitboxes.put("gfx/kritter/goat", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
         hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
 
         hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
-        hitboxes.put("gfx/terobjs/smelter", new Hitbox[]{new Hitbox(new Coord(-12, -12), new Coord(12, 20))});
     }
 
     //Offset and Size with a "buffer" around it to avoid clipping
@@ -91,7 +90,7 @@ public class Hitbox {
         Coord ac = !buffer ? off : off.add(BUFFER_SIZE, BUFFER_SIZE);
         Coord bc = !buffer ? sz : sz.add(BUFFER_SIZE * 2, BUFFER_SIZE * 2);
         this.points = new Coord2d[]{
-                new Coord2d(ac.x, ac.y), new Coord2d(bc.x, ac.y), new Coord2d(bc.x, bc.y), new Coord2d(ac.x, bc.y)
+                new Coord2d(ac.x, -ac.y), new Coord2d(bc.x, -ac.y), new Coord2d(bc.x, -bc.y), new Coord2d(ac.x, -bc.y)
         };
         this.hitable = hitable;
     }
@@ -105,7 +104,10 @@ public class Hitbox {
     }
 
     public Hitbox(final Coord2d[] p, boolean hitable) {
-        points = p;
+        this.points = new Coord2d[p.length];
+        for (int i = 0; i < p.length; i++) {
+            this.points[i] = new Coord2d(p[i].x, -p[i].y);
+        }
         this.hitable = hitable;
     }
 
@@ -170,13 +172,13 @@ public class Hitbox {
                                     break;
                                 }
                             }
-                            if (mm.mat != null) {
-                                Resource.Neg ng = mm.mat.get().layer(Resource.Neg.class);
-                                if (ng != null) {
-                                    neg = ng;
-                                    break;
-                                }
-                            }
+//                            if (mm.mat != null) {
+//                                Resource.Neg ng = mm.mat.get().layer(Resource.Neg.class);
+//                                if (ng != null) {
+//                                    neg = ng;
+//                                    break;
+//                                }
+//                            }
                         }
                         if (l instanceof RenderLink.AmbientLink) {
                             RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;

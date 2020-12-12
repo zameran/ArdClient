@@ -95,12 +95,15 @@ public class GobHitbox extends Sprite {
         public final Coord2d[] points;
 
         public BBox(Coord2d[] points) {
-            this.points = points;
+            this.points = new Coord2d[points.length];
+            for (int i = 0; i < points.length; i++) {
+                this.points[i] = new Coord2d(points[i].x, -points[i].y);
+            }
         }
 
         public BBox(Coord ac, Coord bc) {
             this.points = new Coord2d[]{
-                    new Coord2d(ac.x, ac.y), new Coord2d(bc.x, ac.y), new Coord2d(bc.x, bc.y), new Coord2d(ac.x, bc.y)
+                    new Coord2d(ac.x, -ac.y), new Coord2d(bc.x, -ac.y), new Coord2d(bc.x, -bc.y), new Coord2d(ac.x, -bc.y)
             };
         }
     }
@@ -109,11 +112,11 @@ public class GobHitbox extends Sprite {
     private static final BBox[] bboxLamb = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
     private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
     private static final BBox[] bboxPig = new BBox[]{new BBox(new Coord(-6, -3), new Coord(6, 3))};
-    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
+//    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
     private static final BBox[] bboxHorse = new BBox[]{new BBox(new Coord(-8, -4), new Coord(8, 4))};
-    private static final BBox[] bboxSmelter = new BBox[]{new BBox(new Coord(-12, -12), new Coord(12, 20))};
-    private static final BBox[] bboxWallseg = new BBox[]{new BBox(new Coord(-5, -6), new Coord(6, 5))};
-    private static final BBox[] bboxHwall = new BBox[]{new BBox(new Coord(-1, 0), new Coord(0, 11))};
+//    private static final BBox[] bboxSmelter = new BBox[]{new BBox(new Coord(-12, -12), new Coord(12, 20))};
+//    private static final BBox[] bboxWallseg = new BBox[]{new BBox(new Coord(-5, -6), new Coord(6, 5))};
+//    private static final BBox[] bboxHwall = new BBox[]{new BBox(new Coord(-1, 0), new Coord(0, 11))};
     private static final BBox[] bboxCupboard = new BBox[]{new BBox(new Coord(-5, -5), new Coord(5, 5))};
 
     public static BBox[] getBBox(Gob gob) {
@@ -132,8 +135,8 @@ public class GobHitbox extends Sprite {
             return bboxCalf;
         else if (name.equals("gfx/kritter/sheep/lamb"))
             return bboxLamb;
-        else if (name.equals("gfx/kritter/cattle/cattle"))
-            return bboxCattle;
+//        else if (name.equals("gfx/kritter/cattle/cattle"))
+//            return bboxCattle;
         else if (name.startsWith("gfx/kritter/horse/"))
             return bboxHorse;
         else if (name.startsWith("gfx/kritter/goat/"))
@@ -161,15 +164,15 @@ public class GobHitbox extends Sprite {
 //        }
 
 
-        if (name.endsWith("/smelter"))
-            return bboxSmelter;
+//        if (name.endsWith("/smelter"))
+//            return bboxSmelter;
 //        else if (name.endsWith("brickwallseg") || name.endsWith("brickwallcp") ||
 //                name.endsWith("palisadeseg") || name.endsWith("palisadecp") ||
 //                name.endsWith("poleseg") || name.endsWith("polecp") ||
 //                name.endsWith("drystonewallseg") || name.endsWith("drystonewallcp"))
 //            return bboxWallseg;
-        else if (name.endsWith("/hwall"))
-            return bboxHwall;
+//        else if (name.endsWith("/hwall"))
+//            return bboxHwall;
         
         if (name.endsWith("/consobj")) {
             ResDrawable rd = gob.getattr(ResDrawable.class);
@@ -204,13 +207,13 @@ public class GobHitbox extends Sprite {
                                 break;
                             }
                         }
-                        if (mm.mat != null) {
-                            Resource.Neg ng = mm.mat.get().layer(Resource.Neg.class);
-                            if (ng != null) {
-                                neg = ng;
-                                break;
-                            }
-                        }
+//                        if (mm.mat != null) {
+//                            Resource.Neg ng = mm.mat.get().layer(Resource.Neg.class);
+//                            if (ng != null) {
+//                                neg = ng;
+//                                break;
+//                            }
+//                        }
                     }
                     if (l instanceof RenderLink.AmbientLink) {
                         RenderLink.AmbientLink al = (RenderLink.AmbientLink) l;
