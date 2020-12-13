@@ -179,10 +179,10 @@ jackson-core.jar graal-sdk.jar graaljs.jar tregex.jar truffle-api.jar luaj-jse-3
         <delete dir="build/classes"/>
         <delete dir="build/classes-lib"/>
         <delete file="build/hafen.jar"/>
-        <delete file="build/custom-res"/>
-        <delete file="build/modification"/>
-        <delete file="build/scripts"/>
-        <delete file="build/data"/>
+        <delete dir="build/custom-res"/>
+        <delete dir="build/modification"/>
+        <delete dir="build/scripts"/>
+        <delete dir="build/data"/>
     </target>
 
     <target name="jars_clean" depends="clean-classes, jars"/>
