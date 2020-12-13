@@ -222,6 +222,10 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
         }
     }
 
+    @Override
+    public void edited(Alerted.ConnectSound olditem, Alerted.ConnectSound newitem) {
+    }
+
     public void remove(Alerted.ConnectSound item) {
         map.remove(item.objName);
         keys.remove(item.objName);

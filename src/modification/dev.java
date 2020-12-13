@@ -13,6 +13,8 @@ import haven.Widget;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -87,7 +89,8 @@ public class dev {
 
         boolean skip_log = false;
         for (Map.Entry<String, CheckListboxItem> entry : msgmenus.entrySet()) {
-            if (msg_log_skip_boolean && entry.getKey().toLowerCase().equals(msg) && entry.getValue().selected) skip_log = true;
+            if (msg_log_skip_boolean && entry.getKey().toLowerCase().equals(msg) && entry.getValue().selected)
+                skip_log = true;
         }
 
         if (stackTraceElements[1].getMethodName().equals("uimsg")) {
@@ -258,5 +261,26 @@ public class dev {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String mapToString(Map<?, ?> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            sb.append("[").append(entry.getKey()).append(",").append(entry.getValue()).append("]");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public static String collectionToString(Collection<?> collection) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        Iterator<?> it = collection.iterator();
+        while (it.hasNext()) {
+            sb.append("[").append(it.next()).append("]");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

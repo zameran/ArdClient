@@ -106,6 +106,10 @@ public class HiddenManager extends Window implements ObservableListener<String> 
     }
 
     @Override
+    public void edited(String olditem, String newitem) {
+    }
+
+    @Override
     public void remove(String item) {
         hidden.remove(item);
     }

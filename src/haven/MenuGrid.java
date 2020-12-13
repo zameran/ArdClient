@@ -64,7 +64,6 @@ import haven.automation.farmer.FarmerBots;
 import haven.purus.Farmer;
 import haven.purus.Farmer2;
 import haven.purus.FlowerPicker;
-import haven.purus.StockpileFiller;
 import haven.purus.StockpileFiller2;
 import haven.purus.TroughFiller;
 import haven.purus.pbot.PBotUtils;

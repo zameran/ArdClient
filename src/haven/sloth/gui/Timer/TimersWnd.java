@@ -21,7 +21,7 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
         super(Coord.z, "Timers", "Timers");
 
         Button btna = new Button(100, "Add", () ->
-                parent.parent.add(new TimerEditWnd("Create New Timer"),
+                ui.gui.add(new TimerEditWnd("Create New Timer"),
                         new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200)));
         add(btna, new Coord(0, 10));
         Button btnl = new Button(100, "Load") {
@@ -62,6 +62,17 @@ public class TimersWnd extends Window implements ObservableListener<TimerData.Ti
     @Override
     public void added(TimerData.Timer item) {
         port.cont.add(new TimerWdg(item));
+        pack();
+    }
+
+    @Override
+    public void edited(TimerData.Timer olditem, TimerData.Timer newitem) {
+        TimerWdg timerWdg = find(olditem);
+        if (timerWdg != null) {
+            timerWdg.time = newitem;
+            timerWdg.time.instances = olditem.instances;
+            timerWdg.update();
+        }
         pack();
     }
 

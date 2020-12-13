@@ -120,6 +120,10 @@ public class HighlightManager extends Window implements ObservableListener<Strin
     }
 
     @Override
+    public void edited(String olditem, String newitem) {
+    }
+
+    @Override
     public void remove(String item) {
         highlighted.remove(item);
     }

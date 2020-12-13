@@ -7,6 +7,8 @@ public interface ObservableListener<T> {
 
     void added(T item);
 
+    void edited(T olditem, T newitem);
+
     void remove(T item);
 }
 

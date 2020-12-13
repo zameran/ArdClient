@@ -141,6 +141,10 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
     }
 
     @Override
+    public void edited(MenuGrid.Pagina olditem, MenuGrid.Pagina newitem) {
+    }
+
+    @Override
     public void remove(MenuGrid.Pagina item) {
         all.remove(item);
         if (isIncluded(item)) {

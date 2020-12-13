@@ -7,6 +7,7 @@ import haven.Coord;
 import haven.DefSettings;
 import haven.FastText;
 import haven.GOut;
+import haven.Glob;
 import haven.Label;
 import haven.Resource;
 import haven.Widget;
@@ -18,29 +19,30 @@ import java.util.Collection;
 
 public class TimerWdg extends Widget implements ObservableListener<TimerData.TimerInstance> {
     private static final Resource timersfx = Resource.local().loadwait("custom/sfx/timer");
+    private final static int width = 420;
     private final static int height = 31;
     private final static int txty = 8;
-    private final static Coord timec = new Coord(190, txty);
+    private final static Coord timec = new Coord(210, txty);
 
     private class TimerInstWdg extends Widget {
         final TimerData.TimerInstance inst;
-        private long elapsed = time.duration;
+        private long elapsed = (long) (time.duration * Glob.SERVER_TIME_RATIO);
 
         private TimerInstWdg(final TimerData.TimerInstance inst) {
             this.inst = inst;
-            add(new Button(50, "Cancel", this::cancel), new Coord(270, 3));
+            adda(new Button(50, "Cancel", this::cancel), new Coord(width - 5, 3), 1, 0);
             pack();
         }
 
         @Override
         public void draw(GOut g) {
-            FastText.print(g, timec, timeFormat(elapsed));
+            FastText.aprint(g, timec, 0.5, 0, timeFormat((long) (elapsed / Glob.SERVER_TIME_RATIO)) + " (" + timeFormat(elapsed) + ")");
             super.draw(g);
         }
 
         @Override
         public void tick(double dt) {
-            elapsed = (time.duration - ((long) ui.sess.glob.globtime() - inst.start)) / 3;
+            elapsed = (long) (time.duration / 3 * Glob.SERVER_TIME_RATIO) - (long) ((ui.sess.glob.globtime() - inst.start));
             if (elapsed <= 0) {
                 ui.gui.add(new TimerDoneWindow(time.name), new Coord(50, 50));
                 Audio.play(timersfx, DefSettings.TIMERVOLUME.get() / 1000f);
@@ -57,13 +59,23 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
     public TimerData.Timer time;
     private final int base_height;
 
+    public Button X, editbtn, startbtn;
+    public Label namelbl, timelbl;
+
     TimerWdg(TimerData.Timer t) {
         time = t;
-        sz = new Coord(420, height);
-        add(new Label(time.name), new Coord(3, txty));
-        add(new Label(timeFormat(time.duration / 3)), timec);
-        int x = add(new Button(50, "Start", this::start), new Coord(270, 3)).sz.x + 270 + 5;
-        add(new Button(20, "X", this::delete), new Coord(x, 3));
+        sz = new Coord(width, height);
+        namelbl = new Label(time.name);
+        adda(namelbl, new Coord(3, sz.y / 2), 0, 0.5);
+        X = new Button(20, "X", this::delete);
+        adda(X, new Coord(sz.x - 5, sz.y / 2), 1, 0.5);
+        editbtn = new Button(50, "Edit", this::edit);
+        adda(editbtn, new Coord(X.c.x - 5, sz.y / 2), 1, 0.5);
+        startbtn = new Button(50, "Start", this::start);
+        adda(startbtn, new Coord(editbtn.c.x - 5, sz.y / 2), 1, 0.5);
+        timelbl = new Label(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * Glob.SERVER_TIME_RATIO)) + ")");
+        adda(timelbl, new Coord(startbtn.c.x - 15, sz.y / 2), 1, 0.5);
+
         pack();
         base_height = sz.y;
     }
@@ -79,6 +91,16 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
 
     public void start() {
         time.makeInstance((long) ui.sess.glob.globtime());
+    }
+
+    public void edit() {
+        ui.gui.add(new TimerEditWnd("Edit Timer", time), new Coord(ui.gui.sz.x / 2 - 200, ui.gui.sz.y / 2 - 200));
+    }
+
+    public void update() {
+        namelbl.settext(time.name);
+        timelbl.settext(timeFormat(time.duration / 3) + " (" + timeFormat((long) (time.duration / 3 * Glob.SERVER_TIME_RATIO)) + ")");
+        timelbl.move(new Coord(startbtn.c.x - 15, timelbl.c.y), 1, 0);
     }
 
     public void delete() {
@@ -99,6 +121,10 @@ public class TimerWdg extends Widget implements ObservableListener<TimerData.Tim
         add(new TimerInstWdg(item));
         pack();
         getparent(TimersWnd.class).pack();
+    }
+
+    @Override
+    public void edited(TimerData.TimerInstance olditem, TimerData.TimerInstance newitem) {
     }
 
     @Override

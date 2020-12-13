@@ -57,7 +57,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -389,7 +388,7 @@ public class Resource implements Serializable {
             URL resurl = encodeurl(new URL(baseurl, name + ".res"));
             return (new RetryingInputStream() {
                 protected InputStream create() throws IOException {
-            URLConnection c;
+                    URLConnection c;
                     if (resurl.getProtocol().equals("https"))
                         c = ssl.connect(resurl);
                     else
@@ -1576,6 +1575,7 @@ public class Resource implements Serializable {
     }
 
     public <T> T getcode(Class<T> cl, boolean fail) {
+//        dev.sysPrintStackTrace("getcode " + Resource.this);
         CodeEntry e = layer(CodeEntry.class);
         if (e == null) {
             if (fail)
@@ -1650,11 +1650,13 @@ public class Resource implements Serializable {
                     throw (new LoadException("Unknown codeentry data type: " + t, Resource.this));
                 }
             }
+//            dev.resourceLog("CodeEntry", Resource.this, dev.mapToString(pe), dev.mapToString(pa), dev.collectionToString(classpath));
         }
 
         public void init() {
             for (Code c : layers(Code.class))
                 clmap.put(c.name, c);
+//            dev.resourceLog("CodeEntry init", Resource.this, dev.mapToString(clmap));
         }
 
         public ClassLoader loader() {

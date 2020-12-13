@@ -67,6 +67,10 @@ public class DeletedManager extends Window implements ObservableListener<String>
     }
 
     @Override
+    public void edited(String olditem, String newitem) {
+    }
+
+    @Override
     public void remove(String item) {
         deleted.remove(item);
     }

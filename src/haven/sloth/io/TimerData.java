@@ -1,7 +1,6 @@
 package haven.sloth.io;
 
 import com.google.common.flogger.FluentLogger;
-import haven.Config;
 import haven.Glob;
 import haven.Utils;
 import haven.sloth.util.ObservableCollection;
@@ -83,9 +82,9 @@ public class TimerData extends Thread {
 
     public static class Timer {
         public final int id;
-        public final String name;
-        public final long duration;
-        private ObservableCollection<TimerInstance> instances = new ObservableCollection<>(new ArrayList<>());
+        public String name;
+        public long duration;
+        public ObservableCollection<TimerInstance> instances = new ObservableCollection<>(new ArrayList<>());
 
         private Timer(int id, String n, long d) {
             this.id = id;
@@ -127,6 +126,15 @@ public class TimerData extends Thread {
                 stmt.setInt(1, inst.id);
                 stmt.executeUpdate();
             });
+        }
+
+        public void edit(Timer timer) {
+            this.name = timer.name;
+            this.duration = timer.duration;
+        }
+
+        public boolean equals(Timer other) {
+            return id == other.id && name.equals(other.name) && duration == other.duration;
         }
     }
 
@@ -181,6 +189,21 @@ public class TimerData extends Thread {
             try (final ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
                     timers.add(timer);
+                }
+            }
+        });
+    }
+
+    public static void editTimer(Timer timer, String name, long duration) {
+        Storage.dynamic.write(sql -> {
+            final PreparedStatement stmt = Storage.dynamic.prepare("REPLACE INTO timer VALUES (?, ?, ?)");
+            stmt.setInt(1, timer.id);
+            stmt.setString(2, name);
+            stmt.setLong(3, duration);
+            stmt.executeUpdate();
+            try (final ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    timers.edit(timer, new Timer(timer.id, name, duration));
                 }
             }
         });

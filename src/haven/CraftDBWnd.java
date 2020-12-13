@@ -90,6 +90,10 @@ public class CraftDBWnd extends Window implements DTarget2, ObservableListener<P
     }
 
     @Override
+    public void edited(Pagina olditem, Pagina newitem) {
+    }
+
+    @Override
     public void remove(MenuGrid.Pagina item) {
         all.remove(item);
     }

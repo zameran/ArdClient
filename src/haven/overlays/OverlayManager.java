@@ -128,6 +128,10 @@ public class OverlayManager extends Window implements ObservableListener<Overlay
     }
 
     @Override
+    public void edited(OverlayData.OverlayGob olditem, OverlayData.OverlayGob newitem) {
+    }
+
+    @Override
     public void remove(OverlayData.OverlayGob item) {
         highlighted.remove(item.name);
     }

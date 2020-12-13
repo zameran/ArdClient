@@ -40,12 +40,13 @@ import haven.factories.SeamarriageFactory;
 import haven.factories.WoodlandrealmFactory;
 import haven.res.ui.tt.ArmorFactory;
 import haven.res.ui.tt.WearFactory;
-import haven.res.ui.tt.attrmod.AttrMod;;
+import haven.res.ui.tt.attrmod.AttrMod;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -187,7 +188,7 @@ public abstract class ItemInfo {
         }
 
         public BufferedImage render() {
-            Collections.sort(tips, (a, b) -> (a.order() - b.order()));
+            Collections.sort(tips, Comparator.comparingInt(Tip::order));
             for (Tip tip : tips)
                 tip.layout(this);
             return (cmp.compose());
@@ -452,7 +453,7 @@ public abstract class ItemInfo {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private static final Map<String, ItemInfo.InfoFactory> customFactories = new HashMap<>(14);
+    private static final Map<String, ItemInfo.InfoFactory> customFactories = new HashMap<>();
 
     static {
         customFactories.put("paginae/gov/enact/backwater", new BackwaterFactory());
@@ -470,7 +471,7 @@ public abstract class ItemInfo {
 
         customFactories.put("ui/tt/armor", new ArmorFactory());
         customFactories.put("ui/tt/wear", new WearFactory());
-        customFactories.put("ui/tt/attrmod", new AttrMod.Fac());;
+        customFactories.put("ui/tt/attrmod", new AttrMod.Fac());
     }
 
     public static List<ItemInfo> buildinfo(Owner owner, Raw raw) {
