@@ -1,3 +1,7 @@
+20201213
+Mooncap fix (Sprucecap). Timer fix and improve.
+~
+
 20201211.1
 Fixes. FlowerMenu and map drop fps fix.
 ~
