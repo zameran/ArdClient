@@ -231,7 +231,10 @@ public class Composited implements Rendered, MapView.Clickable {
 
         private SpriteEqu(ED ed) {
             super(ed);
-            this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+            if (ed.res.res.get().name.equals("gfx/terobjs/items/hats/mooncap"))
+                this.spr = Sprite.create(eqowner, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), ed.res.sdt.clone());
+            else
+                this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
         public void draw(GOut g) {

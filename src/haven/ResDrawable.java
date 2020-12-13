@@ -107,6 +107,10 @@ public class ResDrawable extends Drawable {
         //System.out.println(this.res.get().name);
         //System.out.println(gob.type);
 
+        if (res.name.equals("gfx/terobjs/items/hats/mooncap")) {
+            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), sdt);
+            return;
+        }
         spr = Sprite.create(gob, res, stdCopy);
     }
 
