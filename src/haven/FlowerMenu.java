@@ -32,6 +32,7 @@ import haven.sloth.gob.HeldBy;
 import modification.configuration;
 
 import java.awt.Color;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static haven.DefSettings.AMBERMENU;
@@ -152,6 +153,13 @@ public class FlowerMenu extends Widget {
                 p.a = s;
                 if (s == 1.0) {
                     CheckListboxItem itm = Config.flowermenus.get(p.name);
+                    if (itm == null)
+                        for (Map.Entry<String, CheckListboxItem> entry : Config.flowermenus.entrySet()) {
+                            if (p.name.startsWith(entry.getKey())) {
+                                itm = entry.getValue();
+                                break;
+                            }
+                        }
                     if (itm != null && itm.selected && !ui.modctrl && (!ignoreAutoSetting || p.name.equals("Peer into")) ||
                             p.name.equals(nextAutoSel) && System.currentTimeMillis() - nextAutoSelTimeout < 2000) {
                         nextAutoSel = null;

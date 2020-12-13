@@ -523,10 +523,16 @@ public class configuration {
 
     public static SnowThread snowThread;
 
+    public static List<String> exclusion = new ArrayList<>(Arrays.asList("Gild"));
+
     public static void addPetal(String name) {
-        List<String> list = new ArrayList<>(Config.flowermenus.keySet());
+        for (String item : exclusion) {
+            if (name.contains(item)) {
+                name = item;
+                break;
+            }
+        }
         if (Config.flowermenus.get(name) == null) {
-            list.add(name);
             CheckListboxItem ci = new CheckListboxItem(name);
             Config.flowermenus.put(name, ci);
             if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text.equals(""))
