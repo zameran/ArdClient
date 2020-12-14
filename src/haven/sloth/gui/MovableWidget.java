@@ -136,7 +136,7 @@ public abstract class MovableWidget extends Widget {
     }
 
     protected boolean moveHit(final Coord c, final int btn) {
-        return ui.modctrl && btn == 3;
+        return ui.modflags() == UI.MOD_CTRL && btn == 3;
     }
 
     @Override

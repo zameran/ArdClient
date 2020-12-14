@@ -194,7 +194,7 @@ public class MinerAlert extends Window {
     private class runner implements Runnable {
         @Override
         public void run() {
-            while (ui.gui.getwnd("Miner Alert") != null) {
+            while (ui.gui != null && ui.gui.getwnd("Miner Alert") != null) {
                 PBotUtils.sleep(5000);//sleep 5 seconds every iteration, no reason to update more than once every 5 seconds.
                 try {
                     if (ui == null || ui.gui == null)

@@ -1,17 +1,20 @@
 /* Preprocessed source code */
 /* $use: ui/croster */
 
+import haven.Coord;
 import haven.GOut;
 import haven.res.ui.croster.Entry;
 import modification.dev;
 
 public class Ochs extends Entry {
-	static {
-		dev.checkFileVersion("gfx/hud/rosters/cow", 33);
-	}
+    static {
+        dev.checkFileVersion("gfx/hud/rosters/cow", 68);
+    }
+
     public int meat, milk;
     public int meatq, milkq, hideq;
     public int seedq;
+    public boolean bull, calf, dead, pregnant;
 
     public Ochs(long id, String name) {
         super(SIZE, id, name);
@@ -19,16 +22,39 @@ public class Ochs extends Entry {
 
     public void draw(GOut g) {
         drawbg(g);
-        drawcol(g, CowRoster.cols.get(0), 0, this, namerend, 0);
-        drawcol(g, CowRoster.cols.get(1), 1, q, quality, 1);
-        drawcol(g, CowRoster.cols.get(2), 1, meat, null, 2);
-        drawcol(g, CowRoster.cols.get(3), 1, milk, null, 3);
-        drawcol(g, CowRoster.cols.get(4), 1, meatq, percent, 4);
-        drawcol(g, CowRoster.cols.get(5), 1, milkq, percent, 5);
-        drawcol(g, CowRoster.cols.get(6), 1, hideq, percent, 6);
-        drawcol(g, CowRoster.cols.get(7), 1, seedq, null, 7);
+        int i = 0;
+        drawcol(g, CowRoster.cols.get(i), 0, this, namerend, i++);
+        drawcol(g, CowRoster.cols.get(i), 0.5, bull, sex, i++);
+        drawcol(g, CowRoster.cols.get(i), 0.5, calf, growth, i++);
+        drawcol(g, CowRoster.cols.get(i), 0.5, dead, deadrend, i++);
+        drawcol(g, CowRoster.cols.get(i), 0.5, pregnant, pregrend, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, q, quality, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, meat, null, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, milk, null, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, meatq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, milkq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, hideq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, seedq, null, i++);
         super.draw(g);
     }
-}
 
-/* >wdg: CowRoster */
+    public boolean mousedown(Coord c, int button) {
+        if (CowRoster.cols.get(1).hasx(c.x)) {
+            markall(Ochs.class, o -> (o.bull == this.bull));
+            return (true);
+        }
+        if (CowRoster.cols.get(2).hasx(c.x)) {
+            markall(Ochs.class, o -> (o.calf == this.calf));
+            return (true);
+        }
+        if (CowRoster.cols.get(3).hasx(c.x)) {
+            markall(Ochs.class, o -> (o.dead == this.dead));
+            return (true);
+        }
+        if (CowRoster.cols.get(4).hasx(c.x)) {
+            markall(Ochs.class, o -> (o.pregnant == this.pregnant));
+            return (true);
+        }
+        return (super.mousedown(c, button));
+    }
+}

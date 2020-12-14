@@ -29,6 +29,7 @@ package haven;
 import haven.purus.pbot.PBotUtils;
 import haven.res.ui.tt.q.qbuff.QBuff;
 import integrations.food.FoodService;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -116,7 +117,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
 
         public default void drawoverlay(GOut g, Tex tex) {
-            g.aimage(tex, new Coord(g.sz.x, 0), 1, 0);
+            if (configuration.shownumeric) {
+                Coord btm = configuration.infopos(configuration.numericpos, g.sz, tex.sz());
+                g.image(tex, btm);
+            }
         }
 
         public static BufferedImage numrender(int num, Color col) {

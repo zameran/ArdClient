@@ -2,6 +2,7 @@ package haven;
 
 import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.sloth.gui.MovableWidget;
+import modification.configuration;
 
 import java.awt.Color;
 
@@ -10,7 +11,10 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
     public static final Coord lc = new Coord(6, 6);
     public static final Coord rc = new Coord(56, 6);
     private static final Coord ssz = new Coord(44, 44);
-    private static final Color qualitybg = new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
+
+    private static final Color qualitybg() {
+        return new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
+    }
 
     public QuickSlotsWdg() {
         super(new Coord(44 + 44 + 6, 44), "QuickSlotsWdg");
@@ -56,10 +60,10 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
         QBuff quality = witem.item.quality();
         if (Config.showquality) {
             if (quality != null && quality.qtex != null) {
-                Coord btm = new Coord(0, sz.y - 12);
                 Tex t = Config.qualitywhole ? quality.qwtex : quality.qtex;
+                Coord btm = configuration.infopos(configuration.qualitypos, sz.div(2, 1), t.sz());
                 if (Config.qualitybg) {
-                    g.chcolor(qualitybg);
+                    g.chcolor(qualitybg());
                     g.frect(btm, t.sz().add(1, -1));
                     g.chcolor();
                 }
@@ -72,10 +76,10 @@ public class QuickSlotsWdg extends MovableWidget implements DTarget {
         QBuff quality = witem.item.quality();
         if (Config.showquality) {
             if (quality != null && quality.qtex != null) {
-                Coord btm = new Coord(50, sz.y - 12);
                 Tex t = Config.qualitywhole ? quality.qwtex : quality.qtex;
+                Coord btm = configuration.infopos(configuration.qualitypos, sz.div(2, 1), t.sz()).add(new Coord(50, 0));
                 if (Config.qualitybg) {
-                    g.chcolor(qualitybg);
+                    g.chcolor(qualitybg());
                     g.frect(btm, t.sz().add(1, -1));
                     g.chcolor();
                 }

@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Partyview extends Widget {
+public class Partyview extends MovableWidget {
     public static final String ptkey = "Partyview";
     long ign;
     Party party;
@@ -56,14 +56,12 @@ public class Partyview extends Widget {
     }
 
     Partyview(long ign) {
-        super(new Coord(84, 140));
+        super(new Coord(84, 140), ptkey);
         this.ign = ign;
     }
 
     protected void added() {
-        if (haven.sloth.gui.MovableWidget.knownPositions.containsKey(ptkey)) {
-            setPosRel(MovableWidget.knownPositions.get(ptkey));
-        }
+        super.added();
         party = ui.sess.glob.party;
         update();
     }

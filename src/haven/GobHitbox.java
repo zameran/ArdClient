@@ -10,7 +10,6 @@ import java.util.List;
 public class GobHitbox extends Sprite {
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
     public static States.ColState bbclrstate = new States.ColState(new Color(255, 255, 255, 255));
-    //    private Coordf a, b, c, d;
     private BBox[] b;
     private int mode;
     private States.ColState clrstate;
@@ -55,37 +54,17 @@ public class GobHitbox extends Sprite {
                 gl.glBegin(mode);
                 for (int j = 0; j < b[i].points.length; j++) {
                     gl.glVertex3f((float) b[i].points[j].x, (float) b[i].points[j].y, 1);
-//                    gl.glVertex3f(a.x, a.y, 1);
-//                    gl.glVertex3f(b.x, b.y, 1);
-//                    gl.glVertex3f(c.x, c.y, 1);
-//                    gl.glVertex3f(d.x, d.y, 1);
                 }
             } else if (!wall) {
                 gl.glBegin(mode);
                 for (int j = 0; j < b[i].points.length; j++) {
-                    gl.glVertex3f((float) b[i].points[j].x, (float) b[i].points[j].y, 1);
-//                    gl.glVertex3f(a.x, a.y, 1);
-//                    gl.glVertex3f(b.x, b.y, 1);
-//                    gl.glVertex3f(c.x, c.y, 1);
-//                    gl.glVertex3f(d.x, d.y, 1);
+                    gl.glVertex3f((float) b[i].points[j].x, (float) -b[i].points[j].y, 1);
                 }
-//                gl.glVertex3f(a.x, a.y, 1);
-//                gl.glVertex3f(d.x, d.y, 1);
-//                gl.glVertex3f(c.x, c.y, 1);
-//                gl.glVertex3f(b.x, b.y, 1);
             } else {
                 gl.glBegin(mode);
                 for (int j = 0; j < b[i].points.length; j++) {
                     gl.glVertex3f((float) b[i].points[j].x, (float) b[i].points[j].y, 11);
-//                    gl.glVertex3f(a.x, a.y, 11);
-//                    gl.glVertex3f(b.x, b.y, 11);
-//                    gl.glVertex3f(c.x, c.y, 11);
-//                    gl.glVertex3f(d.x, d.y, 11);
                 }
-//                gl.glVertex3f(a.x, a.y, 11);
-//                gl.glVertex3f(d.x, d.y, 11);
-//                gl.glVertex3f(c.x, c.y, 11);
-//                gl.glVertex3f(b.x, b.y, 11);
             }
             gl.glEnd();
         }

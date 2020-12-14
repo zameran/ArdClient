@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.CharWnd;
@@ -13,12 +12,14 @@ import java.util.Comparator;
 
 public class Column<E extends Entry> {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
+
     public final Tex head;
     public final String tip;
     public final Comparator<? super E> order;
     public int w, x;
+    public boolean r;
 
     public Column(String name, Comparator<? super E> order, int w) {
         this.head = CharWnd.attrf.render(name).tex();
@@ -42,6 +43,15 @@ public class Column<E extends Entry> {
 
     public Tex head() {
         return (head);
+    }
+
+    public Column<E> runon() {
+        r = true;
+        return (this);
+    }
+
+    public boolean hasx(int x) {
+        return ((x >= this.x) && (x < this.x + this.w));
     }
 }
 

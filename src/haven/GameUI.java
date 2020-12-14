@@ -85,6 +85,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public final long plid;
     public final Hidepanel ulpanel, umpanel, urpanel, brpanel, menupanel;
     public Avaview portrait;
+    public Partyview partyview;
     public MenuGrid menu;
     public MenuSearch menuSearch;
     public PBotScriptlist PBotScriptlist;
@@ -1150,7 +1151,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } else if (place == "chat") {
             chat.addchild(child);
         } else if (place == "party") {
-            add(child, 10, 95);
+            partyview = add((Partyview) child, 10, 95);
         } else if (place == "meter") {
             int x = (meters.size() % 3) * (IMeter.fsz.x + 5);
             int y = (meters.size() / 3) * (IMeter.fsz.y + 2);

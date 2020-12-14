@@ -30,6 +30,7 @@ import haven.ItemInfo.AttrCache;
 import haven.automation.WItemDestroyCallback;
 import haven.res.ui.tt.Wear;
 import haven.res.ui.tt.q.qbuff.QBuff;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -40,13 +41,16 @@ import java.util.List;
 
 import static haven.Inventory.sqsz;
 import static haven.Text.num10Fnd;
+import static haven.Text.num11Fnd;
 
 public class WItem extends Widget implements DTarget {
     public static final Resource missing = Resource.local().loadwait("gfx/invobjs/missing");
     public static final Tex lockt = Resource.loadtex("custom/inv/locked");
     public GItem item;
     public static final Color famountclr = new Color(24, 116, 205);
-    private static final Color qualitybg = new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
+    private static final Color qualitybg() {
+        return new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
+    }
     public static final Color DURABILITY_COLOR = new Color(214, 253, 255);
     public static final Color ARMOR_COLOR = new Color(255, 227, 191);
     //public static final Color MATCH_COLOR = new Color(255, 32, 255, 255);
@@ -223,9 +227,9 @@ public class WItem extends Widget implements DTarget {
                 int hoursleft = timeleft / 60;
                 int minutesleft = timeleft - hoursleft * 60;
                 if (hoursleft < 1) {
-                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.YELLOW, Color.BLACK, num10Fnd).tex();
+                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.YELLOW, Color.BLACK, num11Fnd).tex();
                 } else
-                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.WHITE, Color.BLACK, num10Fnd).tex();
+                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.WHITE, Color.BLACK, num11Fnd).tex();
             } else {
                 itm.metertex = Text.renderstroked(String.format("%d%%", (int) (meter * 100)), Color.WHITE, Color.BLACK, num10Fnd).tex();
             }
@@ -333,10 +337,10 @@ public class WItem extends Widget implements DTarget {
 
             if (Config.showquality) {
                 if (quality != null && quality.qtex != null) {
-                    Coord btm = new Coord(0, sz.y - 12);
                     Tex t = Config.qualitywhole ? quality.qwtex : quality.qtex;
+                    Coord btm = configuration.infopos(configuration.qualitypos, sz, t.sz());
                     if (Config.qualitybg) {
-                        g.chcolor(qualitybg);
+                        g.chcolor(qualitybg());
                         g.frect(btm, t.sz().add(1, -1));
                         g.chcolor();
                     }
@@ -344,11 +348,13 @@ public class WItem extends Widget implements DTarget {
                 }
             }
 
-            if (item.metertex != null)
-                g.image(item.metertex, Coord.z);
+            if (configuration.showstudytime && item.metertex != null) {
+                Coord btm = configuration.infopos(configuration.studytimepos, sz, item.metertex.sz());
+                g.image(item.metertex, btm);
+            }
 
             ItemInfo.Contents cnt = item.getcontents();
-            if (cnt != null && cnt.content > 0)
+            if (configuration.oldmountbar && cnt != null && cnt.content > 0)
                 drawamountbar(g, cnt.content, cnt.isseeds);
 
             if (Config.showwearbars) {

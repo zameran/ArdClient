@@ -85,6 +85,10 @@ public class CheckBox extends Widget {
         changed(a);
     }
 
+    public void click() {
+        set(!a);
+    }
+
     public void draw(GOut g) {
         final int id = a ? 1 : 0;
         final TextureAtlas.Img chk = Theme.timg(type, id);

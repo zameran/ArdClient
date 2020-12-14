@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.Coord2d;
@@ -9,7 +8,7 @@ import modification.dev;
 
 public class RosterButton extends MenuGrid.PagButton {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
 
     public final GameUI gui;

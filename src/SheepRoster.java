@@ -1,6 +1,3 @@
-/* Preprocessed source code */
-/* $use: ui/croster */
-
 import haven.Resource;
 import haven.UI;
 import haven.res.ui.croster.CattleRoster;
@@ -13,11 +10,17 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SheepRoster extends CattleRoster<Sheep> {
-	static {
-		dev.checkFileVersion("gfx/hud/rosters/sheep", 24);
-	}
+    static {
+        dev.checkFileVersion("gfx/hud/rosters/sheep", 57);
+    }
+
     public static List<Column> cols = initcols(
             new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+
+            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Sheep e) -> e.ram).reversed(), 20).runon(),
+            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Sheep e) -> e.lamb).reversed(), 20).runon(),
+            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Sheep e) -> e.dead).reversed(), 20).runon(),
+            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Sheep e) -> e.pregnant).reversed(), 20),
 
             new Column<Sheep>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Sheep e) -> e.q).reversed()),
 
@@ -47,6 +50,11 @@ public class SheepRoster extends CattleRoster<Sheep> {
         String name = (String) args[n++];
         Sheep ret = new Sheep(id, name);
         ret.grp = (Integer) args[n++];
+        int fl = (Integer) args[n++];
+        ret.ram = (fl & 1) != 0;
+        ret.lamb = (fl & 2) != 0;
+        ret.dead = (fl & 4) != 0;
+        ret.pregnant = (fl & 8) != 0;
         ret.q = ((Number) args[n++]).doubleValue();
         ret.meat = (Integer) args[n++];
         ret.milk = (Integer) args[n++];

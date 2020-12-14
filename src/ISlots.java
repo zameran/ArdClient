@@ -183,7 +183,7 @@ public class ISlots extends Tip implements NumberInfo {
         return (s.size());
     }
 
-    public static final Color avail = new Color(128, 192, 255);
+    public static final Color avail = new Color(25, 255, 255);
 
     public Color numcolor() {
         return ((left > 0) ? avail : Color.WHITE);

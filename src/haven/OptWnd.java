@@ -723,7 +723,7 @@ public class OptWnd extends Window {
         main.add(new PButton(200, "Combat", 'c', combat), new Coord(210, 30));
         main.add(new PButton(200, "Control", 'k', control), new Coord(210, 60));
         main.add(new PButton(200, "UI", 'u', uis), new Coord(210, 90));
-        main.add(new PButton(200, "Quality", 'q', quality), new Coord(420, 0));
+        main.add(new PButton(200, "Item overlay", 'q', quality), new Coord(420, 0));
         main.add(new PButton(200, "Pop-up Menu", 'f', flowermenus), new Coord(420, 30));
         main.add(new PButton(200, "Sound Alarms", 's', soundalarms), new Coord(420, 60));
         main.add(new PButton(200, "Hidden Objects", 'h', hidesettings), new Coord(420, 90));
@@ -1251,17 +1251,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Display item completion progress bar") {
-            {
-                a = Config.itemmeterbar;
-            }
 
-            public void set(boolean val) {
-                Utils.setprefb("itemmeterbar", val);
-                Config.itemmeterbar = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("Show hourglass percentage") {
             {
                 a = Config.showprogressperc;
@@ -1328,17 +1318,7 @@ public class OptWnd extends Window {
         appender.add(ColorPreWithLabel("Unknown player path color: ", GOBPATHCOL, val -> Movable.unknowngobcol = new States.ColState(val)));
         appender.add(new IndirCheckBox("Show Mob Paths", SHOWANIMALPATH));
         appender.add(ColorPreWithLabel("Animal path color: ", ANIMALPATHCOL, val -> Movable.animalpathcol = new States.ColState(val)));
-        appender.add(new CheckBox("Show wear bars") {
-            {
-                a = Config.showwearbars;
-            }
 
-            public void set(boolean val) {
-                Utils.setprefb("showwearbars", val);
-                Config.showwearbars = val;
-                a = val;
-            }
-        });
         appender.add(new CheckBox("Colorful Cave Dust") {
             {
                 a = Config.colorfulcaveins;
@@ -2802,9 +2782,10 @@ public class OptWnd extends Window {
 
     private void initQuality() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quality, new Coord(620, 350)));
-        appender.setVerticalMargin(VERTICAL_MARGIN);
-        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-        appender.add(new CheckBox("Show item quality") {
+        appender.setHorizontalMargin(5);
+
+        List<String> qualityposlist = new ArrayList<>(Arrays.asList("Left-Top", "Right-Top", "Left-Bottom", "Right-Bottom", "Center"));
+        appender.addRow(new CheckBox("Show item quality") {
             {
                 a = Config.showquality;
             }
@@ -2814,7 +2795,33 @@ public class OptWnd extends Window {
                 Config.showquality = val;
                 a = val;
             }
-        });
+        }, new Dropbox<String>(qualityposlist.size(), qualityposlist) {
+            {
+                super.change(configuration.qualitypos);
+            }
+
+            @Override
+            protected String listitem(int i) {
+                return qualityposlist.get(i);
+            }
+
+            @Override
+            protected int listitems() {
+                return qualityposlist.size();
+            }
+
+            @Override
+            protected void drawitem(GOut g, String item, int i) {
+                g.text(item, Coord.z);
+            }
+
+            @Override
+            public void change(String item) {
+                super.change(item);
+                configuration.qualitypos = item;
+                Utils.setpref("qualitypos", item);
+            }
+        }, new PButton(50, "Color Quality", 'c', qualityPanel));
         appender.add(new CheckBox("Round item quality to a whole number") {
             {
                 a = Config.qualitywhole;
@@ -2826,7 +2833,7 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Draw background for quality values") {
+        appender.addRow(new CheckBox("Draw background for quality values:") {
             {
                 a = Config.qualitybg;
             }
@@ -2836,15 +2843,124 @@ public class OptWnd extends Window {
                 Config.qualitybg = val;
                 a = val;
             }
+        }, new HSlider(200, 0, 255, Config.qualitybgtransparency) {
+            public void changed() {
+                Utils.setprefi("qualitybgtransparency", val);
+                Config.qualitybgtransparency = val;
+            }
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render(val + "").tex();
+            }
         });
-        appender.addRow(
-                new Label("Background transparency (req. restart):"),
-                new HSlider(200, 0, 255, Config.qualitybgtransparency) {
-                    public void changed() {
-                        Utils.setprefi("qualitybgtransparency", val);
-                        Config.qualitybgtransparency = val;
-                    }
-                });
+        appender.addRow(new CheckBox("Show numeric info") {
+            {
+                a = configuration.showstudytime;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showstudytime", val);
+                configuration.showstudytime = val;
+                a = val;
+            }
+        }, new Dropbox<String>(qualityposlist.size(), qualityposlist) {
+            {
+                super.change(configuration.numericpos);
+            }
+
+            @Override
+            protected String listitem(int i) {
+                return qualityposlist.get(i);
+            }
+
+            @Override
+            protected int listitems() {
+                return qualityposlist.size();
+            }
+
+            @Override
+            protected void drawitem(GOut g, String item, int i) {
+                g.text(item, Coord.z);
+            }
+
+            @Override
+            public void change(String item) {
+                super.change(item);
+                configuration.numericpos = item;
+                Utils.setpref("numericpos", item);
+            }
+        });
+        appender.add(new CheckBox("Display item completion progress bar") {
+            {
+                a = Config.itemmeterbar;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("itemmeterbar", val);
+                Config.itemmeterbar = val;
+                a = val;
+            }
+        });
+        appender.addRow(new CheckBox("Show study time") {
+            {
+                a = configuration.shownumeric;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("shownumeric", val);
+                configuration.shownumeric = val;
+                a = val;
+            }
+        }, new Dropbox<String>(qualityposlist.size(), qualityposlist) {
+            {
+                super.change(configuration.studytimepos);
+            }
+
+            @Override
+            protected String listitem(int i) {
+                return qualityposlist.get(i);
+            }
+
+            @Override
+            protected int listitems() {
+                return qualityposlist.size();
+            }
+
+            @Override
+            protected void drawitem(GOut g, String item, int i) {
+                g.text(item, Coord.z);
+            }
+
+            @Override
+            public void change(String item) {
+                super.change(item);
+                configuration.studytimepos = item;
+                Utils.setpref("studytimepos", item);
+            }
+        });
+        appender.add(new CheckBox("Draw old mountbar") {
+            {
+                a = configuration.oldmountbar;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("oldmountbar", val);
+                configuration.oldmountbar = val;
+                a = val;
+            }
+        });
+
+        appender.add(new CheckBox("Show wear bars") {
+            {
+                a = Config.showwearbars;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showwearbars", val);
+                Config.showwearbars = val;
+                a = val;
+            }
+        });
 
         quality.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         quality.pack();
@@ -2857,153 +2973,6 @@ public class OptWnd extends Window {
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.add(new Label("Additional Client Features"));
-        //Test//Test//Test
-
-        appender.add(new CheckBox("Item Quality Coloring") {
-            {
-                a = Config.qualitycolor;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("qualitycolor", val);
-                Config.qualitycolor = val;
-                a = val;
-            }
-        });
-
-        appender.add(new CheckBox("Item Quality Coloring Transfer ASC") {
-            {
-                a = Config.transfercolor;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("transfercolor", val);
-                Config.transfercolor = val;
-                a = val;
-            }
-        });
-
-        appender.add(new CheckBox("Drop Color Identical") {
-            {
-                a = Config.dropcolor;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("dropcolor", val);
-                Config.dropcolor = val;
-                a = val;
-            }
-        });
-
-        Frame f = new Frame(new Coord(200, 100), false);
-        f.add(new Label("Uncommon below:"), 5, 10);
-        f.add(new TextEntry(40, String.valueOf(Config.uncommonq)) {
-            @Override
-            public boolean keydown(KeyEvent e) {
-                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-            }
-
-            @Override
-            public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
-                    return buf.key(ev);
-                } else if (c == '\n') {
-                    try {
-                        Config.uncommonq = Integer.parseInt(dtext());
-                        Utils.setprefi("uncommonq", Config.uncommonq);
-                        return true;
-                    } catch (NumberFormatException e) {
-                    }
-                }
-                return false;
-            }
-        }, new Coord(140, 10));
-
-        f.add(new Label("Rare below:"), 5, 30);
-        f.add(new TextEntry(40, String.valueOf(Config.rareq)) {
-            @Override
-            public boolean keydown(KeyEvent e) {
-                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-            }
-
-            @Override
-            public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
-                    return buf.key(ev);
-                } else if (c == '\n') {
-                    try {
-                        Config.rareq = Integer.parseInt(dtext());
-                        Utils.setprefi("rareq", Config.rareq);
-                        return true;
-                    } catch (NumberFormatException e) {
-                    }
-                }
-                return false;
-            }
-        }, new Coord(140, 30));
-
-        f.add(new Label("Epic below:"), 5, 50);
-        f.add(new TextEntry(40, String.valueOf(Config.epicq)) {
-            @Override
-            public boolean keydown(KeyEvent e) {
-                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-            }
-
-            @Override
-            public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
-                    return buf.key(ev);
-                } else if (c == '\n') {
-                    try {
-                        Config.epicq = Integer.parseInt(dtext());
-                        Utils.setprefi("epicq", Config.epicq);
-                        return true;
-                    } catch (NumberFormatException e) {
-                    }
-                }
-                return false;
-            }
-        }, new Coord(140, 50));
-
-        f.add(new Label("Legendary below:"), 5, 70);
-        f.add(new TextEntry(40, String.valueOf(Config.legendaryq)) {
-            @Override
-            public boolean keydown(KeyEvent e) {
-                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
-            }
-
-            @Override
-            public boolean type(char c, KeyEvent ev) {
-                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
-                    return buf.key(ev);
-                } else if (c == '\n') {
-                    try {
-                        Config.legendaryq = Integer.parseInt(dtext());
-                        Utils.setprefi("legendaryq", Config.legendaryq);
-                        return true;
-                    } catch (NumberFormatException e) {
-                    }
-                }
-                return false;
-            }
-        }, new Coord(140, 70));
-
-
-        additions.add(f, new Coord(300, 10));
-
-        appender.add(new CheckBox("Insane Item Alert (Above Legendary)") {
-            {
-                a = Config.insaneitem;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("insaneitem", val);
-                Config.insaneitem = val;
-                a = val;
-            }
-        });
-
-        appender.add(new Label(""));
 
         appender.add(new CheckBox("Straight cave wall (requires new chunk render)") {
             {
@@ -3213,14 +3182,11 @@ public class OptWnd extends Window {
 
     private void initModification() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(620, 350)));
-        appender.setVerticalMargin(VERTICAL_MARGIN);
-        appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
         appender.add(new Label("Strange or unreal modifications"));
 
         appender.addRow(new PButton(50, "Water", 'w', waterPanel),
                 new PButton(50, "Map", 'm', mapPanel),
-                new PButton(50, "Quality", 'c', qualityPanel),
                 new PButton(50, "Dev", 'w', devPanel)
         );
 
@@ -3823,8 +3789,150 @@ public class OptWnd extends Window {
 
     private void initQualityPanel() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(qualityPanel, new Coord(620, 350)));
-        appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
+
+        appender.add(new CheckBox("Item Quality Coloring") {
+            {
+                a = Config.qualitycolor;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("qualitycolor", val);
+                Config.qualitycolor = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Item Quality Coloring Transfer ASC") {
+            {
+                a = Config.transfercolor;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("transfercolor", val);
+                Config.transfercolor = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Drop Color Identical") {
+            {
+                a = Config.dropcolor;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("dropcolor", val);
+                Config.dropcolor = val;
+                a = val;
+            }
+        });
+
+        Frame f = new Frame(new Coord(200, 100), false);
+        f.add(new Label("Uncommon below:"), 5, 10);
+        f.add(new TextEntry(40, String.valueOf(Config.uncommonq)) {
+            @Override
+            public boolean keydown(KeyEvent e) {
+                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
+            }
+
+            @Override
+            public boolean type(char c, KeyEvent ev) {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                    return buf.key(ev);
+                } else if (c == '\n') {
+                    try {
+                        Config.uncommonq = Integer.parseInt(dtext());
+                        Utils.setprefi("uncommonq", Config.uncommonq);
+                        return true;
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return false;
+            }
+        }, new Coord(140, 10));
+
+        f.add(new Label("Rare below:"), 5, 30);
+        f.add(new TextEntry(40, String.valueOf(Config.rareq)) {
+            @Override
+            public boolean keydown(KeyEvent e) {
+                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
+            }
+
+            @Override
+            public boolean type(char c, KeyEvent ev) {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                    return buf.key(ev);
+                } else if (c == '\n') {
+                    try {
+                        Config.rareq = Integer.parseInt(dtext());
+                        Utils.setprefi("rareq", Config.rareq);
+                        return true;
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return false;
+            }
+        }, new Coord(140, 30));
+
+        f.add(new Label("Epic below:"), 5, 50);
+        f.add(new TextEntry(40, String.valueOf(Config.epicq)) {
+            @Override
+            public boolean keydown(KeyEvent e) {
+                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
+            }
+
+            @Override
+            public boolean type(char c, KeyEvent ev) {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                    return buf.key(ev);
+                } else if (c == '\n') {
+                    try {
+                        Config.epicq = Integer.parseInt(dtext());
+                        Utils.setprefi("epicq", Config.epicq);
+                        return true;
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return false;
+            }
+        }, new Coord(140, 50));
+
+        f.add(new Label("Legendary below:"), 5, 70);
+        f.add(new TextEntry(40, String.valueOf(Config.legendaryq)) {
+            @Override
+            public boolean keydown(KeyEvent e) {
+                return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
+            }
+
+            @Override
+            public boolean type(char c, KeyEvent ev) {
+                if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 3 || c == '\b') {
+                    return buf.key(ev);
+                } else if (c == '\n') {
+                    try {
+                        Config.legendaryq = Integer.parseInt(dtext());
+                        Utils.setprefi("legendaryq", Config.legendaryq);
+                        return true;
+                    } catch (NumberFormatException e) {
+                    }
+                }
+                return false;
+            }
+        }, new Coord(140, 70));
+
+        appender.add(f);
+        appender.add(new CheckBox("Insane Item Alert (Above Legendary)") {
+            {
+                a = Config.insaneitem;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("insaneitem", val);
+                Config.insaneitem = val;
+                a = val;
+            }
+        });
+
+        appender.setX(310 + 10);
+        appender.setY(0);
 
         appender.add(new Label("Choose/add item quality color:"));
         appender.add(new CheckBox("Custom quality below") {
@@ -3884,7 +3992,7 @@ public class OptWnd extends Window {
             }
         });
 
-        qualityPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
+        qualityPanel.add(new PButton(200, "Back", 27, quality), new Coord(210, 360));
         qualityPanel.pack();
     }
 

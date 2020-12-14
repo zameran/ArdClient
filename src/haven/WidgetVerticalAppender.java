@@ -13,6 +13,10 @@ public class WidgetVerticalAppender {
         this.x = value;
     }
 
+    public void setY(int value) {
+        this.y = value;
+    }
+
     public void setVerticalMargin(int value) {
         verticalMargin = value;
     }

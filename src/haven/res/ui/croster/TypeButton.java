@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.Audio;
@@ -10,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class TypeButton extends IButton {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
 
     public final int order;

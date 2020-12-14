@@ -79,6 +79,27 @@ public class configuration {
 
     public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
+    public static String qualitypos = Utils.getpref("qualitypos", "Left-Bottom");
+    public static boolean shownumeric = Utils.getprefb("shownumeric", true);
+    public static String numericpos = Utils.getpref("numericpos", "Right-Top");
+    public static boolean showstudytime = Utils.getprefb("showstudytime", true);
+    public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
+    public static Coord infopos(String pos, Coord parsz, Coord tsz) {
+        switch (pos) {
+            case "Right-Top":
+                return new Coord(parsz.x - tsz.x, 0);
+            case "Right-Bottom":
+                return new Coord(parsz.x - tsz.x, parsz.y - tsz.y);
+            case "Center":
+                return new Coord(parsz.x / 2 - tsz.x / 2 , parsz.y / 2  - tsz.y / 2 );
+            case "Left-Bottom":
+                return new Coord(0, parsz.y - tsz.y);
+            case "Left-Top":
+            default:
+                return new Coord(0, 0);
+        }
+    }
+    public static boolean oldmountbar = Utils.getprefb("oldmountbar", false);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
     public static boolean showbeehivestatus = Utils.getprefb("showbeehivestatus", false);
     public static boolean showtreeberry = Utils.getprefb("showtreeberry", false);
@@ -523,7 +544,7 @@ public class configuration {
 
     public static SnowThread snowThread;
 
-    public static List<String> exclusion = new ArrayList<>(Arrays.asList("Gild"));
+    public static List<String> exclusion = new ArrayList<>(Arrays.asList("Gild", "Meditate", "Sing"));
 
     public static void addPetal(String name) {
         for (String item : exclusion) {

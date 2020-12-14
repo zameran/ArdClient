@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.Button;
@@ -30,8 +29,9 @@ import java.util.Set;
 
 public abstract class CattleRoster<T extends Entry> extends Widget {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
+
     public static final int WIDTH = UI.scale(900);
     public static final Comparator<Entry> namecmp = (a, b) -> a.name.compareTo(b.name);
     public static final int HEADH = UI.scale(40);
@@ -53,7 +53,16 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
                 redisplay(display);
             }
         }, sz.x, HEADH);
-        add(new Button(UI.scale(150), "Remove selected", false).action(() -> {
+        Widget prev;
+        prev = add(new Button(UI.scale(100), "Select all", false).action(() -> {
+            for (Entry entry : this.entries.values())
+                entry.mark.set(true);
+        }), entrycont.pos("bl").adds(0, 5));
+        prev = add(new Button(UI.scale(100), "Select none", false).action(() -> {
+            for (Entry entry : this.entries.values())
+                entry.mark.set(false);
+        }), prev.pos("ur").adds(5, 0));
+        adda(new Button(UI.scale(150), "Remove selected", false).action(() -> {
             Collection<Object> args = new ArrayList<>();
             for (Entry entry : this.entries.values()) {
                 if (entry.mark.a) {
@@ -62,7 +71,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
                 }
             }
             wdgmsg("rm", args.toArray(new Object[0]));
-        }), entrycont.pos("bl").adds(0, 5));
+        }), entrycont.pos("br").adds(0, 5), 1, 0);
         pack();
     }
 
@@ -70,7 +79,8 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         for (int i = 0, x = CheckBox.sbox.sz().x + UI.scale(10); i < attrs.length; i++) {
             Column attr = attrs[i];
             attr.x = x;
-            x += attr.w + UI.scale(15);
+            x += attr.w;
+            x += UI.scale(attr.r ? 5 : 1);
         }
         return (Arrays.asList(attrs));
     }
@@ -112,7 +122,7 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public void drawcols(GOut g) {
         Column prev = null;
         for (Column col : cols()) {
-            if (prev != null) {
+            if ((prev != null) && !prev.r) {
                 g.chcolor(255, 255, 0, 64);
                 int x = (prev.x + prev.w + col.x) / 2;
                 g.line(new Coord(x, 0), new Coord(x, sz.y), 1);
@@ -212,14 +222,10 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
             delentry((Long) args[0]);
         } else if (msg == "addto") {
             Widget wdg = ui.getwidget((Integer) args[0]);
-//            System.out.println(wdg);
             GameUI gui = (GameUI) wdg;
             Indir<Resource> res = ui.sess.getres((Integer) args[1]);
-//            System.out.println(res);
             Pagina pag = gui.menu.paginafor(res);
-//            System.out.println(pag);
             MenuGrid.PagButton pagButton = Loading.waitfor(pag::button);
-//            System.out.println(pagButton);
             RosterButton btn = pagButton instanceof RosterButton ? (RosterButton) pagButton : new RosterButton(pag);
             btn.add(this);
         } else {

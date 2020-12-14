@@ -744,105 +744,107 @@ public class CoalToSmelters extends Window implements GobSelectCallback {
         @Override
         public void run() {
             torchlist.addAll(list);
-            for (Gob gob : torchlist) {
-                if (terminatelight || ui.gui.getwnd("Add Coal To Smelters") == null)
-                    return;
-                try {
-                    if (list.size() == 0) {
-                        PBotUtils.sysMsg(ui, "No Smelters/Ovens found", Color.white);
-                        stopbtn.click();
+            synchronized (torchlist) {
+                for (Gob gob : torchlist) {
+                    if (terminatelight || (ui.gui != null && ui.gui.getwnd("Add Coal To Smelters") == null))
                         return;
-                    }
+                    try {
+                        if (list.size() == 0) {
+                            PBotUtils.sysMsg(ui, "No Smelters/Ovens found", Color.white);
+                            stopbtn.click();
+                            return;
+                        }
 
-                    Equipory e = ui.gui.getequipory();
-                    WItem l = e.quickslots[6];
-                    WItem r = e.quickslots[7];
+                        Equipory e = ui.gui.getequipory();
+                        WItem l = e.quickslots[6];
+                        WItem r = e.quickslots[7];
 
-                    noltorch = true;
-                    boolean nortorch = true;
+                        noltorch = true;
+                        boolean nortorch = true;
 
-                    if (l != null) {
-                        String lname = l.item.getname();
-                        if (lname.contains("Lit Torch") || lname.contains("Lantern"))
-                            noltorch = false;
-                    }
-                    if (r != null) {
-                        String rname = r.item.getname();
-                        if (rname.contains("Lit Torch") || rname.contains("Lantern"))
-                            nortorch = false;
-                    }
+                        if (l != null) {
+                            String lname = l.item.getname();
+                            if (lname.contains("Lit Torch") || lname.contains("Lantern"))
+                                noltorch = false;
+                        }
+                        if (r != null) {
+                            String rname = r.item.getname();
+                            if (rname.contains("Lit Torch") || rname.contains("Lantern"))
+                                nortorch = false;
+                        }
 
-                    // take torch from equipment, otherwise assume it's already in the hand
-                    if (!noltorch || !nortorch) {
-                        WItem w = e.quickslots[noltorch ? 7 : 6];
-                        w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), 1);
+                        // take torch from equipment, otherwise assume it's already in the hand
+                        if (!noltorch || !nortorch) {
+                            WItem w = e.quickslots[noltorch ? 7 : 6];
+                            w.mousedown(new Coord(w.sz.x / 2, w.sz.y / 2), 1);
 
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException ie) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ie) {
+                                e.wdgmsg("drop", noltorch ? 7 : 6);
+                                return;
+                            }
+                        }
+                        switch (pathfinder) {
+                            case "boshaw":
+                                PBotUtils.PathfinderRightClick(ui, gob, 0);
+                                break;
+                            case "purus":
+                                PBotUtils.pfRightClick(ui, gob, 0);
+                                break;
+                            case "amber":
+                                ui.gui.map.pfRightClick(gob, -1, 3, 0, null);
+                                break;
+                        }
+                        String wndname;
+                        if (gob.getres().name.contains("smelter"))
+                            wndname = "Ore Smelter";
+                        else
+                            wndname = "Oven";
+
+                        int unstucktimer = 0;
+                        while (ui.gui.getwnd(wndname) == null) {
+                            if (terminatelight || ui.gui.getwnd("Add Coal To Smelters") == null)
+                                return;
+                            if (!PBotUtils.isMoving(ui))
+                                unstucktimer++;
+                            if (unstucktimer > 250) {
+                                PBotUtils.sysLogAppend(ui, "Moving char", "white");
+                                Gob player = ui.gui.map.player();
+                                Coord location = player.rc.floor(posres);
+                                int x = location.x + getrandom();
+                                int y = location.y + getrandom();
+                                Coord finalloc = new Coord(x, y);
+                                ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                                PBotUtils.sleep(1000);
+                                switch (pathfinder) {
+                                    case "boshaw":
+                                        PBotUtils.PathfinderRightClick(ui, gob, 0);
+                                        break;
+                                    case "purus":
+                                        PBotUtils.pfRightClick(ui, gob, 0);
+                                        break;
+                                    case "amber":
+                                        ui.gui.map.pfRightClick(gob, -1, 3, 0, null);
+                                        break;
+                                }
+                                unstucktimer = 0;
+                            }
+
+                            PBotUtils.sleep(10);
+                        }
+
+                        ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+
+                        if (!Utils.waitForProgressFinish(ui.gui, TIMEOUT_ACT, "Oops something went wrong. Timeout when trying to light with torch.")) {
+                            if (terminatelight || ui.gui.getwnd("Add Coal To Smelters") == null)
+                                return;
                             e.wdgmsg("drop", noltorch ? 7 : 6);
                             return;
                         }
+                    } catch (Loading | InterruptedException ie) {
+                        ie.printStackTrace();
                     }
-                    switch (pathfinder) {
-                        case "boshaw":
-                            PBotUtils.PathfinderRightClick(ui, gob, 0);
-                            break;
-                        case "purus":
-                            PBotUtils.pfRightClick(ui, gob, 0);
-                            break;
-                        case "amber":
-                            ui.gui.map.pfRightClick(gob, -1, 3, 0, null);
-                            break;
-                    }
-                    String wndname;
-                    if (gob.getres().name.contains("smelter"))
-                        wndname = "Ore Smelter";
-                    else
-                        wndname = "Oven";
-
-                    int unstucktimer = 0;
-                    while (ui.gui.getwnd(wndname) == null) {
-                        if (terminatelight || ui.gui.getwnd("Add Coal To Smelters") == null)
-                            return;
-                        if (!PBotUtils.isMoving(ui))
-                            unstucktimer++;
-                        if (unstucktimer > 250) {
-                            PBotUtils.sysLogAppend(ui, "Moving char", "white");
-                            Gob player = ui.gui.map.player();
-                            Coord location = player.rc.floor(posres);
-                            int x = location.x + getrandom();
-                            int y = location.y + getrandom();
-                            Coord finalloc = new Coord(x, y);
-                            ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-                            PBotUtils.sleep(1000);
-                            switch (pathfinder) {
-                                case "boshaw":
-                                    PBotUtils.PathfinderRightClick(ui, gob, 0);
-                                    break;
-                                case "purus":
-                                    PBotUtils.pfRightClick(ui, gob, 0);
-                                    break;
-                                case "amber":
-                                    ui.gui.map.pfRightClick(gob, -1, 3, 0, null);
-                                    break;
-                            }
-                            unstucktimer = 0;
-                        }
-
-                        PBotUtils.sleep(10);
-                    }
-
-                    ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
-
-                    if (!Utils.waitForProgressFinish(ui.gui, TIMEOUT_ACT, "Oops something went wrong. Timeout when trying to light with torch.")) {
-                        if (terminatelight || ui.gui.getwnd("Add Coal To Smelters") == null)
-                            return;
-                        e.wdgmsg("drop", noltorch ? 7 : 6);
-                        return;
-                    }
-                } catch (Loading | InterruptedException ie) {
-                    ie.printStackTrace();
                 }
             }
             PBotUtils.sysMsg(ui, "Done", Color.white);

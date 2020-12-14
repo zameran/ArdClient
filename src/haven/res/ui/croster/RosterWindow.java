@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.Coord;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 public class RosterWindow extends Window {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
 
     public static final Map<Glob, RosterWindow> rosters = new HashMap<>();
@@ -58,5 +57,3 @@ public class RosterWindow extends Window {
         super.wdgmsg(sender, msg, args);
     }
 }
-
-/* >pagina: RosterButton$Fac */

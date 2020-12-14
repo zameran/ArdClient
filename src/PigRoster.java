@@ -1,6 +1,3 @@
-/* Preprocessed source code */
-/* $use: ui/croster */
-
 import haven.Resource;
 import haven.UI;
 import haven.res.ui.croster.CattleRoster;
@@ -13,11 +10,17 @@ import java.util.Comparator;
 import java.util.List;
 
 public class PigRoster extends CattleRoster<Pig> {
-	static {
-		dev.checkFileVersion("gfx/hud/rosters/pig", 24);
-	}
+    static {
+        dev.checkFileVersion("gfx/hud/rosters/pig", 56);
+    }
+
     public static List<Column> cols = initcols(
             new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+
+            new Column<Pig>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Pig e) -> e.hog).reversed(), 20).runon(),
+            new Column<Pig>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Pig e) -> e.piglet).reversed(), 20).runon(),
+            new Column<Pig>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Pig e) -> e.dead).reversed(), 20).runon(),
+            new Column<Pig>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20),
 
             new Column<Pig>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Pig e) -> e.q).reversed()),
 
@@ -47,6 +50,11 @@ public class PigRoster extends CattleRoster<Pig> {
         String name = (String) args[n++];
         Pig ret = new Pig(id, name);
         ret.grp = (Integer) args[n++];
+        int fl = (Integer) args[n++];
+        ret.hog = (fl & 1) != 0;
+        ret.piglet = (fl & 2) != 0;
+        ret.dead = (fl & 4) != 0;
+        ret.pregnant = (fl & 8) != 0;
         ret.q = ((Number) args[n++]).doubleValue();
         ret.meat = (Integer) args[n++];
         ret.milk = (Integer) args[n++];

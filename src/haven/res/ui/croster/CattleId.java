@@ -1,4 +1,3 @@
-/* Preprocessed source code */
 package haven.res.ui.croster;
 
 import haven.BuddyWnd;
@@ -21,7 +20,7 @@ import java.awt.Color;
 
 public class CattleId extends GAttrib implements Rendered, PView.Render2D {
     static {
-        dev.checkFileVersion("ui/croster", 42);
+        dev.checkFileVersion("ui/croster", 68);
     }
 
     public final long id;
