@@ -1,5 +1,5 @@
 20201214
-Rosters update. Fixes.
+Rosters update. Fixes. Movable PartyView. Please check 'Item Overlay' in options.
 ~
 
 20201213

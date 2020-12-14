@@ -1954,10 +1954,8 @@ public class Resource implements Serializable {
         List<Layer> layers = new LinkedList<Layer>();
         if (this.ver == -1)
             this.ver = ver;
-        else if (ver != this.ver) {
-            //throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
-            System.out.println("Wrong res version (" + ver + " != " + this.ver + ")");
-        }
+        else if (ver != this.ver)
+            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
         while (!in.eom()) {
             String title = in.string();
 //            dev.resourceLog("DECODING", this, title);
