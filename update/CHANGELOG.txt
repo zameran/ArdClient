@@ -1,3 +1,7 @@
+20201216
+Minimize button. Roster animal name fix. Livestock Manager Wool total and some fix. Fixes. New PBot commands. New mountmeter hide option.
+~
+
 20201214
 Rosters update. Fixes. Movable PartyView. Please check 'Item Overlay' in options.
 ~
