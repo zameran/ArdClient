@@ -31,7 +31,6 @@ import haven.res.ui.tt.Wear;
 import haven.resutil.Curiosity;
 import haven.sloth.gui.MovableWidget;
 import haven.sloth.io.HiddenWndData;
-import modification.dev;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -137,7 +136,7 @@ public class Window extends MovableWidget implements DTarget {
     public final Coord mrgn;
     //close button
     public final IButton cbtn, lbtn;
-    private IButton hbtn;
+    private IButton hbtn, mbtn;
     private final BufferedImage on, off;
     public final ArrayList<IButton> btns = new ArrayList<>();
 
@@ -150,6 +149,8 @@ public class Window extends MovableWidget implements DTarget {
     //close position, close size
     public Coord ctl, csz;
     private boolean hidable = false, hidden;
+    private boolean minimized;
+    private Coord fullsz;
     private Runnable destroyHook = null;
     private final Collection<Widget> twdgs = new LinkedList<Widget>();
 
@@ -172,6 +173,7 @@ public class Window extends MovableWidget implements DTarget {
         this.mrgn = lg ? dlmrgn : dsmrgn;
         cbtn = add(new IButton(Theme.fullres("buttons/close"), null, this::close));
         lbtn = null;
+        makeMinimizable();
         on = off = null;
         origcap = cap;
 
@@ -185,6 +187,7 @@ public class Window extends MovableWidget implements DTarget {
         this.mrgn = lg ? dlmrgn : dsmrgn;
         cbtn = add(new IButton(Theme.fullres("buttons/close"), null, this::close));
         lbtn = add(new IButton(Theme.fullres("buttons/lock"), null, this::toggleLock));
+        makeMinimizable();
         on = lbtn.hover;
         off = lbtn.up;
         origcap = cap;
@@ -246,7 +249,28 @@ public class Window extends MovableWidget implements DTarget {
         if (cap != null) {
             HiddenWndData.saveHide(cap.text, hidable);
         }
+    }
 
+    public void makeMinimizable() {
+        mbtn = addBtn_other("custom/hud/sloth/buttons/minimize", "Toggle Minimize", this::toggleMinimize);
+    }
+
+    public void toggleMinimize() {
+        minimized = !minimized;
+        final BufferedImage tmp = mbtn.down;
+        mbtn.down = mbtn.up;
+        mbtn.up = tmp;
+
+        if (minimized) {
+            fullsz = asz;
+            resize(asz.x, 0);
+        } else {
+            resize(fullsz);
+        }
+    }
+
+    public boolean minimized() {
+        return minimized;
     }
 
 

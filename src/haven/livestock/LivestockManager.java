@@ -36,8 +36,8 @@ public class LivestockManager extends ResizableWnd {
     public CheckBox DropEntrailsBox, DropIntestinesBox, DropMeatBox, DropBonesBox, InspectBox, SlaughterBox;
     public Animal pendingAnimal;
     private GameUI gui;
-    public static int quality, breedquality, hide, meat, milk;
-    public static boolean combined, combinedhide, combinedmeat, combinedmilk = false;
+    public static int quality, breedquality, hide, meat, milk, wool;
+    public static boolean combined, combinedhide, combinedmeat, combinedwool, combinedmilk = false;
     private static final Tex texBull = Resource.loadtex("gfx/livestockava/bull");
     private static final Tex texBilly = Resource.loadtex("gfx/livestockava/billy");
     private static final Tex texRam = Resource.loadtex("gfx/livestockava/ram");
@@ -545,27 +545,34 @@ public class LivestockManager extends ResizableWnd {
             hide = val;
         if (name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Milk quality:")))
             milk = val;
+        if (name.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Wool quality:")))
+            wool = val;
         if (meat > 0 && quality > 0 && !combinedmeat) {
-            pendingAnimal.put("Meat quality2:", quality * meat / 100);
+            pendingAnimal.put("Meat quality2:", quality * meat / 100d);
             pendingAnimal.attributeResolved();
             combinedmeat = true;
         }
         if (milk > 0 && quality > 0 && !combinedmilk) {
-            pendingAnimal.put("Milk quality2:", quality * milk / 100);
+            pendingAnimal.put("Milk quality2:", quality * milk / 100d);
             pendingAnimal.attributeResolved();
             combinedmilk = true;
         }
         if (hide > 0 && quality > 0 && !combinedhide) {
-            pendingAnimal.put("Hide quality2:", quality * hide / 100);
+            pendingAnimal.put("Hide quality2:", quality * hide / 100d);
             pendingAnimal.attributeResolved();
             combinedhide = true;
         }
+        if (wool > 0 && quality > 0 && !combinedwool) {
+            pendingAnimal.put("Wool quality2:", quality * wool / 100d);
+            pendingAnimal.attributeResolved();
+            combinedwool = true;
+        }
         if (quality > 0 && breedquality > 0 && !combined) {
-            pendingAnimal.put("Combined quality:", quality + breedquality);
+            pendingAnimal.put("Combined quality:", (quality + breedquality) * 1d);
             pendingAnimal.attributeResolved();
             combined = true;
         }
-        pendingAnimal.put(name, val);
+        pendingAnimal.put(name, val * 1d);
         pendingAnimal.attributeResolved();
 
 
@@ -574,6 +581,7 @@ public class LivestockManager extends ResizableWnd {
             combinedmeat = false;
             combinedmilk = false;
             combinedhide = false;
+            combinedwool = false;
             Panel p = getAnimalPanel(type);
 
             if (p.list.stream().anyMatch(x -> x.gobid == pendingAnimal.gobid)) {

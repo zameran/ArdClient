@@ -32,6 +32,8 @@ import haven.overlays.newPlantStageSprite;
 import haven.res.lib.tree.Tree;
 import haven.res.lib.vmat.Materials;
 import haven.res.lib.vmat.VarSprite;
+import haven.res.ui.croster.CattleId;
+import haven.res.ui.croster.CattleIdSprite;
 import haven.resutil.BPRadSprite;
 import haven.resutil.WaterTile;
 import haven.sloth.gfx.GobSpeedSprite;
@@ -623,9 +625,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             sb.append("Overlays: ").append(ols.size()).append("\n");
             for (Overlay ol : ols) {
                 if (ol != null) {
-                    sb.append("ol: ").append("i[").append(ol.id).append("]");
-                    if (ol.res != null && ol.res.get() != null) sb.append(", r[").append(ol.res.get()).append("]");
-                    if (ol.spr != null) sb.append(", s[").append(ol.spr).append("]");
+                    sb.append("ol: ").append("[id:").append(ol.id).append("]");
+                    if (ol.res != null && ol.res.get() != null) sb.append("[r:").append(ol.res.get()).append("]");
+                    if (ol.spr != null) sb.append("[s:").append(ol.spr).append("]");
 //                    if (ol.sdt != null) sb.append(", d").append(Arrays.toString(ol.sdt.rbuf));
                     sb.append("\n");
                 }
@@ -1365,6 +1367,17 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {
                 for (HitboxMesh mesh : hitboxmesh)
                     rl.add(mesh, null);
+            }
+
+            if (type == Type.TAMEDANIMAL) {
+                CattleId cattleId = getattr(CattleId.class);
+                if (cattleId != null) {
+                    if (findol(CattleIdSprite.id) == null) {
+                        CattleIdSprite sprite = new CattleIdSprite(cattleId);
+                        addol(new Overlay(CattleIdSprite.id, sprite));
+                        cattleId.sprite = sprite;
+                    }
+                }
             }
         }
         return (false);

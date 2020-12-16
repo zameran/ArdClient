@@ -2855,12 +2855,12 @@ public class OptWnd extends Window {
         });
         appender.addRow(new CheckBox("Show numeric info") {
             {
-                a = configuration.showstudytime;
+                a = configuration.shownumeric;
             }
 
             public void set(boolean val) {
-                Utils.setprefb("showstudytime", val);
-                configuration.showstudytime = val;
+                Utils.setprefb("shownumeric", val);
+                configuration.shownumeric = val;
                 a = val;
             }
         }, new Dropbox<String>(qualityposlist.size(), qualityposlist) {
@@ -2903,12 +2903,12 @@ public class OptWnd extends Window {
         });
         appender.addRow(new CheckBox("Show study time") {
             {
-                a = configuration.shownumeric;
+                a = configuration.showstudytime;
             }
 
             public void set(boolean val) {
-                Utils.setprefb("shownumeric", val);
-                configuration.shownumeric = val;
+                Utils.setprefb("showstudytime", val);
+                configuration.showstudytime = val;
                 a = val;
             }
         }, new Dropbox<String>(qualityposlist.size(), qualityposlist) {
@@ -2946,6 +2946,17 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("oldmountbar", val);
                 configuration.oldmountbar = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Draw new mountbar") {
+            {
+                a = configuration.newmountbar;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("newmountbar", val);
+                configuration.newmountbar = val;
                 a = val;
             }
         });

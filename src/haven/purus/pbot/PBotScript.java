@@ -35,8 +35,9 @@ public class PBotScript extends Thread {
 
     public void kill() {
         try {
-//            interrupt();
-            context.close(true);
+            interrupt();
+            context.leave();
+            context.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

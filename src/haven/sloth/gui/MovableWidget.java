@@ -3,9 +3,9 @@ package haven.sloth.gui;
 import haven.Coord;
 import haven.Coord2d;
 import haven.GOut;
-import haven.sloth.io.Storage;
 import haven.UI;
 import haven.Widget;
+import haven.sloth.io.Storage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -26,6 +26,8 @@
 
 package haven;
 
+import java.util.function.Function;
+
 public abstract class GAttrib {
     public final Gob gob;
 
@@ -44,5 +46,23 @@ public abstract class GAttrib {
 
     public Object staticp() {
         return (Gob.STATIC);
+    }
+
+    public static class ParserMaker implements Resource.PublishedCode.Instancer {
+        public Parser make(Class<?> cl, Resource ires, Object... argv) {
+            if (Parser.class.isAssignableFrom(cl))
+                return (Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Parser.class), ires, argv));
+            try {
+                Function<Object[], Void> parse = Utils.smthfun(cl, "parse", Void.TYPE, Gob.class, Message.class);
+                return ((gob, sdt) -> parse.apply(new Object[]{gob, sdt}));
+            } catch (NoSuchMethodException e) {
+            }
+            return (null);
+        }
+    }
+
+    @Resource.PublishedCode(name = "objdelta", instancer = ParserMaker.class)
+    public static interface Parser {
+        public void apply(Gob gob, Message sdt);
     }
 }

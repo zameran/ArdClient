@@ -51,10 +51,6 @@ public class dev {
 
     public static String serverSender = "_SERVER_MSG";
     public static String clientSender = "_CLIENT_MSG";
-    private static String oldStackTraceElementClass = "";
-    private static String oldStackTraceElementMethod = "";
-    private static int oldStackTraceElementLine = -1;
-    private static String oldSender = "";
 
     public static void sysPrintStackTrace(String text) {
         if (logging) {
@@ -81,36 +77,14 @@ public class dev {
     }
 
     public static void sysLog(String who, Widget widget, int id, String msg, Object... args) {
-        StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
-        int stackTraceElementsLength = stackTraceElements.length;
-
-        int max_wdg_length = 40;
-        int max_msg_length = 10;
-
         boolean skip_log = false;
         for (Map.Entry<String, CheckListboxItem> entry : msgmenus.entrySet()) {
             if (msg_log_skip_boolean && entry.getKey().toLowerCase().equals(msg) && entry.getValue().selected)
                 skip_log = true;
         }
 
-        if (stackTraceElements[1].getMethodName().equals("uimsg")) {
-            oldStackTraceElementClass = stackTraceElements[2].getClassName();
-            oldStackTraceElementMethod = stackTraceElements[2].getMethodName();
-            oldStackTraceElementLine = stackTraceElements[2].getLineNumber();
-        } else {
-            oldStackTraceElementClass = "";
-            oldStackTraceElementMethod = "";
-            oldStackTraceElementLine = -1;
-        }
-        oldSender = who;
-
         if (!skip_log && logging) {
             System.out.print("[" + LocalTime.now() + "]");
-            //System.out.print(" || ");
-			/*for (int i = 1; i < stackTraceElementsLength; i++) {
-				System.out.print("{" + stackTraceElements[i].getClassName() + "(" + stackTraceElements[i].getMethodName() + ")(" + stackTraceElements[i].getLineNumber() + ")");
-				if (i != stackTraceElementsLength - 1) System.out.print(">");
-			}*/
 
             System.out.print(" || " + who);
             if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
@@ -131,16 +105,8 @@ public class dev {
             else if ((id / 10) < 10) a = 1;
             else a = 2;
 
-			/*if (widget != null)
-				for (int i = widget.toString().length() + a; i < max_wdg_length; i++)
-					System.out.print(" ");
-			else
-				for (int i = 4 + a; i < max_wdg_length; i++)
-					System.out.print(" ");*/
             System.out.print(" || " + msg);
             addMsg(msg);
-			/*for (int i = msg.length(); i < max_msg_length; i++)
-				System.out.print(" ");*/
             System.out.print(" || [" + args.length + "]:");
 
 
@@ -150,24 +116,19 @@ public class dev {
                         AuthClient.NativeCred arg = (AuthClient.NativeCred) args[i];
                         System.out.print("{(AuthClient.NativeCred):" + arg.name() + "}");
                     } else if (args[i] instanceof Integer) {
-                        System.out.print("i{" + args[i] + "}");
-                        if (msg.equals("chres")) System.out.print("[" + widget.ui.sess.getres((Integer) args[i]) + "]");
+                        System.out.print("{i:[" + args[i] + "]}");
                     } else if (args[i] instanceof Long) {
-                        System.out.print("l{" + args[i] + "}");
+                        System.out.print("{l:[" + args[i] + "]}");
                     } else if (args[i] instanceof String) {
-                        System.out.print("s{" + args[i] + "}");
+                        System.out.print("{s:[" + args[i] + "]}");
                     } else if (args[i] instanceof Boolean) {
-                        System.out.print("b{" + args[i] + "}");
+                        System.out.print("{b:[" + args[i] + "]}");
                     } else if (args[i] instanceof Coord) {
                         Coord coord = (Coord) args[i];
-                        System.out.print("{x:" + coord.x + ", y:" + coord.y + "}");
+                        System.out.print("{x:" + coord.x + ",y:" + coord.y + "}");
                     } else {
-                        if (stackTraceElements[1].getMethodName().equals("wdgmsg"))
-                            System.out.print("{" + args[i].getClass().getName() + ":" + args[i] + "}");
-                        else
-                            System.out.print("{" + args[i] + "}");
+                        System.out.print("{" + args[i] + "}");
                     }
-                    if (i != args.length - 1) System.out.print(", ");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -177,28 +138,10 @@ public class dev {
     }
 
     public static void sysLogRemote(String who, Widget widget, int id, String type, int parent, Object[] pargs, Object... cargs) {
-        StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
-        int stackTraceElementsLength = stackTraceElements.length;
-
         UI ui = null;
         if (widget.ui != null) ui = widget.ui;
 
         boolean skip_log = false;
-//        for (String s : msg_log_skip) {
-//            if (s.equals(name) && msg_log_skip_boolean) skip_log = true;
-//        }
-
-        if (stackTraceElements[1].getMethodName().equals("run") && oldSender.equals(serverSender)) {
-            if (oldStackTraceElementClass.equals(stackTraceElements[1].getClassName()) &&
-                    oldStackTraceElementMethod.equals(oldStackTraceElementMethod = stackTraceElements[1].getMethodName()) &&
-                    oldStackTraceElementLine == stackTraceElements[1].getLineNumber() - 3)
-                skip_log = true;
-        } else {
-            oldStackTraceElementClass = "";
-            oldStackTraceElementMethod = "";
-            oldStackTraceElementLine = -1;
-        }
-        oldSender = who;
 
         if (!skip_log && logging) {
             System.out.print("[" + LocalTime.now() + "]");
@@ -241,9 +184,8 @@ public class dev {
     private static void argsMethod(Object[] pargs) {
         if (pargs != null) {
             System.out.print(" || [" + pargs.length + "]:");
-            for (int i = 1; i < pargs.length; i++) {
+            for (int i = 0; i < pargs.length; i++) {
                 System.out.print("{" + pargs[i] + "}");
-                if (i != pargs.length - 1) System.out.print(", ");
             }
         }
     }

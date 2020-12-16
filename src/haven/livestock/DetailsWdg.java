@@ -31,15 +31,15 @@ public class DetailsWdg extends Widget {
         add(new Img(animal.getAvatar()), Coord.z);
 
         int offx = LivestockManager.COLUMN_TITLE_X - LivestockManager.ENTRY_X;
-        for (Map.Entry<String, Integer> entry : animal.entrySet()) {
-            Integer val = entry.getValue();
+        for (Map.Entry<String, Double> entry : animal.entrySet()) {
+            Double val = entry.getValue();
             if (val == null)
                 continue;
 
             String key = entry.getKey();
             Column col = animal.getColumns().get(key);
 
-            String valStr = val.toString();
+            String valStr = (String.format((val % 1.0 == 0) ? "%.0f" : "%.2f", val));
             if (key.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Meat quality:")) ||
                     key.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Milk quality:")) ||
                     key.equals(Resource.getLocString(Resource.BUNDLE_LABEL, "Hide quality:")) ||

@@ -752,10 +752,10 @@ public class PBotUtils {
     public static ArrayList<PBotGob> gobsInArea(UI ui, Coord a, Coord b) {
         // Initializes list of crops to harvest between the selected coordinates
         ArrayList<PBotGob> gobs = new ArrayList<PBotGob>();
-        double bigX = a.x > b.x ? a.x : b.x;
-        double smallX = a.x < b.x ? a.x : b.x;
-        double bigY = a.y > b.y ? a.y : b.y;
-        double smallY = a.y < b.y ? a.y : b.y;
+        double bigX = Math.max(a.x, b.x);
+        double smallX = Math.min(a.x, b.x);
+        double bigY = Math.max(a.y, b.y);
+        double smallY = Math.min(a.y, b.y);
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
@@ -803,11 +803,11 @@ public class PBotUtils {
         public int compare(PBotGob a, PBotGob b) {
             if (a.gob.rc.floor().x == b.gob.rc.floor().x) {
                 if (a.gob.rc.floor().x % 2 == 0)
-                    return (a.gob.rc.floor().y < b.gob.rc.floor().y) ? 1 : (a.gob.rc.floor().y > b.gob.rc.floor().y) ? -1 : 0;
+                    return Integer.compare(b.gob.rc.floor().y, a.gob.rc.floor().y);
                 else
-                    return (a.gob.rc.floor().y < b.gob.rc.floor().y) ? -1 : (a.gob.rc.floor().y > b.gob.rc.floor().y) ? 1 : 0;
+                    return Integer.compare(a.gob.rc.floor().y, b.gob.rc.floor().y);
             } else
-                return (a.gob.rc.floor().x < b.gob.rc.floor().x) ? -1 : (a.gob.rc.floor().x > b.gob.rc.floor().x) ? 1 : 0;
+                return Integer.compare(a.gob.rc.floor().x, b.gob.rc.floor().x);
         }
     }
 

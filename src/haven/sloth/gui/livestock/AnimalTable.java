@@ -49,9 +49,6 @@ public abstract class AnimalTable extends RCellSheet {
     public abstract void addAnimal(final Window animal, final boolean male);
 
     public Avaview getAV(Window animal) {
-        for (Widget wdg = animal.child; wdg != null; wdg = wdg.next) {
-            if (wdg instanceof Avaview) return (Avaview) wdg;
-        }
-        return null;
+        return animal.findchild(Avaview.class);
     }
 }

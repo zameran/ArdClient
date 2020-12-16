@@ -67,7 +67,145 @@ public class PBotGobAPI {
     /**
      * List of all gobs in radius
      *
-     * @param radius searh radius
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> getGobsInRadius(UI ui, int radius) {
+        Coord2d plc = PBotGobAPI.player(ui).gob.rc;
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                if (gob.isplayer()) continue;
+                double dist = gob.rc.dist(plc);
+                if (dist < min) {
+                    list.add(new PBotGob(gob));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * List of all gobs in radius
+     *
+     * @param radius search radius
+     * @param center search center
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> getGobsInRadius(UI ui, Coord2d center, int radius) {
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                if (gob.isplayer()) continue;
+                double dist = gob.rc.dist(center);
+                if (dist < min) {
+                    list.add(new PBotGob(gob));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * List of all gobs in radius
+     *
+     * @param radius search radius
+     * @param cx     search center x
+     * @param cy     search center y
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> getGobsInRadius(UI ui, double cx, double cy, int radius) {
+        Coord2d center = new Coord2d(cx, cy);
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                if (gob.isplayer()) continue;
+                double dist = gob.rc.dist(center);
+                if (dist < min) {
+                    list.add(new PBotGob(gob));
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * List of all gobs in radius
+     *
+     * @param radius search radius
+     * @param center search center
+     * @param names  gobs names
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> findObjectsByNames(UI ui, Coord2d center, int radius, String... names) {
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(center);
+                if (dist < min) {
+                    boolean matches = false;
+                    for (String name : names) {
+                        if (gob.getres() != null && gob.getres().name.equals(name)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                    if (matches) {
+                        min = dist;
+                        list.add(new PBotGob(gob));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * List of all gobs in radius
+     *
+     * @param radius search radius
+     * @param cx     search center x
+     * @param cy     search center y
+     * @param names  gobs names
+     * @return List of all gobs in radius
+     */
+    public static List<PBotGob> findObjectsByNames(UI ui, double cx, double cy, int radius, String... names) {
+        Coord2d center = new Coord2d(cx, cy);
+        double min = radius;
+
+        List<PBotGob> list = new ArrayList<PBotGob>();
+        synchronized (ui.sess.glob.oc) {
+            for (Gob gob : ui.sess.glob.oc) {
+                double dist = gob.rc.dist(center);
+                if (dist < min) {
+                    boolean matches = false;
+                    for (String name : names) {
+                        if (gob.getres() != null && gob.getres().name.equals(name)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                    if (matches) {
+                        min = dist;
+                        list.add(new PBotGob(gob));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * List of all gobs in radius
+     *
+     * @param radius search radius
      * @param names  gobs names
      * @return List of all gobs in radius
      */

@@ -56,7 +56,12 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     private BuddyInfo info = null;
     private Widget infof;
     public int serial = 0;
-    public static final int width = 263;
+    public static final int width = UI.scale(263);
+    public static final int height = UI.scale(380);
+    public static final int margin1 = UI.scale(5);
+    public static final int margin2 = 2 * margin1;
+    public static final int margin3 = 2 * margin2;
+    public static final int offset = UI.scale(35);
     public static final Tex online = Resource.loadtex("gfx/hud/online");
     public static final Tex offline = Resource.loadtex("gfx/hud/offline");
     public static final Color[] gc = new Color[]{
@@ -183,46 +188,81 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
     }
 
-    public static class GroupSelector extends Widget {
-        public int group;
+    public static class GroupRect extends Widget {
+        final private static Coord offset = UI.scale(new Coord(2, 2));
+        final private static Coord selsz = UI.scale(new Coord(19, 19));
+        final private static Coord colsz = selsz.sub(offset.mul(2));
+        final private GroupSelector selector;
+        final private int group;
+        private boolean selected;
 
-        public GroupSelector(int group) {
-            super(new Coord((gc.length * 20) + 20, 20));
+        public GroupRect(GroupSelector selector, int group, boolean selected) {
+            super(new Coord(margin3, margin3));
+            this.selector = selector;
             this.group = group;
+            this.selected = selected;
         }
 
         public void draw(GOut g) {
-            for (int i = 0; i < gc.length; i++) {
-                if (i == group) {
-                    g.chcolor();
-                    g.frect(new Coord(i * 20, 0), new Coord(19, 19));
-                }
-                g.chcolor(gc[i]);
-                g.frect(new Coord(2 + (i * 20), 2), new Coord(15, 15));
+            if (selected) {
+                g.chcolor(Color.LIGHT_GRAY);
+                g.frect(Coord.z, selsz);
             }
+            g.chcolor(gc[group]);
+            g.frect(offset, colsz);
             g.chcolor();
         }
 
         public boolean mousedown(Coord c, int button) {
-            if ((c.y >= 2) && (c.y < 17)) {
-                int g = (c.x - 2) / 20;
-                if ((g >= 0) && (g < gc.length) && (c.x >= 2 + (g * 20)) && (c.x < 17 + (g * 20))) {
-                    changed(g);
-                    return (true);
-                }
+            selector.select(group);
+            return (true);
+        }
+
+        public void select() {
+            selected = true;
+        }
+
+        public void unselect() {
+            selected = false;
+        }
+    }
+
+    public static class GroupSelector extends Widget {
+        public int group;
+        public GroupRect[] groups = new GroupRect[gc.length];
+
+        public GroupSelector(int group) {
+            super(new Coord(gc.length * margin3, margin3));
+            this.group = group;
+            for (int i = 0; i < gc.length; ++i) {
+                groups[i] = new GroupRect(this, i, group == i);
+                add(groups[i], new Coord(i * margin3, 0));
             }
-            return (super.mousedown(c, button));
         }
 
         protected void changed(int group) {
+        }
+
+        public void update(int group) {
+            if (group == this.group)
+                return;
+            if (this.group >= 0)
+                groups[this.group].unselect();
             this.group = group;
+            if (group >= 0)
+                groups[group].select();
+        }
+
+        public void select(int group) {
+            update(group);
+            changed(group);
         }
     }
 
     @RName("grp")
     public static class $grp implements Factory {
         public Widget create(UI ui, Object[] args) {
-            return(new GroupSelector((Integer)args[0]) {
+            return (new GroupSelector((Integer) args[0]) {
                 public void changed(int group) {
                     wdgmsg("ch", group);
                 }

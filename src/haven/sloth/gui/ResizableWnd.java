@@ -68,13 +68,13 @@ public class ResizableWnd extends Window {
 
     @Override
     protected void drawframe(GOut g) {
-        g.image(sizer, ctl.add(csz).sub(sizer.sz()));
+        if (!minimized()) g.image(sizer, ctl.add(csz).sub(sizer.sz()));
         super.drawframe(g);
     }
 
     @Override
     public boolean mousedown(Coord c, int button) {
-        if (!locked() && button == 1 && c.isect(ctl.add(csz).sub(sizer.sz()), sizer.sz())) {
+        if (!locked() && !minimized() && button == 1 && c.isect(ctl.add(csz).sub(sizer.sz()), sizer.sz())) {
             dm = ui.grabmouse(this);
             dragc = asz.sub(c);
             parent.setfocus(this);

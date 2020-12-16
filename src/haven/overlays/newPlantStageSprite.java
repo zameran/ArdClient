@@ -13,7 +13,6 @@ import haven.RenderList;
 import haven.Sprite;
 import haven.Tex;
 import haven.Text;
-import modification.resources;
 
 import java.awt.Color;
 import java.util.HashMap;

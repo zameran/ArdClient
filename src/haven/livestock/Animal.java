@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class Animal extends HashMap<String, Integer> {
+public abstract class Animal extends HashMap<String, Double> {
     private final static int COL_SPACE;
     public long gobid;
     public long wndid;

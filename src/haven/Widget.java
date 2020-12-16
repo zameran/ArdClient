@@ -472,11 +472,10 @@ public class Widget {
                     } else {
                         throw (new RuntimeException("Invalid scaling operand: " + a));
                     }
-                } else if (op == 'm') {
-                    if (ui != null && ui.gui != null) PBotUtils.sysMsg(ui, "Unknown position operation: " + op);
                 } else if (Character.isWhitespace(op)) {
                 } else {
-                    throw (new RuntimeException("Unknown position operation: " + op));
+                    if (ui != null && ui.gui != null) PBotUtils.sysMsg(ui, "Unknown position operation: " + op);
+//                    throw (new RuntimeException("Unknown position operation: " + op));
                 }
             }
         } catch (RuntimeException e) {

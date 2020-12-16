@@ -65,7 +65,7 @@ public class PBotScriptlist extends GameUI.Hidewnd {
             }
         };
         add(search, new Coord(10, 5));
-        add(change, new Coord(sz.x - change.sz.x - 10, 5));
+        add(change, new Coord(asz.x - change.sz.x - 10, 5));
 
         list = new ScriptList(210, 10);
         add(list, new Coord(10, 35));

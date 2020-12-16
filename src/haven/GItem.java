@@ -97,7 +97,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
         }
 
         public void draw(GOut g) {
-            inf.drawoverlay(g, data);
+            if (!inf.getClass().getName().equals("Level") || configuration.newmountbar)
+                inf.drawoverlay(g, data);
         }
 
         public static <S> InfoOverlay<S> create(OverlayInfo<S> inf) {
