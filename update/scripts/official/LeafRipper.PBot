@@ -6,10 +6,12 @@ const ui = Java.type('haven.purus.pbot.PBotAPI').ui();
 const PBotUtils = Java.type('haven.purus.pbot.PBotUtils');
 const PBotWindowAPI = Java.type('haven.purus.pbot.PBotWindowAPI');
 const PBotGobAPI = Java.type('haven.purus.pbot.PBotGobAPI');
+const window = PBotUtils.PBotWindow(ui, "Leaf Ripper", 110, 110, ScriptID);
+const start = window.addButton("btnClick", "Start", 50, 5, 5);
 let stop = false;
 
 shouldStop = () => {
-	return stop;
+	return stop || window.closed();
 }
 
 javaListToArray = (javalist) => {
@@ -18,6 +20,10 @@ javaListToArray = (javalist) => {
 		ret.push(javalist.get(i));
 	return ret;
 };
+
+const btnClick = () => {
+    main();
+}
 
 main = () => {
 	PBotUtils.sysMsg(ui, "Select area with mulberry trees");
@@ -45,7 +51,8 @@ main = () => {
 			tree = mulberries.shift();
 			continue;
 		}
-		PBotUtils.waitForHourglass(ui); // We may or may not have leave in our hand after this, maybe it doesn't matter
+		// PBotUtils.waitForHourglass(ui); // We may or may not have leave in our hand after this, maybe it doesn't matter
+		waitForIdle();
 		let leaves = PBotUtils.playerInventory(ui).getInventoryItemsByResnames(["gfx/invobjs/leaf-mulberrytree"]).size();
 		while(leaves > 0) {
 			if(piles.length === 0) {
@@ -82,4 +89,16 @@ main = () => {
 	PBotUtils.sysMsg(ui, "Done!");
 }
 
-main();
+function waitForIdle() {
+  const maxWaitTICKs = 4;
+  const TICK = 200;
+  let idleCounter = maxWaitTICKs;
+  while (idleCounter >= 0 && !shouldStop()) {
+    if (PBotUtils.getHourglass(ui) == -1)
+      idleCounter--;
+    else {
+      idleCounter = maxWaitTICKs;
+    }
+    PBotUtils.sleep(TICK);
+  }
+}
