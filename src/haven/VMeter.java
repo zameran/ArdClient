@@ -185,35 +185,32 @@ public class VMeter extends Widget {
 
     @Override
     public Object tooltip(Coord c, Widget prev) {
+        if (super.tooltip != null) return super.tooltip;
         Widget p = this.parent;
-        if (super.tooltip == null) {
-            if (p instanceof Window) {
-                for (Kit kit : kits) {
-                    if (((Window) p).cap.text.equals(kit.windowName)) {
-                        for (TypeLimit tl : kit.typeLimit) {
-                            if (cl.equals(tl.color)) {
-                                String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
-                                String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
-                                String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
-                                if (ui.modctrl) {
-                                    return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
-                                } else {
-                                    return RichText.render(stt, -1).tex();
-                                }
+        if (p instanceof Window) {
+            for (Kit kit : kits) {
+                if (((Window) p).cap.text.equals(kit.windowName)) {
+                    for (TypeLimit tl : kit.typeLimit) {
+                        if (cl.equals(tl.color)) {
+                            String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
+                            String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
+                            String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
+                            if (ui.modctrl) {
+                                return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
+                            } else {
+                                return RichText.render(stt, -1).tex();
                             }
                         }
                     }
                 }
-                if (((Window) p).cap.text.equals("Ore Smelter")) {
-                    if (ui.modctrl) {
-                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
-                    } else {
-                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
-                    }
+            }
+            if (((Window) p).cap.text.equals("Ore Smelter")) {
+                if (ui.modctrl) {
+                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
+                } else {
+                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
                 }
             }
-        } else {
-            return super.tooltip;
         }
         return RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex();
     }
