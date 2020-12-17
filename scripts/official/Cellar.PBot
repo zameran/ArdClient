@@ -21,7 +21,6 @@ function shouldStop() {
 
 const btnClick = () => {
 	const cellar = PBotGobAPI.findGobByNames(ui, 1000, ["gfx/terobjs/arch/cellardoor"]);
-	window.closeWindow();
 	if(cellar == null) {
 		PBotUtils.sysMsg(ui, "Couldn't find a cellar door!");
 		return;
