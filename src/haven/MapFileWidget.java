@@ -210,7 +210,7 @@ public class MapFileWidget extends Widget {
                 try {
                     tex = img.get();
                 } catch (Exception e) {
-                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+//                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
                 }
             }
             return tex;
