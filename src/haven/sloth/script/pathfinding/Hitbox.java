@@ -130,15 +130,16 @@ public class Hitbox {
         if (ores.isPresent()) {
             Resource res = ores.get();
 
+            if (res.name.endsWith("/consobj")) {
+                ResDrawable rd = gob.getattr(ResDrawable.class);
+                if (rd != null && rd.sdt.rbuf.length >=4) {
+                    MessageBuf buf = rd.sdt.clone();
+                    return new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
+                }
+            }
+
             Optional<Hitbox[]> hitbox = hitboxes.get(res.name);
             if (hitbox.isPresent()) {
-                if (res.name.endsWith("/consobj")) {
-                    ResDrawable rd = gob.getattr(ResDrawable.class);
-                    if (rd != null && rd.sdt.rbuf.length >=4) {
-                        MessageBuf buf = rd.sdt.clone();
-                        return new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
-                    }
-                }
                 if (gob.type == Type.WALLSEG && Config.flatwalls) {
                     for (Hitbox h : hitbox.get()) {
                         h.zplus = 10;
