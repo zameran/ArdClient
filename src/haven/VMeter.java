@@ -45,10 +45,19 @@ public class VMeter extends Widget {
     public static final List<Kit> kits = new ArrayList<Kit>() {{
         add(new Kit("Cauldron", new ArrayList<TypeLimit>() {{
             add(new TypeLimit(new Color(71, 101, 153), 30f, "L"));
-            add(new TypeLimit(new Color(255, 128, 0), 10f, "ticks"));
+            add(new TypeLimit(new Color(255, 128, 0), 10f, "ticks", TypeLimit.Tooltip.fuel));
         }}));
         add(new Kit("Tub", new ArrayList<TypeLimit>() {{
             add(new TypeLimit(new Color(165, 117, 62), 40f, "L"));
+        }}));
+        add(new Kit("Fireplace", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 10f, "ticks", TypeLimit.Tooltip.fireplace));
+        }}));
+        add(new Kit("Kiln", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 30f, "ticks", TypeLimit.Tooltip.fuel));
+        }}));
+        add(new Kit("Oven", new ArrayList<TypeLimit>() {{
+            add(new TypeLimit(new Color(255, 128, 0), 30f, "ticks", TypeLimit.Tooltip.fuel, "$b{$col[255,128,0]{\n4 ticks to cook}}"));
         }}));
     }};
 
@@ -73,11 +82,23 @@ public class VMeter extends Widget {
         public final Color color;
         public final double limit;
         public final String subText;
+        public final String tooltip;
+        public final String addTooltip;
 
-        public TypeLimit(Color color, double limit, String subText) {
+        public TypeLimit(Color color, double limit, String subText, Tooltip tooltip, String addTooltip) {
             this.color = color;
             this.limit = limit;
             this.subText = subText;
+            this.tooltip = getTooltip(tooltip);
+            this.addTooltip = addTooltip;
+        }
+
+        public TypeLimit(Color color, double limit, String subText, Tooltip tooltip) {
+            this(color, limit, subText, tooltip, "");
+        }
+
+        public TypeLimit(Color color, double limit, String subText) {
+            this(color, limit, subText, null);
         }
 
         public static TypeLimit getTypeLimit(Kit kit, Color color) {
@@ -85,6 +106,22 @@ public class VMeter extends Widget {
                 if (typeLimit.color.equals(color))
                     return typeLimit;
             return null;
+        }
+
+        enum Tooltip {
+            fuel, fireplace
+        }
+
+        public String getTooltip(Tooltip type) {
+            if (type == null) return "";
+            switch (type) {
+                case fuel:
+                    return "\n1 tick = 4 minutes 50 seconds\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                case fireplace:
+                    return "\n1 tick = 6 minutes\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks";
+                default:
+                    return "";
+            }
         }
     }
 
@@ -149,37 +186,35 @@ public class VMeter extends Widget {
     @Override
     public Object tooltip(Coord c, Widget prev) {
         Widget p = this.parent;
-        if (p instanceof Window) {
-            if (((Window) p).cap.text.equals("Oven")) {
-                if (ui.modctrl) {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}" + ".\n13 units to cook.", -1).tex();
-                } else {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
-                }
-            } else if (((Window) p).cap.text.equals("Ore Smelter")) {
-                if (ui.modctrl) {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
-                } else {
-                    return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
-                }
-            } else if (((Window) p).cap.text.equals("Cauldron")) {
-                if (cl.equals(new Color(71, 101, 153))) {
-                    return RichText.render("$b{$col[255,223,5]{" + 30f * amount / 100 + "/30L (" + amount + "%)}}", -1).tex();
-                } else if (cl.equals(new Color(255, 128, 0))) {
-                    if (ui.modctrl) {
-                        return RichText.render("$b{$col[255,223,5]{" + 10f * amount / 100 + "/10 ticks (" + amount + "%)}}" +
-                                "\n1 tick = 4 minutes 50 seconds\n1 branch = 1 tick\nCoal, Black coal = 2 ticks\nBlock of Wood = 5 ticks\nTarsticks = 20 ticks", -1).tex();
-                    } else {
-                        return RichText.render("$b{$col[255,223,5]{" + 10f * amount / 100 + "/10 ticks (" + amount + "%)}}", -1).tex();
+        if (super.tooltip == null) {
+            if (p instanceof Window) {
+                for (Kit kit : kits) {
+                    if (((Window) p).cap.text.equals(kit.windowName)) {
+                        for (TypeLimit tl : kit.typeLimit) {
+                            if (cl.equals(tl.color)) {
+                                String ca = (tl.limit * amount / 100 % 1 == 0 ? String.format("%.0f", tl.limit * amount / 100) : tl.limit * amount / 100) + "";
+                                String cl = (tl.limit % 1 == 0 ? String.format("%.0f", tl.limit) : tl.limit) + "";
+                                String stt = "$b{$col[255,223,5]{" + ca + " / " + cl + " " + tl.subText + " (" + amount + "%)}}";
+                                if (ui.modctrl) {
+                                    return RichText.render(stt + tl.tooltip + tl.addTooltip, -1).tex();
+                                } else {
+                                    return RichText.render(stt, -1).tex();
+                                }
+                            }
+                        }
                     }
                 }
-            } else if (((Window) p).cap.text.equals("Tub")) {
-                if (!ui.modctrl) {
-                    return RichText.render("$b{$col[255,223,5]{" + 40f * amount / 100 + "/40L (" + amount + "%)}}", -1).tex();
+                if (((Window) p).cap.text.equals("Ore Smelter")) {
+                    if (ui.modctrl) {
+                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units.}}" + "\n40 units to smelt.\n30 units to smelt well mined.", -1).tex();
+                    } else {
+                        return RichText.render("$b{$col[255,223,5]{" + amount + "/100 units}}", -1).tex();
+                    }
                 }
             }
+        } else {
+            return super.tooltip;
         }
-        return super.tooltip;//RichText.render("$b{$col[255,223,5]{" + amount +"/100 units.}}", -1).tex();
-
+        return RichText.render("$b{$col[255,223,5]{" + amount + "%}}", -1).tex();
     }
 }
