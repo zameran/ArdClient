@@ -4479,9 +4479,75 @@ public class OptWnd extends Window {
     private void initchatsettings() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(chatsettings, new Coord(620, 310)));
 
-        appender.setVerticalMargin(VERTICAL_MARGIN);
+//        appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
+        appender.add(new CheckBox("Enable chat alert sounds") {
+            {
+                a = Config.chatsounds;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("chatsounds", val);
+                Config.chatsounds = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Enable discord chat alert sounds") {
+            {
+                a = Config.discordsounds;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("discordsounds", val);
+                Config.discordsounds = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Enable public realm chat alert sounds") {
+            {
+                a = Config.realmchatalerts;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("realmchatalerts", val);
+                Config.realmchatalerts = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Autoselect new chat") {
+            {
+                a = configuration.autoselectchat;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoselectchat", val);
+                configuration.autoselectchat = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Enable private chat alert sounds") {
+            {
+                a = configuration.privatechatalerts;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("privatechatalerts", val);
+                configuration.privatechatalerts = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Ignore unknown private message") {
+            {
+                a = configuration.ignorepm;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("ignorepm", val);
+                configuration.ignorepm = val;
+                a = val;
+            }
+        });
         appender.addRow(new Label("Enter Village name for Chat Alert sound, and village chat relay."),
                 new TextEntry(150, Config.chatalert) {
                     @Override
@@ -4516,39 +4582,6 @@ public class OptWnd extends Window {
                     }
                 }
         );
-        appender.add(new CheckBox("Enable village chat alert sounds") {
-            {
-                a = Config.chatsounds;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("chatsounds", val);
-                Config.chatsounds = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Enable discord chat alert sounds") {
-            {
-                a = Config.discordsounds;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("discordsounds", val);
-                Config.discordsounds = val;
-                a = val;
-            }
-        });
-        appender.add(new CheckBox("Enable public realm chat alert sounds") {
-            {
-                a = Config.realmchatalerts;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("realmchatalerts", val);
-                Config.realmchatalerts = val;
-                a = val;
-            }
-        });
         appender.addRow(new Label("Enter Discord Bot Key"),
                 new TextEntry(475, Config.discordtoken) {
                     @Override

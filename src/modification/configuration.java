@@ -121,6 +121,10 @@ public class configuration {
     public static double worldsize = Utils.getprefd("worldsize", 1f);
     public static boolean transparencyworld = Utils.getprefb("transparencyworld", false);
 
+    public static boolean privatechatalerts = Utils.getprefb("privatechatalerts", true);
+    public static boolean ignorepm = Utils.getprefb("ignorepm", false);
+    public static boolean autoselectchat = Utils.getprefb("autoselectchat", true);
+
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead", "Spring Water")) {{
         sort(new Comparator<String>() {
             @Override

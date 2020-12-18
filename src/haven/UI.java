@@ -26,6 +26,7 @@
 
 package haven;
 
+import modification.configuration;
 import modification.dev;
 
 import java.awt.Font;
@@ -222,13 +223,10 @@ public class UI {
             if (parent != 65535) {
                 Widget pwdg = widgets.get(parent);
                 if (pwdg == null) {
-                    if (dev.skipexceptions) {
-                        System.out.println("Null parent widget " + parent + " for " + id);
-                        return;
-                    } else
-                        throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
+                    dev.resourceLog("Null parent widget newwidget", parent, id, type, pargs, cargs);
+//                        throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
+                    return;
                 }
-
                 pwdg.addchild(wdg, pargs);
 
                 if (pwdg instanceof Window && gui != null)
@@ -252,19 +250,15 @@ public class UI {
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg == null) {
-                if (dev.skipexceptions) {
-                    System.out.println("Null child widget " + id + " added to " + parent);
-                    return;
-                } else
-                    throw (new UIException("Null child widget " + id + " added to " + parent, null, pargs));
+                dev.resourceLog("Null parent widget addwidget", id, parent, pargs);
+//                    throw (new UIException("Null child widget " + id + " added to " + parent, null, pargs));
+                return;
             }
             Widget pwdg = widgets.get(parent);
             if (pwdg == null) {
-                if (dev.skipexceptions) {
-                    System.out.println("Null parent widget " + parent + " for " + id);
-                    return;
-                } else
-                    throw (new UIException("Null parent widget " + parent + " for " + id, null, pargs));
+                dev.resourceLog("Null parent widget addwidget", parent, id, pargs);
+//                    throw (new UIException("Null parent widget " + parent + " for " + id, null, pargs));
+                return;
             }
             pwdg.addchild(wdg, pargs);
             dev.sysLogRemote("addwidget", wdg, id, null, parent, pargs, (Object) null);
@@ -284,7 +278,8 @@ public class UI {
             TextEntry entry = new TextEntry(40, "") {
                 @Override
                 public boolean keydown(KeyEvent e) {
-                    return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
+                    if (e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12) return true;
+                    else return super.keydown(e);
                 }
 
                 @Override
@@ -464,11 +459,9 @@ public class UI {
                 // try { for(Object obj:args) if(!wdg.toString().contains("CharWnd")) System.out.println("UI Wdg : " + wdg + " msg : "+msg+" id = " + id + " arg 1 : " + obj); }catch(ArrayIndexOutOfBoundsException qq){}
                 wdg.uimsg(msg.intern(), args);
             } else {
-                if (dev.skipexceptions) {
-                    System.out.println("Uimsg to non-existent widget " + id);
-                    return;
-                } else
-                    throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
+                dev.resourceLog("Uimsg to non-existent widget ", id);
+//                    throw (new UIException("Uimsg to non-existent widget " + id, msg, args));
+                return;
             }
             dev.sysLog(dev.serverSender, wdg, id, msg, args);
         }

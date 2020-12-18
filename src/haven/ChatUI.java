@@ -28,6 +28,7 @@ package haven;
 
 import haven.automation.Discord;
 import haven.sloth.gob.Mark;
+import modification.configuration;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.awt.Color;
@@ -1131,14 +1132,22 @@ public class ChatUI extends Widget {
                 if (t.equals("in")) {
                     Message cmsg = new InMessage(line, iw());
                     append(cmsg);
-                    notify(cmsg, 3);
-
-                    BuddyWnd.Buddy buddy = getparent(GameUI.class).buddies.find(other);
+                    GameUI gui = getparent(GameUI.class);
+                    BuddyWnd.Buddy buddy = gui.buddies.find(other);
+                    boolean skip = false;
+                    if (configuration.privatechatalerts) {
+                        if (configuration.ignorepm && (buddy == null || buddy.online == -1)) {
+                            skip = true;
+                        }
+                    } else  {
+                        skip = true;
+                    }
+                    if (!skip) notify(cmsg, 3);
                     save("Private Chat", cmsg.text().text, buddy != null ? buddy.name : "???");
 
                     long time = System.currentTimeMillis();
                     if (lastmsg == 0 || (time - lastmsg) / 1000 > 50) {
-                        Audio.play(alarmsfx, Config.chatalarmvol);
+                        if (!skip) Audio.play(alarmsfx, Config.chatalarmvol);
                         lastmsg = time;
                     }
                 } else if (t.equals("out")) {
@@ -1207,8 +1216,21 @@ public class ChatUI extends Widget {
             chan.c = chansel.c.add(chansel.sz.x, 0);
             chan.resize(sz.x - marg.x - chan.c.x, sz.y - chan.c.y);
             super.add(w);
-            select(chan, false);
+
+            boolean skip = false;
+            if (configuration.autoselectchat) {
+                if (w instanceof PrivChat && configuration.ignorepm) {
+                    PrivChat pmc = (PrivChat) w;
+                    GameUI gui = getparent(GameUI.class);
+                    BuddyWnd.Buddy buddy = gui.buddies.find(pmc.other);
+                    if (buddy == null || buddy.online == -1)
+                        skip = true;
+                }
+            } else skip = true;
+
+            if (!skip) select(chan, false);
             chansel.add(chan);
+            if (skip) chan.hide();
             return (w);
         } else {
             return (super.add(w));
