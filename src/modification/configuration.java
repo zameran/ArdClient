@@ -86,12 +86,20 @@ public class configuration {
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
     public static Coord infopos(String pos, Coord parsz, Coord tsz) {
         switch (pos) {
+            case "Right-Center":
+                return new Coord(parsz.x - tsz.x, parsz.y / 2  - tsz.y / 2);
+            case "Left-Center":
+                return new Coord(0, parsz.y / 2  - tsz.y / 2);
+            case "Top-Center":
+                return new Coord(parsz.x / 2 - tsz.x / 2, 0);
+            case "Bottom-Center":
+                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y - tsz.y);
             case "Right-Top":
                 return new Coord(parsz.x - tsz.x, 0);
             case "Right-Bottom":
                 return new Coord(parsz.x - tsz.x, parsz.y - tsz.y);
             case "Center":
-                return new Coord(parsz.x / 2 - tsz.x / 2 , parsz.y / 2  - tsz.y / 2 );
+                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y / 2  - tsz.y / 2);
             case "Left-Bottom":
                 return new Coord(0, parsz.y - tsz.y);
             case "Left-Top":

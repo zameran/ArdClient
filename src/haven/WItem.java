@@ -48,9 +48,11 @@ public class WItem extends Widget implements DTarget {
     public static final Tex lockt = Resource.loadtex("custom/inv/locked");
     public GItem item;
     public static final Color famountclr = new Color(24, 116, 205);
+
     private static final Color qualitybg() {
         return new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
     }
+
     public static final Color DURABILITY_COLOR = new Color(214, 253, 255);
     public static final Color ARMOR_COLOR = new Color(255, 227, 191);
     //public static final Color MATCH_COLOR = new Color(255, 32, 255, 255);
@@ -218,7 +220,7 @@ public class WItem extends Widget implements DTarget {
         return (() -> ret);
     });
 
-    public final AttrCache<Double> itemmeter = new AttrCache<Double>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> {
+    public final AttrCache<Double> itemmeter = new AttrCache<>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> {
         GItem itm = WItem.this.item;
         if (minf != null) {
             double meter = minf.meter();
@@ -226,10 +228,7 @@ public class WItem extends Widget implements DTarget {
                 int timeleft = (int) (itm.studytime * (1.0 - meter));
                 int hoursleft = timeleft / 60;
                 int minutesleft = timeleft - hoursleft * 60;
-                if (hoursleft < 1) {
-                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.YELLOW, Color.BLACK, num11Fnd).tex();
-                } else
-                    itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.WHITE, Color.BLACK, num11Fnd).tex();
+                itm.metertex = Text.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), hoursleft < 1 ? Color.YELLOW : Color.WHITE, Color.BLACK, num11Fnd).tex();
             } else {
                 itm.metertex = Text.renderstroked(String.format("%d%%", (int) (meter * 100)), Color.WHITE, Color.BLACK, num10Fnd).tex();
             }
@@ -238,7 +237,7 @@ public class WItem extends Widget implements DTarget {
         itm.metertex = null;
         return minf::meter;
     }));
-    public final AttrCache<QualityList> itemq = new AttrCache<QualityList>(this::info, AttrCache.cache(info -> {
+    public final AttrCache<QualityList> itemq = new AttrCache<>(this::info, AttrCache.cache(info -> {
         List<ItemInfo.Contents> contents = ItemInfo.findall(ItemInfo.Contents.class, info);
         List<ItemInfo> qualities = null;
         if (!contents.isEmpty()) {
@@ -257,7 +256,7 @@ public class WItem extends Widget implements DTarget {
         return !qualityList.isEmpty() ? qualityList : null;
     }));
 
-    public final AttrCache<Tex> heurnum = new AttrCache<Tex>(this::info, AttrCache.cache(info -> {
+    public final AttrCache<Tex> heurnum = new AttrCache<>(this::info, AttrCache.cache(info -> {
         String num = ItemInfo.getCount(info);
         if (num == null) return null;
         return Text.renderstroked(num, Color.WHITE, Color.BLACK).tex();

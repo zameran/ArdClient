@@ -2784,7 +2784,7 @@ public class OptWnd extends Window {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(quality, new Coord(620, 350)));
         appender.setHorizontalMargin(5);
 
-        List<String> qualityposlist = new ArrayList<>(Arrays.asList("Left-Top", "Right-Top", "Left-Bottom", "Right-Bottom", "Center"));
+        List<String> qualityposlist = new ArrayList<>(Arrays.asList("Left-Top", "Top-Center", "Right-Top", "Right-Center", "Right-Bottom", "Bottom-Center", "Left-Bottom", "Left-Center", "Center"));
         appender.addRow(new CheckBox("Show item quality") {
             {
                 a = Config.showquality;
@@ -4100,15 +4100,20 @@ public class OptWnd extends Window {
             }
         });
         appender.add(new IndirCheckBox("Sloth Debug", DefSettings.DEBUG));
-        appender.add(new Button(50, "Resource") {
+        appender.addRow(new Button(50, "Resource") {
             @Override
             public void click() {
                 if (ui.sess != null) {
                     ui.sess.allCache();
                 }
             }
-        });
-
+        },
+                new Button(50, "Clear Memory") {
+                    @Override
+                    public void click() {
+                        System.gc();
+                    }
+                });
         appender.add(new Label(""));
         TextEntry baseurl = new TextEntry(200, Config.resurl.toString()) {
             {
