@@ -1,3 +1,7 @@
+20201223
+Yulestar and charters fix.
+~
+
 20201220
 Fixes. Private message ignore option (Chat). More VMeter. Scripts fix. More Item info more layout.
 ~
