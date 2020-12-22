@@ -26,7 +26,6 @@
 
 package haven;
 
-import modification.configuration;
 import modification.dev;
 
 import java.awt.Font;
@@ -320,7 +319,20 @@ public class UI {
         if (cap.equals("Charter Stone") || cap.equals("Sublime Portico")) {
             // show secrets list only for already built chartes/porticos
             if (wdg.wsz.y >= 50) {
-                wdg.add(new CharterList(150, 20), new Coord(0, 50));
+                wdg.adda(new Button(50, "Load old") {
+                    public void click() {
+                        String[] charters = Utils.getprefsa("charters", new String[0]);
+                        for (String charter : charters) {
+                            wdg.uimsg("add", charter);
+                        }
+                        hide();
+                    }
+
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Please update your charters").tex();
+                    }
+                }, new Coord(wdg.asz.x, 0), 1, 0);
+                //wdg.add(new CharterList(150, 20), new Coord(0, 50));
                 wdg.presize();
             }
         } else if (gui != null && gui.livestockwnd != null && gui.livestockwnd.getAnimalPanel(cap) != null) {

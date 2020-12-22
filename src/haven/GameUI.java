@@ -2116,8 +2116,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private static final String charterMsg = "The name of this charterstone is \"";
 
     public void msg(String msg) {
-        if (msg.startsWith(charterMsg))
-            CharterList.addCharter(msg.substring(charterMsg.length(), msg.length() - 2));
+        /*if (msg.startsWith(charterMsg)) //TravelWnd
+            CharterList.addCharter(msg.substring(charterMsg.length(), msg.length() - 2));*/
 
         msg(msg, Color.WHITE, Color.WHITE);
     }
