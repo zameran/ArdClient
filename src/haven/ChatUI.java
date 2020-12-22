@@ -197,8 +197,10 @@ public class ChatUI extends Widget {
 
         public static class SimpleMessage extends Message {
             private final Text t;
+            public final String text;
 
             public SimpleMessage(String text, Color col, int w) {
+                this.text = text;
                 if (Config.chattimestamp)
                     text = timestamp(text);
                 if (col == null)
@@ -217,6 +219,11 @@ public class ChatUI extends Widget {
 
             public Coord sz() {
                 return (t.sz());
+            }
+
+            @Override
+            public String toString() {
+                return text;
             }
         }
 
