@@ -111,12 +111,24 @@ public class ResDrawable extends Drawable {
             spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), sdt);
             return;
         }
+        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce")) {
+            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);
+            return;
+        }
         spr = Sprite.create(gob, res, stdCopy);
     }
 
     public void setup(RenderList rl) {
         try {
             init();
+            String name = getres().name;
+            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce")) {
+                if (name.equals("gfx/terobjs/trees/yulestar-fir"))
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
+                else
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
+                rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
+            }
         } catch (Loading e) {
             return;
         }
