@@ -198,12 +198,15 @@ function fillSeedBarrel(sb) {
 	PBotUtils.PathfinderRightClick(ui, sb[0], 0);
 	PBotWindowAPI.waitForWindow(ui, "Barrel", 2000);
 	if (sip.size() > 0) {
-		sip.get(0).takeItem(5);
-	
-		while (PBotUtils.getItemAtHand(ui) != null && !shouldStop()) {
-			sb[0].itemClick(1);
-			PBotUtils.sleep(100);
-		}
+	    while (fseedinplayer().size() > 0 && !shouldStop()) {
+	    	fseedinplayer().get(0).takeItem(500);
+
+	    	while (PBotUtils.getItemAtHand(ui) != null && !shouldStop()) {
+	    		sb[0].itemClick(1);
+	    		PBotUtils.sleep(100);
+	    	}
+	    	PBotUtils.sleep(100);
+	    }
 	}
 }
 
