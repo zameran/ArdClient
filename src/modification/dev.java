@@ -70,7 +70,10 @@ public class dev {
     public static void resourceLog(Object... strings) {
         if (logging) {
             for (Object s : strings) {
-                System.out.print(s == null ? "null" : s.toString() + " ");
+                if (s instanceof Object[]) {
+                    argsMethod((Object[]) s);
+                } else
+                    System.out.print(s == null ? "null" : s.toString() + " ");
             }
             System.out.println();
         }
