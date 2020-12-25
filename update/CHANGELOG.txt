@@ -1,3 +1,7 @@
+20201226
+Yulestar fix. Shield checker (Combat). Sloth features. Map draw options (Modification - Map). Minimize btn fix.
+~
+
 20201223
 Yulestar and charters fix.
 ~
