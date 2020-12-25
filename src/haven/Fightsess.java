@@ -27,6 +27,7 @@
 package haven;
 
 
+import haven.purus.pbot.PBotUtils;
 import haven.res.gfx.fx.floatimg.DamageText;
 import haven.res.ui.tt.wpn.Armpen;
 import haven.sloth.gui.MovableWidget;
@@ -134,6 +135,19 @@ public class Fightsess extends Widget {
     public static class $_ implements Factory {
         public Widget create(UI ui, Object[] args) {
             int nact = (Integer) args[0];
+
+            if (configuration.shieldnotify) {
+                try {
+                    WItem righthand = ui.gui.getequipory().quickslots[7];
+                    WItem lefthand = ui.gui.getequipory().quickslots[6];
+
+                    if (!((righthand != null && righthand.name.get().contains("shield")) || (lefthand != null && lefthand.name.get().contains("shield")))) {
+                        PBotUtils.sysMsg(ui, "Shield not equipped!", Color.white);
+                    }
+                } catch (Exception e) {
+                }
+            }
+
             if (!Config.attackedsfx.equals("None"))
                 Audio.play(Resource.local().loadwait(Config.attackedsfx), Config.attackedvol);
             return (new Fightsess(nact));
@@ -340,50 +354,50 @@ public class Fightsess extends Widget {
 
                     if (fv.lsrel.size() > 1) {
                         fxon(fv.current.gobid, tgtfx);
-                        if (Config.showothercombatinfo) {
-                            for (int i = 0; i < fv.lsrel.size(); i++) {
-                                if (fv.current != fv.lsrel.get(i)) {
-                                    try {
-                                        Coord buffcoord = null;
-                                        for (Buff buff : fv.lsrel.get(i).buffs.children(Buff.class)) {
-                                            pcc2 = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
-                                            //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
-                                            Coord cc = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                            Coord finalcc = new Coord(cc.x, cc.y - 60);
-                                            if (buffcoord == null)
-                                                buffcoord = finalcc;
-                                            else
-                                                finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
-                                            drawOpeningofftarget(g, buff, finalcc, 24);
-                                        }
-                                        int itransfer = i;
-                                        Text.UText<?> oip2 = new Text.UText<Integer>(ipf2) {
-                                            public String text(Integer v) {
-                                                return ("IP: " + v);
-                                            }
-
-                                            public Integer value() {
-                                                return (fv.lsrel.get(itransfer).oip);
-                                            }
-                                        };
-                                        Text.UText<?> ip2 = new Text.UText<Integer>(ipf) {
-                                            public String text(Integer v) {
-                                                return ("IP: " + v);
-                                            }
-
-                                            public Integer value() {
-                                                return (fv.lsrel.get(itransfer).ip);
-                                            }
-                                        };
-                                        Coord cc = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
-                                        Coord finalcc = new Coord(cc.x, cc.y - 50);
-                                        g.aimage(ip2.get().tex(), finalcc.add(-5, 0), 1, .5);
-                                        g.aimage(oip2.get().tex(), finalcc.add(-5, 20), 1, .5);
-                                    } catch (Exception idk) {
-                                    }
-                                }
-                            }
-                        }
+//                        if (Config.showothercombatinfo) {
+//                            for (int i = 0; i < fv.lsrel.size(); i++) {
+//                                if (fv.current != fv.lsrel.get(i)) {
+//                                    try {
+//                                        Coord buffcoord = null;
+//                                        for (Buff buff : fv.lsrel.get(i).buffs.children(Buff.class)) {
+//                                            pcc2 = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc;
+//                                            //  Coord cc = pcc2.add(buff.c.x / 32 * 24, -100);
+//                                            Coord cc = ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
+//                                            Coord finalcc = new Coord(cc.x, cc.y - 60);
+//                                            if (buffcoord == null)
+//                                                buffcoord = finalcc;
+//                                            else
+//                                                finalcc = buffcoord.add(buff.c.x / 32 * 24, 0);
+//                                            drawOpeningofftarget(g, buff, finalcc, 24);
+//                                        }
+//                                        int itransfer = i;
+//                                        Text.UText<?> oip2 = new Text.UText<Integer>(ipf2) {
+//                                            public String text(Integer v) {
+//                                                return ("IP: " + v);
+//                                            }
+//
+//                                            public Integer value() {
+//                                                return (fv.lsrel.get(itransfer).oip);
+//                                            }
+//                                        };
+//                                        Text.UText<?> ip2 = new Text.UText<Integer>(ipf) {
+//                                            public String text(Integer v) {
+//                                                return ("IP: " + v);
+//                                            }
+//
+//                                            public Integer value() {
+//                                                return (fv.lsrel.get(itransfer).ip);
+//                                            }
+//                                        };
+//                                        Coord cc = this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sc.add(new Coord(this.ui.gui.map.glob.oc.getgob(fv.lsrel.get(i).gobid).sczu.mul(15)));
+//                                        Coord finalcc = new Coord(cc.x, cc.y - 50);
+//                                        g.aimage(ip2.get().tex(), finalcc.add(-5, 0), 1, .5);
+//                                        g.aimage(oip2.get().tex(), finalcc.add(-5, 20), 1, .5);
+//                                    } catch (Exception idk) {
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
                 }
 

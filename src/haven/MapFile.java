@@ -28,6 +28,7 @@ package haven;
 
 import haven.Defer.Future;
 import haven.resutil.Ridges;
+import modification.configuration;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -554,31 +555,35 @@ public class MapFile {
             {
                 BufferedImage[] texes = new BufferedImage[256];
                 boolean[] cached = new boolean[256];
-                for (c.y = 0; c.y < cmaps.y; c.y++) {
-                    for (c.x = 0; c.x < cmaps.x; c.x++) {
-                        int t = gettile(c);
-                        BufferedImage tex = tiletex(t, texes, cached);
-                        int rgb = 0;
-                        if (tex != null)
-                            rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()),
-                                    Utils.floormod(c.y + off.y, tex.getHeight()));
-                        buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
-                        buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
-                        buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
-                        buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+                if (configuration.allowtexturemap) {
+                    for (c.y = 0; c.y < cmaps.y; c.y++) {
+                        for (c.x = 0; c.x < cmaps.x; c.x++) {
+                            int t = gettile(c);
+                            BufferedImage tex = tiletex(t, texes, cached);
+                            int rgb = 0;
+                            if (tex != null)
+                                rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()),
+                                        Utils.floormod(c.y + off.y, tex.getHeight()));
+                            buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
+                            buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
+                            buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
+                            buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+                        }
                     }
                 }
-                for (c.y = 1; c.y < cmaps.y - 1; c.y++) {
-                    for (c.x = 1; c.x < cmaps.x - 1; c.x++) {
-                        int p = tilesets[gettile(c)].prio;
-                        if ((tilesets[gettile(c.add(-1, 0))].prio > p) ||
-                                (tilesets[gettile(c.add(1, 0))].prio > p) ||
-                                (tilesets[gettile(c.add(0, -1))].prio > p) ||
-                                (tilesets[gettile(c.add(0, 1))].prio > p)) {
-                            buf.setSample(c.x, c.y, 0, 0);
-                            buf.setSample(c.x, c.y, 1, 0);
-                            buf.setSample(c.x, c.y, 2, 0);
-                            buf.setSample(c.x, c.y, 3, 255);
+                if (configuration.allowoutlinemap) {
+                    for (c.y = 1; c.y < cmaps.y - 1; c.y++) {
+                        for (c.x = 1; c.x < cmaps.x - 1; c.x++) {
+                            int p = tilesets[gettile(c)].prio;
+                            if ((tilesets[gettile(c.add(-1, 0))].prio > p) ||
+                                    (tilesets[gettile(c.add(1, 0))].prio > p) ||
+                                    (tilesets[gettile(c.add(0, -1))].prio > p) ||
+                                    (tilesets[gettile(c.add(0, 1))].prio > p)) {
+                                buf.setSample(c.x, c.y, 0, 0);
+                                buf.setSample(c.x, c.y, 1, 0);
+                                buf.setSample(c.x, c.y, 2, 0);
+                                buf.setSample(c.x, c.y, 3, configuration.mapoutlinetransparency);
+                            }
                         }
                     }
                 }
@@ -587,19 +592,21 @@ public class MapFile {
             if (z[0] != NOZ) {
                 Tiler[] tilers = new Tiler[256];
                 boolean[] tlcached = new boolean[256];
-                for (c.y = 1; c.y < MCache.cmaps.y - 1; ++c.y) {
-                    for (c.x = 1; c.x < MCache.cmaps.x - 1; ++c.x) {
-                        final Tiler t = tiler(gettile(c), tilers, tlcached);
-                        if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
-                            for (int y = c.y - 1; y <= c.y + 1; ++y) {
-                                for (int x = c.x - 1; x <= c.x + 1; ++x) {
-                                    Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1),
-                                            buf.getSample(x, y, 2), buf.getSample(x, y, 3));
-                                    final Color blended = Utils.blendcol(cc, Color.BLACK, x == c.x && y == c.y ? 1.0 : 0.1);
-                                    buf.setSample(x, y, 0, blended.getRed());
-                                    buf.setSample(x, y, 1, blended.getGreen());
-                                    buf.setSample(x, y, 2, blended.getBlue());
-                                    buf.setSample(x, y, 3, blended.getAlpha());
+                if (configuration.allowridgesmap) {
+                    for (c.y = 1; c.y < MCache.cmaps.y - 1; ++c.y) {
+                        for (c.x = 1; c.x < MCache.cmaps.x - 1; ++c.x) {
+                            final Tiler t = tiler(gettile(c), tilers, tlcached);
+                            if (t instanceof Ridges.RidgeTile && brokenp(t, c, tilers, tlcached)) {
+                                for (int y = c.y - 1; y <= c.y + 1; ++y) {
+                                    for (int x = c.x - 1; x <= c.x + 1; ++x) {
+                                        Color cc = new Color(buf.getSample(x, y, 0), buf.getSample(x, y, 1),
+                                                buf.getSample(x, y, 2), buf.getSample(x, y, 3));
+                                        final Color blended = Utils.blendcol(cc, Color.BLACK, x == c.x && y == c.y ? 1.0 : configuration.allowoutlinemap ? 0.1 : 0);
+                                        buf.setSample(x, y, 0, blended.getRed());
+                                        buf.setSample(x, y, 1, blended.getGreen());
+                                        buf.setSample(x, y, 2, blended.getBlue());
+                                        buf.setSample(x, y, 3, blended.getAlpha());
+                                    }
                                 }
                             }
                         }

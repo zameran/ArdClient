@@ -190,6 +190,7 @@ public class DefSettings {
     public static final IndirSetting<Boolean> SHOWSKYBOX = new IndirSetting<>(global, "graphics.show-skybox");               //[Bool] Toggle skybox
     public static final IndirSetting<Integer> SKYBOXRANGE = new IndirSetting<>(global, "graphics.skybox-range");             //[Int ] Skybox range, default -> 1500?
     public static final IndirSetting<Boolean> KEEPGRIDS = new IndirSetting<>(global, "graphics.dont-delete-grids");          //[Bool] Don't delete map grids
+    public static final IndirSetting<Boolean> KEEPGOBS = new IndirSetting<>(global, "graphics.dont-delete-gobs");            //[Bool] Don't delete gobs
     public static final IndirSetting<Boolean> AUTOHEARTH = new IndirSetting<>(global, "gameplay.autohearth");                //[Bool] Toggle auto hearth on players
     public static final IndirSetting<Boolean> SMARTAIM = new IndirSetting<>(global, "gameplay.smartaim");                    //[Bool] Toggle smart aim for archery
     public static final IndirSetting<String> MENUTHEME = new IndirSetting<>(global, "theme.menu");                           //[String] Menu theme to use, default: default
@@ -247,6 +248,7 @@ public class DefSettings {
         SHOWSKYBOX.ensure(false);
         SKYBOXRANGE.ensure(15000);
         KEEPGRIDS.ensure(false);
+        KEEPGOBS.ensure(false);
         DRAWGRIDRADIUS.ensure(2);
         DARKMODE.ensure(false);
         //Gameplay

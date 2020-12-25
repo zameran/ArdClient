@@ -14,6 +14,7 @@ import haven.Scrollbar;
 import haven.Tex;
 import haven.UI;
 import haven.Widget;
+import haven.Window;
 import modification.dev;
 
 import java.util.ArrayList;
@@ -145,7 +146,8 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     }
 
     public void draw(GOut g) {
-        drawcols(g);
+        if (parent != null && parent instanceof Window && !(((Window) parent).minimized()))
+            drawcols(g);
         super.draw(g);
     }
 

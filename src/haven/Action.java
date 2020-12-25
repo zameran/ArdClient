@@ -66,7 +66,8 @@ public enum Action {
     ATTACK(GameUI::attack, "Attack Cursor"),
     CLOSEST_TARGET(GameUI::closestTarget, "Target Closest Target"),
     NEXT_SESS(GameUI::nextSess, "Goto Next Session"),
-    PREV_SESS(GameUI::prevSess, "Goto Previous Session");;
+    PREV_SESS(GameUI::prevSess, "Goto Previous Session"),
+    PAUSE_SESS(GameUI::pauseSess, "Pause Sess");
 
 
     public final String name;

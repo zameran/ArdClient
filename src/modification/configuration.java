@@ -127,7 +127,12 @@ public class configuration {
     public static boolean forcelivestockopen = Utils.getprefb("forcelivestockopen", false);
     public static boolean resizableworld = Utils.getprefb("resizableworld", false);
     public static double worldsize = Utils.getprefd("worldsize", 1f);
+    public static boolean rotateworld = Utils.getprefb("rotateworld", false);
+    public static double rotateworldvalx = Utils.getprefd("rotateworldvalx", 0);
+    public static double rotateworldvaly = Utils.getprefd("rotateworldvaly", 0);
+    public static double rotateworldvalz = Utils.getprefd("rotateworldvalz", 0);
     public static boolean transparencyworld = Utils.getprefb("transparencyworld", false);
+    public static boolean shieldnotify = Utils.getprefb("shieldnotify", false);
 
     public static boolean privatechatalerts = Utils.getprefb("privatechatalerts", true);
     public static boolean ignorepm = Utils.getprefb("ignorepm", false);
@@ -158,6 +163,10 @@ public class configuration {
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
     public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
+    public static boolean allowtexturemap = Utils.getprefb("allowtexturemap", true);
+    public static boolean allowoutlinemap = Utils.getprefb("allowoutlinemap", true);
+    public static boolean allowridgesmap = Utils.getprefb("allowridgesmap", true);
+    public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);

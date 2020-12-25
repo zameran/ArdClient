@@ -85,6 +85,8 @@ import static haven.DefSettings.GOBPATHCOL;
 import static haven.DefSettings.GUIDESCOLOR;
 import static haven.DefSettings.HIDDENCOLOR;
 import static haven.DefSettings.HUDTHEME;
+import static haven.DefSettings.KEEPGOBS;
+import static haven.DefSettings.KEEPGRIDS;
 import static haven.DefSettings.NVAMBIENTCOL;
 import static haven.DefSettings.NVDIFFUSECOL;
 import static haven.DefSettings.NVSPECCOC;
@@ -2033,6 +2035,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Notify in the absence of a shield") {
+            {
+                a = configuration.shieldnotify;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("shieldnotify", val);
+                configuration.shieldnotify = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("Auto Clear Damage") {
             {
                 a = configuration.autocleardamage;
@@ -3193,6 +3206,7 @@ public class OptWnd extends Window {
 
     private void initModification() {
         final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(modification, new Coord(620, 350)));
+        appender.setHorizontalMargin(5);
 
         appender.add(new Label("Strange or unreal modifications"));
 
@@ -3401,6 +3415,50 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("World size density: " + configuration.worldsize + "x").tex();
+            }
+        });
+        appender.addRow(new CheckBox("Rotate World") {
+            {
+                a = configuration.rotateworld;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("rotateworld", val);
+                configuration.rotateworld = val;
+                a = val;
+            }
+        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvalx * 100)) {
+            @Override
+            public void changed() {
+                configuration.rotateworldvalx = val / 100f;
+                Utils.setprefd("rotateworldvalx", configuration.rotateworldvalx);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Rotate angle x: " + configuration.rotateworldvalx + "%").tex();
+            }
+        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvaly * 100)) {
+            @Override
+            public void changed() {
+                configuration.rotateworldvaly = val / 100f;
+                Utils.setprefd("rotateworldvaly", configuration.rotateworldvaly);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Rotate angle y: " + configuration.rotateworldvaly + "%").tex();
+            }
+        }, new HSlider(100, 0, 36000, (int) (configuration.rotateworldvalz * 100)) {
+            @Override
+            public void changed() {
+                configuration.rotateworldvalz = val / 100f;
+                Utils.setprefd("rotateworldvalz", configuration.rotateworldvalz);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Rotate angle z: " + configuration.rotateworldvalz + "%").tex();
             }
         });
         appender.add(new CheckBox("Transparency World") {
@@ -3620,6 +3678,8 @@ public class OptWnd extends Window {
                         return Text.render("Blizzard density: " + configuration.blizzarddensity).tex();
                     }
                 });
+        appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
+        appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
         appender.add(new Label("Flowermenu"));
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
@@ -4046,6 +4106,66 @@ public class OptWnd extends Window {
             }
         });
 
+        appender.add(new CheckBox("Allow texture map") {
+            {
+                a = configuration.allowtexturemap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowtexturemap", val);
+                configuration.allowtexturemap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw textures on large map").tex();
+            }
+        });
+
+        appender.addRow(new CheckBox("Allow outline map") {
+            {
+                a = configuration.allowoutlinemap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowoutlinemap", val);
+                configuration.allowoutlinemap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw outline on large map").tex();
+            }
+        }, new HSlider(255, 0, 255, configuration.mapoutlinetransparency) {
+            public void changed() {
+                configuration.mapoutlinetransparency = val;
+                Utils.setprefi("mapoutlinetransparency", val);
+            }
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render(val + "").tex();
+            }
+        });
+
+        appender.add(new CheckBox("Allow ridges map") {
+            {
+                a = configuration.allowridgesmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("allowridgesmap", val);
+                configuration.allowridgesmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw ridges on large map").tex();
+            }
+        });
+
         mapPanel.add(new PButton(200, "Back", 27, modification), new Coord(210, 360));
         mapPanel.pack();
     }
@@ -4152,11 +4272,26 @@ public class OptWnd extends Window {
             }
 
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Enter resource name and get its hash (type Enter)").tex();
+                return Text.render("Enter resource name and get its hash (press ENTER)").tex();
             }
         };
         appender.addRow(new Label("Base URL: "), baseurl);
-        appender.addRow(new Label("res/"), textEntry, new Button(50, "Download") {
+        appender.addRow(new Label("res/"), textEntry,
+                new Button(30, "ENTER") {
+            public void click() {
+                String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + textEntry.text)); //-8944751680107289605
+                hashid.settext(hash);
+
+                PBotUtils.sysMsg(ui, hash);
+                System.out.println(hash);
+            }
+
+            private long namehash(long h, String name) {
+                for (int i = 0; i < name.length(); i++)
+                    h = (h * 31) + name.charAt(i);
+                return (h);
+            }
+        }, new Button(50, "Download") {
             public void click() {
                 try {
                     Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);

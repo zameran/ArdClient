@@ -635,9 +635,8 @@ public class Window extends MovableWidget implements DTarget {
     }
 
     public void draw(GOut g) {
-        if (!hidden) {
+        if (!hidden)
             drawframe(g);
-        }
         cdraw(g.reclip(atl, asz));
         super.draw(g);
     }

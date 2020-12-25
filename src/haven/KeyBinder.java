@@ -36,6 +36,7 @@ import static haven.Action.LOGOUT;
 import static haven.Action.LOGOUTSELECT;
 import static haven.Action.MARK_CURRENT;
 import static haven.Action.NEXT_SESS;
+import static haven.Action.PAUSE_SESS;
 import static haven.Action.PEACE_CURRENT;
 import static haven.Action.PREV_SESS;
 import static haven.Action.RUN_SPEED;
@@ -181,6 +182,7 @@ public class KeyBinder {
         add(KeyEvent.VK_TAB, CTRL, CLOSEST_TARGET);
         add(KeyEvent.VK_ADD, 0, NEXT_SESS);
         add(KeyEvent.VK_SUBTRACT, 0, PREV_SESS);
+        add(KeyEvent.VK_F12, CTRL, PAUSE_SESS);
     }
 
     private static synchronized void store() {

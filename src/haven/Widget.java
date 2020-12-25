@@ -783,6 +783,8 @@ public class Widget {
             next = wdg.next;
             if (!wdg.visible)
                 continue;
+            if (this instanceof Window && ((Window) this).minimized() && !(wdg instanceof IButton))
+                continue;
             Coord cc = xlate(wdg.c, true);
             GOut g2;
             if (strict)

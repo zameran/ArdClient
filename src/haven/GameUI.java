@@ -600,6 +600,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         sessmap = null;
     }
 
+    public void pauseSess() {
+        DefSettings.PAUSED.set(!DefSettings.PAUSED.get());
+    }
+
     public void toggleCharacter() {
         if ((chrwdg != null) && chrwdg.show(!chrwdg.visible)) {
             chrwdg.raise();

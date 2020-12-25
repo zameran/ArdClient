@@ -809,23 +809,25 @@ public class MCache {
     }
 
     public void trim(Coord ul, Coord lr) {
-        synchronized (grids) {
-            synchronized (req) {
-                for (Iterator<Map.Entry<Coord, Grid>> i = grids.entrySet().iterator(); i.hasNext(); ) {
-                    Map.Entry<Coord, Grid> e = i.next();
-                    Coord gc = e.getKey();
-                    Grid g = e.getValue();
-                    if ((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y)) {
-                        g.dispose();
-                        i.remove();
+        if(!DefSettings.KEEPGRIDS.get()) {
+            synchronized (grids) {
+                synchronized (req) {
+                    for (Iterator<Map.Entry<Coord, Grid>> i = grids.entrySet().iterator(); i.hasNext(); ) {
+                        Map.Entry<Coord, Grid> e = i.next();
+                        Coord gc = e.getKey();
+                        Grid g = e.getValue();
+                        if ((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y)) {
+                            g.dispose();
+                            i.remove();
+                        }
                     }
+                    for (Iterator<Coord> i = req.keySet().iterator(); i.hasNext(); ) {
+                        Coord gc = i.next();
+                        if ((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y))
+                            i.remove();
+                    }
+                    cached = null;
                 }
-                for (Iterator<Coord> i = req.keySet().iterator(); i.hasNext(); ) {
-                    Coord gc = i.next();
-                    if ((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y))
-                        i.remove();
-                }
-                cached = null;
             }
         }
     }

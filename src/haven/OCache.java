@@ -128,7 +128,7 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void remove(long id, int frame) {
-        if (objs.containsKey(id)) {
+        if (objs.containsKey(id) && !DefSettings.KEEPGOBS.get()) {
             if (!deleted.containsKey(id) || deleted.get(id) < frame) {
                 Gob old = objs.remove(id);
                 deleted.put(id, frame);
