@@ -40,7 +40,9 @@ function waitingMenu(menu) {
     		PBotUtils.sysMsg(ui, "Did't find " + menu);
     		return false;
     	} else {
-    		PBotUtils.waitForHourglass(ui);
+    	    if (menu != "Collect bones") {
+    		    PBotUtils.waitForHourglass(ui);
+    		}
     		PBotUtils.waitFlowermenuClose(ui);
     		PBotUtils.sysMsg(ui, menu);
     		return true;
@@ -84,11 +86,13 @@ const btnClick = () => {
 	
 	if (shouldStop()) return false;
 	
-	for(let gob of gobs) {
+	for (let gob of gobs) {
 		let ba = butchered_animals + 1;
 		infoLabel.setText(ba + " animal");
-		if(!gob.gob.isDead())
+		if(!gob.isKnocked()) {
+		    PBotUtils.sysMsg(ui, gob.toString());
 			continue; // Probably not a butcherable animal
+		}
 		
 		PBotUtils.dropItemFromHand(ui, 0);
 		
@@ -99,7 +103,15 @@ const btnClick = () => {
 			    continue;
 			}
 
-			if(waitingMenu("Skin") || waitingMenu("Scale")) {
+			if(waitingMenu("Skin")) {
+				if (shouldStop()) break;
+				infoLabel.setText("Skin " + ba + " animal");
+			}
+			if (!gob.pfClick(3, 0)) {
+			    PBotUtils.sysMsg(ui, "Didn't find path!");
+			    continue;
+			}
+			if(waitingMenu("Scale")) {
 				if (shouldStop()) break;
 				infoLabel.setText("Skin " + ba + " animal");
 			}
@@ -142,10 +154,10 @@ const btnClick = () => {
                 continue;
             }
 			
-			if(waitingMenu("Collect bones")) {
+			if (waitingMenu("Collect bones")) {
 				if (shouldStop()) break;
 				infoLabel.setText("Collect bones " + ba + " animal");
-				while(PBotGobAPI.findGobById(gob.getGobId()) != null) {
+				while (PBotGobAPI.findGobById(ui, gob.getGobId()) != null) {
 					PBotUtils.sleep(5);
 				}
 			}
