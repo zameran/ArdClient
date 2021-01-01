@@ -160,39 +160,41 @@ public class Pointer extends Widget {
             return;
         }
 
-        Gob questgob = this.gobid < 0L ? null : this.ui.sess.glob.oc.getgob(this.gobid);
-        final Coord3f gobsc;
-        final Coord2d gobrc;
-        if (questgob != null) {
-            try {
-                Coord3f cc = questgob.getc();
-                if (Config.disableelev)
-                    cc.z = 0;
-                gobsc = (getparent(GameUI.class)).map.screenxf(cc);
-                gobrc = questgob.rc;
-                if (Config.disableelev)
-                    gobsc.z = 0;
-            } catch (Loading localLoading) {
-                return;
-            }
-        } else {
-            gobsc = ui.gui.map.screenxf(this.tc);
-            gobrc = tc;
-        }
-
-        if (gobsc != null) {
-            final Double angle = ui.gui.map.screenangle(gobrc, true);
-            final Gob me = PBotUtils.player(ui);
-            if (me != null) {
-                final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
-                if (cdist != dist) {
-                    dist = cdist;
+        if (ui.gui != null && ui.gui.map != null) {
+            Gob questgob = this.gobid < 0L ? null : this.ui.sess.glob.oc.getgob(this.gobid);
+            final Coord3f gobsc;
+            final Coord2d gobrc;
+            if (questgob != null) {
+                try {
+                    Coord3f cc = questgob.getc();
+                    if (Config.disableelev)
+                        cc.z = 0;
+                    gobsc = (getparent(GameUI.class)).map.screenxf(cc);
+                    gobrc = questgob.rc;
+                    if (Config.disableelev)
+                        gobsc.z = 0;
+                } catch (Loading localLoading) {
+                    return;
                 }
-            }
-            if (!angle.equals(Double.NaN)) {
-                drawarrow(g, ui.gui.map.screenangle(gobrc, true));
             } else {
-                drawarrow(g, new Coord(gobsc));
+                gobsc = ui.gui.map.screenxf(this.tc);
+                gobrc = tc;
+            }
+
+            if (gobsc != null) {
+                final Double angle = ui.gui.map.screenangle(gobrc, true);
+                final Gob me = PBotUtils.player(ui);
+                if (me != null) {
+                    final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
+                    if (cdist != dist) {
+                        dist = cdist;
+                    }
+                }
+                if (!angle.equals(Double.NaN)) {
+                    drawarrow(g, ui.gui.map.screenangle(gobrc, true));
+                } else {
+                    drawarrow(g, new Coord(gobsc));
+                }
             }
         }
     }

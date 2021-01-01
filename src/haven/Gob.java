@@ -392,10 +392,24 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         //Don't try to discover anything until we know who the plgob is.
         final UI ui = glob.ui.get();
         if (ui != null && ui.gui != null && ui.gui.map != null && ui.gui.map.plgob != -1) {
+            if (type == Type.DUNGEONDOOR) {
+                Defer.later(() -> {
+                    if (getattr(GobIcon.class) == null) {
+                        try {
+                            resources.IndirResource res = resources.getCachedRes("gfx/icons/door");
+                            if (res.get() != null)
+                                setattr(new GobIcon(this, res));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return null;
+                });
+            }
             if (ui.gui.mapfile != null && resources.customMarkObj) {
-                for (Map.Entry<String, String> entry : resources.customMarkObjs.entrySet()) {
-                    if (name.equals(entry.getKey())) {
-                        ui.gui.mapfile.markobj(id, this, entry.getValue());
+                for (String item : resources.customMarkObjs) {
+                    if (name.equals(item)) {
+                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(item));
                     }
                 }
             }
@@ -682,7 +696,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (comp.oldposes != null) {
                 for (ResData res : comp.oldposes) {
                     final String nm = rnm(res.res).toLowerCase();
-                    if (nm.endsWith("knock") || nm.endsWith("dead")) {
+                    final String last = nm.contains("/") ? nm.substring(nm.lastIndexOf("/")) : "";
+                    if (nm.endsWith("knock") || nm.endsWith("dead") || last.contains("knock")) {
                         return true;
                     }
                 }

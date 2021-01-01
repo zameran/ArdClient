@@ -4072,6 +4072,23 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
+        appender.add(new CheckBox("Simple Large Map") {
+            {
+                a = configuration.simplelmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("simplelmap", val);
+                configuration.simplelmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+            }
+        });
+
         appender.add(new CheckBox("Additional marks on the map") {
             {
                 a = resources.customMarkObj;
@@ -4163,6 +4180,23 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw ridges on large map").tex();
+            }
+        });
+
+        appender.add(new CheckBox("Draw cave tiles on map") {
+            {
+                a = configuration.cavetileonmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("cavetileonmap", val);
+                configuration.cavetileonmap = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw cave tiles on large map").tex();
             }
         });
 

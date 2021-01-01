@@ -7,7 +7,10 @@ import haven.Text;
 import haven.Utils;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class resources {
@@ -28,14 +31,16 @@ public class resources {
     public static Tex invsq = Resource.loadtex("gfx/hud/invsq");
 
     public static boolean customMarkObj = Utils.getprefb("customMarkObj", false);
-    public static Map<String, String> customMarkObjs = new HashMap<String, String>() {{
-        put("gfx/tiles/ridges/cavein", getDefaultTextName("gfx/tiles/ridges/cavein"));
-        put("gfx/tiles/ridges/caveout", getDefaultTextName("gfx/tiles/ridges/caveout"));
-        put("gfx/terobjs/beaverdamdoor", getDefaultTextName("gfx/terobjs/beaverdamdoor"));
-        put("gfx/terobjs/dng/batcave", getDefaultTextName("gfx/terobjs/dng/batcave"));
-        put("gfx/terobjs/dng/antdungeon", getDefaultTextName("gfx/terobjs/dng/antdungeon"));
-        put("gfx/terobjs/wonders/tarpit", getDefaultTextName("gfx/terobjs/wonders/tarpit"));
-    }};
+    public static List<String> customMarkObjs = new ArrayList<>(Arrays.asList(
+                    "gfx/tiles/ridges/cavein",
+                    "gfx/tiles/ridges/caveout",
+                    "gfx/terobjs/beaverdamdoor",
+                    "gfx/terobjs/dng/batcave",
+                    "gfx/terobjs/dng/antdungeon",
+                    "gfx/terobjs/wonders/tarpit",
+                    "gfx/terobjs/dng/antdoor",
+                    "gfx/terobjs/beaverdoor"
+    ));
 
     public static String getDefaultTextName(String gobname) {
         if (gobname.contains("/")) {

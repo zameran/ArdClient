@@ -469,6 +469,22 @@ public class MapFile {
             return (tiles[c.x + (c.y * cmaps.x)] & 0xff);
         }
 
+        public int gettile(String name) {
+            for (int i = 0; i < tilesets.length; i++) {
+                if (tilesets[i].res.name().equalsIgnoreCase(name))
+                    return i;
+            }
+            return 0;
+        }
+
+        public boolean isContains(int t, String type) {
+            return tilesets[t].res.name().contains(type);
+        }
+
+        public String tileName(int t) {
+            return tilesets[t].res.name;
+        }
+
         public int getz(Coord c) {
             return (z[c.x + (c.y * cmaps.x)]);
         }
@@ -484,6 +500,29 @@ public class MapFile {
                     throw (l);
                 } catch (Exception e) {
                     Debug.log.printf("mapfile warning: could not load tileset resource %s(v%d): %s\n", tilesets[t].res.name, tilesets[t].res.ver, e);
+                }
+                if (r != null) {
+                    Resource.Image ir = r.layer(Resource.imgc);
+                    if (ir != null) {
+                        texes[t] = ir.img;
+                    }
+                }
+                cached[t] = true;
+                return texes[t];
+            }
+        }
+
+        private BufferedImage tiletex(int t, BufferedImage[] texes, boolean[] cached, String res) {
+            if (cached[t])
+                return texes[t];
+            else {
+                Resource r = null;
+                try {
+                    r = Resource.remote().loadwait(res);
+                } catch (Loading l) {
+                    throw (l);
+                } catch (Exception e) {
+                    Debug.log.printf("mapfile warning: could not load tileset resource %s(v%d): %s\n", r.name, r.ver, e);
                 }
                 if (r != null) {
                     Resource.Image ir = r.layer(Resource.imgc);
@@ -559,15 +598,40 @@ public class MapFile {
                     for (c.y = 0; c.y < cmaps.y; c.y++) {
                         for (c.x = 0; c.x < cmaps.x; c.x++) {
                             int t = gettile(c);
-                            BufferedImage tex = tiletex(t, texes, cached);
+                            BufferedImage tex;
+                            if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
+                                final String tname = tileName(t);
+                                final String newtype = "gfx/tiles/paving/" + tname.substring(tname.lastIndexOf("/") + 1);
+                                tex = tiletex(t, texes, cached, newtype);
+                            } else tex = tiletex(t, texes, cached);
                             int rgb = 0;
-                            if (tex != null)
+                            if (tex != null) {
                                 rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()),
                                         Utils.floormod(c.y + off.y, tex.getHeight()));
-                            buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
-                            buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
-                            buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
-                            buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+
+                                if (configuration.simplelmap) {
+                                    int mixrgb = tex.getRGB(20, 45);
+
+                                    //color post-processing
+                                    Color mixtempColor = new Color(mixrgb, true);
+                                    Color tempColor = new Color(rgb, true);
+
+                                    tempColor = Utils.blendcol(tempColor, mixtempColor, 0.75f);
+                                    rgb = tempColor.getRGB();
+                                }
+                            }
+
+                            if (configuration.simplelmap) {
+                                buf.setSample(c.x, c.y, 0, new Color(rgb, true).getRed());
+                                buf.setSample(c.x, c.y, 1, new Color(rgb, true).getGreen());
+                                buf.setSample(c.x, c.y, 2, new Color(rgb, true).getBlue());
+                                buf.setSample(c.x, c.y, 3, new Color(rgb, true).getAlpha());
+                            } else {
+                                buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
+                                buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
+                                buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
+                                buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
+                            }
                         }
                     }
                 }

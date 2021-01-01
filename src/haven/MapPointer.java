@@ -110,21 +110,23 @@ public class MapPointer extends Widget {
             return;
         }
 
-        final Coord3f sc = ui.gui.map.screenxf(this.tc);
+        if (ui.gui != null && ui.gui.map != null) {
+            final Coord3f sc = ui.gui.map.screenxf(this.tc);
 
-        if (tc != null) {
-            final Double angle = ui.gui.map.screenangle(tc, true);
-            final Gob me = PBotUtils.player(ui);
-            if (me != null) {
-                final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
-                if (cdist != dist) {
-                    dist = cdist;
+            if (tc != null) {
+                final Double angle = ui.gui.map.screenangle(tc, true);
+                final Gob me = PBotUtils.player(ui);
+                if (me != null) {
+                    final int cdist = (int) (Math.ceil(me.rc.dist(tc) / 11.0));
+                    if (cdist != dist) {
+                        dist = cdist;
+                    }
                 }
-            }
-            if (!angle.equals(Double.NaN)) {
-                drawarrow(g, ui.gui.map.screenangle(tc, true));
-            } else {
-                drawarrow(g, new Coord(sc));
+                if (!angle.equals(Double.NaN)) {
+                    drawarrow(g, ui.gui.map.screenangle(tc, true));
+                } else {
+                    drawarrow(g, new Coord(sc));
+                }
             }
         }
     }

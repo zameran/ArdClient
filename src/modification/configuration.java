@@ -167,6 +167,8 @@ public class configuration {
     public static boolean allowoutlinemap = Utils.getprefb("allowoutlinemap", true);
     public static boolean allowridgesmap = Utils.getprefb("allowridgesmap", true);
     public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
+    public static boolean simplelmap = Utils.getprefb("simplelmap", false);
+    public static boolean cavetileonmap = Utils.getprefb("cavetileonmap", false);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);

@@ -1,5 +1,8 @@
 package haven.res.gfx.fx.floatimg;
 
+import haven.Coord;
+import haven.GOut;
+import haven.Gob;
 import haven.Resource;
 import haven.TexI;
 import haven.Text;
@@ -50,5 +53,20 @@ public class DamageText extends FloatSprite {
     public boolean tick(int dt) {
         //Never delete us
         return false;
+    }
+
+    public void draw2d(GOut g) {
+        if (tex != null) {
+            final Gob gob = (Gob) owner;
+            if (gob.sc == null) {
+                return;
+            }
+            Coord sc = gob.sc.add(new Coord(gob.sczu.mul(15))).sub(0, offset);
+
+            g.chcolor(35, 35, 35, 192);
+            g.frect(sc.sub(tex.sz().x / 2, 0), tex.sz());
+            g.chcolor();
+        }
+        super.draw2d(g);
     }
 }
