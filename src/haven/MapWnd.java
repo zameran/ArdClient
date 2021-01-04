@@ -153,6 +153,7 @@ public class MapWnd extends Window {
                         zoomtex = null;
                         Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
                         MapFileWidget.zoom++;
+                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                         tc = tc.div(MapFileWidget.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
@@ -166,6 +167,7 @@ public class MapWnd extends Window {
                         zoomtex = null;
                         Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
                         MapFileWidget.zoom--;
+                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                         tc = tc.div(MapFileWidget.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
