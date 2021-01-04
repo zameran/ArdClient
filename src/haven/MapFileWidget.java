@@ -78,7 +78,7 @@ public class MapFileWidget extends Widget {
     private boolean dragging;
     private Coord dsc, dmc;
     private String biome;
-    public static int zoom = 0;
+    public static int zoom = Utils.getprefi("zoomlmap", 0);
     public static int zoomlvls = 7;
     private static final double[] scaleFactors = new double[]{1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
@@ -556,6 +556,7 @@ public class MapFileWidget extends Widget {
                 ui.gui.mapfile.zoomtex = null;
                 Coord tc = curloc.tc.mul(MapFileWidget.scalef());
                 MapFileWidget.zoom++;
+                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                 tc = tc.div(MapFileWidget.scalef());
                 curloc.tc.x = tc.x;
                 curloc.tc.y = tc.y;
@@ -565,6 +566,7 @@ public class MapFileWidget extends Widget {
                 ui.gui.mapfile.zoomtex = null;
                 Coord tc = curloc.tc.mul(MapFileWidget.scalef());
                 MapFileWidget.zoom--;
+                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                 tc = tc.div(MapFileWidget.scalef());
                 curloc.tc.x = tc.x;
                 curloc.tc.y = tc.y;
