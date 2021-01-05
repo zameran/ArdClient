@@ -1112,7 +1112,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                if (stage == 32) {
+                if (stage == 32 || stage == 48) {
                     rl.prepc(Rendered.eyesort);
 //                    rl.prepc(Rendered.deflt);
 //                    rl.prepc(Rendered.first);
