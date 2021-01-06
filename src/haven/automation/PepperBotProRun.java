@@ -363,7 +363,6 @@ public class PepperBotProRun extends Window implements Runnable {
                             }
 
                             //gui = this.parent.findchild(GameUI.class);
-                            ui.gui = ui.gui;
                             stam = ui.gui.getmeter("stam", 0);
                             if (stam.a <= 60) {
                                 if (stopThread)
@@ -380,7 +379,6 @@ public class PepperBotProRun extends Window implements Runnable {
                             //gui.map.wdgmsg("click", cauldron.sc, cauldron.rc.floor(posres), 3, 0, 0, (int) cauldron.id, cauldron.rc.floor(posres), 0, -1);
                             FlowerMenu.setNextSelection("Open");
                             int tryagaintimer = 0;
-                            ui.gui = ui.gui;
                             while (ui.gui.getwnd("Cauldron") == null) {
                                 if (stopThread) // Checks if aborted
                                     break;

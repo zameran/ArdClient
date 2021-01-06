@@ -209,6 +209,7 @@ public class Config {
     public static boolean showanimalrad = Utils.getprefb("showanimalrad", true);
     public static boolean hwcursor = Utils.getprefb("hwcursor", false);
     public static boolean showboundingboxes = Utils.getprefb("showboundingboxes", false);
+    public static boolean showgridlines = Utils.getprefb("showgridlines", false);
     public static boolean showcooldown = Utils.getprefb("showcooldown", false);
     public static boolean nodropping = Utils.getprefb("nodropping", false);
     public static boolean nodropping_all = Utils.getprefb("nodropping_all", false);

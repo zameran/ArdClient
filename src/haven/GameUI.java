@@ -483,6 +483,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleGridLines() {
+        Config.showgridlines = !Config.showgridlines;
+        Utils.setprefb("showgridlines", Config.showgridlines);
         if (map != null)
             map.togglegrid();
     }

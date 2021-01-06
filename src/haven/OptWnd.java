@@ -4926,7 +4926,7 @@ public class OptWnd extends Window {
                     val.getRed(),
                     val.getGreen(),
                     val.getBlue(),
-                    (int) (val.getAlpha() * 0.5)
+                    val.getAlpha()
             );
             if (ui.sess != null) {
                 ui.sess.glob.oc.changeAllGobs();

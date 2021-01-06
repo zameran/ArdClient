@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GobHitbox extends Sprite {
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
-    public static States.ColState bbclrstate = new States.ColState(new Color(255, 255, 255, 255));
+    public static States.ColState bbclrstate = new States.ColState(DefSettings.GUIDESCOLOR.get());
     private BBox[] b;
     private int mode;
     private States.ColState clrstate;

@@ -15,7 +15,7 @@ public class TileOutline implements Rendered {
             DefSettings.GUIDESCOLOR.get().getRed(),
             DefSettings.GUIDESCOLOR.get().getGreen(),
             DefSettings.GUIDESCOLOR.get().getBlue(),
-            (int) (DefSettings.GUIDESCOLOR.get().getAlpha() * 0.7)
+            DefSettings.GUIDESCOLOR.get().getAlpha()
     );
     private Location location;
     private Coord ul;
@@ -26,7 +26,7 @@ public class TileOutline implements Rendered {
         this.mapView = mapView;
         this.map = mapView.glob.map;
         this.area = (MCache.cutsz.x * 5) * (MCache.cutsz.y * 5) * (2 * mapView.view);
-        this.color = new States.ColState(255, 255, 255, 64);
+        //this.color = new States.ColState(255, 255, 255, 64);
         // double-buffer to prevent flickering
         vertexBuffers = new FloatBuffer[2];
         vertexBuffers[0] = Utils.mkfbuf(this.area * 3 * 4);

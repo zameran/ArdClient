@@ -116,7 +116,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public static int plobgran = Utils.getprefi("placegridval", 8);
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
     public String tooltip;
-    private boolean showgrid;
+    private boolean showgrid = Config.showgridlines;
     private TileOutline gridol;
     private Coord lasttc = Coord.z;
     //    public static Gob.Overlay rovlsupport = new Gob.Overlay(new BPRadSprite(100.0F, 0, BPRadSprite.smatSupports));
@@ -1889,7 +1889,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public boolean isclearmovequeue() {
-        return pathfindGob == null && pathfindGobMod == 0 && pathfindGobMouse == 0 && movequeue.size() == 0 && movingto == null && ui.gui.pointer.tc == null;
+        return pathfindGob == null && pathfindGobMod == 0 && pathfindGobMouse == 0 && movequeue.size() == 0 && movingto == null && (ui.gui == null || (ui.gui.pointer == null || ui.gui.pointer.tc == null));
     }
 
     public void clearmovequeue() {
@@ -3160,7 +3160,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void togglegrid() {
-        showgrid = !showgrid;
+        showgrid = Config.showgridlines;
         if (showgrid) {
             Coord tc = new Coord((int) (cc.x / tilesz.x / MCache.cutsz.x - view - 1) * MCache.cutsz.x,
                     (int) (cc.y / tilesz.y / MCache.cutsz.y - view - 1) * MCache.cutsz.y);
