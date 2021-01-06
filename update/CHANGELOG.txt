@@ -1,4 +1,8 @@
 20210105
+Save grid state. Fix color. Fix pointer null.
+~
+
+20210105
 Zoom of map now saving. Fixed alt ping for rus. Tree stage color autumn fix.
 ~
 
