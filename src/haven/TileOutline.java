@@ -15,7 +15,7 @@ public class TileOutline implements Rendered {
             DefSettings.GUIDESCOLOR.get().getRed(),
             DefSettings.GUIDESCOLOR.get().getGreen(),
             DefSettings.GUIDESCOLOR.get().getBlue(),
-            DefSettings.GUIDESCOLOR.get().getAlpha()
+            (int) (DefSettings.GUIDESCOLOR.get().getAlpha() * 0.5)
     );
     private Location location;
     private Coord ul;
