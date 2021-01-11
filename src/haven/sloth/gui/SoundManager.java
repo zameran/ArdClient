@@ -10,14 +10,17 @@ import haven.HSlider;
 import haven.Label;
 import haven.Listbox;
 import haven.Resource;
+import haven.TextEntry;
 import haven.Utils;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.Alerted;
+import haven.sloth.io.HighlightData;
 import haven.sloth.util.ObservableListener;
 import modification.configuration;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
     private List<String> keys = new ArrayList<>();
     private final Listbox<String> sounds;
     private final Listbox<String> objs;
+    private final TextEntry manualin;
     private HSlider volslider;
     private Label vollabel;
     private final Listbox<String> defaults;
@@ -121,14 +125,42 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
         {
             Coord bc = c.copy();
             bc.y += add(new Button(200, "Load Defaults", this::loadDefaults), bc.copy()).sz.y + 5;
-            add(new Button(200, "Preview", this::preview), bc.copy());
         }
         {
             c.x = 0;
-            add(new Button(200, "Remove Sound Alert", this::removeAlert), c.copy());
-            select = add(new Button(200, "Select", this::select), new Coord(c.copy().x + 205, c.copy().y));
+            manualin = add(new TextEntry(200, "") {
+                @Override
+                public boolean type(char c, KeyEvent ev) {
+                    if (c == '\n') {
+                        if (sounds.sel != null) {
+                            Alerted.add(text, sounds.sel, volslider.val / 1000.0);
+                            settext("");
+                        } else {
+                            PBotUtils.sysMsg(ui, "Choose a sound");
+                        }
+                    } else {
+                        return buf.key(ev);
+                    }
+                    return false;
+                }
+            }, c.copy());
+            Button addg = add(new Button(50, "Add", () -> {
+                if (!manualin.text.equals("")) {
+                    if (sounds.sel != null) {
+                        Alerted.add(manualin.text, sounds.sel, volslider.val / 1000.0);
+                        manualin.settext("");
+                    } else {
+                        PBotUtils.sysMsg(ui, "Choose a sound");
+                    }
+                }
+            }), c.copy().add(0, manualin.sz.y + 5));
+            add(new Button(50, "Remove Sound Alert", this::removeAlert), c.copy().add(addg.sz.x + 5, manualin.sz.y + 5));
+            select = add(new Button(200, "Select", this::select), c.copy().add(205, 0));
+            add(new Button(200, "Preview", this::preview), c.copy().add(205, select.sz.y + 5));
         }
         {
+            c.x = 0;
+            c.y += manualin.sz.y + 5;
             vollabel = add(new Label("Selected Alert Volume"), new Coord(c.copy().x + 40, c.copy().y + 20));
             volslider = add(new HSlider(200, 0, 1000, 0) {
                 protected void added() {
