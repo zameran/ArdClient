@@ -77,10 +77,10 @@ public class MapFileWidget extends Widget {
     private UI.Grab drag;
     private boolean dragging;
     private Coord dsc, dmc;
-    private String biome;
+    private String biome, seginfo;
     public static int zoom = Utils.getprefi("zoomlmap", 0);
-    public static int zoomlvls = 7;
-    private static final double[] scaleFactors = new double[]{1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    public static int zoomlvls = 8;
+    private static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public static Map<String, Tex> cachedTextTex = new HashMap<>();
@@ -483,9 +483,6 @@ public class MapFileWidget extends Widget {
         if (curloc != null)
             tc = c.sub(sz.div(2)).add(curloc.tc);
         if (tc != null) {
-            DisplayMarker mark = markerat(tc);
-            if ((mark != null) && clickmarker(mark, button))
-                return (true);
             if (clickloc(new Location(curloc.seg, tc.mul(scalef())), button))
                 return (true);
             if (button == 1 && (ui.modctrl || ui.modmeta || ui.modshift)) {
@@ -543,10 +540,22 @@ public class MapFileWidget extends Widget {
     }
 
     public boolean mouseup(Coord c, int button) {
-        if ((drag != null) && (button == 1)) {
-            drag.remove();
-            drag = null;
+        if (button == 1) {
+            if (drag != null) {
+                drag.remove();
+                drag = null;
+            } else {
+                Coord tc = null;
+                if (curloc != null)
+                    tc = c.sub(sz.div(2)).add(curloc.tc);
+                if (tc != null) {
+                    DisplayMarker mark = markerat(tc);
+                    if ((mark != null) && clickmarker(mark, button))
+                        return (true);
+                }
+            }
         }
+
         return (super.mouseup(c, button));
     }
 
@@ -584,6 +593,8 @@ public class MapFileWidget extends Widget {
             if (mark != null) {
                 return (mark.tip);
             } else {
+                if (ui.modshift)
+                    return (segmentinfo(c));
                 return (biomeat(c));
             }
         }
@@ -609,6 +620,22 @@ public class MapFileWidget extends Widget {
             return Text.render(newbiome);
         }
         return Text.render(biome);
+    }
+
+    private Object segmentinfo(Coord c) {
+        final Coord tc = c.sub(sz.div(2)).mul(scalef()).add(curloc.tc.mul(scalef()));
+        final Coord gc = tc.div(cmaps);
+        String newsegment;
+        try {
+            newsegment = curloc.seg.gridid(gc) + "";
+        } catch (Exception e) {
+            newsegment = "null";
+        }
+        if (!newsegment.equals(seginfo)) {
+            seginfo = newsegment;
+            return Text.render(newsegment);
+        }
+        return Text.render(seginfo);
     }
 
     private static String prettybiome(String biome) {
