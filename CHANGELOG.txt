@@ -1,4 +1,8 @@
-20210105
+20210111
+Sound manager - text input. Map 8x zoom.
+~
+
+20210106
 Save grid state. Fix color. Fix pointer null.
 ~
 
