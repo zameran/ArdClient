@@ -144,7 +144,9 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
                     return false;
                 }
             }, c.copy());
-            Button addg = add(new Button(50, "Add", () -> {
+            Button removebtn = add(new Button(50, "Remove Sound Alert", this::removeAlert));
+            removebtn.move(c.copy().add(200, manualin.sz.y + 5), 1, 0);
+            add(new Button(200 - removebtn.sz.x - 5, "Add", () -> {
                 if (!manualin.text.equals("")) {
                     if (sounds.sel != null) {
                         Alerted.add(manualin.text, sounds.sel, volslider.val / 1000.0);
@@ -154,7 +156,6 @@ public class SoundManager extends Window implements ObservableListener<Alerted.C
                     }
                 }
             }), c.copy().add(0, manualin.sz.y + 5));
-            add(new Button(50, "Remove Sound Alert", this::removeAlert), c.copy().add(addg.sz.x + 5, manualin.sz.y + 5));
             select = add(new Button(200, "Select", this::select), c.copy().add(205, 0));
             add(new Button(200, "Preview", this::preview), c.copy().add(205, select.sz.y + 5));
         }
