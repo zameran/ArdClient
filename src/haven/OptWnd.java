@@ -3700,7 +3700,7 @@ public class OptWnd extends Window {
                 }
         );
         appender.addRow(new Label("Place Grid: "),
-                new HSlider(200, 0, 100, Utils.getprefi("placegridval", 8)) {
+                new HSlider(200, 0, 255, Utils.getprefi("placegridval", 8)) {
                     @Override
                     public void changed() {
                         try {
