@@ -1,3 +1,7 @@
+20210115
+Instant Flowermenu option (Modification).
+~
+
 20210111
 Sound manager - text input. Map 8x zoom.
 ~

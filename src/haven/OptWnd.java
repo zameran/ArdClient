@@ -2861,6 +2861,7 @@ public class OptWnd extends Window {
                 Utils.setprefi("qualitybgtransparency", val);
                 Config.qualitybgtransparency = val;
             }
+
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render(val + "").tex();
@@ -3681,6 +3682,38 @@ public class OptWnd extends Window {
         appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
         appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
         appender.add(new Label("Flowermenu"));
+        appender.addRow(new Label("Instant Flowermenu: "),
+                new CheckBox("Opening") {
+                    {
+                        a = configuration.instflmopening;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmopening", val);
+                        configuration.instflmopening = val;
+                        a = val;
+                    }
+                }, new CheckBox("Chosen") {
+                    {
+                        a = configuration.instflmchosen;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmchosen", val);
+                        configuration.instflmchosen = val;
+                        a = val;
+                    }
+                }, new CheckBox("Cancel") {
+                    {
+                        a = configuration.instflmcancel;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("instflmcancel", val);
+                        configuration.instflmcancel = val;
+                        a = val;
+                    }
+                });
         appender.add(new IndirCheckBox("Don't close flowermenu on clicks", BUGGEDMENU));
         appender.add(new IndirCheckBox("Close button to each flowermenu", CLOSEFORMENU));
 
@@ -4160,6 +4193,7 @@ public class OptWnd extends Window {
                 configuration.mapoutlinetransparency = val;
                 Utils.setprefi("mapoutlinetransparency", val);
             }
+
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render(val + "").tex();
@@ -4255,13 +4289,13 @@ public class OptWnd extends Window {
         });
         appender.add(new IndirCheckBox("Sloth Debug", DefSettings.DEBUG));
         appender.addRow(new Button(50, "Resource") {
-            @Override
-            public void click() {
-                if (ui.sess != null) {
-                    ui.sess.allCache();
-                }
-            }
-        },
+                            @Override
+                            public void click() {
+                                if (ui.sess != null) {
+                                    ui.sess.allCache();
+                                }
+                            }
+                        },
                 new Button(50, "Clear Memory") {
                     @Override
                     public void click() {
@@ -4312,29 +4346,29 @@ public class OptWnd extends Window {
         appender.addRow(new Label("Base URL: "), baseurl);
         appender.addRow(new Label("res/"), textEntry,
                 new Button(30, "ENTER") {
-            public void click() {
-                String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + textEntry.text)); //-8944751680107289605
-                hashid.settext(hash);
+                    public void click() {
+                        String hash = String.format("%016x.0", namehash(namehash(0, baseurl.text), "res/" + textEntry.text)); //-8944751680107289605
+                        hashid.settext(hash);
 
-                PBotUtils.sysMsg(ui, hash);
-                System.out.println(hash);
-            }
+                        PBotUtils.sysMsg(ui, hash);
+                        System.out.println(hash);
+                    }
 
-            private long namehash(long h, String name) {
-                for (int i = 0; i < name.length(); i++)
-                    h = (h * 31) + name.charAt(i);
-                return (h);
-            }
-        }, new Button(50, "Download") {
-            public void click() {
-                try {
-                    Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);
-                    dev.resourceLog("Resource", "DOWNLOAD", res);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+                    private long namehash(long h, String name) {
+                        for (int i = 0; i < name.length(); i++)
+                            h = (h * 31) + name.charAt(i);
+                        return (h);
+                    }
+                }, new Button(50, "Download") {
+                    public void click() {
+                        try {
+                            Resource res = Resource.remote(baseurl.text).loadwait(textEntry.text);
+                            dev.resourceLog("Resource", "DOWNLOAD", res);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
         appender.addRow(new Label("%appdata%/Haven and Hearth/"), hashid, new Button(50, "Remove") {
             public void click() {
                 if (hashid.text != null && !hashid.text.equals("")) {
@@ -4420,6 +4454,7 @@ public class OptWnd extends Window {
                 super.itemclick(itm, button);
                 Utils.setprefchklst("flowersel", Config.flowermenus);
             }
+
             protected void drawitemname(GOut g, CheckListboxItem itm) {
                 Text t = Text.render(Resource.getLocString(Resource.BUNDLE_FLOWER, itm.name));
                 Tex T = t.tex();
@@ -4457,6 +4492,7 @@ public class OptWnd extends Window {
                 }
                 Config.flowerlist.items.sort(Comparator.comparing(o -> Resource.getLocString(Resource.BUNDLE_FLOWER, o.name)));
             }
+
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Right Click to clear entry").tex();
             }
@@ -4473,6 +4509,7 @@ public class OptWnd extends Window {
                 }
                 return (true);
             }
+
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Clear all list if something went wrong (CTRL + LMB). Don't click!").tex();
             }

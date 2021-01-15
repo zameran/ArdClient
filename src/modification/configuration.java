@@ -77,6 +77,10 @@ public class configuration {
     public static boolean scaletree = Utils.getprefb("scaletree", false);
     public static int scaletreeint = Utils.getprefi("scaletreeint", 25);
 
+    public static boolean instflmopening = Utils.getprefb("instflmopening", true);
+    public static boolean instflmchosen = Utils.getprefb("instflmchosen", false);
+    public static boolean instflmcancel = Utils.getprefb("instflmcancel", true);
+
     public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static String qualitypos = Utils.getpref("qualitypos", "Left-Bottom");
