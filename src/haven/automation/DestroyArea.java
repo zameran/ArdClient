@@ -51,7 +51,7 @@ public class DestroyArea extends Window implements GobSelectCallback {
         add(lblc3, new Coord(0, ycoord += 15));
 
 
-        runbtn = new haven.Button(100, "Run") {
+        runbtn = new Button(100, "Run") {
             @Override
             public void click() {
                 if (list.size() == 0) {
@@ -65,11 +65,11 @@ public class DestroyArea extends Window implements GobSelectCallback {
             }
         };
         add(runbtn, new Coord(0, ycoord += 35));
-        stopbtn = new haven.Button(100, "Stop") {
+        stopbtn = new Button(100, "Stop") {
             @Override
             public void click() {
                 PBotUtils.sysMsg(ui, "Stopping", Color.white);
-                this.hide();
+                hide();
                 runner.interrupt();
                 runbtn.show();
                 cbtn.show();
@@ -80,6 +80,10 @@ public class DestroyArea extends Window implements GobSelectCallback {
         selectareabtn = new Button(100, "Select") {
             @Override
             public void click() {
+                if (gobselected == null) {
+                    PBotUtils.sysMsg(ui, "Please choose a gob (Alt+Click)", Color.white);
+                    return;
+                }
                 selectingarea = new Thread(new DestroyArea.selectingarea(), "Destroy Gobs in Area");
                 selectingarea.start();
             }
@@ -93,10 +97,11 @@ public class DestroyArea extends Window implements GobSelectCallback {
             try {
                 int remaining = list.size();
                 for (Gob i : list) {
+                    if (terminate) break;
                     boolean destroyed = false;
                     PBotUtils.destroyGob(ui, i);
                     PBotUtils.sleep(200);
-                    while (!destroyed) {
+                    while (!destroyed && !terminate) {
                         List<Gob> allgobs = PBotUtils.getGobs(ui);
                         if (!allgobs.contains(i))
                             destroyed = true;
@@ -106,7 +111,8 @@ public class DestroyArea extends Window implements GobSelectCallback {
                     remaining--;
                     lblc3.settext(remaining + "");
                 }
-                runbtn.click();
+                runbtn.show();
+                stopbtn.hide();
             } catch (NullPointerException | ConcurrentModificationException ip) {
             }
         }
@@ -150,10 +156,10 @@ public class DestroyArea extends Window implements GobSelectCallback {
     public ArrayList<Gob> GobList() {
         // Initialises list of crops to harvest between the selected coordinates
         ArrayList<Gob> gobs = new ArrayList<Gob>();
-        double bigX = selectedAreaA.x > selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
-        double smallX = selectedAreaA.x < selectedAreaB.x ? selectedAreaA.x : selectedAreaB.x;
-        double bigY = selectedAreaA.y > selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
-        double smallY = selectedAreaA.y < selectedAreaB.y ? selectedAreaA.y : selectedAreaB.y;
+        double bigX = Math.max(selectedAreaA.x, selectedAreaB.x);
+        double smallX = Math.min(selectedAreaA.x, selectedAreaB.x);
+        double bigY = Math.max(selectedAreaA.y, selectedAreaB.y);
+        double smallY = Math.min(selectedAreaA.y, selectedAreaB.y);
         synchronized (ui.sess.glob.oc) {
             for (Gob gob : ui.sess.glob.oc) {
                 if (gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
@@ -170,11 +176,11 @@ public class DestroyArea extends Window implements GobSelectCallback {
         public int compare(Gob a, Gob b) {
             if (a.rc.floor().x == b.rc.floor().x) {
                 if (a.rc.floor().x % 2 == 0)
-                    return (a.rc.floor().y < b.rc.floor().y) ? 1 : (a.rc.floor().y > b.rc.floor().y) ? -1 : 0;
+                    return Integer.compare(b.rc.floor().y, a.rc.floor().y);
                 else
-                    return (a.rc.floor().y < b.rc.floor().y) ? -1 : (a.rc.floor().y > b.rc.floor().y) ? 1 : 0;
+                    return Integer.compare(a.rc.floor().y, b.rc.floor().y);
             } else
-                return (a.rc.floor().x < b.rc.floor().x) ? -1 : (a.rc.floor().x > b.rc.floor().x) ? 1 : 0;
+                return Integer.compare(a.rc.floor().x, b.rc.floor().x);
         }
     }
 
