@@ -16,6 +16,7 @@ import haven.UI;
 import haven.Widget;
 import haven.Window;
 import haven.purus.pbot.PBotUtils;
+import haven.purus.pbot.PBotWindowAPI;
 import org.json.JSONArray;
 
 import java.awt.Color;
@@ -114,6 +115,9 @@ public class MusicWnd extends Window {
         try {
             if (allTracks.a) {
                 for (int i = 1; i < allT.normalNotes.size(); i++) {
+                    if (!ui.rwidgets.containsKey(this)) {
+                        break;
+                    }
                     int octave = (allT.normalNotes.get(i - 1).getKey() / 12);
                     int note = allT.normalNotes.get(i - 1).getKey() % 12;
 
@@ -153,6 +157,9 @@ public class MusicWnd extends Window {
 
             } else {
                 for (int i = 1; i < currentT.normalNotes.size(); i++) {
+                    if (!ui.rwidgets.containsKey(this)) {
+                        break;
+                    }
                     int octave = (currentT.normalNotes.get(i - 1).getKey() / 12);
                     int note = currentT.normalNotes.get(i - 1).getKey() % 12;
 
