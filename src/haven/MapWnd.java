@@ -844,7 +844,12 @@ public class MapWnd extends Window {
                         if (info == null)
                             throw (new Loading());
                         Coord sc = tc.add(info.sc.sub(obg.gc).mul(cmaps));
-                        long oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
+                        long oid = 0;
+                        try {
+                            oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
+                        } catch (NumberFormatException e) {
+                            oid = Long.MAX_VALUE - Math.abs(sc.x * sc.y);
+                        }
                         SMarker prev = view.file.smarkers.get(oid);
                         rnm = rnm + " [" + sc.x + ", " + sc.y + "]";
                         if (prev == null) {

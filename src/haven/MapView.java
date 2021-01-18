@@ -27,6 +27,7 @@
 package haven;
 
 import haven.GLProgram.VarID;
+import haven.MCache.OverlayInfo;
 import haven.automation.AreaSelectCallback;
 import haven.automation.CoalToSmelters;
 import haven.automation.FlaxBot;
@@ -66,6 +67,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +109,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Collection<Rendered> extradraw = new LinkedList<Rendered>();
     public Camera camera = restorecam();
     private Plob placing = null;
-    private int[] visol = new int[32];
     private Grabber grab;
     public Selector selection;
     private MCache.Overlay miningOverlay;
@@ -389,6 +390,76 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     static {
         camtypes.put("bad", FreeCam.class);
+    }
+
+    public class NFreeCam extends Camera {
+        private float dist = 50.0f, tdist = dist;
+        private float elev = (float) Math.PI / 4.0f, telev = elev;
+        private float angl = 0.0f, tangl = angl;
+        private Coord dragorig = null;
+        private float elevorig, anglorig;
+        private final float pi2 = (float) (Math.PI * 2);
+        private Coord3f cc = null;
+
+        public void tick(double dt) {
+            float cf = (1f - (float) Math.pow(500, -dt));
+            angl = angl + ((tangl - angl) * cf);
+            while (angl > pi2) {
+                angl -= pi2;
+                tangl -= pi2;
+                anglorig -= pi2;
+            }
+            while (angl < 0) {
+                angl += pi2;
+                tangl += pi2;
+                anglorig += pi2;
+            }
+            if (Math.abs(tangl - angl) < 0.0001) angl = tangl;
+
+            elev = elev + ((telev - elev) * cf);
+            if (Math.abs(telev - elev) < 0.0001) elev = telev;
+
+            dist = dist + ((tdist - dist) * cf);
+            if (Math.abs(tdist - dist) < 0.0001) dist = tdist;
+
+            Coord3f mc = getcc();
+            mc.y = -mc.y;
+            if ((cc == null) || (Math.hypot(mc.x - cc.x, mc.y - cc.y) > 250))
+                cc = mc;
+            else
+                cc = cc.add(mc.sub(cc).mul(cf));
+            view = new haven.Camera(PointedCam.compute(cc.add(0.0f, 0.0f, 15f), dist, elev, angl));
+        }
+
+        public float angle() {
+            return (angl);
+        }
+
+        public boolean click(Coord c) {
+            elevorig = elev;
+            anglorig = angl;
+            dragorig = c;
+            return (true);
+        }
+
+        public void drag(Coord c) {
+            telev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
+            if (telev < 0.0f) telev = 0.0f;
+            if (telev > (Math.PI / 2.0)) telev = (float) Math.PI / 2.0f;
+            tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
+        }
+
+        public boolean wheel(Coord c, int amount) {
+            float d = tdist + (amount * 25);
+            if (d < 5)
+                d = 5;
+            tdist = d;
+            return (true);
+        }
+    }
+
+    static {
+        camtypes.put("nbad", NFreeCam.class);
     }
 
     public class TopDownCam extends Camera {
@@ -692,29 +763,74 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         setcanfocus(true);
         markedGobs.clear();
 
-        if (SHOWPCLAIM.get()) { //TODO look at me
-            enol(0, 1);
+        if (SHOWPCLAIM.get()) {
+            enol("cplot");
         }
         if (SHOWVCLAIM.get()) {
-            enol(2, 3);
+            enol("vlg");
         }
         if (SHOWKCLAIM.get()) {
-            enol(4, 5);
+            enol("realm");
         }
     }
 
-    public boolean visol(int ol) {
-        return (visol[ol] > 0);
+    public boolean visol(String tag) {
+        synchronized (oltags) {
+            return (oltags.containsKey(tag));
+        }
     }
 
+    public void enol(String tag) {
+        synchronized (oltags) {
+            oltags.put(tag, oltags.getOrDefault(tag, 0) + 1);
+        }
+    }
+
+    public void disol(String tag) {
+        synchronized (oltags) {
+            Integer rc = oltags.get(tag);
+            if ((rc != null) && (--rc > 0))
+                oltags.put(tag, rc);
+            else
+                oltags.remove(tag);
+        }
+    }
+
+    @Deprecated
+    private String oltag(int id) {
+        switch (id) {
+            case 0:
+            case 1:
+                return ("cplot");
+            case 2:
+            case 3:
+                return ("vlg");
+            case 4:
+            case 5:
+                return ("realm");
+            case 16:
+                return ("cplot-s");
+            case 17:
+                return ("sel");
+        }
+        return ("n/a");
+    }
+
+    @Deprecated
+    public boolean visol(int id) {
+        return (visol(oltag(id)));
+    }
+
+    @Deprecated
     public void enol(int... overlays) {
-        for (int ol : overlays)
-            visol[ol]++;
+        for (int id : overlays)
+            enol(oltag(id));
     }
 
+    @Deprecated
     public void disol(int... overlays) {
-        for (int ol : overlays)
-            visol[ol]--;
+        for (int id : overlays)
+            disol(oltag(id));
     }
 
     private final Rendered flavobjs = new Rendered() {
@@ -823,8 +939,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     };
 
+    private final Map<String, Integer> oltags = new HashMap<>();
+
     {
-        visol[6] = 1;
+        oltags.put("show", 1);
     }
 
     private final Rendered mapol = new Rendered() {
@@ -855,21 +973,26 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         public boolean setup(RenderList rl) {
             Coord cc = MapView.this.cc.floor(tilesz).div(MCache.cutsz);
-            Coord o = new Coord();
-            for (o.y = -view; o.y <= view; o.y++) {
-                for (o.x = -view; o.x <= view; o.x++) {
-                    Coord2d pc = cc.add(o).mul(MCache.cutsz).mul(tilesz);
-                    for (int i = 0; i < visol.length; i++) {
-                        if (mats[i] == null)
-                            continue;
-                        if (visol[i] > 0) {
-                            Rendered olcut;
-                            try {
-                                olcut = glob.map.getolcut(i, cc.add(o));
-                                if (olcut != null)
-                                    rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), mats[i]));
-                            } catch (Loading e) {
-                            }
+            Area va = new Area(cc.sub(view, view), cc.add(view + 1, view + 1));
+            Collection<OverlayInfo> visol = new ArrayList<>();
+            synchronized (oltags) {
+                for (OverlayInfo id : glob.map.getols(va.mul(MCache.cutsz))) {
+                    for (String tag : id.tags()) {
+                        if (oltags.containsKey(tag)) {
+                            visol.add(id);
+                            break;
+                        }
+                    }
+                }
+            }
+            for (Coord gc : va) {
+                Coord2d pc = gc.mul(MCache.cutsz).mul(tilesz);
+                for (OverlayInfo olid : visol) {
+                    Rendered olcut = glob.map.getolcut(olid, gc);
+                    if (olcut != null) {
+                        try {
+                            rl.add(olcut, GLState.compose(Location.xlate(new Coord3f((float) pc.x, -(float) pc.y, 0)), olid.mat()));
+                        } catch (Loading l) {
                         }
                     }
                 }
@@ -964,7 +1087,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (camera instanceof MapView.TopDownCam)
                 curcamera = "topdown";
 
-            if (curcamera.equals("follow")) {
+            if (curcamera == null || curcamera.equals("follow")) {
                 cam = "ortho";
                 PBotUtils.sysMsg(ui, "Switched to Ortho Cam", Color.white);
             } else if (curcamera.equals("ortho")) {
@@ -1450,7 +1573,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean aging() {
-            return (i > (1 << 13));
+            return (i > (1 << 20));
         }
     }
 
@@ -1506,7 +1629,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     g.getimage(img -> Debug.dumpimage(img, Debug.somedir("click2.png")));
                 g.getpixel(c, col -> {
                     tile = new Coord(col.getRed() - 1, col.getGreen() - 1);
-                    pixel = new Coord2d((col.getBlue() * tilesz.x) / 255, (col.getAlpha() * tilesz.y) / 255);
+                    pixel = new Coord2d((col.getBlue() * tilesz.x) / 255.0, (col.getAlpha() * tilesz.y) / 255.0);
                     ckdone(2);
                 });
             }
@@ -1604,6 +1727,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         rl.setup(gobs, clickbasic(g));
         rl.fin();
         rl.render(g);
+        if (clickdb) g.getimage(img -> Debug.dumpimage(img, Debug.somedir("click3.png")));
         rl.get(g, c, cb);
     }
 
@@ -1751,6 +1875,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Loading camload = null, lastload = null;
 
     public void draw(GOut g) {
+        glob.map.sendreqs();
         if ((olftimer != 0) && (olftimer < Utils.rtime()))
             unflashol();
         try {
@@ -2096,20 +2221,22 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-    private int olflash;
+    private Collection<String> olflash = null;
     private double olftimer;
 
     private void unflashol() {
-        for (int i = 0; i < visol.length; i++) {
-            if ((olflash & (1 << i)) != 0)
-                visol[i]--;
+        if (olflash != null) {
+            olflash.forEach(this::disol);
         }
-        olflash = 0;
+        olflash = null;
         olftimer = 0;
     }
 
-    public Plob placing() {
-        return placing;
+    private void flashol(Collection<String> ols, double tm) {
+        unflashol();
+        ols.forEach(this::enol);
+        olflash = ols;
+        olftimer = Utils.rtime() + tm;
     }
 
     public void uimsg(String msg, Object... args) {
@@ -2142,13 +2269,20 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 plgob = (Integer) args[0];
             plgobid = plgob;
         } else if (msg == "flashol") {
-            unflashol();
-            olflash = (Integer) args[0];
-            for (int i = 0; i < visol.length; i++) {
+            Collection<String> ols = new ArrayList<>();
+            int olflash = (Integer) args[0];
+            for (int i = 0; i < 32; i++) {
                 if ((olflash & (1 << i)) != 0)
-                    visol[i]++;
+                    ols.add(oltag(i));
             }
-            olftimer = Utils.rtime() + (((Number) args[1]).doubleValue() / 1000.0);
+            double tm = ((Number) args[1]).doubleValue() / 1000.0;
+            flashol(ols, tm);
+        } else if (msg == "flashol2") {
+            Collection<String> ols = new LinkedList<>();
+            double tm = ((Number) args[0]).doubleValue() / 100.0;
+            for (int a = 1; a < args.length; a++)
+                ols.add((String) args[a]);
+            flashol(ols, tm);
         } else if (msg == "sel") {
             boolean sel = ((Integer) args[0]) != 0;
             synchronized (this) {
@@ -2652,7 +2786,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
         if (miningOverlay != null && button == 1) {
             miningOverlay.destroy();
-            disol(18);
             miningOverlay = null;
         }
         parent.setfocus(this);
@@ -2849,10 +2982,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         Resource res = glob.map.tilesetr(t);
                         if (res != null &&
                                 (res.name.equals("gfx/tiles/water") ||
-                                res.name.equals("gfx/tiles/deep") ||
-                                res.name.equals("gfx/tiles/odeeper") ||
-                                res.name.equals("gfx/tiles/odeep") ||
-                                res.name.equals("gfx/tiles/owater"))) {
+                                        res.name.equals("gfx/tiles/deep") ||
+                                        res.name.equals("gfx/tiles/odeeper") ||
+                                        res.name.equals("gfx/tiles/odeep") ||
+                                        res.name.equals("gfx/tiles/owater"))) {
                             nodropping = true;
                         }
                     }
@@ -2977,6 +3110,20 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
+    public static final OverlayInfo selol = new OverlayInfo() {
+        final Material mat = new Material(Light.deflight,
+                new Material.Colors(Color.BLACK, new Color(0, 0, 0, 32), Color.BLACK, new Color(255, 255, 0, 255)),
+                States.presdepth);
+
+        public Collection<String> tags() {
+            return (Arrays.asList("show"));
+        }
+
+        public Material mat() {
+            return (mat);
+        }
+    };
+
     private class Selector implements Grabber {
         Coord sc;
         MCache.Overlay ol;
@@ -3006,7 +3153,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
         {
             grab(xl);
-            enol(17);
         }
 
         public boolean mmousedown(Coord mc, int button) {
@@ -3021,9 +3167,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 modflags = ui.modflags();
                 xl.mv = true;
                 mgrab = ui.grabmouse(MapView.this);
-                synchronized (glob.map.grids) {
-                    ol = glob.map.new Overlay(sc, sc, 1 << 17);
-                }
+                ol = glob.map.new Overlay(Area.sized(sc, new Coord(1, 1)), selol);
                 return (true);
             }
         }
@@ -3068,7 +3212,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Coord tc = mc.div(MCache.tilesz2);
                     Coord c1 = new Coord(Math.min(tc.x, sc.x), Math.min(tc.y, sc.y));
                     Coord c2 = new Coord(Math.max(tc.x, sc.x), Math.max(tc.y, sc.y));
-                    ol.update(c1, c2);
+                    ol.update(new Area(c1, c2.add(1, 1)));
                     tt = Text.render(String.format("%d\u00d7%d", c2.x - c1.x + 1, c2.y - c1.y + 1));
                 }
             }
@@ -3081,7 +3225,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     mgrab.remove();
                 }
                 release(xl);
-                disol(17);
             }
         }
     }

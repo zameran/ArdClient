@@ -32,20 +32,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.WeakHashMap;
 
 public class Makewindow extends Widget {
     Widget obtn, cbtn;
-    List<Spec> inputs = Collections.emptyList();
-    List<Spec> outputs = Collections.emptyList();
-    List<Indir<Resource>> qmod = null;
-    static final Text qmodl = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:"));
-    int xoff = 45;
-    private static final int qmy = 38, outy = 65;
-    public static final Text.Foundry nmf = new Text.Foundry(Text.serif, 20).aa(true);
-    private long qModProduct = -1;
+    public static final Text qmodl = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quality:"));
+    public static final Text tooll = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Tools:"));
     private static final Tex softcapl = Text.render("Softcap:").tex();
     private Tex softcap;
+    public List<Spec> inputs = Collections.emptyList();
+    public List<Spec> outputs = Collections.emptyList();
+    public List<Indir<Resource>> qmod = Collections.emptyList();
+    public List<Indir<Resource>> tools = new ArrayList<>();
+    int xoff = 45;
+    private final int qmy = 38, outy = 65;
+    public static final Text.Foundry nmf = new Text.Foundry(Text.serif, 20).aa(true);
+    private long qModProduct = -1;
 
     @RName("make")
     public static class $_ implements Factory {
@@ -221,14 +225,21 @@ public class Makewindow extends Widget {
             this.outputs = outputs;
         } else if (msg == "qmod") {
             List<Indir<Resource>> qmod = new ArrayList<Indir<Resource>>();
-            for (Object arg : args) {
-                Indir<Resource> qm = ui.sess.getres((Integer) arg);
-                qmod.add(qm);
-            }
+            for (Object arg : args)
+                qmod.add(ui.sess.getres((Integer) arg));
             this.qmod = qmod;
+        } else if (msg == "tool") {
+            tools.add(ui.sess.getres((Integer) args[0]));
         } else {
             super.uimsg(msg, args);
         }
+    }
+
+    public static final Coord qmodsz = new Coord(20, 20);
+    private static final Map<Indir<Resource>, Tex> qmicons = new WeakHashMap<>();
+
+    private static Tex qmicon(Indir<Resource> qm) {
+        return (qmicons.computeIfAbsent(qm, res -> new TexI(PUtils.convolve(res.get().layer(Resource.imgc).img, qmodsz, CharWnd.iconfilter))));
     }
 
     public void draw(GOut g) {
@@ -250,64 +261,84 @@ public class Makewindow extends Widget {
             c = c.add(Inventory.sqsz.x, 0);
             popt = opt;
         }
-        if (qmod != null) {
-            g.image(qmodl.tex(), new Coord(0, qmy + 4));
-            c = new Coord(xoff, qmy);
+        {
+            int x = 0;
+            if (!qmod.isEmpty()) {
+                g.aimage(qmodl.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                x += qmodl.sz().x + 5;
+                x = Math.max(x, xoff);
+                qmx = x;
 
-            CharWnd chrwdg = null;
-            try {
-                chrwdg = ((GameUI) parent.parent).chrwdg;
-            } catch (Exception e) { // fail silently
-            }
-
-            List<Integer> qmodValues = new ArrayList<Integer>(3);
-
-            for (Indir<Resource> qm : qmod) {
+                CharWnd chrwdg = null;
                 try {
-                    Tex t = qm.get().layer(Resource.imgc).tex();
-                    g.image(t, c);
-                    c = c.add(t.sz().x + 1, 0);
+                    chrwdg = ((GameUI) parent.parent).chrwdg;
+                } catch (Exception e) { // fail silently
+                }
 
-                    if (Config.showcraftcap && chrwdg != null) {
-                        String name = qm.get().basename();
-                        for (CharWnd.SAttr attr : chrwdg.skill) {
-                            if (name.equals(attr.attr.nm)) {
-                                Coord sz = attr.attr.comptex.sz();
-                                g.image(attr.attr.comptex, c.add(3, t.sz().y / 2 - sz.y / 2));
-                                c = c.add(sz.x + 8, 0);
-                                qmodValues.add(attr.attr.comp);
-                                break;
+                List<Integer> qmodValues = new ArrayList<Integer>(3);
+
+                for (Indir<Resource> qm : qmod) {
+                    try {
+                        Tex t = qmicon(qm);
+                        g.image(t, new Coord(x, qmy));
+                        x += t.sz().x + 1;
+
+                        if (Config.showcraftcap && chrwdg != null) {
+                            String name = qm.get().basename();
+                            for (CharWnd.SAttr attr : chrwdg.skill) {
+                                if (name.equals(attr.attr.nm)) {
+                                    g.aimage(attr.attr.comptex, new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                                    x += attr.attr.comptex.sz().x;
+                                    qmodValues.add(attr.attr.comp);
+                                    break;
+                                }
+                            }
+                            for (CharWnd.Attr attr : chrwdg.base) {
+                                if (name.equals(attr.attr.nm)) {
+                                    g.aimage(attr.attr.comptex, new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                                    x += attr.attr.comptex.sz().x;
+                                    qmodValues.add(attr.attr.comp);
+                                    break;
+                                }
                             }
                         }
-                        for (CharWnd.Attr attr : chrwdg.base) {
-                            if (name.equals(attr.attr.nm)) {
-                                Coord sz = attr.attr.comptex.sz();
-                                g.image(attr.attr.comptex, c.add(3, t.sz().y / 2 - sz.y / 2));
-                                c = c.add(sz.x + 8, 0);
-                                qmodValues.add(attr.attr.comp);
-                                break;
-                            }
-                        }
+                    } catch (Loading l) {
                     }
-                } catch (Loading l) {
+                }
+                x += 25;
+
+                if (Config.showcraftcap && qmodValues.size() > 0) {
+                    long product = 1;
+                    for (long cap : qmodValues)
+                        product *= cap;
+
+                    if (product != qModProduct) {
+                        qModProduct = product;
+                        softcap = Text.renderstroked("" + (int) Math.pow(product, 1.0 / qmodValues.size()),
+                                Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+                    }
+
+                    Coord sz = softcap.sz();
+                    Coord szl = softcapl.sz();
+                    g.image(softcapl, this.sz.sub(sz.x + szl.x + 113, (this.sz.y / 2 + szl.y / 2) - 15));
+                    g.image(softcap, this.sz.sub(sz.x + 105, (this.sz.y / 2 + sz.y / 2) - 15));
                 }
             }
 
-            if (Config.showcraftcap && qmodValues.size() > 0) {
-                long product = 1;
-                for (long cap : qmodValues)
-                    product *= cap;
-
-                if (product != qModProduct) {
-                    qModProduct = product;
-                    softcap = Text.renderstroked("" + (int) Math.pow(product, 1.0 / qmodValues.size()),
-                            Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
+            if (!tools.isEmpty()) {
+                g.aimage(tooll.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
+                x += tooll.sz().x + 5;
+                x = Math.max(x, xoff);
+                toolx = x;
+                for (Indir<Resource> tool : tools) {
+                    try {
+                        Tex t = qmicon(tool);
+                        g.image(t, new Coord(x, qmy));
+                        x += t.sz().x + 1;
+                    } catch (Loading l) {
+                    }
                 }
-
-                Coord sz = softcap.sz();
-                Coord szl = softcapl.sz();
-                g.image(softcapl, this.sz.sub(sz.x + szl.x + 113, (this.sz.y / 2 + szl.y / 2) - 15));
-                g.image(softcap, this.sz.sub(sz.x + 105, (this.sz.y / 2 + sz.y / 2) - 15));
+                x += 25;
             }
         }
         c = new Coord(xoff, outy);
@@ -347,6 +378,7 @@ public class Makewindow extends Widget {
         return super.mousedown(c, button);
     }
 
+    private int qmx, toolx;
     private long hoverstart;
     private Spec lasttip;
     private Indir<Object> stip, ltip;
@@ -355,14 +387,50 @@ public class Makewindow extends Widget {
         String name = null;
         Spec tspec = null;
         Coord c;
-        if (qmod != null) {
-            c = new Coord(xoff, qmy);
+        if (!qmod.isEmpty()) {
+            c = new Coord(qmx, qmy);
             try {
+                CharWnd chrwdg = null;
+                Tex tvalue = null;
+                if (Config.showcraftcap) {
+                    try {
+                        chrwdg = ((GameUI) parent.parent).chrwdg;
+                    } catch (Exception e) { // fail silently
+                    }
+
+                }
                 for (Indir<Resource> qm : qmod) {
-                    Tex t = qm.get().layer(Resource.imgc).tex();
-                    if (mc.isect(c, t.sz()))
+                    Coord tsz = qmicon(qm).sz();
+                    if (mc.isect(c, tsz))
                         return (qm.get().layer(Resource.tooltip).t);
-                    c = c.add(t.sz().x + 1 + (Config.showcraftcap ? 21 : 0), 0);
+                    if (Config.showcraftcap && chrwdg != null) {
+                        String value = qm.get().basename();
+                        for (CharWnd.SAttr attr : chrwdg.skill) {
+                            if (value.equals(attr.attr.nm)) {
+                                tvalue = attr.attr.comptex;
+                                break;
+                            }
+                        }
+                        for (CharWnd.Attr attr : chrwdg.base) {
+                            if (value.equals(attr.attr.nm)) {
+                                tvalue = attr.attr.comptex;
+                                break;
+                            }
+                        }
+                    }
+                    c = c.add(tsz.x + (tvalue == null ? 0 : tvalue.sz().x), 0);
+                }
+            } catch (Loading l) {
+            }
+        }
+        if (!tools.isEmpty()) {
+            c = new Coord(toolx, qmy);
+            try {
+                for (Indir<Resource> tool : tools) {
+                    Coord tsz = qmicon(tool).sz();
+                    if (mc.isect(c, tsz))
+                        return (tool.get().layer(Resource.tooltip).t);
+                    c = c.add(tsz.x + 1, 0);
                 }
             } catch (Loading l) {
             }
@@ -384,7 +452,6 @@ public class Makewindow extends Widget {
                 }
                 c = c.add(Inventory.sqsz.x, 0);
                 popt = opt;
-                // c = c.add(31, 0);
             }
             c = new Coord(xoff, outy);
             for (Spec s : outputs) {
@@ -393,7 +460,6 @@ public class Makewindow extends Widget {
                     break find;
                 }
                 c = c.add(Inventory.sqsz.x, 0);
-                //  c = c.add(31, 0);
             }
         }
         if (lasttip != tspec) {
@@ -474,6 +540,10 @@ public class Makewindow extends Widget {
 
         public BufferedImage tipimg() {
             return (text.img);
+        }
+
+        public Tip shortvar() {
+            return (this);
         }
     }
 
