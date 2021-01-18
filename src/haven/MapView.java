@@ -3181,9 +3181,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Resource curs = ui.root.getcurs(c);
                     if (button == 1 && curs != null && curs.name.equals("gfx/hud/curs/mine")) {
                         synchronized (glob.map.grids) {
-                            miningOverlay = glob.map.new Overlay(ol.getc1(), ol.getc2(), 1 << 18);
+                            miningOverlay = glob.map.new Overlay(ol.getA(), selol);
                         }
-                        enol(18);
                     }
                     ol.destroy();
                     mgrab.remove();

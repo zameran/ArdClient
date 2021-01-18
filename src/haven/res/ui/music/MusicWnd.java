@@ -55,6 +55,7 @@ public class MusicWnd extends Window {
     public double multiplier = 1;
     public int[] diapasone = new int[2];
     public int[] octaves = new int[10];
+    public boolean paused;
 
     public CheckBox disableKeys;
 
@@ -118,6 +119,8 @@ public class MusicWnd extends Window {
                     if (!ui.rwidgets.containsKey(this)) {
                         break;
                     }
+                    while (paused)
+                        Thread.sleep(10);
                     int octave = (allT.normalNotes.get(i - 1).getKey() / 12);
                     int note = allT.normalNotes.get(i - 1).getKey() % 12;
 
@@ -160,6 +163,8 @@ public class MusicWnd extends Window {
                     if (!ui.rwidgets.containsKey(this)) {
                         break;
                     }
+                    while (paused)
+                        Thread.sleep(10);
                     int octave = (currentT.normalNotes.get(i - 1).getKey() / 12);
                     int note = currentT.normalNotes.get(i - 1).getKey() % 12;
 
@@ -516,7 +521,7 @@ public class MusicWnd extends Window {
 
     public void pause() {
         try {
-            thread.wait();
+            paused = !paused;
         } catch (Exception e) {
             e.printStackTrace();
         }
