@@ -4134,7 +4134,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.add(new CheckBox("Additional marks on the map") {
+        appender.addRow(new CheckBox("Additional marks on the map") {
             {
                 a = resources.customMarkObj;
             }
@@ -4148,6 +4148,45 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+            }
+        }, new Button(50, "Configurate") {
+            public void click() {
+                Window w = new Window(Coord.z,"Map Marks Configurate");
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
+                final TextEntry value = new TextEntry(150, "") {
+                    @Override
+                    public void activate(String text) {
+                        list.add(text);
+                        settext("");
+                    }
+                };
+                wva.add(list);
+                wva.addRow(value, new Button(45, "Add") {
+                    @Override
+                    public void click() {
+                        list.add(value.text);
+                        value.settext("");
+                    }
+                }, new Button(45, "Load Default") {
+                    @Override
+                    public void click() {
+                        for (String dmark : resources.customMarkObjs) {
+                            boolean exist = false;
+                            for (String mark : resources.customMarks.keySet()) {
+                                if (dmark.equalsIgnoreCase(mark)) {
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                            if (!exist)
+                                list.put(dmark, false);
+                        }
+                    }
+                });
+                w.pack();
+
+                ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
 

@@ -5,6 +5,7 @@ import haven.Resource;
 import haven.Tex;
 import haven.Text;
 import haven.Utils;
+import haven.sloth.util.ObservableMap;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class resources {
                     "gfx/terobjs/dng/antdoor",
                     "gfx/terobjs/beaverdoor"
     ));
+    public static ObservableMap<String, Boolean> customMarks = Utils.loadCustomList(customMarkObjs, "CustomMarks");
 
     public static String getDefaultTextName(String gobname) {
         if (gobname.contains("/")) {

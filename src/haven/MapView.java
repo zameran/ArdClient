@@ -3481,6 +3481,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     case 6: //Mark gob on map
                         ui.gui.mapfile.markobj(g.id, g, configuration.getDefaultTextName(g.resname().get()));
                         break;
+                    case 7: //Mark gob to custom marks
+                        resources.customMarks.put(g.resname().get(), true);
+                        break;
                 }
             }, "Mark for party",
                     !HighlightData.isHighlighted(name) ? "Highlight" : "Remove Highlight",
@@ -3488,7 +3491,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Alerted.shouldAlert(name) ? "Remove Sound" : "Add Sound",
                     "Delete",
                     "Custom overlays",
-                    "Mark on map");
+                    "Mark on map",
+                    "Add to custom marks");
             ui.root.add(modmenu, ui.mc);
         });
     }

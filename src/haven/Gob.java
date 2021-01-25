@@ -407,9 +407,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 });
             }
             if (ui.gui.mapfile != null && resources.customMarkObj) {
-                for (String item : resources.customMarkObjs) {
-                    if (name.equals(item)) {
-                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(item));
+                for (Map.Entry<String, Boolean> entry : resources.customMarks.entrySet()) {
+                    if (name.equals(entry.getKey()) && entry.getValue()) {
+                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(entry.getKey()));
                     }
                 }
             }
