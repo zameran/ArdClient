@@ -5,7 +5,6 @@ import haven.FastMesh;
 import haven.MapMesh;
 import haven.Material;
 import haven.RenderList;
-import haven.Resource;
 import haven.States;
 import haven.Utils;
 import haven.VertexBuf;
@@ -63,9 +62,7 @@ public class HitboxMesh extends FastMesh {
 //        final String[] key = rec + "," + off;
 
         HitboxMesh[] hb = hbs.get(keys);
-        if (hb != null)
-            return hb;
-        else {
+        if (hb == null) {
 //            rec = rec.add(off).sub(1, 1);
             float h = 2f;
 //            float
@@ -154,7 +151,7 @@ public class HitboxMesh extends FastMesh {
 //                sa.put((short) 3).put((short) 7).put((short) 4);
             }
             hbs.put(keys, hb);
-            return hb;
         }
+        return hb;
     }
 }

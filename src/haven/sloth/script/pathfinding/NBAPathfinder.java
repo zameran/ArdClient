@@ -89,7 +89,7 @@ public class NBAPathfinder extends Pathfinder {
         final boolean earlyexit = DefSettings.PATHFINDINGTIER.get() == 2;
 
         //10: while any v ∈ M has g(v) < ∞ do //While we have verts that have g(v) defined
-        while (!startpq.isEmpty() && (!goalpq.isEmpty())) {
+        while (!startpq.isEmpty() && (!goalpq.isEmpty() || DefSettings.LIMITPATHFINDING.get())) {
             //Do it in lock step to simulate it being simultaneous.
             fs = expand(startpq, goal, start, start, fs, ft, startNodes, endNodes, ignore, Side.SOURCE);
             ft = expand(goalpq, start, goal, start, ft, fs, endNodes, startNodes, ignore, Side.GOAL);
@@ -146,8 +146,17 @@ public class NBAPathfinder extends Pathfinder {
                         if (!checkHit(nc)) {
                             //18:       g(v) = min(g(v), g(u0) + d(u0, v));
                             final Node child = new Node(node, nc, node.g + 1, heuristic.distance(nc, target));
-                            M.add(child);
-                            myNodes.put(nc, child);
+                            if (!DefSettings.LIMITPATHFINDING.get()) {
+                                M.add(child);
+                                myNodes.put(nc, child);
+                            } else if (heuristic.distance(nc, start) < 440) {
+                                M.add(child);
+                                myNodes.put(nc, child);
+                                if (side == Side.SOURCE && child.h < estbest) {
+                                    estbest = child.h;
+                                    estbestc = nc;
+                                }
+                            }
                         }
                     } else if (otherNodes.containsKey(nc)) { //19:       L = min(L, g(v) + ˜g(v));
                         final Node child = new Node(node, nc, node.g + 1, heuristic.distance(nc, target));

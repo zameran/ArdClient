@@ -77,6 +77,7 @@ import static haven.DefSettings.BUGGEDMENU;
 import static haven.DefSettings.CHEESERACKMISSINGCOLOR;
 import static haven.DefSettings.CLOSEFORMENU;
 import static haven.DefSettings.DARKMODE;
+import static haven.DefSettings.DEBUG;
 import static haven.DefSettings.DEEPWATERCOL;
 import static haven.DefSettings.DRAWGRIDRADIUS;
 import static haven.DefSettings.ERRORTEXTCOLOR;
@@ -87,10 +88,13 @@ import static haven.DefSettings.HIDDENCOLOR;
 import static haven.DefSettings.HUDTHEME;
 import static haven.DefSettings.KEEPGOBS;
 import static haven.DefSettings.KEEPGRIDS;
+import static haven.DefSettings.LIMITPATHFINDING;
 import static haven.DefSettings.NVAMBIENTCOL;
 import static haven.DefSettings.NVDIFFUSECOL;
 import static haven.DefSettings.NVSPECCOC;
+import static haven.DefSettings.PATHFINDINGTIER;
 import static haven.DefSettings.PLAYERPATHCOL;
+import static haven.DefSettings.RESEARCHUNTILGOAL;
 import static haven.DefSettings.SHOWANIMALPATH;
 import static haven.DefSettings.SHOWFKBELT;
 import static haven.DefSettings.SHOWGOBPATH;
@@ -3681,6 +3685,14 @@ public class OptWnd extends Window {
                 });
         appender.add(new IndirCheckBox("Never delete grids", KEEPGRIDS));
         appender.add(new IndirCheckBox("Never delete gobs", KEEPGOBS));
+
+        appender.add(new Label("Pathfinder"));
+        final String[] tiers = {"Perfect", "Medium", "Fastest"};
+        appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(200, 0, 2, PATHFINDINGTIER));
+        appender.add(new IndirCheckBox("Limit pathfinding search to 40 tiles", LIMITPATHFINDING));
+        appender.add(new IndirCheckBox("Research if goal was not found (requires Limited pathfinding)", RESEARCHUNTILGOAL));
+        appender.add(new IndirCheckBox("Debug", DEBUG));
+
         appender.add(new Label("Flowermenu"));
         appender.addRow(new Label("Instant Flowermenu: "),
                 new CheckBox("Opening") {

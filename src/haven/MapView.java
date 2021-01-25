@@ -53,10 +53,12 @@ import haven.sloth.gob.Mark;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.SoundSelector;
 import haven.sloth.io.HighlightData;
+import haven.sloth.script.pathfinding.Hitbox;
 import haven.sloth.script.pathfinding.Move;
 import haven.sloth.script.pathfinding.NBAPathfinder;
 import modification.configuration;
 import modification.dev;
+import modification.resources;
 
 import javax.media.opengl.GL;
 import java.awt.Color;
@@ -1968,7 +1970,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 final double left = plc.dist(movingto) / mspeed;
                 //Only predictive models can trigger here
                 return movingto.dist(pl.rc) <= 5 || left == 0;
-            } else if (movingto == null || movingto.dist(pl.rc) <= 5) {
+            } else if (movingto == null || movingto.dist(pl.rc) <= 8) {
                 return true;
             } else {
                 //Way off target and not moving, cancel
@@ -1990,27 +1992,33 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (!pl.isMoving()) {
                 finishTimes++;
                 if (finishTimes > maxfinish) {
-                    return true;
+                    return (true);
                 } else if (movequeue.size() > 0) {
-                    return false;
-                } else if (movingto != null) {
-                    if (pathfindGob != null) {
-                        GobHitbox.BBox[] box = GobHitbox.getBBox(pathfindGob);
-                        GobHitbox.BBox[] pbox = GobHitbox.getBBox(pl);
-                        if (box != null && pbox != null && box.length == 1 && box[0].points.length == 4 && pbox.length == 1 && pbox[0].points.length == 4) {
-                            return pathfindGob.rc.dist(pl.rc) <= Math.sqrt(Math.pow(Math.max(box[0].points[0].x, box[0].points[0].y), 2) * 2) + Math.sqrt(Math.pow(Math.max(pbox[0].points[0].x, pbox[0].points[0].y), 2) * 2) + 2;
-                        } else
-                            return movingto.dist(pl.rc) <= 5;
+                    return (false);
+                } else if (pathfindGob != null) {
+                    Hitbox[] box = Hitbox.hbfor(pathfindGob);
+                    Hitbox[] pbox = Hitbox.hbfor(pl);
+                    if (box != null && pbox != null && box.length > 0 && pbox.length > 0) {
+                        for (Hitbox hb1 : box)
+                            for (Hitbox hb2 : pbox)
+                                if (configuration.insect(hb1.points, configuration.abs(hb2.points, 2), pathfindGob.rc, pl.rc))
+                                    return (true);
+                        return (false);
                     } else
-                        return movingto.dist(pl.rc) <= 5;
+                        return pathfindGob.rc.dist(pl.rc) <= 5;
+                } else if (movingto != null) {
+                    return movingto.dist(pl.rc) <= 5;
+                } else {
+                    return (true);
                 }
             } else {
                 finishTimes = 0;
-                return false;
+                return (false);
             }
+        } else {
+            finishTimes = 0;
+            return (false);
         }
-        finishTimes = 0;
-        return false;
     }
 
     public boolean isclearmovequeue() {
@@ -2062,14 +2070,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
     public boolean pathto(final Coord2d c) {
         final Move[] moves = findpath(c);
+        clearmovequeue();
         if (moves != null) {
-            clearmovequeue();
             for (final Move m : moves) {
                 queuemove(m.dest());
             }
-            return true;
+            return (true);
         } else {
-            return false;
+            return (false);
         }
     }
 
@@ -2140,11 +2148,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
             lastMove = System.currentTimeMillis();
         }
-        if (pathfindGobMouse == 3 && movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
-            wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
-            isclickongob = true;
-        }
         if (!isclearmovequeue() && isfinishmovequeue()) {
+            if (pathfindGobMouse == 3 && movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
+                wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
+                isclickongob = true;
+            }
             clearmovequeue();
         }
         partyHighlight.update();

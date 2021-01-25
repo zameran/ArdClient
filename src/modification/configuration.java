@@ -3,6 +3,7 @@ package modification;
 import haven.CheckListboxItem;
 import haven.Config;
 import haven.Coord;
+import haven.Coord2d;
 import haven.Gob;
 import haven.MainFrame;
 import haven.OCache;
@@ -19,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -90,12 +92,13 @@ public class configuration {
     public static String numericpos = Utils.getpref("numericpos", "Right-Top");
     public static boolean showstudytime = Utils.getprefb("showstudytime", true);
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
+
     public static Coord infopos(String pos, Coord parsz, Coord tsz) {
         switch (pos) {
             case "Right-Center":
-                return new Coord(parsz.x - tsz.x, parsz.y / 2  - tsz.y / 2);
+                return new Coord(parsz.x - tsz.x, parsz.y / 2 - tsz.y / 2);
             case "Left-Center":
-                return new Coord(0, parsz.y / 2  - tsz.y / 2);
+                return new Coord(0, parsz.y / 2 - tsz.y / 2);
             case "Top-Center":
                 return new Coord(parsz.x / 2 - tsz.x / 2, 0);
             case "Bottom-Center":
@@ -105,7 +108,7 @@ public class configuration {
             case "Right-Bottom":
                 return new Coord(parsz.x - tsz.x, parsz.y - tsz.y);
             case "Center":
-                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y / 2  - tsz.y / 2);
+                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y / 2 - tsz.y / 2);
             case "Left-Bottom":
                 return new Coord(0, parsz.y - tsz.y);
             case "Left-Top":
@@ -113,6 +116,7 @@ public class configuration {
                 return new Coord(0, 0);
         }
     }
+
     public static boolean oldmountbar = Utils.getprefb("oldmountbar", false);
     public static boolean newmountbar = Utils.getprefb("newmountbar", true);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
@@ -145,12 +149,7 @@ public class configuration {
     public static boolean autoselectchat = Utils.getprefb("autoselectchat", true);
 
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead", "Spring Water")) {{
-        sort(new Comparator<String>() {
-            @Override
-            public int compare(String l1, String l2) {
-                return l1.compareTo(l2);
-            }
-        });
+        sort(String::compareTo);
     }};
     public static String autoDrinkLiquid = Utils.getpref("autoDrinkLiquid", "Water");
     public static boolean drinkorsip = Utils.getprefb("drinkorsip", false);
@@ -590,5 +589,48 @@ public class configuration {
                 Config.flowerlist.items.add(ci);
             Utils.setcollection("petalcol", Config.flowermenus.keySet());
         }
+    }
+
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2) {
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(polygon1[i1], polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1], polygon2[i2], polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1]))
+                    return (true);
+        return (false);
+    }
+
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2, Coord2d gobc1, Coord2d gobc2) {
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(polygon1[i1].add(gobc1), polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1].add(gobc1),
+                        polygon2[i2].add(gobc2), polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1].add(gobc2)))
+                    return (true);
+        return (false);
+    }
+
+    public static double vectormul(double ax, double ay, double bx, double by) {
+        return (ax * by - ay * bx);
+    }
+
+    public static boolean crossing(Coord2d c1, Coord2d c2, Coord2d c3, Coord2d c4) {
+//        int v1 = (int) Math.round(vectormul(c4.x - c3.x, c4.y - c3.y, c3.x - c1.x, c3.y - c1.y));
+//        int v2 = (int) Math.round(vectormul(c4.x - c3.x, c4.y - c3.y, c3.x - c1.x, c3.y - c1.y));
+//        int v3 = (int) Math.round(vectormul(c2.x - c1.x, c2.y - c1.y, c1.x - c3.x, c1.y - c3.y));
+//        int v4 = (int) Math.round(vectormul(c2.x - c1.x, c2.y - c1.y, c1.x - c4.x, c1.y - c4.y));
+        Line2D l1 = new Line2D.Double(c1.x, c1.y, c2.x, c2.y);
+        Line2D l2 = new Line2D.Double(c3.x, c3.y, c4.x, c4.y);
+        return l1.intersectsLine(l2);
+//        return ((v1 * v2) < 0 && (v3 * v4) < 0);
+    }
+
+    public static Coord2d abs(Coord2d c, double adding) {
+        return (new Coord2d(c.x + (c.x / Math.abs(c.x) * adding), c.y + (c.y / Math.abs(c.y) * adding)));
+    }
+
+    public static Coord2d[] abs(Coord2d[] c, double adding) {
+        Coord2d[] c2 = new Coord2d[c.length];
+        for (int i = 0; i < c.length; i++)
+            c2[i] = abs(c[i], adding);
+        return (c2);
     }
 }
