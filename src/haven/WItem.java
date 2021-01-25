@@ -491,7 +491,7 @@ public class WItem extends Widget implements DTarget {
         if (spr != null) {
             return spr.sz().div(30);
         } else {
-            return new Coord(1, 1);
+            return new Coord(0, 0);
         }
 //        Indir<Resource> res = item.getres().indir();
 //        if (res.get() != null) {
