@@ -29,10 +29,6 @@ package haven;
 import haven.sloth.gob.Type;
 import modification.configuration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class ResDrawable extends Drawable {
     public final Indir<Resource> res;
     public Sprite spr = null;
