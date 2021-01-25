@@ -1,5 +1,5 @@
 20210125
-Area Picker (WIP). New Craft and Build res image. Fix buddy color, beltwnd null res, helleyehat. Trying to fix pathfinding (fix and improve). Custom marks improve (Modification - Map - Additional marks).
+New Craft and Build res image. Fix buddy color, beltwnd null res, helleyehat. Trying to fix pathfinding (fix and improve). Custom marks improve (Modification - Map - Additional marks). Area Picker (WIP - need testing and suggestions).
 ~
 
 20210120
