@@ -1,3 +1,7 @@
+20210125
+Area Picker (WIP). New Craft and Build res image. Fix buddy color, beltwnd null res, helleyehat. Trying to fix pathfinding (fix and improve). Custom marks improve (Modification - Map - Additional marks).
+~
+
 20210120
 adv fix. Musicbot tracks fix.
 ~
