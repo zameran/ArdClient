@@ -211,4 +211,10 @@ public class DestroyArea extends Window implements GobSelectCallback {
             runner.interrupt();
         terminate = true;
     }
+
+    public void destroy() {
+        super.destroy();
+        if (ui.gui != null && ui.gui.map != null)
+            ui.gui.map.unregisterGobSelect();
+    }
 }
