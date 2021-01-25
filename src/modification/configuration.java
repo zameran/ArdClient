@@ -37,6 +37,8 @@ public class configuration {
     public static String picturePath = modificationPath + "/picture";
     public static String errorPath = "errors";
     public static String pbotErrorPath = "pboterrors";
+    public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
+    public static String hatreplace = "gfx/terobjs/items/sprucecap";
 
     public static boolean customTitleBoolean = Utils.getprefb("custom-title-bol", false);
 

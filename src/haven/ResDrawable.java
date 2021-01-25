@@ -29,6 +29,10 @@ package haven;
 import haven.sloth.gob.Type;
 import modification.configuration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ResDrawable extends Drawable {
     public final Indir<Resource> res;
     public Sprite spr = null;
@@ -107,9 +111,11 @@ public class ResDrawable extends Drawable {
         //System.out.println(this.res.get().name);
         //System.out.println(gob.type);
 
-        if (res.name.equals("gfx/terobjs/items/hats/mooncap")) {
-            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), sdt);
-            return;
+        for (String hat : configuration.hatslist) {
+            if (res.name.equals(hat)) {
+                spr = Sprite.create(gob, Resource.remote().loadwait(configuration.hatreplace), sdt);
+                return;
+            }
         }
         if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce")) {
             spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);

@@ -30,6 +30,7 @@ import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
 import haven.sloth.gob.Type;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -231,10 +232,16 @@ public class Composited implements Rendered, MapView.Clickable {
 
         private SpriteEqu(ED ed) {
             super(ed);
-            if (ed.res.res.get().name.equals("gfx/terobjs/items/hats/mooncap"))
-                this.spr = Sprite.create(eqowner, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), ed.res.sdt.clone());
-            else
-                this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+            Sprite s = null;
+            for (String hat : configuration.hatslist) {
+                if (ed.res.res.get().name.equals(hat)) {
+                    s = Sprite.create(eqowner, Resource.remote().loadwait(configuration.hatreplace), ed.res.sdt.clone());
+                    break;
+                }
+            }
+            if (s == null)
+                s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+            this.spr = s;
         }
 
         public void draw(GOut g) {
