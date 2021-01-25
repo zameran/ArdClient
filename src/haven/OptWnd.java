@@ -4130,7 +4130,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Automatically places markrs on the map: caves, dungeons, tarpits.").tex();
+                return Text.render("Draw the map easier").tex();
             }
         });
 
