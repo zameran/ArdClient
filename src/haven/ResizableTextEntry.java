@@ -1,5 +1,6 @@
 package haven;
 
+import java.awt.Color;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 
@@ -11,7 +12,9 @@ public class ResizableTextEntry extends TextEntry {
     }
 
     public void draw(GOut g) {
-        sz = new Coord((int) getTextWidth(text), mext.getHeight());
+        Coord size = Text.render(text, Color.WHITE, fnd).sz();
+        if (sz.x != size.x + addWidth)
+            sz = new Coord(size.x + addWidth, mext.getHeight());
         super.draw(g);
     }
 

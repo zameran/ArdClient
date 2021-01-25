@@ -30,6 +30,7 @@ import haven.Resource.AButton;
 import haven.automation.AddBranchesToOven;
 import haven.automation.AddCoalToSmelter;
 import haven.automation.AddWoodToSmokeShed;
+import haven.automation.AreaPicker;
 import haven.automation.ButcherFish;
 import haven.automation.CoalToSmelters;
 import haven.automation.Coracleslol;
@@ -939,6 +940,14 @@ public class MenuGrid extends Widget {
                         synchronized (GobSelectCallback.class) {
                             ui.gui.map.registerGobSelect(sw);
                         }
+                    }
+                }
+        ));
+        addSpecial(new haven.MenuGrid.SpecialPagina(this, "paginae::scripts::areapicker",
+                Resource.local().load("paginae/scripts/areaPicker"),
+                (pag) -> {
+                    if (ui.gui != null && ui.gui.getwnd(AreaPicker.scriptname) == null) {
+                        ui.gui.add(new AreaPicker());
                     }
                 }
         ));
