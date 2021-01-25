@@ -5,11 +5,14 @@ import haven.Config;
 import haven.Coord;
 import haven.Dropbox;
 import haven.GOut;
+import haven.Inventory;
 import haven.Label;
 import haven.ResizableTextEntry;
 import haven.Resource;
 import haven.Text;
 import haven.TextEntry;
+import haven.WItem;
+import haven.Widget;
 import haven.WidgetVerticalAppender;
 import haven.Window;
 import haven.purus.pbot.PBotGob;
@@ -36,7 +39,7 @@ import java.util.stream.Collectors;
  * 2. FlowerMenu (whitout flowermenu = just right click?) . favorite?
  * 3. optional. Storage...
  * 4. Storage : select area and chests
- * Drink water?
+ * Drink water? click block for running
  * <p>
  * <p>
  * final. Run
@@ -170,7 +173,10 @@ public class AreaPicker extends Window implements Runnable {
         };
         stopbtn = new Button(50, "Stop") {
             public void click() {
-                stop();
+                try {
+                    stop();
+                } catch (InterruptedException e) {
+                }
             }
         };
 
@@ -183,7 +189,8 @@ public class AreaPicker extends Window implements Runnable {
         appender.addRow(new Label("4(WIP). Objects to storage"), selectstoragebtn, selectedstoragedbx, areastoragesinfolbl);
 
         appender.add(runbtn);
-        add(stopbtn, runbtn.c); stopbtn.hide();
+        add(stopbtn, runbtn.c);
+        stopbtn.hide();
 
         pack();
     }
@@ -197,8 +204,10 @@ public class AreaPicker extends Window implements Runnable {
         maininfolbl.settext("", Color.WHITE);
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException {
         runthread.interrupt();
+        ui.root.wdgmsg("gk", 27);
+        sleep(1);
     }
 
     public void collecting() {
@@ -209,7 +218,7 @@ public class AreaPicker extends Window implements Runnable {
                     botLog("Gob is " + (p + 1) + " of " + currentgoblist.size() + ". Try is " + (i + 1) + " of " + retry, Color.YELLOW);
                     if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
                         botLog("Not enough space for item", Color.WHITE);
-                        return;
+                        stop();
                     }
                     if (pfRightClick(currentgoblist.get(p))) {
                         waitForFlowerMenu();
@@ -217,7 +226,7 @@ public class AreaPicker extends Window implements Runnable {
                             if (choosePetal(flowermenudbx.sel)) {
                                 if (!waitFlowermenuClose()) {
                                     botLog("Can't close the flowermenu", Color.WHITE);
-                                    return;
+                                    stop();
                                 }
                                 waitMoving();
                                 if (waitForHourglass())
@@ -228,7 +237,7 @@ public class AreaPicker extends Window implements Runnable {
                             } else {
                                 if (!closeFlowermenu()) {
                                     botLog("Can't close the flowermenu", Color.WHITE);
-                                    return;
+                                    stop();
                                 } else
                                     break;
                             }
@@ -356,20 +365,31 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public boolean freeSlots() throws InterruptedException {
-        botLog("free slots checking...", Color.WHITE);
+        //botLog("free slots checking...", Color.WHITE);
         boolean free = false;
         int slots = -1;
         while (slots == -1) {
-            try {
-                slots = PBotUtils.playerInventory(ui).freeSlotsInv();
-                if (slots > 0) free = true;
-                botLog("free slots checked " + slots, Color.WHITE);
-            } catch (Exception e) {
-                botLog("free slots checking failed", Color.WHITE);
-                sleep(100);
+            Inventory inv = PBotUtils.playerInventory(ui).inv;
+
+            int takenSlots = 0;
+            for (Widget i = inv.child; i != null; i = i.next) {
+                if (i instanceof WItem) {
+                    WItem buf = (WItem) i;
+                    int s = 0;
+                    for (int t = 0, sleep = 10; s == 0 && t < waitingtime; t += sleep) {
+                        s = buf.size().x * buf.size().y;
+                        sleep(sleep);
+                    }
+                    takenSlots += s;
+                }
             }
+            int allSlots = inv.isz.x * inv.isz.y;
+            slots = allSlots - takenSlots;
+
+            if (slots > 0) free = true;
+            //botLog("free slots checked " + slots, Color.WHITE);
         }
-        botLog("free slots " + free, Color.WHITE);
+        //botLog("free slots " + free, Color.WHITE);
         return free;
     }
 
