@@ -1422,11 +1422,19 @@ public class Resource implements Serializable {
             if (pr.length() == 0) {
                 parent = null;
             } else {
+                Named n;
                 try {
-                    parent = pool.load(pr, pver);
+                    n = pool.load(pr, pver);
                 } catch (RuntimeException e) {
-                    throw (new LoadException("Illegal resource dependency", e, Resource.this));
+//                    throw (new LoadException("Illegal resource dependency", e, Resource.this));
+                    System.out.println("Illegal resource dependency " + e + Resource.this);
+                    try {
+                        n = pool.load(pr);
+                    } catch (Exception ex) {
+                        n = Resource.local().load("gfx/invobjs/missing");
+                    }
                 }
+                parent = n;
             }
 
             name = buf.string();

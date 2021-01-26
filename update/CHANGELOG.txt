@@ -1,3 +1,7 @@
+20210126
+CraftDBWnd fix. Disables animation - disable smoke (ISmoke).
+~
+
 20210125
 New Craft and Build res image. Fix buddy color, beltwnd null res, helleyehat. Trying to fix pathfinding (fix and improve). Custom marks improve (Modification - Map - Additional marks). Area Picker (WIP - need testing and suggestions).
 ~
