@@ -384,7 +384,7 @@ public class TrellisFarmer2 extends Window implements Runnable {
         Coord2d gCoord = g.rc;
 
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfmove(ui, c2d.x, c2d.y)) {
+            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
                 return true;
             }
         }

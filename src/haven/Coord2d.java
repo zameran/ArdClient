@@ -124,6 +124,10 @@ public class Coord2d implements Comparable<Coord2d>, java.io.Serializable {
         return (div(b.x, b.y));
     }
 
+    public Coord2d div(Coord b) {
+        return (div(b.x, b.y));
+    }
+
     public Coord round() {
         return (new Coord((int) Math.round(x), (int) Math.round(y)));
     }

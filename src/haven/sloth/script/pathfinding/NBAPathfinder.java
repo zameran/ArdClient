@@ -228,6 +228,9 @@ public class NBAPathfinder extends Pathfinder {
     }
 
     public ArrayList<Move> path(final Coord start, final Coord goal) {
-        return advreduce(findpath(start, goal));
+        long t = System.currentTimeMillis();
+        ArrayList<Move> moves = advreduce(findpath(start, goal));
+        System.out.println("Pathfinding from " + start + " to " + goal + " for " + (System.currentTimeMillis() - t) + " ms");
+        return moves;
     }
 }

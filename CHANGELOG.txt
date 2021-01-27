@@ -1,3 +1,7 @@
+20210128
+Scripts fix.
+~
+
 20210126
 CraftDBWnd fix. Disables animation - disable smoke (ISmoke).
 ~

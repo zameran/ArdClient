@@ -94,12 +94,20 @@ const pressBtn = () => {
 	let seedInPress = pressInventory.getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
 	
 	const Button = Java.type('haven.Button');
-	const pressb = pressWindow.getchild(Button);  //Find Press Button
+	let pressbs = pressWindow.getchilds(Button);  //Find Press Button
+	let pressb;
 	
 	const VMeter = Java.type('haven.VMeter');
 	const juiceMeter = pressWindow.getchild(VMeter);
 	let juiceAmount = juiceMeter.amount / 100;
-	
+
+	for (let pb of pressbs) {
+	    PBotUtils.sysMsg(ui, pb.text.text);
+	    if (pb.text.text == "Press") {
+	        pressb = pb
+	        break;
+	    }
+	}
 	if (pressb == null) {
 		PBotUtils.sysMsg(ui, "Press Button not found!");
 		return;

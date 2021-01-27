@@ -426,7 +426,7 @@ public class TrellisFarmer extends Window implements Runnable {
 
         lblProg2.settext("Find path");
         for (Coord2d c2d : near(gCoord)) {
-            if (PBotUtils.pfmove(ui, c2d.x, c2d.y)) {
+            if (PBotUtils.pfLeftClick(ui, c2d.x, c2d.y)) {
                 return true;
             }
         }

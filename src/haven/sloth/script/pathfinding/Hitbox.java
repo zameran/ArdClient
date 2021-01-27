@@ -105,6 +105,10 @@ public class Hitbox {
 
     private final boolean hitable;
 
+    public boolean ishitable() {
+        return hitable;
+    }
+
     public float zplus = 0;
 
     public Hitbox(final Coord off, final Coord br, boolean hitable, boolean buffer) {

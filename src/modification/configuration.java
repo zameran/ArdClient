@@ -608,6 +608,20 @@ public class configuration {
         return (false);
     }
 
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2, Gob gob1, Gob gob2) {
+        Coord2d gobc1 = gob1.rc, gobc2 = gob2.rc;
+        for (int i = 0; i < polygon1.length; i++)
+            polygon1[i] = polygon1[i].rotate((float) gob1.a);
+        for (int i = 0; i < polygon2.length; i++)
+            polygon2[i] = polygon2[i].rotate((float) gob2.a);
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(polygon1[i1].add(gobc1), polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1].add(gobc1),
+                        polygon2[i2].add(gobc2), polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1].add(gobc2)))
+                    return (true);
+        return (false);
+    }
+
     public static double vectormul(double ax, double ay, double bx, double by) {
         return (ax * by - ay * bx);
     }

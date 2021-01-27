@@ -7,11 +7,8 @@ import haven.DefSettings;
 import haven.Gob;
 import haven.MCache;
 import haven.UI;
-import haven.purus.pbot.PBotGob;
-import haven.purus.pbot.PBotGobAPI;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Type;
-import modification.configuration;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -113,39 +110,20 @@ public abstract class Pathfinder {
 //                            return true;
 //            }
 //        }
-        boolean hit = false;
+
         for (Hitbox h : plhb) {
             for (int i = 0; i < h.points.length; i++) {
                 final Coord c = mc.add(h.offset());
                 final Coord br = c.add(h.size());
                 Coord xy = new Coord(0, 0);
-                check:
                 for (xy.x = c.x; xy.x < br.x; ++xy.x)
                     for (xy.y = c.y; xy.y < br.y; ++xy.y)
-                        if (ui.sess.glob.gobhitmap.checkHit(xy)) {
-                            hit = true;
-                            break check;
-                        }
+                        if (ui.sess.glob.gobhitmap.checkHit(xy))
+                            return (true);
             }
         }
 
-        if (hit) {
-            PBotGob player = PBotGobAPI.player(ui);
-            if (player.gob != null) {
-                Hitbox[] pbox = Hitbox.hbfor(player.gob);
-                if (plhb != null && pbox != null && plhb.length > 0 && pbox.length > 0) {
-                    check:
-                    for (Hitbox hb1 : plhb)
-                        for (Hitbox hb2 : pbox)
-                            if (configuration.insect(hb1.points, configuration.abs(hb2.points, 2), new Coord2d(mc), player.gob.rc)) {
-                                hit = false;
-                                break check;
-                            }
-                }
-            }
-        }
-
-        return (hit);
+        return (false);
     }
 
     /**

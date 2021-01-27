@@ -55,6 +55,9 @@ const startFarmingBtn = () => {
 	
 	for (let i = 0; i < fieldTiles.length; i++) {
 		infoLabel.setText(i + "");
+		if (shouldStop()) {
+		    return;
+		}
 		let inventoryItems = PBotUtils.playerInventory(ui).getInventoryItemsByResnames([seedName]);
 		if (inventoryItems.size() == 0 && !seedInHand(seedName)) {
 			PBotUtils.sysMsg(ui, "Seeds null");
@@ -95,7 +98,7 @@ const pc = () => PBotGobAPI.player(ui).gob.rc;
 function move(cc) {
 	infoLabel.setText("move");
 	//PBotUtils.mapClick(ui, x, y, 1, 0);
-	if (!PBotUtils.pfmove(ui, cc.x, cc.y)) {
+	if (!PBotUtils.pfLeftClick(ui, cc.x, cc.y)) {
 		PBotUtils.sysMsg(ui, "Path not found!");
 		return false;
 	}

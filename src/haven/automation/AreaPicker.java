@@ -48,6 +48,8 @@ import java.util.stream.Collectors;
 public class AreaPicker extends Window implements Runnable {
     public final static String scriptname = "Area Picker";
     public final static String storagetrigger = "Storage";
+    public final static String[] collectstates = new String[]{"Inventory", "Drop out of hand", storagetrigger, "Stockpiles"};
+    public final static String[] pfstates = new String[]{"purus", "sloth"};
     public final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
     public Thread runthread;
 
@@ -57,15 +59,16 @@ public class AreaPicker extends Window implements Runnable {
     public final List<String>
             areagobslist = new ArrayList<>(),
             flowermenulist = new ArrayList<>(Config.flowermenus.keySet()),
-            collecttrigger = new ArrayList<>(Arrays.asList("Inventory", "Drop out of hand", storagetrigger)),
-            areastorageslist = new ArrayList<>();
+            collecttrigger = new ArrayList<>(Arrays.asList(collectstates)),
+            areastorageslist = new ArrayList<>(),
+            pflist = new ArrayList<>(Arrays.asList(pfstates));
     public final List<PBotGob>
             currentgoblist = new ArrayList<>(),
             currentstoragelist = new ArrayList<>();
 
     public Button refresh, selectgobsbtn, selectstoragebtn, runbtn, stopbtn;
     public Label maininfolbl, areagobsinfolbl, areastoragesinfolbl;
-    public Dropbox<String> selectedgobdbx, flowermenudbx, collecttriggerdbx, selectedstoragedbx; //it may be multiples
+    public Dropbox<String> selectedgobdbx, flowermenudbx, collecttriggerdbx, selectedstoragedbx, pfdbx; //it may be multiples
     public TextEntry waitingtimete;
 
     public int retry = 5;
@@ -87,7 +90,7 @@ public class AreaPicker extends Window implements Runnable {
                     try {
                         waitingtime = text.equals("") ? 0 : Integer.parseInt(text);
                         return (true);
-                    } catch (NumberFormatException e) {
+                    } catch (NumberFormatException ignore) {
                     }
                 }
                 return (false);
@@ -166,6 +169,31 @@ public class AreaPicker extends Window implements Runnable {
         selectedstoragedbx = dropbox(areastorageslist, "storage");
         areastoragesinfolbl = new Label("");
 
+        pfdbx = new Dropbox<String>(10, pflist) {
+            protected String listitem(int i) {
+                return pflist.get(i);
+            }
+
+            protected int listitems() {
+                return pflist.size();
+            }
+
+            protected void drawitem(GOut g, String item, int i) {
+                g.text(item, Coord.z);
+            }
+
+            public void change(String item) {
+                super.change(item);
+                int x = Text.render(item).sz().x;
+                if (sz.x != x + Dropbox.drop.sz().x + 2) resize(new Coord(x + Dropbox.drop.sz().x + 2, sz.y));
+            }
+
+            public boolean mousedown(Coord c, int btn) {
+                super.mousedown(c, btn);
+                if (dl != null) resizedl(pflist);
+                return (true);
+            }
+        };
         runbtn = new Button(50, "Run") {
             public void click() {
                 (runthread = new Thread(AreaPicker.this, "Area Collecting")).start();
@@ -175,7 +203,7 @@ public class AreaPicker extends Window implements Runnable {
             public void click() {
                 try {
                     stop();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignore) {
                 }
             }
         };
@@ -185,10 +213,10 @@ public class AreaPicker extends Window implements Runnable {
         appender.addRow(maininfolbl); //refreshbtn for flowermenu
         appender.addRow(new Label("1. Objects to collect"), selectgobsbtn, selectedgobdbx, areagobsinfolbl);
         appender.addRow(new Label("2. Flower Petal"), flowermenudbx); //may be make it multiple? (Take bark and sticks)
-        appender.addRow(new Label("3(WIP). Storage type"), collecttriggerdbx);
+        appender.addRow(new Label("3. Storage type"), collecttriggerdbx);
         appender.addRow(new Label("4(WIP). Objects to storage"), selectstoragebtn, selectedstoragedbx, areastoragesinfolbl);
 
-        appender.add(runbtn);
+        appender.addRow(pfdbx, runbtn);
         add(stopbtn, runbtn.c);
         stopbtn.hide();
 
@@ -196,11 +224,20 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public void run() {
+        if (checkcollectstate() != 0 && checkcollectstate() != 1) {
+            botLogPing("Select storage type", Color.WHITE);
+            return;
+        }
         runbtn.hide();
         stopbtn.show();
+        boolean ad = Config.autodrink;
+        if (ad) Config.autodrink = false;
+
         collecting();
+
         runbtn.show();
         stopbtn.hide();
+        if (ad) Config.autodrink = true;
         maininfolbl.settext("", Color.WHITE);
     }
 
@@ -213,13 +250,31 @@ public class AreaPicker extends Window implements Runnable {
     public void collecting() {
         try {
             for (int p = 0; p < currentgoblist.size(); p++) {
-                currentgoblist.get(p).toggleMarked();
+                if (PBotGobAPI.findGobById(ui, currentgoblist.get(p).getGobId()) != null) {
+                    currentgoblist.get(p).toggleMarked();
+                }
                 for (int i = 0; i < retry; i++) {
                     botLog("Gob is " + (p + 1) + " of " + currentgoblist.size() + ". Try is " + (i + 1) + " of " + retry, Color.YELLOW);
-                    if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
-                        botLog("Not enough space for item", Color.WHITE);
-                        stop();
+                    if (checkcollectstate() == -1 || checkcollectstate() == 0) {
+                        if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
+                            botLog("Not enough space for item. Stopping...", Color.WHITE);
+                            stop();
+                        }
                     }
+                    if (checkcollectstate() == 1) {
+                        if (!freeSlots() && PBotUtils.getItemAtHand(ui) != null) {
+                            botLog("Dropping...", Color.WHITE);
+                            if (!dropItemFromHand()) {
+                                botLog("Can't drop. Stopping...", Color.WHITE);
+                                stop();
+                            }
+                        }
+                    }
+                    if (PBotGobAPI.findGobById(ui, currentgoblist.get(p).getGobId()) == null) {
+                        botLog("Object not found. Skipping...", Color.WHITE);
+                        break;
+                    }
+
                     if (pfRightClick(currentgoblist.get(p))) {
                         waitForFlowerMenu();
                         if (petalExists()) {
@@ -247,21 +302,30 @@ public class AreaPicker extends Window implements Runnable {
                         break;
                     sleep(1);
                 }
-                currentgoblist.get(p).toggleMarked();
+                if (PBotGobAPI.findGobById(ui, currentgoblist.get(p).getGobId()) != null) {
+                    currentgoblist.get(p).toggleMarked();
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        botLog("Finish!", Color.GREEN);
+        botLogPing("Finish!", Color.GREEN);
     }
 
     public boolean pfRightClick(PBotGob pgob) throws InterruptedException {
         botLog("pathfinding " + pgob + "...", Color.WHITE);
         for (int i = 0; i < retry; i++) {
             botLog("try " + (i + 1) + " of " + retry + " pathfinding " + pgob + "...", Color.WHITE);
-            boolean yea = ui.gui.map.pathto(pgob.gob);
-            while (ui.gui != null && ui.gui.map != null && !ui.gui.map.isclearmovequeue())
-                sleep(10);
+            boolean yea;
+
+            if (checkpf() == 1) {
+                yea = ui.gui.map.pathto(pgob.gob);
+                while (ui.gui != null && ui.gui.map != null && !ui.gui.map.isclearmovequeue())
+                    sleep(10);
+            } else {
+                yea = pgob.pfClick(1, 0);
+            }
+
             if (yea) {   //very bad pathfinding
                 botLog("path found", Color.GREEN);
                 pgob.doClick(3, 0);
@@ -274,7 +338,7 @@ public class AreaPicker extends Window implements Runnable {
 
     public void waitMoving() throws InterruptedException {
         botLog("moving...", Color.WHITE);
-        if (PBotGobAPI.player(ui).isMoving()) {
+        while (PBotGobAPI.player(ui).isMoving()) {
             sleep(10);
         }
         botLog("move stop", Color.WHITE);
@@ -305,10 +369,22 @@ public class AreaPicker extends Window implements Runnable {
             sleep(5);
         }
         while (ui.gui.prog >= 0) {
-            if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
-                botLog("Not enough space for item", Color.WHITE);
-                ui.root.wdgmsg("gk", 27);
-                return (false);
+            if (checkcollectstate() == -1 || checkcollectstate() == 0) {
+                if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
+                    botLog("Not enough space for item. Stopping...", Color.WHITE);
+                    ui.root.wdgmsg("gk", 27);
+                    return (false);
+                }
+            }
+            if (checkcollectstate() == 1) {
+                if (!freeSlots() && PBotUtils.getItemAtHand(ui) != null) {
+                    botLog("Dropping...", Color.WHITE);
+                    if (!dropItemFromHand()) {
+                        botLog("Can't drop. Stopping...", Color.WHITE);
+                        ui.root.wdgmsg("gk", 27);
+                        return (false);
+                    }
+                }
             }
             sleep(25);
         }
@@ -398,8 +474,43 @@ public class AreaPicker extends Window implements Runnable {
             maininfolbl.settext(msg, clr);
             System.out.println(msg);
             ui.gui.botlog.append(msg, clr);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
         }
+    }
+
+    public void botLogPing(String msg, Color clr) {
+        try {
+            ui.gui.botmsg(msg, clr);
+        } catch (Exception ignore) {
+        }
+    }
+
+    public int checkcollectstate() {
+        if (collecttriggerdbx.sel == null) return -1;
+        for (int i = 0; i < collectstates.length; i++) {
+            if (collecttriggerdbx.sel.equals(collectstates[i])) return i;
+        }
+        return -2;
+    }
+
+    public int checkpf() {
+        if (pfdbx.sel == null) return -1;
+        for (int i = 0; i < collectstates.length; i++) {
+            if (pfdbx.sel.equals(pfstates[i])) return i;
+        }
+        return -2;
+    }
+
+    public boolean dropItemFromHand() {
+        botLog("dropping...", Color.WHITE);
+        for (int i = 0; i < retry; i++) {
+            if (PBotUtils.dropItemFromHand(ui, 0, 200)) {
+                botLog("dropped", Color.WHITE);
+                return (true);
+            } else
+                botLog("dropping failed", Color.WHITE);
+        }
+        return (false);
     }
 
     public void tick(int dt) {

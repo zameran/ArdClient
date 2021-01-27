@@ -2000,9 +2000,14 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     Hitbox[] pbox = Hitbox.hbfor(pl);
                     if (box != null && pbox != null && box.length > 0 && pbox.length > 0) {
                         for (Hitbox hb1 : box)
-                            for (Hitbox hb2 : pbox)
-                                if (configuration.insect(hb1.points, configuration.abs(hb2.points, 2), pathfindGob.rc, pl.rc))
-                                    return (true);
+                            for (Hitbox hb2 : pbox) {
+                                if (hb1.ishitable() && hb2.ishitable()) {
+                                    if (configuration.insect(hb1.points, configuration.abs(hb2.points, 1), pathfindGob, pl))
+                                        return (true);
+                                } else {
+                                    return pathfindGob.rc.dist(pl.rc) <= 5;
+                                }
+                            }
                         return (false);
                     } else
                         return pathfindGob.rc.dist(pl.rc) <= 5;
