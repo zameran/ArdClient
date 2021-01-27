@@ -690,6 +690,18 @@ public class PBotUtils {
             sleep(25);
     }
 
+    public static boolean dropItemFromHand(UI ui, int mod, int timeout) {
+        ui.gui.map.wdgmsg("drop", Coord.z, ui.gui.map.player().rc.floor(posres), mod);
+        int retries = 0;
+        while (getItemAtHand(ui) != null) {
+            if (retries > timeout / 25)
+                return false;
+            retries++;
+            sleep(25);
+        }
+        return true;
+    }
+
 //    public static void dropItemFromHand(int mod) {
 //        dropItemFromHand(PBotAPI.modeui(), mod);
 //    }
