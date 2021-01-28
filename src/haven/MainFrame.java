@@ -58,7 +58,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
     private final ThreadGroup g;
     public final Thread mt;
     DisplayMode fsmode = null, prefs = null;
-    public static final String TITLE = "ARD Unstable " + "???: The Tale of the Snail Kingdom";
+    public static final String TITLE = "ARD Unstable ???: Graveyard of Broken Clients";
 
     static {
         try {
