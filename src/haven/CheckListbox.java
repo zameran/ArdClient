@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CheckListbox extends Listbox<CheckListboxItem> {
-    private static final Tex chk = Resource.loadtex("gfx/hud/chkmarks");
+    public static final Tex chk = Resource.loadtex("gfx/hud/chkmarks");
     public List<CheckListboxItem> items = new ArrayList<CheckListboxItem>() {
         @Override
         public boolean add(CheckListboxItem value) {

@@ -7,11 +7,14 @@ import haven.DefSettings;
 import haven.Gob;
 import haven.MCache;
 import haven.UI;
+import haven.purus.pbot.PBotGobAPI;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Type;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -84,6 +87,22 @@ public abstract class Pathfinder {
         }
     }
 
+    public boolean pointinsect(Hitbox h, Coord xy) {
+        int[] x = new int[h.points.length];
+        int[] y = new int[h.points.length];
+        Gob player = PBotGobAPI.player(ui).gob;
+        Coord pc = player.rc.round();
+        float a = (float) player.geta();
+        for (int i = 0; i < h.points.length; i++) {
+            Coord c = pc.add(h.points[i].rotate(a).round());
+            x[i] = c.x;
+            y[i] = c.y;
+        }
+        Point p = new Point(xy.x, xy.y);
+        Polygon pg = new Polygon(x, y, h.points.length);
+        return (pg.contains(p));
+    }
+
     /**
      * Did we hit a bad spot at this coordinate?
      * Good spots are null or PLAYER
@@ -118,7 +137,7 @@ public abstract class Pathfinder {
                 Coord xy = new Coord(0, 0);
                 for (xy.x = c.x; xy.x < br.x; ++xy.x)
                     for (xy.y = c.y; xy.y < br.y; ++xy.y)
-                        if (ui.sess.glob.gobhitmap.checkHit(xy))
+                        if (!pointinsect(h, xy) && ui.sess.glob.gobhitmap.checkHit(xy))
                             return (true);
             }
         }
@@ -163,7 +182,7 @@ public abstract class Pathfinder {
                 for (xy.x = c.x; xy.x < br.x; ++xy.x)
                     for (xy.y = c.y; xy.y < br.y; ++xy.y) {
                         final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                        if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
+                        if (!pointinsect(h, xy) && t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
                             return (true);
                     }
             }
@@ -209,7 +228,7 @@ public abstract class Pathfinder {
                 for (xy.x = c.x; xy.x < br.x; ++xy.x)
                     for (xy.y = c.y; xy.y < br.y; ++xy.y) {
                         final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                        if (t != Tile.SHALLOWWATER && t != null)
+                        if (!pointinsect(h, xy) && t != Tile.SHALLOWWATER && t != null)
                             return (true);
                     }
             }

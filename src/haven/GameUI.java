@@ -2171,6 +2171,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         return null;
     }
 
+    public Window getwnd(Window wnd) {
+        for (Widget w = lchild; w != null; w = w.prev) {
+            if (w instanceof Window) {
+                if (w.equals(wnd))
+                    return (Window) w;
+            }
+        }
+        return null;
+    }
+
 
     private static final int WND_WAIT_SLEEP = 8;
 

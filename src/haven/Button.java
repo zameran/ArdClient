@@ -177,6 +177,12 @@ public class Button extends SIWidget {
         redraw();
     }
 
+    public void change(Color col) {
+        this.text = tf.render(Resource.getLocString(Resource.BUNDLE_BUTTON, text.text), col);
+        this.cont = this.text.img;
+        redraw();
+    }
+
     public void click() {
         if (action != null)
             action.run();

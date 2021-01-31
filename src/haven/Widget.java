@@ -1537,6 +1537,14 @@ public class Widget {
         return null;
     }
 
+    public boolean containschild(Widget w) {
+        for (Widget wdg = child; wdg != null; wdg = wdg.next) {
+            if (wdg.equals(w))
+                return true;
+        }
+        return false;
+    }
+
     public <T extends Widget> ArrayList<T> getchilds(Class<T> c) {
         ArrayList<T> widgets = new ArrayList<>();
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {
