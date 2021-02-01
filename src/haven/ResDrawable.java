@@ -109,8 +109,16 @@ public class ResDrawable extends Drawable {
 
         for (String hat : configuration.hatslist) {
             if (res.name.equals(hat)) {
-                spr = Sprite.create(gob, Resource.remote().loadwait(configuration.hatreplace), sdt);
-                return;
+                try {
+                    Resource r = Resource.remote().loadwait(configuration.hatreplace);
+                    spr = Sprite.create(gob, r, sdt);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
+                    spr = Sprite.create(gob, r, sdt);
+                    return;
+                }
             }
         }
         if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce")) {

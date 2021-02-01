@@ -29,6 +29,7 @@ package haven;
 import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
+import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.Type;
 import modification.configuration;
 
@@ -235,8 +236,16 @@ public class Composited implements Rendered, MapView.Clickable {
             Sprite s = null;
             for (String hat : configuration.hatslist) {
                 if (ed.res.res.get().name.equals(hat)) {
-                    s = Sprite.create(eqowner, Resource.remote().loadwait(configuration.hatreplace), ed.res.sdt.clone());
-                    break;
+                    try {
+                        Resource r = Resource.remote().loadwait(configuration.hatreplace);
+                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
+                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+                        break;
+                    }
                 }
             }
             if (s == null)

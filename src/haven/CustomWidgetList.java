@@ -5,19 +5,36 @@ import haven.sloth.util.ObservableMapListener;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implements ObservableMapListener<String, Boolean> {
     public final ObservableMap<String, Boolean> customlist;
     public final String jsonname;
+    public int width;
 
     public static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(o -> o.name);
 
     public CustomWidgetList(ObservableMap<String, Boolean> list, String jsonname) {
-        super(new Coord(200, 25), 10);
+//        super(new Coord(200, 25), 10);
+        super(new Coord(calcWidth(list.keySet()) + 50 + 2, 25), 10);
+        width = calcWidth(list.keySet()) + 50 + 2;
         customlist = list;
         customlist.addListener(this);
         this.jsonname = jsonname;
+    }
+
+    private static int calcWidth(Set<String> names) {
+        if (names.size() == 0)
+            return 0;
+        List<Integer> widths = names.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList());
+        return widths.stream().reduce(Integer::max).get();
+    }
+
+    private static int calcHeight(List<String> values) {
+        return Math.max(Text.render(values.get(0)).sz().y, 16);
     }
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
@@ -61,8 +78,20 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
         }
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
+    public void add(String name, Boolean val) {
+        if (name != null && !name.isEmpty() && !customlist.containsKey(name)) {
+            synchronized (customlist) {
+                customlist.put(name, val);
+            }
+            Utils.saveCustomList(customlist, jsonname);
+            additem(new Item(name));
+            update();
+        }
+    }
+
     private void update() {
-        Collections.sort(list, ITEM_COMPARATOR);
+        list.sort(ITEM_COMPARATOR);
         int n = listitems();
         for (int i = 0; i < n; i++) {
             listitem(i).c = itempos(i);
@@ -86,7 +115,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                 item.update(val);
             }
         } else {
-            add(key);
+            add(key, val);
         }
     }
 
@@ -106,7 +135,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
         private UI.Grab grab;
 
         public Item(String name) {
-            super(new Coord(200, 25));
+            super(new Coord(width, 25));
             this.name = name;
 
             cb = add(new CheckBox(name), 3, 3);
@@ -124,7 +153,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                     //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
                     return super.mouseup(Coord.z, button);
                 }
-            }, 175, 0);
+            }, width - 25, 0);
         }
 
         @Override

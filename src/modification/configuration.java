@@ -13,6 +13,8 @@ import haven.Tex;
 import haven.TexI;
 import haven.Utils;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.util.ObservableMap;
+import org.apache.commons.collections4.list.TreeList;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -40,7 +42,28 @@ public class configuration {
     public static String errorPath = "errors";
     public static String pbotErrorPath = "pboterrors";
     public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
-    public static String hatreplace = "gfx/terobjs/items/sprucecap";
+    public static List<String> normalhatslist = new TreeList<>(Arrays.asList(
+            "gfx/terobjs/items/linkhat",
+            "gfx/terobjs/items/hats/jesterscap",
+            "gfx/terobjs/items/hats/blackguardsmanscap",
+            "gfx/terobjs/items/hats/deputyshat",
+            "gfx/terobjs/items/hats/redcorsairshat",
+            "gfx/terobjs/items/hats/inquisitorshat",
+            "gfx/terobjs/items/hats/yulebell",
+            "gfx/terobjs/items/hats/christmusketeershat",
+            "gfx/terobjs/items/hats/magicrown",
+            "gfx/terobjs/items/hats/evileyehat",
+            "gfx/terobjs/items/hats/highwaymanhat",
+            "gfx/terobjs/items/hats/exotichat",
+            "gfx/terobjs/items/hats/spiderfarmershat",
+            "gfx/terobjs/items/hats/flagshipcaptain",
+            "gfx/terobjs/items/hats/merrygreenhat",
+            "gfx/terobjs/items/sprucecap",
+            "gfx/terobjs/largechest"
+    ));
+    public static ObservableMap<String, Boolean> customHats = Utils.loadCustomList(normalhatslist, "CustomHats");
+    public static String defaultbrokenhat = "gfx/terobjs/items/sprucecap";
+    public static String hatreplace = Utils.getpref("hatreplace", defaultbrokenhat);
 
     public static boolean customTitleBoolean = Utils.getprefb("custom-title-bol", false);
 

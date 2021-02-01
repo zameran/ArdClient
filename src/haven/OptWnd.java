@@ -3269,6 +3269,73 @@ public class OptWnd extends Window {
 
         appender.add(new Label(""));
 
+        appender.addRow(new Label("Broken hat replacer"), new Button(50, "Configurate") {
+            public void click() {
+                Window w = new Window(Coord.z,"Hat wardrobe");
+                WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
+                final CustomWidgetList list = new CustomWidgetList(configuration.customHats, "CustomHats") {
+                    public void wdgmsg(Widget sender, String msg, Object... args) {
+                        if (!msg.equals("changed")) {
+                            super.wdgmsg(sender, msg, args);
+                        } else {
+                            String name = (String) args[0];
+                            boolean val = (Boolean) args[1];
+                            synchronized (customlist) {
+                                customlist.put(name, val);
+                            }
+                            if (val) {
+                                for (Map.Entry<String, Boolean> entry : customlist.entrySet()) {
+                                    if (entry.getValue() && !entry.getKey().equals(name)) {
+                                        synchronized (customlist) {
+                                            customlist.put(entry.getKey(), false);
+                                        }
+                                    }
+                                }
+                                configuration.hatreplace = name;
+                                Utils.setpref("hatreplace", name);
+                            } else {
+                                configuration.hatreplace = configuration.defaultbrokenhat;
+                                Utils.setpref("hatreplace", configuration.defaultbrokenhat);
+                            }
+                            Utils.saveCustomList(customlist, jsonname);
+                        }
+                    }
+                };
+                final TextEntry value = new TextEntry(150, "") {
+                    @Override
+                    public void activate(String text) {
+                        list.add(text);
+                        settext("");
+                    }
+                };
+                wva.add(list);
+                wva.addRow(value, new Button(45, "Add") {
+                    @Override
+                    public void click() {
+                        list.add(value.text, false);
+                        value.settext("");
+                    }
+                }, new Button(45, "Load Default") {
+                    @Override
+                    public void click() {
+                        for (String dmark : configuration.normalhatslist) {
+                            boolean exist = false;
+                            for (String mark : configuration.customHats.keySet()) {
+                                if (dmark.equalsIgnoreCase(mark)) {
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                            if (!exist)
+                                list.put(dmark, false);
+                        }
+                    }
+                });
+                w.pack();
+
+                ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
+            }
+        });
         appender.add(new CheckBox("Player Status tooltip") {
             {
                 a = configuration.statustooltip;
