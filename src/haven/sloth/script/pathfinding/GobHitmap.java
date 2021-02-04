@@ -235,9 +235,9 @@ public class GobHitmap {
                 if (h.canHit()) {
                     ArrayList<Coord> coordes = new ArrayList<>();
                     for (int j = 0; j < h.points.length; j++) {
-                        Coord c = new Coord(h.points[j].round().x, -h.points[j].round().y);
+                        Coord c = new Coord(h.points[j].round().x, h.points[j].round().y);
                         c = c.rotate((float) g.a);
-                        final Coord gc = g.getc().round();
+                        final Coord gc = new Coord(g.getc());
                         c = gc.add(c);
                         coordes.add(c);
                     }

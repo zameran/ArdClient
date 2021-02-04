@@ -136,28 +136,28 @@ public class Hitbox {
         this.hitable = hitable;
     }
 
-    public Coord offset() {
-        double minx = 0, miny = 0;
+    public Coord2d offset() {
+        double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
         for (Coord2d c2 : points) {
             minx = Math.min(minx, c2.x);
             miny = Math.min(miny, c2.y);
         }
 //        return Coord.z.sub(BUFFER_SIZE, BUFFER_SIZE);
 //        return new Coord2d(minx, miny).round().add(BUFFER_SIZE, BUFFER_SIZE);
-        return new Coord2d(minx, miny).round();
+        return new Coord2d(minx, miny);
 //        return Coord.z;
 //        return new Coord2d(minx, miny).round().sub(BUFFER_SIZE, BUFFER_SIZE);
     }
 
-    public Coord size() {
-        double maxx = 0, maxy = 0, minx = 0, miny = 0;
+    public Coord2d size() {
+        double maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE, minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
         for (Coord2d c2 : points) {
             maxx = Math.max(maxx, c2.x);
             maxy = Math.max(maxy, c2.y);
             minx = Math.min(minx, c2.x);
             miny = Math.min(miny, c2.y);
         }
-        return new Coord2d(maxx - minx, maxy - miny).round();
+        return new Coord2d(maxx - minx, maxy - miny);
 //        return new Coord2d(maxx - minx, maxy - miny).round()/*.add(BUFFER_SIZE * 2, BUFFER_SIZE * 2)*/;
 //        return new Coord2d(maxx, maxy).ceil();
 //        return new Coord2d(maxx - minx, maxy - miny).round().add(BUFFER_SIZE, BUFFER_SIZE);

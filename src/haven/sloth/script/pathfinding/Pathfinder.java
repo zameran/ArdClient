@@ -87,22 +87,6 @@ public abstract class Pathfinder {
         }
     }
 
-    public boolean pointinsect(Hitbox h, Coord xy) {
-        int[] x = new int[h.points.length];
-        int[] y = new int[h.points.length];
-        Gob player = PBotGobAPI.player(ui).gob;
-        Coord pc = player.rc.round();
-        float a = (float) player.geta();
-        for (int i = 0; i < h.points.length; i++) {
-            Coord c = pc.add(h.points[i].rotate(a).round());
-            x[i] = c.x;
-            y[i] = c.y;
-        }
-        Point p = new Point(xy.x, xy.y);
-        Polygon pg = new Polygon(x, y, h.points.length);
-        return (pg.contains(p));
-    }
-
     /**
      * Did we hit a bad spot at this coordinate?
      * Good spots are null or PLAYER
@@ -131,15 +115,13 @@ public abstract class Pathfinder {
 //        }
 
         for (Hitbox h : plhb) {
-            for (int i = 0; i < h.points.length; i++) {
-                final Coord c = mc.add(h.offset());
-                final Coord br = c.add(h.size());
-                Coord xy = new Coord(0, 0);
-                for (xy.x = c.x; xy.x < br.x; ++xy.x)
-                    for (xy.y = c.y; xy.y < br.y; ++xy.y)
-                        if (!pointinsect(h, xy) && ui.sess.glob.gobhitmap.checkHit(xy))
-                            return (true);
-            }
+            final Coord2d c = h.offset().add(mc).sub(0.5, 0.5);
+            final Coord2d br = h.size().add(c).add(1, 1);
+            Coord2d xy = new Coord2d(0, 0);
+            for (xy.x = c.x; xy.x < br.x; xy.x += 0.5)
+                for (xy.y = c.y; xy.y < br.y; xy.y += 0.5)
+                    if (ui.sess.glob.gobhitmap.checkHit(xy.floor()))
+                        return (true);
         }
 
         return (false);
@@ -175,17 +157,15 @@ public abstract class Pathfinder {
 //        }
 
         for (Hitbox h : plhb) {
-            for (int i = 0; i < h.points.length; i++) {
-                final Coord c = mc.add(h.offset());
-                final Coord br = c.add(h.size());
-                Coord xy = new Coord(0, 0);
-                for (xy.x = c.x; xy.x < br.x; ++xy.x)
-                    for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                        final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                        if (!pointinsect(h, xy) && t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
-                            return (true);
-                    }
-            }
+            final Coord c = mc.add(h.offset().floor());
+            final Coord br = c.add(h.size().floor());
+            Coord xy = new Coord(0, 0);
+            for (xy.x = c.x; xy.x < br.x; ++xy.x)
+                for (xy.y = c.y; xy.y < br.y; ++xy.y) {
+                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+                    if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
+                        return (true);
+                }
         }
         return (false);
     }
@@ -221,17 +201,15 @@ public abstract class Pathfinder {
 //        }
 
         for (Hitbox h : plhb) {
-            for (int i = 0; i < h.points.length; i++) {
-                final Coord c = mc.add(h.offset());
-                final Coord br = c.add(h.size());
-                Coord xy = new Coord(0, 0);
-                for (xy.x = c.x; xy.x < br.x; ++xy.x)
-                    for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                        final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
-                        if (!pointinsect(h, xy) && t != Tile.SHALLOWWATER && t != null)
-                            return (true);
-                    }
-            }
+            final Coord c = mc.add(h.offset().floor());
+            final Coord br = c.add(h.size().floor());
+            Coord xy = new Coord(0, 0);
+            for (xy.x = c.x; xy.x < br.x; ++xy.x)
+                for (xy.y = c.y; xy.y < br.y; ++xy.y) {
+                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+                    if (t != Tile.SHALLOWWATER && t != null)
+                        return (true);
+                }
         }
         return (false);
     }
