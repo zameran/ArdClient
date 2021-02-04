@@ -77,10 +77,9 @@ const winepressBtn = () => {
 };
 
 const pressBtn = () => {
+    PBotUtils.sleep(2000); //wait
 	const pressWindow = PBotUtils.getWindow(ui, "Extraction Press");
 	const pressInventory = PBotWindowAPI.getInventory(pressWindow);
-	
-	PBotUtils.sleep(1000); //wait
 
 	if (PBotCharacterAPI.getStamina(ui) < 60)
         if (!PBotUtils.drink(ui, true)) {
@@ -94,27 +93,12 @@ const pressBtn = () => {
 	let seedInPress = pressInventory.getInventoryItemsByResnames(['gfx/invobjs/seed-grape']);
 	
 	const Button = Java.type('haven.Button');
-	let pressbs = pressWindow.getchilds(Button);  //Find Press Button
-	let pressb;
+	const pressb = pressWindow.getchild(Button);  //Find Press Button
 	
 	const VMeter = Java.type('haven.VMeter');
 	const juiceMeter = pressWindow.getchild(VMeter);
-	let juiceAmount = juiceMeter.amount / 100;
 
-	for (let pb of pressbs) {
-	    PBotUtils.sysMsg(ui, pb.text.text);
-	    if (pb.text.text == "Press") {
-	        pressb = pb
-	        break;
-	    }
-	}
-	if (pressb == null) {
-		PBotUtils.sysMsg(ui, "Press Button not found!");
-		return;
-	} else if (pressb.text.text != "Press") {
-		PBotUtils.sysMsg(ui, "Press Button not found!");
-		return;
-	}
+	let juiceAmount = juiceMeter.amount / 100;
 	
 	while ((juiceAmount != 1 || (grapeInPlayer.size() != 0 && grapeInPress.size() != 0)) && !shouldStop()) {
 		let freePressSlots = pressInventory.freeSlotsInv();
@@ -195,7 +179,7 @@ function fillJuiceBarrel(jb, wp) {
 	PBotUtils.sleep(1000);
 	
 	while (PBotGobAPI.player(ui).getPoses().contains("gfx/borka/banzai") && !shouldStop()) {
-		PBotUtils.pfmove(ui, playerCoord.x, playerCoord.y);
+		PBotUtils.pfLeftClick(ui, playerCoord.x, playerCoord.y);
 		PBotUtils.mapClick(ui, juiceBarrelCoord.x, juiceBarrelCoord.y, 3, 0);
 		PBotUtils.sleep(1000);
 	}
@@ -281,7 +265,7 @@ const startBtn = () => {
 		}
 
 		while (PBotUtils.getWindow(ui, "Extraction Press") == null && !shouldStop()) {
-			if (PBotUtils.PathfinderRightClick(ui, winepressGob, 0)) {
+			if (PBotUtils.pfRightClick(ui, winepressGob, 0)) {
 			} else {
 				PBotUtils.sysMsg(ui, "Winepress not found");
 				break;
