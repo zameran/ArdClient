@@ -121,14 +121,14 @@ public class SeedCropFarmer extends Window implements Runnable {
                     retryharvest++;
                     lblProg2.settext("Moving to Harvest " + retryharvest);
                     if (!PBotUtils.pfGobClick(ui, g, 1, 0)) {
-                        PBotUtils.sysMsg(ui, "Path not found");
+                        System.out.println("Path not found");
                         continue;
                     } else {
                         PBotUtils.pfRightClick(ui, g, 0);
                     }
                     lblProg2.settext("Waiting for crop to disappear " + retryharvest);
                     if (!harvest()) {
-                        PBotUtils.sysMsg(ui, "Harvest not found");
+                        System.out.println("Harvest not found");
                         continue;
                     }
                 }
@@ -263,7 +263,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     PBotUtils.mapInteractClick(ui);
                                 else {
                                     if (!inHandToInventory()) {
-                                        PBotUtils.sysMsg(ui, "Drop can not");
+                                        System.out.println("Drop can not");
                                         if (PBotUtils.getItemAtHand(ui) != null)
                                             PBotUtils.dropItem(ui, 0);
                                     }
@@ -276,7 +276,7 @@ public class SeedCropFarmer extends Window implements Runnable {
 
                         lblProg2.settext("Dropping seeds");
                         if (!inHandToInventory()) {
-                            PBotUtils.sysMsg(ui, "Drop can not");
+                            System.out.println("Drop can not");
                             if (PBotUtils.getItemAtHand(ui) != null)
                                 PBotUtils.dropItem(ui, 0);
                         }
@@ -293,47 +293,25 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 return;
                             lblProg2.settext("Grabbing seeds2");
                             Inventory inv = ui.gui.maininv;
-                            lblProg2.settext("Grabbing seeds21");
                             while (inv.getItemPartial("seed") == null) {
-                                lblProg2.settext("Grabbing seeds22");
                                 System.out.println(inv.getItemPartial("seed") + "");
-                                lblProg2.settext("Grabbing seeds23");
-                                PBotUtils.sysMsg(ui, inv.getItemPartial("seed") + "");
-                                lblProg2.settext("Grabbing seeds24");
                                 PBotUtils.sleep(10);
                             }
-                            lblProg2.settext("Grabbing seeds25");
                             WItem flax = inv.getItemPartial("seed");
-                            lblProg2.settext("Grabbing seeds26");
                             GItem flax2 = flax.item;
-                            lblProg2.settext("Grabbing seeds27");
                             List<WItem> items = inv.getIdenticalItems((flax2)); // acquires all seed stacks in inventory
-                            lblProg2.settext("Grabbing seeds28");
                             sort(items); // sorts by quality
-                            lblProg2.settext("Grabbing seeds29");
                             for (WItem seeds : items) {
-                                lblProg2.settext("Grabbing seeds210");
                                 GItem item = seeds.item;
-                                lblProg2.settext("Grabbing seeds210");
                                 if (PBotUtils.getAmount(item) >= 5) {
-                                    lblProg2.settext("Grabbing seeds212");
-                                    lblProg2.settext("Grabbing seeds213");
                                     PBotUtils.takeItem(ui, item, 1000);
-                                    lblProg2.settext("Grabbing seeds214");
                                     while (PBotUtils.getItemAtHand(ui) == null) { // just a double verification that we have successfully picked up seeds, should account for lag
                                         retryharvest++;
-                                        lblProg2.settext("Grabbing seeds215");
                                         if (retryharvest > 500) {
-                                            lblProg2.settext("Grabbing seeds216");
                                             retryharvest = 0;
-                                            lblProg2.settext("Grabbing seeds217");
-                                            lblProg2.settext("Grabbing seeds218");
                                             PBotUtils.takeItem(ui, item, 1000);
                                         }
-                                        lblProg2.settext("Grabbing seeds219");
                                         System.out.println(PBotUtils.getItemAtHand(ui) + " " + retryharvest);
-                                        lblProg2.settext("Grabbing seeds220");
-                                        PBotUtils.sysMsg(ui, PBotUtils.getItemAtHand(ui) + " " + retryharvest);
                                         PBotUtils.sleep(10);
                                     }
                                     break;
@@ -965,7 +943,7 @@ public class SeedCropFarmer extends Window implements Runnable {
             retrytake++;
             lblProg2.settext("Grabbing seeds " + retrytake);
             if (harvestItem() == null || !harvestItem().takeItem(1000)) {
-                PBotUtils.sysMsg(ui, "Take can not");
+                System.out.println("Take can not");
                 continue;
             }
         }
