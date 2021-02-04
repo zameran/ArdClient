@@ -1,7 +1,4 @@
-/* Preprocessed source code */
 package haven.res.lib.vmat;
-
-/* $use: lib/uspr */
 
 import haven.FastMesh;
 import haven.Gob;
@@ -16,8 +13,9 @@ import java.util.LinkedList;
 
 public class VarSprite extends UnivSprite {
     static {
-        dev.checkFileVersion("lib/vmat", 31);
+        dev.checkFileVersion("lib/vmat", 34);
     }
+
     private Gob.ResAttr.Cell<Mapping> aptr;
     private Mapping cmats;
 

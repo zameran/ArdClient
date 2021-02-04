@@ -1,7 +1,4 @@
-/* Preprocessed source code */
 package haven.res.lib.vmat;
-
-/* $use: lib/uspr */
 
 import haven.FastMesh;
 import haven.Gob;
@@ -15,8 +12,9 @@ import java.util.LinkedList;
 
 public abstract class Mapping extends Gob.ResAttr {
     static {
-        dev.checkFileVersion("lib/vmat", 31);
+        dev.checkFileVersion("lib/vmat", 34);
     }
+
     public abstract Material mergemat(Material orig, int mid);
 
     public Rendered[] apply(Resource res) {
@@ -39,5 +37,3 @@ public abstract class Mapping extends Gob.ResAttr {
         }
     };
 }
-
-/* >gattr: haven.res.lib.vmat.Materials */
