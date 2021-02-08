@@ -71,7 +71,7 @@ public class StaticSprite extends Sprite {
                 try {
                     rl.add(lr.l.make(owner));
                 } catch (Exception e) {
-                    //e.printStackTrace(); FIXME Tried to fetch non-present res-loaded class haven.RenderLink$ArgLink from gfx/fx/eq
+                    //e.printStackTrace(); //FIXME Tried to fetch non-present res-loaded class haven.RenderLink$ArgLink from gfx/fx/eq
                 }
         }
         if (res.layer(Resource.audio, "amb") != null)

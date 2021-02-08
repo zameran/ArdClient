@@ -233,7 +233,7 @@ public class Composited implements Rendered, MapView.Clickable {
 
         private SpriteEqu(ED ed) {
             super(ed);
-            Sprite s = null;
+//            Sprite s = null;
 //            for (String hat : configuration.hatslist) {
 //                if (ed.res.res.get().name.equals(hat)) {
 //                    try {
@@ -249,8 +249,9 @@ public class Composited implements Rendered, MapView.Clickable {
 //                }
 //            }
 //            if (s == null)
-                s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
-            this.spr = s;
+//                s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+//            this.spr = s;
+            this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
         public void draw(GOut g) {
