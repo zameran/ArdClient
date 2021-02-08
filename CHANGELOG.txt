@@ -1,3 +1,7 @@
+20210208
+Hats fix. A lot of fix. AreaPicker improve.
+~
+
 20210204
 Bug Fixes
 ~
