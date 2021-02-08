@@ -6,15 +6,22 @@ import java.awt.font.TextLayout;
 
 public class ResizableTextEntry extends TextEntry {
     public int addWidth = 30;
+    public final int defwidth;
 
+    public ResizableTextEntry(int defwidth,  String deftext) {
+        super(defwidth, deftext, null, null);
+        this.defwidth = defwidth;
+    }
     public ResizableTextEntry(String deftext) {
         super(0, deftext, null, null);
+        this.defwidth = 0;
     }
 
     public void draw(GOut g) {
         Coord size = Text.render(text, Color.WHITE, fnd).sz();
-        if (sz.x != size.x + addWidth)
-            sz = new Coord(size.x + addWidth, mext.getHeight());
+        int w = text.equals("") ? Math.max(defwidth, addWidth) : Math.max(Math.max(size.x + 12, addWidth), defwidth);
+        if (sz.x != w)
+            sz = new Coord(w, mext.getHeight());
         super.draw(g);
     }
 

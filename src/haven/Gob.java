@@ -166,13 +166,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         public boolean setup(RenderList rl) {
             if (spr != null) {
-                if (name().equals("gfx/terobjs/trees/yulestar-fir") || name().equals("gfx/terobjs/trees/yulestar-spruce")) {
-                    if (name().equals("gfx/terobjs/trees/yulestar-fir"))
-                        rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
-                    else
-                        rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-                    rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
-                }
+//                if (name().equals("gfx/terobjs/trees/yulestar-fir") || name().equals("gfx/terobjs/trees/yulestar-spruce")) {
+//                    if (name().equals("gfx/terobjs/trees/yulestar-fir"))
+//                        rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
+//                    else
+//                        rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
+//                    rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
+//                }
 
                 rl.add(spr, null);
             }
@@ -1053,10 +1053,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         } else {
             synchronized (ols) {
                 for (Overlay ol : ols) {
-                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce")) {
-                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
-                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
-                    }
+//                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce")) {
+//                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
+//                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
+//                    }
                     rl.add(ol, null);
                 }
                 for (Overlay ol : ols) {

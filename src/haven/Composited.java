@@ -234,21 +234,21 @@ public class Composited implements Rendered, MapView.Clickable {
         private SpriteEqu(ED ed) {
             super(ed);
             Sprite s = null;
-            for (String hat : configuration.hatslist) {
-                if (ed.res.res.get().name.equals(hat)) {
-                    try {
-                        Resource r = Resource.remote().loadwait(configuration.hatreplace);
-                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
-                        break;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
-                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
-                        break;
-                    }
-                }
-            }
-            if (s == null)
+//            for (String hat : configuration.hatslist) {
+//                if (ed.res.res.get().name.equals(hat)) {
+//                    try {
+//                        Resource r = Resource.remote().loadwait(configuration.hatreplace);
+//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+//                        break;
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
+//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+//                        break;
+//                    }
+//                }
+//            }
+//            if (s == null)
                 s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
             this.spr = s;
         }

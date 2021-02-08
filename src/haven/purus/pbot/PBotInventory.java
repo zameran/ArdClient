@@ -109,7 +109,7 @@ public class PBotInventory {
         for (PBotItem item : getInventoryContents()) {
             String name = item.getResname();
             for (String s : resnames) {
-                if (s.contains(name))
+                if (name != null && name.contains(s))
                     items.add(item);
             }
         }

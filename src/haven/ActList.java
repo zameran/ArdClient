@@ -66,7 +66,7 @@ public class ActList extends Listbox<ActList.ActItem> {
     @Override
     protected void drawitem(GOut g, ActItem item, int i) {
         g.image(item.icon, Coord.z);
-        g.aimage(item.name.tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
+        g.aimage(RichText.render(item.name.text, -1).tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
     }
 
     public class ActItem {

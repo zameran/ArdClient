@@ -68,7 +68,11 @@ public class StaticSprite extends Sprite {
         }
         for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
             if ((lr.id < 0) || (((1 << lr.id) & fl) != 0))
-                rl.add(lr.l.make(owner));
+                try {
+                    rl.add(lr.l.make(owner));
+                } catch (Exception e) {
+                    //e.printStackTrace(); FIXME Tried to fetch non-present res-loaded class haven.RenderLink$ArgLink from gfx/fx/eq
+                }
         }
         if (res.layer(Resource.audio, "amb") != null)
             rl.add(new ActAudio.Ambience(res));

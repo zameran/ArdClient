@@ -437,6 +437,8 @@ public class Hitbox {
             if (rd != null)
                 if (res.name.endsWith("/pow") && (rd.sdt.peekrbuf(0) == 33 || rd.sdt.peekrbuf(0) == 17))
                     return (false);
+                if (res.name.equals("gfx/terobjs/vflag"))
+                    return (false);
 //            if (checkOverlay(gob, id)) return (false);
         }
         return (true);

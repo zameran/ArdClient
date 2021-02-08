@@ -130,6 +130,7 @@ public class MenuSearch extends Window implements ObservableListener<MenuGrid.Pa
                 list.add(pag);
             }
         }
+        refilter();
     }
 
     @Override

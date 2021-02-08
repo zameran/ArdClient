@@ -6,6 +6,8 @@ import haven.GameUI;
 import haven.Inventory;
 import haven.WItem;
 import haven.Widget;
+import haven.purus.pbot.PBotInventory;
+import haven.purus.pbot.PBotItem;
 import haven.purus.pbot.PBotUtils;
 
 import java.awt.Color;
@@ -25,30 +27,26 @@ public class FillCheeseTray implements Runnable {
 
     @Override
     public void run() {
-        synchronized (gui.ui.root.lchild) {
-            try {
-                for (Widget q = gui.ui.root.lchild; q != null; q = q.rnext()) {
-                    if (q instanceof Inventory) {
-                        tray = getTrays2((Inventory) q);
-                        if (tray != null) {
-                            trays = getTrays((Inventory) q);
-                            System.out.println("trays size : " + trays.size());
-                        }
-                    }
+        try {
+            for (PBotInventory pBotInventory : PBotUtils.getAllInventories(gui.ui)) {
+                tray = getTrays2(pBotInventory.inv);
+                if (tray != null) {
+                    trays = getTrays(pBotInventory.inv);
+                    System.out.println("trays size : " + trays.size());
                 }
-                for (WItem item : trays) {
-                    if (item.item.getcontents() != null)
-                        System.out.println("contents not null");
-                    else
-                        System.out.println("contents null");
-                    if (item.item.getcontents() == null)
-                        trays2.add(item);
-                    else if (item.item.getcontents().iscurds)
-                        trays2.add(item);
-                }
-            } catch (NullPointerException q) {
-                q.printStackTrace();
             }
+            for (WItem item : trays) {
+                if (item.item.getcontents() != null)
+                    System.out.println("contents not null");
+                else
+                    System.out.println("contents null");
+                if (item.item.getcontents() == null)
+                    trays2.add(item);
+                else if (item.item.getcontents().iscurds)
+                    trays2.add(item);
+            }
+        } catch (NullPointerException q) {
+            q.printStackTrace();
         }
         if (trays2.size() == 0) {
             PBotUtils.sysMsg(gui.ui, "No trays with space found, not running.", Color.white);
@@ -82,19 +80,11 @@ public class FillCheeseTray implements Runnable {
         PBotUtils.sysMsg(gui.ui, "Done", Color.white);
     }
 
-    private java.util.List<WItem> getTrays(Inventory inv) {
-        List<WItem> trays = inv.getItemsPartial("Cheese Tray");
-        // BotUtils.sysMsg("trying to find trays", Color.WHITE);
-        if (trays == null)
-            return null;
-        return trays;
+    private List<WItem> getTrays(Inventory inv) {
+        return inv.getItemsPartial("Cheese Tray");
     }
 
     private WItem getTrays2(Inventory inv) {
-        WItem trays = inv.getItemPartialTrays("Tray");
-        // BotUtils.sysMsg("trying to find trays", Color.WHITE);
-        if (trays == null)
-            return null;
-        return trays;
+        return inv.getItemPartialTrays("Tray");
     }
 }
