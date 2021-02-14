@@ -28,6 +28,7 @@ package haven;
 
 
 import haven.automation.Discord;
+import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.BPRadSprite;
 import haven.resutil.FoodInfo;
@@ -40,6 +41,9 @@ import integrations.mapv4.MappingClient;
 import modification.configuration;
 import modification.dev;
 import modification.resources;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -47,6 +51,7 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -532,7 +537,7 @@ public class OptWnd extends Window {
                     }
                 });
 
-                appender.add(new Label("Disable animations (req. restart):"));
+                appender.add(new Label("Disable animations:"));
                 CheckListbox disanimlist = new CheckListbox(320, Config.disableanim.values().size(), 18 + Config.fontadd) {
                     @Override
                     protected void itemclick(CheckListboxItem itm, int button) {
@@ -818,7 +823,7 @@ public class OptWnd extends Window {
                     ui.gui.act("lo");
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
-                    MainFrame.instance.p.closeSession(ui);
+                    //MainFrame.instance.p.closeSession(ui);
                 }
             }, new Coord(210, 330));
         }
@@ -1950,6 +1955,17 @@ public class OptWnd extends Window {
             public void set(boolean val) {
                 Utils.setprefb("showservertime", val);
                 Config.showservertime = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Show polowners info") {
+            {
+                a = configuration.showpolownersinfo;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showpolownersinfo", val);
+                configuration.showpolownersinfo = val;
                 a = val;
             }
         });
@@ -3254,11 +3270,6 @@ public class OptWnd extends Window {
                                 if (ui != null && ui.root != null && ui.root.getchild(LoginScreen.class) != null)
                                     ui.uimsg(1, "bg");
                             }
-
-                            @Override
-                            public Object tooltip(Coord c0, Widget prev) {
-                                return Text.render("Request restart").tex();
-                            }
                         },
                 pictureList != null ? makePictureChoiseDropdown() : new Label("The modification folder has no pictures") {
                     @Override
@@ -3271,7 +3282,7 @@ public class OptWnd extends Window {
 
         appender.addRow(new Label("Broken hat replacer"), new Button(50, "Configurate") {
             public void click() {
-                Window w = new Window(Coord.z,"Hat wardrobe");
+                Window w = new Window(Coord.z, "Hat wardrobe");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                 final CustomWidgetList list = new CustomWidgetList(configuration.customHats, "CustomHats") {
                     public void wdgmsg(Widget sender, String msg, Object... args) {
@@ -3332,6 +3343,257 @@ public class OptWnd extends Window {
                     }
                 });
                 w.pack();
+
+                ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
+            }
+
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Hats works! It is now an unused function. Suggest your changes for it revival").tex();
+            }
+        });
+        appender.addRow(new CheckBox("Cloth painter") {
+            {
+                a = configuration.paintcloth;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("paintcloth", val);
+                configuration.paintcloth = val;
+                a = val;
+            }
+        }, new Button(50, "Configurate") {
+            public void click() {
+                Window w = new Window(Coord.z, "Cloth Painter") {{
+                    WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                    CustomWidgetList cwl = new CustomWidgetList(configuration.painedcloth, "PaintedClothList", true) {
+                        public void wdgmsg(Widget sender, String msg, Object... args) {
+                            if (msg.equals("option")) {
+                                String name = (String) args[0];
+                                Window settings = win(name, getHashJSON(name));
+                                ui.root.adda(settings, ui.root.sz.div(2), 0.5, 0.5);
+                            } else {
+                                super.wdgmsg(sender, msg, args);
+                                savejson();
+                            }
+                        }
+
+                        public JSONObject getHashJSON(String name) {
+                            JSONObject jo = new JSONObject();
+                            try {
+                                jo = configuration.painedclothjson.getJSONObject(name);
+                            } catch (JSONException ignored) {
+                            }
+                            return (jo);
+                        }
+
+                        public Window win(String name, JSONObject json) {
+                            return (new Window(Coord.z, name) {{
+                                WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
+                                wva.setHorizontalMargin(2);
+                                for (String f : configuration.clothfilters) {
+                                    boolean check = false;
+                                    try {
+                                        check = json.getBoolean(f);
+                                    } catch (JSONException ignored) {
+                                    }
+                                    wva.add(cbox(f, check, name));
+                                }
+                                JSONArray colar = new JSONArray();
+                                boolean check = false;
+                                int a = -1, d = -1, s = -1, e = -1, shine = 0;
+                                try {
+                                    colar = json.getJSONArray(configuration.clothcol);
+                                } catch (JSONException ignored) {
+                                }
+                                if (colar.length() > 0) {
+                                    try {
+                                        check = colar.getBoolean(0);
+                                    } catch (JSONException ignored) {
+                                    }
+                                    JSONObject colorj = new JSONObject();
+                                    try {
+                                        colorj = colar.getJSONObject(1);
+                                    } catch (JSONException i) {
+                                    }
+                                    if (colorj.length() > 0) {
+                                        try {
+                                            a = colorj.getInt("Ambient");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            d = colorj.getInt("Diffuse");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            s = colorj.getInt("Specular");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            e = colorj.getInt("Emission");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            shine = colorj.getInt("Shine");
+                                        } catch (JSONException ignored) {
+                                        }
+                                    }
+                                }
+                                wva.addRow(cbox(configuration.clothcol, check, name),
+                                        ccol(a, "Ambient", name, this),
+                                        ccol(d, "Diffuse", name, this),
+                                        ccol(s, "Specular", name, this),
+                                        ccol(e, "Emission", name, this),
+                                        new HSlider(100, -100, 100, shine) {
+                                            public void changed() {
+                                                savejson(name, parent);
+                                            }
+
+                                            public Object tooltip(Coord c0, Widget prev) {
+                                                return Text.render("Shine: " + val).tex();
+                                            }
+                                        });
+                                pack();
+                            }});
+                        }
+
+                        public CheckBox cbox(String name, boolean b, String wname) {
+                            return (new CheckBox(name) {
+                                {
+                                    a = b;
+                                }
+
+                                public void set(boolean val) {
+                                    super.set(val);
+                                    savejson(wname, parent);
+                                }
+                            });
+                        }
+
+                        public ColorPreview ccol(int i, String name, String wname, Window pa) {
+                            return (new ColorPreview(new Coord(20, 20), new Color(i, true), val -> {
+                                savejson(wname, pa);
+                            }, name) {
+
+                            });
+                        }
+
+                        public JSONObject wjson(Widget json) {
+                            JSONObject jo = new JSONObject();
+                            List<CheckBox> cbl = json.getchilds(CheckBox.class);
+                            for (CheckBox cb : cbl) {
+                                for (String f : configuration.clothfilters) {
+                                    if (cb.lbl.text.equals(f)) {
+                                        jo.put(cb.lbl.text, cb.a);
+                                        break;
+                                    }
+                                }
+                                if (cb.lbl.text.equals(configuration.clothcol)) {
+                                    JSONArray ja = new JSONArray();
+                                    ja.put(cb.a);
+                                    JSONObject co = new JSONObject();
+                                    List<ColorPreview> cpl = json.getchilds(ColorPreview.class);
+                                    for (ColorPreview cp : cpl) {
+                                        co.put(cp.name, cp.getColor().hashCode());
+                                    }
+                                    HSlider hsl = json.getchild(HSlider.class);
+                                    co.put("Shine", hsl.val);
+                                    ja.put(co);
+                                    jo.put(cb.lbl.text, ja);
+                                }
+                            }
+                            return (jo);
+                        }
+
+                        public void createjson(String name, Widget parent) {
+                            JSONObject nall = new JSONObject();
+                            for (Map.Entry<String, Boolean> entry : customlist.entrySet()) {
+                                JSONObject o = new JSONObject();
+                                try {
+                                    o = configuration.painedclothjson.getJSONObject(entry.getKey());
+                                } catch (JSONException ignored) {
+                                }
+                                nall.put(entry.getKey(), entry.getKey().equals(name) ? wjson(parent) : o);
+                            }
+                            configuration.painedclothjson = nall;
+                        }
+
+                        public void createjson() {
+                            JSONObject nall = new JSONObject();
+                            for (Map.Entry<String, Boolean> entry : customlist.entrySet()) {
+                                JSONObject o = new JSONObject();
+                                try {
+                                    o = configuration.painedclothjson.getJSONObject(entry.getKey());
+                                } catch (JSONException ignored) {
+                                }
+                                nall.put(entry.getKey(), o);
+                            }
+                            configuration.painedclothjson = nall;
+                        }
+
+                        public void savejson(String name, Widget parent) {
+                            createjson(name, parent);
+                            FileWriter jsonWriter = null;
+                            try {
+                                jsonWriter = new FileWriter("PaintedCloth.json");
+                                jsonWriter.write(configuration.painedclothjson.toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                try {
+                                    if (jsonWriter != null) {
+                                        jsonWriter.flush();
+                                        jsonWriter.close();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        public void savejson() {
+                            createjson();
+                            FileWriter jsonWriter = null;
+                            try {
+                                jsonWriter = new FileWriter("PaintedCloth.json");
+                                jsonWriter.write(configuration.painedclothjson.toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                try {
+                                    if (jsonWriter != null) {
+                                        jsonWriter.flush();
+                                        jsonWriter.close();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    };
+                    TextEntry search = new TextEntry(cwl.sz.x, "");
+                    TextEntry addentry = new TextEntry(0, "") {
+                        public void activate(String text) {
+                            if (!text.equals("")) {
+                                cwl.add(text, false);
+                                settext("");
+                            }
+                        }
+                    };
+                    Button addbtn = new Button(45, "Add") {
+                        public void click() {
+                            if (!addentry.text.equals("")) {
+                                cwl.add(addentry.text, false);
+                                addentry.settext("");
+                            }
+                        }
+                    };
+                    addentry.resize(cwl.sz.x - addbtn.sz.x - 1, addentry.sz.y);
+
+                    wva.add(cwl);
+                    //wva.add(search);
+                    wva.addRow(addentry, addbtn);
+                    pack();
+                }};
 
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
@@ -3404,12 +3666,7 @@ public class OptWnd extends Window {
             }
         });
 
-        appender.addRow(new Label("Custom grid size: ") {
-            @Override
-            public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Request restart").tex();
-            }
-        }, makeCustomMenuGrid(0), makeCustomMenuGrid(1));
+        appender.addRow(new Label("Custom grid size: "), makeCustomMenuGrid(0), makeCustomMenuGrid(1));
 
         appender.add(new CheckBox("Special menu alt+RMC in proximity to the mouse cursor") {
             {
@@ -3758,7 +4015,6 @@ public class OptWnd extends Window {
         appender.addRow(new IndirLabel(() -> String.format("Pathfinding Tier: %s", tiers[PATHFINDINGTIER.get()])), new IndirHSlider(200, 0, 2, PATHFINDINGTIER));
         appender.add(new IndirCheckBox("Limit pathfinding search to 40 tiles", LIMITPATHFINDING));
         appender.add(new IndirCheckBox("Research if goal was not found (requires Limited pathfinding)", RESEARCHUNTILGOAL));
-        appender.add(new IndirCheckBox("Debug", DEBUG));
 
         appender.add(new Label("Flowermenu"));
         appender.addRow(new Label("Instant Flowermenu: "),
@@ -4218,7 +4474,7 @@ public class OptWnd extends Window {
             }
         }, new Button(50, "Configurate") {
             public void click() {
-                Window w = new Window(Coord.z,"Map Marks Configurate");
+                Window w = new Window(Coord.z, "Map Marks Configurate");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
                 final CustomWidgetList list = new CustomWidgetList(resources.customMarks, "CustomMarks");
                 final TextEntry value = new TextEntry(150, "") {
@@ -4405,6 +4661,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new IndirCheckBox("Debug sloth pathfinding", DEBUG));
+        appender.add(new CheckBox("Debug purus pathfinding") {
+            {
+                a = Pathfinder.DEBUG;
+            }
+
+            public void set(boolean val) {
+                Pathfinder.DEBUG = val;
+                a = val;
+            }
+        });
         appender.add(new IndirCheckBox("Sloth Debug", DefSettings.DEBUG));
         appender.addRow(new Button(50, "Resource") {
                             @Override
@@ -4565,7 +4832,17 @@ public class OptWnd extends Window {
         // clusterlist.items.addAll(Config.autoclusters.values());
         appender2.add(clusterlist);
 
-        appender.add(new Label("Automatic selecton:"));
+        appender.add(new CheckBox("Automatic selecton:") {
+            {
+                a = configuration.autoflower;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("autoflower", val);
+                configuration.autoflower = val;
+                a = val;
+            }
+        });
         Config.flowerlist = new CheckListbox(140, 17) {
             @Override
             protected void itemclick(CheckListboxItem itm, int button) {

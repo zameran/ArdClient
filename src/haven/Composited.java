@@ -29,10 +29,14 @@ package haven;
 import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
-import haven.purus.pbot.PBotUtils;
+import haven.resutil.WaterTile;
 import haven.sloth.gob.Type;
 import modification.configuration;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -217,8 +221,22 @@ public class Composited implements Rendered, MapView.Clickable {
 
         public boolean setup(RenderList r) {
             m.setup(r);
-            for (Layer lay : this.lay)
+            for (Layer lay : this.lay) {
+                for (GLState gs : lay.mat.states) {
+                    if (gs instanceof TexGL.TexDraw) {
+                        String s = gs.toString().substring("TexDraw(TexR(".length(), gs.toString().lastIndexOf(','));
+                        if (configuration.painedcloth.get(s) == null) {
+                            configuration.painedcloth.put(s, false);
+                            Utils.saveCustomList(configuration.painedcloth, "PaintedClothList");
+                        }
+
+                        if (configuration.paintcloth) {
+                            configuration.paintcloth(s, r);
+                        }
+                    }
+                }
                 r.add(lay, null);
+            }
             return (false);
         }
 

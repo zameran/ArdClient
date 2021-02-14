@@ -121,24 +121,26 @@ public class ResDrawable extends Drawable {
 //                }
 //            }
 //        }
-//        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce")) {
-//            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);
-//            return;
-//        }
+        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce") || res.name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
+            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);
+            return;
+        }
         spr = Sprite.create(gob, res, stdCopy);
     }
 
     public void setup(RenderList rl) {
         try {
             init();
-//            String name = getres().name;
-//            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce")) {
-//                if (name.equals("gfx/terobjs/trees/yulestar-fir"))
-//                    rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
-//                else
-//                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
-//                rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
-//            }
+            String name = getres().name;
+            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce") || name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
+                if (name.equals("gfx/terobjs/trees/yulestar-fir"))
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
+                else if (name.equals("gfx/terobjs/trees/yulestar-spruce"))
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
+                else
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
+                rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
+            }
         } catch (Loading e) {
             return;
         }

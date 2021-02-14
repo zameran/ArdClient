@@ -1120,7 +1120,6 @@ public class Config {
             "foot.r",
             "Bone.001_L.002",
             "Spine00"
-
     ));
 
     public static final Map<Long, Pair<String, String>> gridIdsMap = new HashMap<>(58000);

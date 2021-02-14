@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * (Beta)
  * Preset = file (JSON)
  * Endless = time
- * Professional options
+ * Professional options (drink . dead option . wait time . retry .)
  * Stop btn, pause btn
  * <p>
  * Main Info + Refresh Button (FlowerMenu)
@@ -69,6 +69,8 @@ public class AreaPicker extends Window implements Runnable {
     public Thread runthread;
     public boolean block = false;
     public String barrel; //gfx/terobjs/barrel
+    private volatile boolean paused = false;
+    private final Object pauseLock = new Object();
 
     public final Coord[]
             gobarea = new Coord[2],
@@ -89,7 +91,7 @@ public class AreaPicker extends Window implements Runnable {
             selecteditemlist = new TreeList<>();
 
 
-    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn;
+    public Button refresh, selectgobbtn, selectedgobbtn, selectedflowerbtn, selectstoragebtn, selectedstoragebtn, selecteditembtn, selecteditemaddbtn, runbtn, stopbtn, pausumebtn;
     public Label l1, l2, l3, l4, l5;
     public Label maininfolbl, areagobinfolbl, flowerpetalsinfolbl, areastorageinfolbl, iteminfolbl;
     public Dropbox<String> collecttriggerdbx;
@@ -501,6 +503,17 @@ public class AreaPicker extends Window implements Runnable {
                 }
             }
         };
+        pausumebtn = new Button(50, "Pause") {
+            public void click() {
+                if (runthread.isAlive()) {
+                    if (runthread.isInterrupted()) {
+                        resume();
+                    } else {
+                        pause();
+                    }
+                }
+            }
+        };
 
         appender.setHorizontalMargin(5);
         appender.setVerticalMargin(2);
@@ -511,9 +524,10 @@ public class AreaPicker extends Window implements Runnable {
         appender.addRow(l4 = new Label("4. Objects to storage"), selectstoragebtn, selectedstoragebtn, areastorageinfolbl);
         appender.addRow(l5 = new Label("5. Items for storage"), selecteditembtn, iteminfolbl);
 
-        appender.addRow(runbtn);
+        appender.addRow(runbtn, pausumebtn);
         add(stopbtn, runbtn.c);
         stopbtn.hide();
+        pausumebtn.hide();
 
         pack();
     }
@@ -525,15 +539,21 @@ public class AreaPicker extends Window implements Runnable {
         }
         runbtn.hide();
         stopbtn.show();
+        pausumebtn.change("Pause");
+        pausumebtn.show();
         boolean ad = Config.autodrink;
         if (ad) Config.autodrink = false;
+        boolean af = configuration.autoflower;
+        if (ad) configuration.autoflower = false;
         block(true);
 
         collecting();
 
         runbtn.show();
         stopbtn.hide();
+        pausumebtn.hide();
         if (ad) Config.autodrink = true;
+        if (af) configuration.autoflower = true;
         block(false);
         maininfolbl.settext("", Color.WHITE);
     }
@@ -545,6 +565,7 @@ public class AreaPicker extends Window implements Runnable {
             byte cr = checkcollectstate();
             int p = 0;
             while (objects.size() > 0) {
+                pauseCheck();
                 PBotGob pgob = closestGob(objects);
                 p++;
                 if (pgob == null) {
@@ -669,6 +690,7 @@ public class AreaPicker extends Window implements Runnable {
         List<PBotGob> output = new ArrayList<>(storages);
         for (int p = 0; p < storages.size(); p++) {
             for (int i = 0; i < retry; i++) {
+                pauseCheck();
                 botLog("Storage is " + (p + 1) + " of " + storages.size() + ". Try is " + (i + 1) + " of " + retry, Color.YELLOW);
                 if (PBotGobAPI.findGobById(ui, storages.get(p).getGobId()) == null) {
                     botLog("Object not found. Skipping...", Color.WHITE);
@@ -752,6 +774,7 @@ public class AreaPicker extends Window implements Runnable {
     public boolean pfRightClick(PBotGob pgob) throws InterruptedException {
         botLog("pathfinding " + pgob + "...", Color.WHITE);
         for (int i = 0; i < retry; i++) {
+            pauseCheck();
             botLog("try " + (i + 1) + " of " + retry + " pathfinding " + pgob + "...", Color.WHITE);
             boolean yea;
 
@@ -763,9 +786,7 @@ public class AreaPicker extends Window implements Runnable {
                 while (!ui.gui.map.pastaPathfinder.isInterrupted() && ui.gui.map.pastaPathfinder.isAlive())
                     sleep(10);
 
-                synchronized (ui.gui.map) {
-                    yea = ui.gui.map.foundPath;
-                }
+                yea = ui.gui.map.foundPath;
 
                 botLog("purus path" + (yea ? "" : " not") + " found", yea ? Color.GREEN : Color.RED);
             }
@@ -837,6 +858,7 @@ public class AreaPicker extends Window implements Runnable {
             if (yea) {
                 botLog("path found", Color.GREEN);
                 pgob.doClick(3, 0);
+                waitMoving();
                 return (true);
             } else
                 botLog("path not found", Color.RED);
@@ -959,18 +981,16 @@ public class AreaPicker extends Window implements Runnable {
     }
 
 
-    public boolean drink() {
+    public boolean drink() throws InterruptedException {
         if (!ui.gui.drinkingWater) {
             Thread t = new Thread(new DrinkWater(ui.gui));
             t.start();
-            try {
-                t.join();
-                if (!ui.gui.lastDrinkingSucessful) {
-                    botLog("PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
-                    return (false);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while (t.isAlive() && !t.isInterrupted()) {
+                sleep(10);
+            }
+            if (!ui.gui.lastDrinkingSucessful) {
+                botLog("PBotUtils Warning: Couldn't drink, didn't find anything to drink!", Color.ORANGE);
+                return (false);
             }
         }
         return (true);
@@ -978,65 +998,70 @@ public class AreaPicker extends Window implements Runnable {
 
 
     public byte waitForHourglass() throws InterruptedException {
-        botLog("hourglass waiting...", Color.WHITE);
-        double prog = ui.gui.prog;
-        for (int i = 0, sleep = 5; prog == ui.gui.prog; i += sleep) {
-            if (i > waitingtime)
-                return (0);
-            prog = ui.gui.prog;
-            sleep(sleep);
-        }
-        int total = 0;
-        for (int sleep = 5; ui.gui.prog >= 0; total += sleep) {
-            if (PBotCharacterAPI.getStamina(ui) < 70) {//FIXME custom value
-                botLog("Drinking...", Color.WHITE);
-                if (!drink()) {
-                    botLog("Drink failed. Stop!", Color.WHITE);
-//                    pause();
-                } else {
-                    botLog("Drink successful", Color.WHITE);
-                    botLog("hourglass waiting...", Color.WHITE);
-                }
-                sleep(sleep * 10);
+        boolean repeat = true;
+        while (repeat) {
+            repeat = false;
+            botLog("hourglass waiting...", Color.WHITE);
+            double prog = ui.gui.prog;
+            for (int i = 0, sleep = 5; prog == ui.gui.prog; i += sleep) {
+                if (i > waitingtime)
+                    return (0);
+                prog = ui.gui.prog;
+                sleep(sleep);
             }
+            int total = 0;
+            for (int sleep = 5; ui.gui.prog >= 0; total += sleep) {
+                pauseCheck();
+                if (PBotCharacterAPI.getStamina(ui) < 70) {//FIXME custom value
+                    botLog("Drinking...", Color.WHITE);
+                    if (!drink()) {
+                        botLog("Drink failed. Pause!", Color.WHITE);
+                        pause();
+                    } else {
+                        botLog("Drink successful", Color.WHITE);
+                        repeat = true;
+                        break;
+                    }
+                }
 
-            byte cr = checkcollectstate();
-            if (cr == -1 || cr == 0) {
-                if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
-                    botLog("Not enough space for item. Stopping...", Color.WHITE);
-                    stop();
-                    return (-1);
-                }
-            }
-            if (cr == 1) {
-                if (PBotUtils.getItemAtHand(ui) != null) {
-                    botLog("Dropping...", Color.WHITE);
-                    if (!dropItemFromHand()) {
-                        botLog("Can't drop. Stopping...", Color.WHITE);
+                byte cr = checkcollectstate();
+                if (cr == -1 || cr == 0) {
+                    if (!freeSlots() || PBotUtils.getItemAtHand(ui) != null) {
+                        botLog("Not enough space for item. Stopping...", Color.WHITE);
                         stop();
                         return (-1);
                     }
                 }
-            }
-            if (cr == 2) {
-                if (PBotUtils.getItemAtHand(ui) != null) {
-                    botLog("Dropping...", Color.WHITE);
-                    if (!dropItemFromHand()) {
-                        botLog("Can't drop. Stopping...", Color.WHITE);
-                        stop();
-                        return (-1);
+                if (cr == 1) {
+                    if (PBotUtils.getItemAtHand(ui) != null) {
+                        botLog("Dropping...", Color.WHITE);
+                        if (!dropItemFromHand()) {
+                            botLog("Can't drop. Stopping...", Color.WHITE);
+                            stop();
+                            return (-1);
+                        }
                     }
                 }
-                PBotItem bigitem = getMaxSizeItem(getInvItems(selecteditemlist));
-                if (bigitem != null && PBotUtils.playerInventory(ui).freeSpaceForItem(bigitem) == null) {
-                    botLog("Not enough space for item. Folding...", Color.WHITE);
-                    ui.root.wdgmsg("gk", 27);
-                    return (2);
+                if (cr == 2) {
+                    if (PBotUtils.getItemAtHand(ui) != null) {
+                        botLog("Dropping...", Color.WHITE);
+                        if (!dropItemFromHand()) {
+                            botLog("Can't drop. Stopping...", Color.WHITE);
+                            stop();
+                            return (-1);
+                        }
+                    }
+                    PBotItem bigitem = getMaxSizeItem(getInvItems(selecteditemlist));
+                    if (bigitem != null && PBotUtils.playerInventory(ui).freeSpaceForItem(bigitem) == null) {
+                        botLog("Not enough space for item. Folding...", Color.WHITE);
+                        ui.root.wdgmsg("gk", 27);
+                        return (2);
+                    }
                 }
+                sleep(sleep);
             }
-            sleep(sleep);
+            botLog("hourglass finish at " + total + " ms", Color.WHITE);
         }
-        botLog("hourglass finish at " + total + " ms", Color.WHITE);
         return (1);
     }
 
@@ -1137,6 +1162,7 @@ public class AreaPicker extends Window implements Runnable {
 
             selectgobbtn.change(Color.GREEN);
 
+            updatelist("gob");
             updateinfo("gob");
             pack();
         }
@@ -1164,6 +1190,7 @@ public class AreaPicker extends Window implements Runnable {
 
             selectstoragebtn.change(Color.GREEN);
 
+            updatelist("storage");
             updateinfo("storage");
             pack();
         }
@@ -1448,6 +1475,31 @@ public class AreaPicker extends Window implements Runnable {
             runthread.interrupt();
         ui.root.wdgmsg("gk", 27);
         sleep(1);
+    }
+
+    public void pause() {
+        synchronized (pauseLock) {
+            paused = true;
+            pausumebtn.change("Resume");
+        }
+    }
+
+    public void pauseCheck() throws InterruptedException {
+        synchronized (pauseLock) {
+            if (paused) {
+                synchronized (pauseLock) {
+                    pauseLock.wait();
+                }
+            }
+        }
+    }
+
+    public void resume() {
+        synchronized (pauseLock) {
+            paused = false;
+            pauseLock.notifyAll();
+            pausumebtn.change("Pause");
+        }
     }
 
     public void block(boolean state) {

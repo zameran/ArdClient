@@ -967,22 +967,20 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void resattr(Gob g, Indir<Resource> resid, Message dat) {
-        Defer.later(new Defer.Callable<Void>() {
-            public Void call() {
-                try {
-                    if (resid.toString().contains("10221") || resid.toString().contains("ui/croster")) {
+        if (resid.toString().contains("10370") || resid.toString().contains("ui/croster")) {
+            Defer.later(new Defer.Callable<Void>() {
+                public Void call() {
+                    try {
                         Resource res = resid.get();
                         GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
-                        if (parser != null) {
-                            parser.apply(g, dat);
-                        }
+                        parser.apply(g, dat);
+                    } catch (Loading le) {
+                        Defer.later(this);
                     }
-                } catch (Loading le) {
-                    Defer.later(this);
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
+        }
 
         if (dat != null)
             g.setrattr(resid, dat);

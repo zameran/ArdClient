@@ -238,12 +238,36 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                             "Are you sure you want to exit?", "Confirm",
                             JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null,
                             ObjButtons, ObjButtons[1]);
-                    if (PromptResult == 0)
+                    if (PromptResult == 0) {
                         g.interrupt();
+                        mt.interrupt();
+                        new Thread(() -> {
+                            for (int i = 0, sleep = 10; !g.isDestroyed() || !mt.isInterrupted(); i += sleep) {
+                                if (i >= 5000)
+                                    System.exit(0);
+                                try {
+                                    Thread.sleep(sleep);
+                                } catch (InterruptedException interruptedException) {
+                                    interruptedException.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    }
                 } else {
                     g.interrupt();
+                    mt.interrupt();
+                    new Thread(() -> {
+                        for (int i = 0, sleep = 10; !g.isDestroyed() || !mt.isInterrupted(); i += sleep) {
+                            if (i >= 5000)
+                                System.exit(0);
+                            try {
+                                Thread.sleep(sleep);
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
-
             }
 
             public void windowActivated(WindowEvent e) {

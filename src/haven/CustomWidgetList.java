@@ -3,7 +3,6 @@ package haven;
 import haven.sloth.util.ObservableMap;
 import haven.sloth.util.ObservableMapListener;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -14,16 +13,29 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
     public final ObservableMap<String, Boolean> customlist;
     public final String jsonname;
     public int width;
+    public boolean options = false;
 
     public static final Comparator<Item> ITEM_COMPARATOR = Comparator.comparing(o -> o.name);
 
     public CustomWidgetList(ObservableMap<String, Boolean> list, String jsonname) {
-//        super(new Coord(200, 25), 10);
         super(new Coord(calcWidth(list.keySet()) + 50 + 2, 25), 10);
         width = calcWidth(list.keySet()) + 50 + 2;
         customlist = list;
         customlist.addListener(this);
         this.jsonname = jsonname;
+    }
+
+    public CustomWidgetList(ObservableMap<String, Boolean> list, String jsonname, boolean options) {
+        super(new Coord(calcWidth(list.keySet()) + 50 + 2 + 25, 25), 10);
+        this.options = options;
+        width = calcWidth(list.keySet()) + 50 + 2 + 25;
+        customlist = list;
+        customlist.addListener(this);
+        this.jsonname = jsonname;
+    }
+
+    public void enableOptions(boolean b) {
+        options = b;
     }
 
     private static int calcWidth(Set<String> names) {
@@ -58,6 +70,9 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                 Utils.saveCustomList(customlist, jsonname);
                 removeitem((Item) sender, true);
                 update();
+                break;
+            }
+            case "option": {
                 break;
             }
             default:
@@ -133,6 +148,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
         private final CheckBox cb;
         private boolean a = false;
         private UI.Grab grab;
+        private Button cl, opt;
 
         public Item(String name) {
             super(new Coord(width, 25));
@@ -142,7 +158,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
             cb.a = customlist.get(name);
             cb.canactivate = true;
 
-            add(new Button(24, "X") {
+            add(cl = new Button(24, "X") {
                 @Override
                 public void click() {
                     super.wdgmsg("activate", name);
@@ -154,6 +170,25 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                     return super.mouseup(Coord.z, button);
                 }
             }, width - 25, 0);
+            if (options)
+                add(opt = new Button(24, "⚙") {
+                    public void click() {
+                        super.wdgmsg("opt", name);
+                    }
+
+                    public boolean mouseup(Coord c, int button) {
+                        //FIXME:a little hack, because WidgetList does not pass correct click coordinates if scrolled
+                        return super.mouseup(Coord.z, button);
+                    }
+                }, width - 50, 0);
+        }
+
+        public void draw(GOut g) {
+            super.draw(g);
+            if (cl.c.x != width - 25)
+                cl.c.x = width - 25;
+            if (opt.c.x != width - 50)
+                opt.c.x = width - 50;
         }
 
         @Override
@@ -197,6 +232,8 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                 case "activate":
                     wdgmsg("delete", name);
                     break;
+                case "opt":
+                    wdgmsg("option", name);
                 default:
                     super.wdgmsg(sender, msg, args);
                     break;

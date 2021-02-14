@@ -236,7 +236,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         add(new Widget(new Coord(360, umpanel.sz.y)) {
             @Override
             public void draw(GOut g) {
-                c.x = umpanel.c.x - 360;
+                if (c.x != umpanel.c.x - 360)
+                    c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
                     Tex mtime = ui.sess.glob.mservertimetex;
                     Tex ltime = ui.sess.glob.lservertimetex;
