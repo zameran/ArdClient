@@ -2,6 +2,7 @@ package haven.purus;
 
 import haven.Button;
 import haven.Coord;
+import haven.Coord2d;
 import haven.FlowerMenu;
 import haven.GItem;
 import haven.Gob;
@@ -13,6 +14,7 @@ import haven.Sprite;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
+import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
@@ -99,8 +101,11 @@ public class SeedCropFarmer extends Window implements Runnable {
                 ispumpkin = true;
             else
                 ispumpkin = false;
+
+            List<Gob> gobs = new ArrayList<>(crops);
             crop:
-            for (Gob g : crops) {
+            for (;gobs.size() > 0;) {
+                Gob g = closestGob(gobs);
                 if (stopThread)
                     return;
                 if (PBotUtils.getStamina(ui) < 60) {
@@ -117,7 +122,10 @@ public class SeedCropFarmer extends Window implements Runnable {
                 while (PBotGobAPI.findGobById(ui, g.id) != null) {
                     if (stopThread)
                         return;
-                    if (retryharvest > 50) continue crop;
+                    if (retryharvest > 50) {
+                        gobs.remove(g);
+                        continue crop;
+                    }
                     retryharvest++;
                     lblProg2.settext("Moving to Harvest " + retryharvest);
                     if (!PBotUtils.pfGobClick(ui, g, 1, 0)) {
@@ -256,7 +264,10 @@ public class SeedCropFarmer extends Window implements Runnable {
                         while (PBotUtils.findNearestStageCrop(ui, 5, 0, cropName) == null && harvestItem() != null) {
                             if (stopThread)
                                 return;
-                            if (retryplant > 50) continue crop;
+                            if (retryplant > 50) {
+                                gobs.remove(g);
+                                continue crop;
+                            }
                             retryplant++;
                             if (PBotUtils.getItemAtHand(ui) != null) {
                                 if (inHandHarvestItem())
@@ -282,7 +293,6 @@ public class SeedCropFarmer extends Window implements Runnable {
                         }
 
 //                            ui.gui.map.wdgmsg("itemact", Coord.z, PBotUtils.player(ui).rc.floor(posres), 0, 0, (int) PBotUtils.player(ui).id, PBotUtils.player(ui).rc.floor(posres), 0, -1);
-
                     } catch (NullPointerException | Loading | Sprite.ResourceException q) {
                     }
                 } else if (replantcontainer) {
@@ -377,8 +387,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 }
                                 List<PBotItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName);
                                 ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 1, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
-                                int i = 0;
-                                while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size()) {
+                                for (int i = 0; PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size(); i++) {
                                     if (stopThread)
                                         break;
                                     if (containers.size() == 1 && i > 250) {
@@ -402,7 +411,6 @@ public class SeedCropFarmer extends Window implements Runnable {
                                         break;
                                     }
                                     PBotUtils.sleep(10);
-                                    i++;
                                 }
                             }
                             PBotUtils.sleep(250);
@@ -445,36 +453,31 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     }
                                     List<PBotItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName);
                                     ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 1, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
-                                    while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size()) {
+                                    for (int i = 0; PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size(); i++) {
                                         if (stopThread)
                                             return;
-                                        int i = 0;
-                                        while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size()) {
-                                            if (stopThread)
-                                                return;
-                                            if (containers.size() == 1 && i > 250) {
-                                                PBotUtils.sysMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
-                                                stopThread = true;
-                                                stop();
-                                                break;
-                                            } else if (i > 250) {
-                                                PBotUtils.sysMsg(ui, "Container appears to be full, removing.", Color.white);
-                                                Coord slot = PBotUtils.getFreeInvSlot(ui.gui.maininv);
-                                                PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
-                                                PBotUtils.sleep(250);
-                                                containers.remove(0);
-                                                PBotUtils.pfRightClick(ui, containers.get(0), 0);
-                                                if (containers.get(0).getres().basename().contains("barrel"))
-                                                    PBotUtils.waitForWindow(ui, "Barrel");
-                                                else
-                                                    PBotUtils.waitForWindow(ui, "Trough");
-                                                item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
-                                                PBotUtils.takeItem(ui, item, 1000);
-                                                break;
-                                            }
-                                            PBotUtils.sleep(10);
-                                            i++;
+                                        if (containers.size() == 1 && i > 250) {
+                                            PBotUtils.sysMsg(ui, "Only container in list appears to be full, stopping.", Color.white);
+                                            stopThread = true;
+                                            stop();
+                                            break;
+                                        } else if (i > 250) {
+                                            PBotUtils.sysMsg(ui, "Container appears to be full, removing.", Color.white);
+                                            Coord slot = PBotUtils.getFreeInvSlot(ui.gui.maininv);
+                                            PBotUtils.dropItemToInventory(slot, ui.gui.maininv);
+                                            PBotUtils.sleep(250);
+                                            containers.remove(0);
+                                            PBotUtils.pfRightClick(ui, containers.get(0), 0);
+                                            if (containers.get(0).getres().basename().contains("barrel"))
+                                                PBotUtils.waitForWindow(ui, "Barrel");
+                                            else
+                                                PBotUtils.waitForWindow(ui, "Trough");
+                                            item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
+                                            PBotUtils.takeItem(ui, item, 1000);
+                                            PBotUtils.sleep(1000);
+                                            break;
                                         }
+                                        PBotUtils.sleep(10);
                                     }
                                 }
                                 PBotUtils.sleep(250);
@@ -498,6 +501,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     } catch (NullPointerException | Loading | Resource.LoadException p) {
                     }
                 }
+                gobs.remove(g);
                 cropsHarvested++;
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
             }
@@ -517,8 +521,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     GItem item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
                     PBotUtils.takeItem(ui, item, 1000);
 
-                    ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 0, 0, (int) containers.get(0).id,
-                            containers.get(0).rc.floor(posres), 0, -1);
+                    ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 0, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
                     int i = 0;
                     while (PBotUtils.getItemAtHand(ui) != null) {
                         if (i == 60000)
@@ -979,5 +982,18 @@ public class SeedCropFarmer extends Window implements Runnable {
                 return (false);
         }
         return (false);
+    }
+
+    public Gob closestGob(List<Gob> list) {
+        double min = Double.MAX_VALUE;
+        Gob gob = null;
+        Coord2d pc = PBotGobAPI.player(ui).getRcCoords();
+        for (Gob g : list) {
+            if (pc.dist(g.rc) < min) {
+                min = Math.min(min, pc.dist(g.rc));
+                gob = g;
+            }
+        }
+        return (gob);
     }
 }

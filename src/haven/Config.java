@@ -478,8 +478,29 @@ public class Config {
         put("gnomeshat", new CheckListboxItem("Gnomes Hat"));
     }};
 
-    public final static HashMap<String, CheckListboxItem> icons = new HashMap<String, CheckListboxItem>(73) {{
+    public final static HashMap<String, CheckListboxItem> icons = new HashMap<String, CheckListboxItem>() {{
+        put("arrow", new CheckListboxItem("Arrow"));
+        put("rowboat", new CheckListboxItem("Rowboat"));
+        put("dugout", new CheckListboxItem("Dugout"));
+        put("knarr", new CheckListboxItem("Knarr"));
+        put("snekkja", new CheckListboxItem("Snekkja"));
+        put("wagon", new CheckListboxItem("Wagon"));
+        put("wheelbarrow", new CheckListboxItem("Wheelbarrow"));
+        put("cart", new CheckListboxItem("Cart"));
+        put("wball", new CheckListboxItem("Wrecking Ball"));
+        put("bram", new CheckListboxItem("Battering Ram"));
+        put("irrbloss", new CheckListboxItem("Irrlight"));
+        put("opiumdragon", new CheckListboxItem("Opium Dragon"));
+        put("moonmoth", new CheckListboxItem("Moonmoths"));
+        put("lobsterpot", new CheckListboxItem("Lobster Pot"));
         put("mandrakespirited", new CheckListboxItem("Spirited Mandrake"));
+        put("fishingnet", new CheckListboxItem("Fishing Net"));
+        put("mare", new CheckListboxItem("Tamed Mares"));
+        put("stallion", new CheckListboxItem("Tamed Stallions"));
+        put("boarspear", new CheckListboxItem("Boar Spear"));
+        put("boostspeed", new CheckListboxItem("Speed Boost"));
+    }};
+    public final static HashMap<String, CheckListboxItem> oldicons = new HashMap<String, CheckListboxItem>() {{
         put("dandelion", new CheckListboxItem("Dandelion"));
         put("chantrelle", new CheckListboxItem("Chantrelle"));
         put("blueberry", new CheckListboxItem("Blueberry"));
@@ -491,22 +512,11 @@ public class Config {
         put("stingingnettle", new CheckListboxItem("Stinging Nettle"));
         put("dragonfly", new CheckListboxItem("Dragonfly"));
         put("toad", new CheckListboxItem("Toad"));
-        put("bram", new CheckListboxItem("Battering Ram"));
         put("magpie", new CheckListboxItem("Magpie"));
         put("mistletoe", new CheckListboxItem("Mistletoe"));
         put("firefly", new CheckListboxItem("Firefly"));
-        put("rowboat", new CheckListboxItem("Rowboat"));
-        put("dugout", new CheckListboxItem("Dugout"));
-        put("knarr", new CheckListboxItem("Knarr"));
-        put("snekkja", new CheckListboxItem("Snekkja"));
-        put("arrow", new CheckListboxItem("Arrow"));
-        put("boarspear", new CheckListboxItem("Boar Spear"));
         put("cavemoth", new CheckListboxItem("Cave Moth"));
         put("frog", new CheckListboxItem("Frog"));
-        put("wagon", new CheckListboxItem("Wagon"));
-        put("wheelbarrow", new CheckListboxItem("Wheelbarrow"));
-        put("cart", new CheckListboxItem("Cart"));
-        put("wball", new CheckListboxItem("Wrecking Ball"));
         put("windweed", new CheckListboxItem("Wild Windsown Weed"));
         put("mussels", new CheckListboxItem("Mussels"));
         put("mallard", new CheckListboxItem("Duck"));
@@ -521,14 +531,11 @@ public class Config {
         put("coltsfoot", new CheckListboxItem("Coltsfoot"));
         put("chives", new CheckListboxItem("Chives"));
         put("rustroot", new CheckListboxItem("Rustroot"));
-        put("boostspeed", new CheckListboxItem("Speed Boost"));
         put("adder", new CheckListboxItem("Adder"));
         put("crab", new CheckListboxItem("Crab"));
         put("clover", new CheckListboxItem("Clover"));
         put("ladysmantle", new CheckListboxItem("Lady's Mantle"));
         put("grasshopper", new CheckListboxItem("Grasshopper"));
-        put("irrbloss", new CheckListboxItem("Irrlight"));
-        put("opiumdragon", new CheckListboxItem("Opium Dragon"));
         put("snapdragon", new CheckListboxItem("Uncommon Snapdragon"));
         put("cattail", new CheckListboxItem("Cattail"));
         put("forestsnail", new CheckListboxItem("Forest Snail"));
@@ -546,12 +553,7 @@ public class Config {
         put("mole", new CheckListboxItem("Moles"));
         put("lorchel", new CheckListboxItem("Morels"));
         put("frogscrown", new CheckListboxItem("Frog's Crown"));
-        put("lobsterpot", new CheckListboxItem("Lobster Pot"));
-        put("fishingnet", new CheckListboxItem("Fishing Net"));
         put("lampstalk", new CheckListboxItem("Lamp Stalks"));
-        put("moonmoth", new CheckListboxItem("Moonmoths"));
-        put("stallion", new CheckListboxItem("Tamed Stallions"));
-        put("mare", new CheckListboxItem("Tamed Mares"));
     }};
 
     public static CheckListbox flowerlist = null;

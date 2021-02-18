@@ -541,6 +541,7 @@ public class AreaPicker extends Window implements Runnable {
         stopbtn.show();
         pausumebtn.change("Pause");
         pausumebtn.show();
+        paused = false;
         boolean ad = Config.autodrink;
         if (ad) Config.autodrink = false;
         boolean af = configuration.autoflower;
@@ -563,11 +564,9 @@ public class AreaPicker extends Window implements Runnable {
             List<PBotGob> storages = new ArrayList<>(currentstoragelist);
             List<PBotGob> objects = new ArrayList<>(currentgoblist);
             byte cr = checkcollectstate();
-            int p = 0;
-            while (objects.size() > 0) {
+            for (int p = 1; objects.size() > 0; p++) {
                 pauseCheck();
                 PBotGob pgob = closestGob(objects);
-                p++;
                 if (pgob == null) {
                     objects.remove(pgob);
                     continue;
@@ -671,6 +670,10 @@ public class AreaPicker extends Window implements Runnable {
                         botLog("Can't drop. Stopping...", Color.WHITE);
                         stop();
                     }
+                }
+                if (getInvItems(selecteditemlist).size() == 0) {
+                    botLog("Inventory is empty", Color.WHITE);
+                    stop();
                 }
                 storaging(storages);
             }
@@ -1485,11 +1488,9 @@ public class AreaPicker extends Window implements Runnable {
     }
 
     public void pauseCheck() throws InterruptedException {
-        synchronized (pauseLock) {
-            if (paused) {
-                synchronized (pauseLock) {
-                    pauseLock.wait();
-                }
+        if (paused) {
+            synchronized (pauseLock) {
+                pauseLock.wait();
             }
         }
     }
