@@ -92,7 +92,8 @@ public class MapWnd extends Window {
     private Map<Long, Tex> namemap = new HashMap<>(50);
     private Map<Coord, Coord> questlinemap = new HashMap<>();
 
-    private List<TempMark> tempMarkList = new ArrayList<>();
+    private final List<TempMark> tempMarkList = new ArrayList<>();
+    private long lastMarkCheck = System.currentTimeMillis();
 
     public static class TempMark {
         final long start;
@@ -407,12 +408,14 @@ public class MapWnd extends Window {
         private void drawmarks(GOut g, final Location ploc) {
             final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
             Location tloc = this.curloc;
-            for (TempMark cm : tempMarkList) {
-                if (tloc != null && tloc.seg == cm.loc.seg) {
-                    TexI tex = cm.icon;
-                    Coord c = xlate(ploc);
-                    if (c != null)
-                        g.aimage(tex, c.add(cm.rc.floor(tilesz).sub(pc).div(scalef())), 0.5, 0.5);
+            synchronized (tempMarkList) {
+                for (TempMark cm : tempMarkList) {
+                    if (tloc != null && tloc.seg == cm.loc.seg) {
+                        TexI tex = cm.icon;
+                        Coord c = xlate(ploc);
+                        if (c != null)
+                            g.aimage(tex, c.add(cm.rc.floor(tilesz).sub(pc).div(scalef())), 0.5, 0.5);
+                    }
                 }
             }
         }
@@ -468,128 +471,132 @@ public class MapWnd extends Window {
 
         public void tick(double dt) {
             super.tick(dt);
-            if (configuration.tempmarks)
+            if (configuration.tempmarks && System.currentTimeMillis() - lastMarkCheck > configuration.tempmarksfrequency) {
                 checkmarks();
+                lastMarkCheck = System.currentTimeMillis();
+            }
         }
 
         public void checkmarks() {
             Defer.later(() -> {
-                final List<TempMark> marks = new ArrayList<>(tempMarkList);
-                for (TempMark cm : marks) {
-                    PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
-                    if (g == null) {
-                        if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
-                            tempMarkList.remove(cm);
-                        }
-                    } else {
-                        if (g.getRcCoords() != cm.rc) {
-                            for (TempMark customMark : tempMarkList) {
-                                if (customMark.id == cm.id) {
-                                    customMark.rc = g.getRcCoords();
-                                    break;
+                synchronized (tempMarkList) {
+                    final List<TempMark> marks = new ArrayList<>(tempMarkList);
+                    for (TempMark cm : marks) {
+                        PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
+                        if (g == null) {
+                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                                tempMarkList.remove(cm);
+                            }
+                        } else {
+                            if (g.getRcCoords() != cm.rc) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.rc = g.getRcCoords();
+                                        break;
+                                    }
+                                }
+                            }
+                            Location tloc = this.curloc;
+                            if (tloc != null && tloc.seg != cm.loc.seg) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.loc = tloc;
+                                        break;
+                                    }
                                 }
                             }
                         }
-                        Location tloc = this.curloc;
-                        if (tloc != null && tloc.seg != cm.loc.seg) {
-                            for (TempMark customMark : tempMarkList) {
-                                if (customMark.id == cm.id) {
-                                    customMark.loc = tloc;
-                                    break;
+                        Gob dg = null;
+                        for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
+                            if (disp.sc == null)
+                                continue;
+                            GobIcon.Image img = disp.img;
+                            if (disp.gob.id == cm.id) {
+                                if (!img.rot)
+                                    dg = disp.gob;
+                                break;
+                            }
+                        }
+                        if (dg == null) {
+                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                                tempMarkList.remove(cm);
+                            }
+                        } else {
+                            if (dg.rc != cm.rc) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.rc = dg.rc;
+                                        break;
+                                    }
+                                }
+                            }
+                            Location tloc = this.curloc;
+                            if (tloc != null && tloc.seg != cm.loc.seg) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.loc = tloc;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                    Gob dg = null;
+
+                    marks.clear();
+                    marks.addAll(tempMarkList);
+
+                    OCache oc = ui.sess.glob.oc;
+                    synchronized (oc) {
+                        for (Gob gob : oc) {
+                            try {
+                                Optional<Resource> ores = gob.res();
+                                if (!ores.isPresent())
+                                    continue;
+                                Resource res = ores.get();
+                                TempMark m = getTMark(marks, gob.id);
+                                if (m == null) {
+                                    GobIcon icon = gob.getattr(GobIcon.class);
+                                    TexI tex = null;
+                                    if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                                        CheckListboxItem itm = Config.icons.get(res.basename());
+                                        if (configuration.tempmarksall || (itm != null && !itm.selected)) {
+                                            if (icon != null)
+                                                tex = (TexI) cachedtex(gob);
+                                            else
+                                                tex = (TexI) Config.additonalicons.get(res.name);
+                                        }
+                                    } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
+                                        tex = (TexI) LocalMiniMap.roadicn;
+                                    } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
+                                        tex = (TexI) LocalMiniMap.roadicn;
+                                    } else if (gob.type == Type.DUNGEONDOOR) {
+                                        int stage = 0;
+                                        if (gob.getattr(ResDrawable.class) != null)
+                                            stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
+                                        if (stage == 10 || stage == 14)
+                                            tex = (TexI) LocalMiniMap.dooricn;
+                                    }
+                                    if (tex != null && this.curloc != null)
+                                        tempMarkList.add(new TempMark(gob.id, gob.rc, this.curloc, tex));
+                                }
+                            } catch (Loading l) {
+                            }
+                        }
+                    }
+
                     for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
                         if (disp.sc == null)
                             continue;
-                        GobIcon.Image img = disp.img;
-                        if (disp.gob.id == cm.id) {
-                            if (!img.rot)
-                                dg = disp.gob;
-                            break;
-                        }
-                    }
-                    if (dg == null) {
-                        if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
-                            tempMarkList.remove(cm);
-                        }
-                    } else {
-                        if (dg.rc != cm.rc) {
-                            for (TempMark customMark : tempMarkList) {
-                                if (customMark.id == cm.id) {
-                                    customMark.rc = dg.rc;
-                                    break;
-                                }
+                        TempMark m = getTMark(marks, disp.gob.id);
+                        if (m == null) {
+                            GobIcon.Image img = disp.img;
+                            TexI tex = null;
+                            if (!img.rot) {
+                                tex = (TexI) cachedtex(disp.gob);
                             }
+                            if (tex != null && this.curloc != null)
+                                tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, this.curloc, tex));
                         }
-                        Location tloc = this.curloc;
-                        if (tloc != null && tloc.seg != cm.loc.seg) {
-                            for (TempMark customMark : tempMarkList) {
-                                if (customMark.id == cm.id) {
-                                    customMark.loc = tloc;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                marks.clear();
-                marks.addAll(tempMarkList);
-
-                OCache oc = ui.sess.glob.oc;
-                synchronized (oc) {
-                    for (Gob gob : oc) {
-                        try {
-                            Optional<Resource> ores = gob.res();
-                            if (!ores.isPresent())
-                                continue;
-                            Resource res = ores.get();
-                            TempMark m = getTMark(marks, gob.id);
-                            if (m == null) {
-                                GobIcon icon = gob.getattr(GobIcon.class);
-                                TexI tex = null;
-                                if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
-                                    CheckListboxItem itm = Config.icons.get(res.basename());
-                                    if (configuration.tempmarksall || (itm != null && !itm.selected)) {
-                                        if (icon != null)
-                                            tex = (TexI) cachedtex(gob);
-                                        else
-                                            tex = (TexI) Config.additonalicons.get(res.name);
-                                    }
-                                } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
-                                    tex = (TexI) LocalMiniMap.roadicn;
-                                } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
-                                    tex = (TexI) LocalMiniMap.roadicn;
-                                } else if (gob.type == Type.DUNGEONDOOR) {
-                                    int stage = 0;
-                                    if (gob.getattr(ResDrawable.class) != null)
-                                        stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
-                                    if (stage == 10 || stage == 14)
-                                        tex = (TexI) LocalMiniMap.dooricn;
-                                }
-                                if (tex != null && this.curloc != null)
-                                    tempMarkList.add(new TempMark(gob.id, gob.rc, this.curloc, tex));
-                            }
-                        } catch (Loading l) {
-                        }
-                    }
-                }
-
-                for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
-                    if (disp.sc == null)
-                        continue;
-                    TempMark m = getTMark(marks, disp.gob.id);
-                    if (m == null) {
-                        GobIcon.Image img = disp.img;
-                        TexI tex = null;
-                        if (!img.rot) {
-                            tex = (TexI) cachedtex(disp.gob);
-                        }
-                        if (tex != null && this.curloc != null)
-                            tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, this.curloc, tex));
                     }
                 }
                 return (null);

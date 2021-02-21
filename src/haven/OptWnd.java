@@ -4620,6 +4620,7 @@ public class OptWnd extends Window {
             }
         });
 
+        appender.add(new Label(""));
         appender.addRow(new CheckBox("Temporary marks") {
             {
                 a = configuration.tempmarks;
@@ -4635,8 +4636,24 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw checked icons on map for a while").tex();
             }
-        }, new HSlider(200, 0, 5000, configuration.tempmarkstime) {
+        }, new CheckBox("All Temporary marks") {
+            {
+                a = configuration.tempmarksall;
+            }
 
+            public void set(boolean val) {
+                Utils.setprefb("tempmarksall", val);
+                configuration.tempmarksall = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw all icons on map for a while").tex();
+            }
+        });
+
+        appender.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
             @Override
             protected void added() {
                 super.added();
@@ -4652,20 +4669,21 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Marks time : " + configuration.tempmarkstime + "s").tex();
             }
-        }, new CheckBox("All Temporary marks") {
-            {
-                a = configuration.tempmarksall;
+        }, new HSlider(200, 0, 5000, configuration.tempmarksfrequency) {
+            @Override
+            protected void added() {
+                super.added();
             }
 
-            public void set(boolean val) {
-                Utils.setprefb("tempmarksall", val);
-                configuration.tempmarksall = val;
-                a = val;
+            @Override
+            public void changed() {
+                configuration.tempmarksfrequency = val;
+                Utils.setprefi("tempmarksfrequency", configuration.tempmarksfrequency);
             }
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw all icons on map for a while").tex();
+                return Text.render("Frequency time : " + configuration.tempmarksfrequency + "ms").tex();
             }
         });
 

@@ -212,6 +212,7 @@ public class configuration {
     public static boolean tempmarks = Utils.getprefb("tempmarks", false);
     public static boolean tempmarksall = Utils.getprefb("tempmarksall", false);
     public static int tempmarkstime = Utils.getprefi("tempmarkstime", 300);
+    public static int tempmarksfrequency = Utils.getprefi("tempmarksfrequency", 500);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
