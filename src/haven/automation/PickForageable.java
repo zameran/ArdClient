@@ -46,8 +46,12 @@ public class PickForageable implements Runnable {
                         gate = gates.contains(res.basename());
                     if (!Config.disablecartkeybind)
                         cart = res.basename().equals("cart");
-                    if (itm == null)
-                        hidden = null;
+                    if (itm == null) {
+                        itm = Config.oldicons.get(res.basename());
+                        if (itm == null) {
+                            hidden = null;
+                        }
+                    }
                     else if (itm.selected)
                         hidden = Boolean.TRUE;
 
@@ -75,6 +79,7 @@ public class PickForageable implements Runnable {
         if (herb == null)
             return;
         gui.map.wdgmsg("click", herb.sc, herb.rc.floor(posres), 3, 0, 0, (int) herb.id, herb.rc.floor(posres), 0, -1);
+        gui.map.pllastcc = herb.rc;
 
         if (herb.getres() != null) {
             CheckListboxItem itm = Config.autoclusters.get(herb.getres().name);

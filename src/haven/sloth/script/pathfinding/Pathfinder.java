@@ -114,13 +114,14 @@ public abstract class Pathfinder {
 //            }
 //        }
 
+        Coord2d pc = PBotGobAPI.player(ui).getRcCoords();
         for (Hitbox h : plhb) {
-            final Coord2d c = h.offset().add(mc).sub(0.5, 0.5);
+            final Coord2d c = h.offset().add(mc);
             final Coord2d br = h.size().add(c).add(1, 1);
-            Coord2d xy = new Coord2d(0, 0);
+            Coord2d xy = Coord2d.z;
             for (xy.x = c.x; xy.x < br.x; xy.x += 0.5)
                 for (xy.y = c.y; xy.y < br.y; xy.y += 0.5)
-                    if (ui.sess.glob.gobhitmap.checkHit(xy.floor()))
+                    if (ui.sess.glob.gobhitmap.checkHit(xy.floor()) && pc.dist(new Coord2d(mc)) > 3)
                         return (true);
         }
 
@@ -157,12 +158,12 @@ public abstract class Pathfinder {
 //        }
 
         for (Hitbox h : plhb) {
-            final Coord c = mc.add(h.offset().floor());
-            final Coord br = c.add(h.size().floor());
-            Coord xy = new Coord(0, 0);
-            for (xy.x = c.x; xy.x < br.x; ++xy.x)
-                for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+            final Coord2d c = h.offset().add(mc);
+            final Coord2d br = h.size().add(c).add(1, 1);
+            Coord2d xy = Coord2d.z;
+            for (xy.x = c.x; xy.x < br.x; xy.x += 0.5)
+                for (xy.y = c.y; xy.y < br.y; xy.y += 0.5) {
+                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2).floor());
                     if (t != Tile.DEEPWATER && t != Tile.SHALLOWWATER)
                         return (true);
                 }
@@ -201,12 +202,12 @@ public abstract class Pathfinder {
 //        }
 
         for (Hitbox h : plhb) {
-            final Coord c = mc.add(h.offset().floor());
-            final Coord br = c.add(h.size().floor());
-            Coord xy = new Coord(0, 0);
-            for (xy.x = c.x; xy.x < br.x; ++xy.x)
-                for (xy.y = c.y; xy.y < br.y; ++xy.y) {
-                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2));
+            final Coord2d c = h.offset().add(mc);
+            final Coord2d br = h.size().add(c).add(1, 1);
+            Coord2d xy = Coord2d.z;
+            for (xy.x = c.x; xy.x < br.x; xy.x += 0.5)
+                for (xy.y = c.y; xy.y < br.y; xy.y += 0.5) {
+                    final Tile t = ui.sess.glob.map.gethitmap(xy.div(MCache.tilesz2).floor());
                     if (t != Tile.SHALLOWWATER && t != null)
                         return (true);
                 }

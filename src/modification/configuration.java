@@ -209,11 +209,18 @@ public class configuration {
     public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
     public static boolean simplelmap = Utils.getprefb("simplelmap", false);
     public static boolean cavetileonmap = Utils.getprefb("cavetileonmap", false);
+    public static boolean tempmarks = Utils.getprefb("tempmarks", false);
+    public static boolean tempmarksall = Utils.getprefb("tempmarksall", false);
+    public static int tempmarkstime = Utils.getprefi("tempmarkstime", 300);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
     public static float badcamelevdefault = Utils.getpreff("badcamelevdefault", (float) Math.PI / 4.0f);
     public static float badcamangldefault = Utils.getpreff("badcamangldefault", 0.0f);
+
+    public static int pfcolor = Utils.getprefi("pfcolor", Color.MAGENTA.hashCode());
+    public static int dowsecolor = Utils.getprefi("dowsecolor", Color.MAGENTA.hashCode());
+    public static int questlinecolor = Utils.getprefi("questlinecolor", Color.MAGENTA.hashCode());
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);
 
@@ -648,14 +655,14 @@ public class configuration {
 
     public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2, Gob gob1, Gob gob2) {
         Coord2d gobc1 = gob1.rc, gobc2 = gob2.rc;
+        Coord2d[] p1 = new Coord2d[polygon1.length], p2 = new Coord2d[polygon2.length];
         for (int i = 0; i < polygon1.length; i++)
-            polygon1[i] = polygon1[i].rotate((float) gob1.a);
+            p1[i] = polygon1[i].rotate((float) gob1.a).add(gobc1);
         for (int i = 0; i < polygon2.length; i++)
-            polygon2[i] = polygon2[i].rotate((float) gob2.a);
+            p2[i] = polygon2[i].rotate((float) gob2.a).add(gobc2);
         for (int i1 = 0; i1 < polygon1.length; i1++)
             for (int i2 = 0; i2 < polygon2.length; i2++)
-                if (crossing(polygon1[i1].add(gobc1), polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1].add(gobc1),
-                        polygon2[i2].add(gobc2), polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1].add(gobc2)))
+                if (crossing(p1[i1], p1[i1 + 1 == p1.length ? 0 : i1 + 1], p2[i2], p2[i2 + 1 == p2.length ? 0 : i2 + 1]))
                     return (true);
         return (false);
     }

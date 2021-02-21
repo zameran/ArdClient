@@ -2,6 +2,7 @@ package haven.sloth.script.pathfinding;
 
 import haven.Coord;
 import haven.Coord2d;
+import haven.Defer;
 import haven.Gob;
 import haven.MapView;
 import haven.OCache;
@@ -16,6 +17,7 @@ public class Move {
 
     public void apply(MapView mv) {
         mv.wdgmsg("click", fake, dest.floor(OCache.posres), 1, 0);
+        mv.pllastcc = dest;
     }
 
     public Coord2d dest() {
@@ -76,9 +78,9 @@ public class Move {
 
         public void apply(MapView mv) {
             if (g != null)
-                mv.pathto(g);
+                Defer.later(() -> mv.pathto(g));
             else
-                mv.pathto(goal);
+                Defer.later(() -> mv.pathto(goal));
         }
     }
 }

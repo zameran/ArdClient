@@ -1958,17 +1958,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new CheckBox("Show polowners info") {
-            {
-                a = configuration.showpolownersinfo;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showpolownersinfo", val);
-                configuration.showpolownersinfo = val;
-                a = val;
-            }
-        });
+//        appender.add(new CheckBox("Show polowners info") {
+//            {
+//                a = configuration.showpolownersinfo;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("showpolownersinfo", val);
+//                configuration.showpolownersinfo = val;
+//                a = val;
+//            }
+//        });
         appender.add(new CheckBox("Drop leeches automatically") {
             {
                 a = Config.leechdrop;
@@ -3598,6 +3598,18 @@ public class OptWnd extends Window {
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
+        appender.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
+            configuration.pfcolor = val.hashCode();
+            Utils.setprefi("pfcolor", val.hashCode());
+        }));
+        appender.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
+            configuration.dowsecolor = val.hashCode();
+            Utils.setprefi("dowsecolor", val.hashCode());
+        }));
+        appender.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
+            configuration.questlinecolor = val.hashCode();
+            Utils.setprefi("questlinecolor", val.hashCode());
+        }));
         appender.add(new CheckBox("Player Status tooltip") {
             {
                 a = configuration.statustooltip;
@@ -4605,6 +4617,55 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw cave tiles on large map").tex();
+            }
+        });
+
+        appender.addRow(new CheckBox("Temporary marks") {
+            {
+                a = configuration.tempmarks;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("tempmarks", val);
+                configuration.tempmarks = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw checked icons on map for a while").tex();
+            }
+        }, new HSlider(200, 0, 5000, configuration.tempmarkstime) {
+
+            @Override
+            protected void added() {
+                super.added();
+            }
+
+            @Override
+            public void changed() {
+                configuration.tempmarkstime = val;
+                Utils.setprefi("tempmarkstime", configuration.tempmarkstime);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Marks time : " + configuration.tempmarkstime + "s").tex();
+            }
+        }, new CheckBox("All Temporary marks") {
+            {
+                a = configuration.tempmarksall;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("tempmarksall", val);
+                configuration.tempmarksall = val;
+                a = val;
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Draw all icons on map for a while").tex();
             }
         });
 

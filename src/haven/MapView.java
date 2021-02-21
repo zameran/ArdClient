@@ -97,11 +97,11 @@ import static haven.MCache.tilesz;
 import static haven.OCache.posres;
 
 public class MapView extends PView implements DTarget, Console.Directory, PFListener {
-    public static long plgobid;
-    public static boolean clickdb = false;
+    public long plgobid;
+    public boolean clickdb = false;
     public boolean foundPath = false;
     public long plgob = -1;
-    public static Coord2d pllastcc;
+    public Coord2d pllastcc;
     public Coord2d cc;
     public String curcamera;
     public final Glob glob;
@@ -1901,8 +1901,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
             }
             try {
-                glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)),
-                        cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
+                glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)), cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
             } catch (Defer.DeferredException e) {
                 dev.sysPrintStackTrace("MapView draw " + e);
                 // there seems to be a rare problem with fetching gridcuts when teleporting, not sure why...
@@ -1998,16 +1997,19 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 } else if (pathfindGob != null) {
                     Hitbox[] box = Hitbox.hbfor(pathfindGob);
                     Hitbox[] pbox = Hitbox.hbfor(pl);
-                    if (box != null && pbox != null && box.length > 0 && pbox.length > 0) {
+                    if (box != null && pbox != null) {
+                        boolean hit = false;
                         for (Hitbox hb1 : box)
                             for (Hitbox hb2 : pbox) {
-                                if (hb1.ishitable() && hb2.ishitable()) {
+                                if (hb1.ishitable()) {
+                                    hit = true;
                                     if (configuration.insect(hb1.points, configuration.abs(hb2.points, 1), pathfindGob, pl))
                                         return (true);
-                                } else {
-                                    return pathfindGob.rc.dist(pl.rc) <= 5;
                                 }
                             }
+                        if (!hit) {
+                            return pathfindGob.rc.dist(pl.rc) <= 5;
+                        }
                         return (false);
                     } else
                         return pathfindGob.rc.dist(pl.rc) <= 5;
@@ -2074,8 +2076,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public boolean pathto(final Coord2d c) {
-        final Move[] moves = findpath(c);
         clearmovequeue();
+        final Move[] moves = findpath(c);
         if (moves != null) {
             for (final Move m : moves) {
                 queuemove(m.dest());
@@ -2109,6 +2111,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public void moveto(final Coord2d c) {
         clearmovequeue();
         wdgmsg("click", new Coord(1, 1), c.floor(posres), 1, 0);
+        pllastcc = c;
     }
 
     public void relMove(final Coord2d c) {
@@ -2116,6 +2119,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         if (g != null) {
             final Coord gc = new Coord2d(g.getc()).add(c).floor(posres);
             wdgmsg("click", new Coord(1, 1), gc, 1, 0);
+            pllastcc = new Coord2d(g.getc());
         }
     }
 
@@ -2151,11 +2155,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             movingto = movequeue.poll();
             ui.gui.pointer.update(movingto);
             wdgmsg("click", new Coord(1, 1), movingto.floor(posres), 1, 0);
+            pllastcc = movingto;
             lastMove = System.currentTimeMillis();
         }
         if (!isclearmovequeue() && isfinishmovequeue()) {
             if (pathfindGobMouse == 3 && movequeue.size() == 0 && pathfindGob != null && !isclickongob) {
                 wdgmsg("click", Coord.z, pathfindGob.rc.floor(posres), 3, pathfindGobMod, 0, (int) pathfindGob.id, pathfindGob.rc.floor(posres), 0, -1);
+                pllastcc = pathfindGob.rc;
                 isclickongob = true;
             }
             clearmovequeue();
@@ -2485,8 +2491,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 }
             } else {
                 lastItemactClickArgs = null;
-                if (clickb == 1)
-                    pllastcc = mc;
                 // reset alt so we could walk with alt+lmb while having item on the cursor
                 int modflags = ui.modflags();
                 if (ui.gui.vhand != null && clickb == 1)
@@ -2515,6 +2519,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         if (target != null) {
                             wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                            pllastcc = target.rc;
                             return;
                         }
                     }
@@ -2531,6 +2536,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         if (target != null) {
                             wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                            pllastcc = target.rc;
                             return;
                         }
                     }
@@ -2549,6 +2555,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         if (target != null) {
                             wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                            pllastcc = target.rc;
                             return;
                         }
                     }
@@ -2559,7 +2566,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
                 if (inf == null) {
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
-                        pathto(mc);
+                        Defer.later(() -> pathto(mc));
                         //      purusPfLeftClick(mc.floor(), null);
                     } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null) {
                         //Queued movement
@@ -2570,6 +2577,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             clearmovequeue();
                         }
                         wdgmsg("click", args);
+                        pllastcc = mc;
                     }
                 } else {
                     Gob gob = inf.gob;
@@ -2586,6 +2594,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             glob.oc.changed(gob);
                         } else {
                             wdgmsg("click", args);
+                            pllastcc = mc;
                         }
                     } else if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modctrl && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
@@ -2627,9 +2636,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     } else if (Config.pf && curs != null && !curs.name.equals("gfx/hud/curs/study") && gob != null) {
                         if (clickb == 3) {
                             //  purusPfRightClick(gob, (int) args[8], clickb, 0, null);
-                            pathtoRightClick(gob, 0);
+                            Defer.later(() -> pathtoRightClick(gob, 0));
                         } else if (clickb == 1) {
-                            pathto(gob);
+                            Defer.later(() -> pathto(gob));
                         }
                     } else {
                         args = Utils.extend(args, gobargs);
@@ -2637,6 +2646,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             clearmovequeue();
                         }
                         wdgmsg("click", args);
+                        pllastcc = mc;
                         if (gob != null && gob.getres() != null) {
                             CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                             if (itm != null && itm.selected)
@@ -3006,9 +3016,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         // we really don't want dropping, so click is moving
                         if (Config.pf) {
                             // purusPfLeftClick(mc.floor(), null);
-                            pathto(mc);
+                            Defer.later(() -> pathto(mc));
                         } else {
                             wdgmsg("click", pc, mc.floor(posres), 1, 0);
+                            pllastcc = mc;
                         }
                         return;
                     }
@@ -3349,8 +3360,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (gobcls != null) {
                 ui.gui.act("aggro");
                 wdgmsg("click", gobcls.sc, Coord.z, 1, ui.modflags(), 0, (int) gobcls.id, gobcls.rc.floor(posres), 0, 0);
+                pllastcc = gobcls.rc;
                 Gob pl = player();
                 wdgmsg("click", pl.sc, pl.rc.floor(posres), 3, 0);
+                pllastcc = pl.rc;
             }
         }
     }

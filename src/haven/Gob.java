@@ -71,7 +71,6 @@ import java.util.function.Consumer;
 
 public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
     public int cropstgmaxval = 0;
-    private Overlay gobpath = null;
     private Overlay bowvector = null;
     public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, 14).aa(true);
     private static final Material.Colors dframeEmpty = new Material.Colors(new Color(0, 255, 0, 200));
@@ -477,9 +476,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //Check for any special attributes we should attach
                 Alerted.checkAlert(name, this);
 
-                if (Movable.isMovable(name)) {
-                    setattr(new Movable(this));
-                }
                 if (Hidden.isHidden(name)) {
                     setattr(new Hidden(this));
                 }
@@ -900,23 +896,23 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         synchronized (attr) {
             attr.put(ac, a);
         }
-        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
-            final UI ui = glob.ui.get();
-            if (ui != null) {
-                try {
-                    Gob pl = glob.oc.getgob(ui.gui.map.plgob);
-                    if (pl != null) {
-                        Following follow = pl.getattr(Following.class);
-                        if (pl == this ||
-                                (follow != null && follow.tgt() == this)) {
-                            gobpath = new Overlay(new GobPath(this));
-                            ols.add(gobpath);
-                        }
-                    }
-                } catch (Exception e) {
-                }//ignore, this is just a draw a line on player movement. Not critical.
-            }
-        }
+//        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
+//            final UI ui = glob.ui.get();
+//            if (ui != null) {
+//                try {
+//                    Gob pl = glob.oc.getgob(ui.gui.map.plgob);
+//                    if (pl != null) {
+//                        Following follow = pl.getattr(Following.class);
+//                        if (pl == this ||
+//                                (follow != null && follow.tgt() == this)) {
+//                            gobpath = new Overlay(new GobPath(this));
+//                            ols.add(gobpath);
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                }//ignore, this is just a draw a line on player movement. Not critical.
+//            }
+//        }
     }
 
     public void delayedsetattr(GAttrib a, Consumer<Gob> cb) {
@@ -935,11 +931,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void delattr(Class<? extends GAttrib> c) {
         synchronized (attr) {
             attr.remove(attrclass(c));
-        }
-        if (attrclass(c) == Moving.class && gobpath != null) {
-            ols.remove(gobpath);
-            gobpath = null;
-            MapView.pllastcc = null;
         }
     }
 
@@ -1065,6 +1056,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (ol.spr instanceof Overlay.SetupMod)
                         ((Overlay.SetupMod) ol.spr).setupmain(rl);
                 }
+            }
+
+            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
+//                    if (Movable.isMovable(name)) {}
+                if (isMoving() && getattr(Movable.class) == null)
+                    setattr(new Movable(this));
             }
 
             if (configuration.resizableworld) {

@@ -1,7 +1,7 @@
 package haven.sloth.gfx;
 
+import haven.Config;
 import haven.Coord2d;
-import haven.DefSettings;
 import haven.GLState;
 import haven.GOut;
 import haven.Material;
@@ -42,14 +42,14 @@ public class GobPathSprite extends Sprite {
         final ByteBuffer sa = Utils.mkbbuf(6 * faces);
 
         //Height of our path relative to gob z position, 11f is roughly hearthling eye height
-        final float h = 11f;
+        final float h = 1f;
         //The size of our path triangles is 0.5f, just enough to make it stand out from left, right, and top
         final float delta = 0.5f;
         //Since this Sprite is drawn relative to the gob's position AND rotation we only care about x really
         //This sprite is essentially drawn on the default plane and rotated/transformed with the gob
-        //Therefore, y is a1lways 1f defining the width of our top face, delta defines the width of the side faces
-        final float y = 1f;
-        final float z = !DefSettings.FLATWORLD.get() ? endz + h : 0;
+        //Therefore, y is always 1f defining the width of our top face, delta defines the width of the side faces
+        final float y = 0.5f;
+        final float z = !Config.disableelev ? endz + h : 0;
         final float dh = h - delta, dz = z - delta;
 
         pa.put(0).put(0).put(h);
@@ -94,9 +94,9 @@ public class GobPathSprite extends Sprite {
 
     public boolean setup(RenderList rl) {
         rl.prepo(Rendered.last);
-        //rl.prepo(Rendered.eyesort);
+//        rl.prepo(Rendered.eyesort);
         rl.prepo(Material.nofacecull);
-        //Location.goback(rl.state(), "gobx");
+//        Location.goback(rl.state(), "gobx");
         rl.state().put(States.color, null);
         return true;
     }

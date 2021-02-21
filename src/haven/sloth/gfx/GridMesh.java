@@ -1,9 +1,9 @@
 package haven.sloth.gfx;
 
 import com.google.common.flogger.FluentLogger;
+import haven.Config;
 import haven.Coord;
 import haven.Coord3f;
-import haven.DefSettings;
 import haven.FastMesh;
 import haven.GOut;
 import haven.MCache;
@@ -85,10 +85,14 @@ public class GridMesh extends FastMesh {
         for (c.y = ul.y; c.y <= stop.y; ++c.y) {
             for (c.x = ul.x; c.x <= stop.x; ++c.x) {
                 me = mapToScreen(c, ul, mc);
-                mez = !DefSettings.FLATWORLD.get() ? me.z : 0;
+                mez = !Config.disableelev ? me.z : 0;
                 pa.put(me.x).put(me.y).put(mez + zoff);
                 z = ((int) me.z + 128) % 256;
-                cl.put(colors[z][0]).put(colors[z][1]).put(colors[z][2]).put(0.5f);
+                if (((me.x % (11 * 100) == 0) && (c.x % 100 == 0)) || ((me.y % (11 * 100) == 0) && (c.y % 100 == 0))) {
+                    cl.put(255).put(255).put(255).put(0.5f);
+                } else {
+                    cl.put(colors[z][0]).put(colors[z][1]).put(colors[z][2]).put(0.5f);
+                }
             }
         }
 

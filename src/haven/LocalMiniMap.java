@@ -31,17 +31,18 @@ import haven.purus.pbot.PBotDiscord;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.Ridges;
 import haven.sloth.gob.Type;
+import haven.sloth.gui.DowseWnd;
 import modification.configuration;
 
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +107,8 @@ public class LocalMiniMap extends Widget {
     private final static Tex bushicn = Text.renderstroked("\u22C6", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
     private final static Tex treeicn = Text.renderstroked("\u25B2", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
     private final static Tex bldricn = Text.renderstroked("\u25AA", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
-    private final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
-    private final static Tex dooricn = Resource.loadtex("gfx/icons/door");
+    public final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
+    public final static Tex dooricn = Resource.loadtex("gfx/icons/door");
     private Map<Color, Tex> xmap = new HashMap<Color, Tex>(6);
     public static Coord plcrel = null;
     public long lastnewgid;
@@ -838,6 +839,12 @@ public class LocalMiniMap extends Widget {
 
         drawnewicons(g);
 
+        try {
+            drawmovement(g);
+            drawTracking(g);
+        } catch (Exception e) {
+        }
+
         synchronized (ui.sess.glob.party.memb) {
             Collection<Party.Member> members = ui.sess.glob.party.memb.values();
             for (Party.Member m : members) {
@@ -891,6 +898,41 @@ public class LocalMiniMap extends Widget {
         //Improve minimap player markers slightly commit skip
     }
 
+    private void drawTracking(GOut g) {
+        final double dist = 90000.0D;
+        synchronized (ui.gui.dowsewnds) {
+            for (final DowseWnd wnd : ui.gui.dowsewnds) {
+                final Coord mc = p2c(wnd.startc).add(delta);
+                final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
+                final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
+                g.chcolor(new Color(configuration.dowsecolor, true));
+                g.dottedline(mc, lc, 1);
+                g.dottedline(mc, rc, 1);
+                g.chcolor();
+            }
+        }
+    }
+
+    private void drawmovement(GOut g) {
+        final Coord pc = p2c(mv.player().rc).add(delta);
+        final Coord2d movingto = mv.movingto();
+        final Iterator<Coord2d> queue = mv.movequeue();
+        Coord last;
+        if (movingto != null) {
+            //Make the line first
+            g.chcolor(new Color(configuration.pfcolor, true));
+            last = p2c(movingto).add(delta);
+            g.dottedline(pc, last, 2);
+            if (queue.hasNext()) {
+                while (queue.hasNext()) {
+                    final Coord next = p2c(queue.next()).add(delta);
+                    g.dottedline(last, next, 2);
+                    last = next;
+                }
+            }
+        }
+    }
+
     public void center() {
         delta = Coord.z;
     }
@@ -915,7 +957,7 @@ public class LocalMiniMap extends Widget {
             Coord csd = c.sub(delta);
             Coord2d mc = c2p(csd);
             if (button == clickBind)
-                MapView.pllastcc = mc;
+                mv.pllastcc = mc;
             Gob gob = findicongob(csd.add(delta));
             if (gob == null) { //click tile
                 if (ui.modmeta && button == clickBind) {
@@ -927,23 +969,15 @@ public class LocalMiniMap extends Widget {
                 return true;
             } else {
                 if (ui.modmeta) {
-                    if (ui != null && ui.gui != null && ui.gui.map != null)
+                    if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
-                    if (gob != null && gob.getres() != null) {
+                    if (gob.getres() != null) {
                         CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                         if (itm != null && itm.selected)
                             mv.startMusselsPicker(gob);
                     }
-//                    if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().contains("mussel") || gob.getres().basename().contains("oyster")))
-//                        mv.startMusselsPicker(gob);
-//                    if (Config.autopickclay && gob.getres() != null && gob.getres().basename().contains("clay-gray"))
-//                        mv.startMusselsPicker(gob);
-//                    if (Config.autopickbarnacles && gob.getres() != null && gob.getres().basename().contains("goosebarnacle"))
-//                        mv.startMusselsPicker(gob);
-//                    if (Config.autopickcattails && gob.getres() != null && gob.getres().basename().contains("cattail"))
-//                        mv.startMusselsPicker(gob);
                 }
             }
         } else if (button == dragBind) {
@@ -1143,7 +1177,7 @@ public class LocalMiniMap extends Widget {
                 }
             }
         }
-        ret.sort((a, b) -> a.z - b.z);
+        ret.sort(Comparator.comparingInt(a -> a.z));
         if (ret.size() == 0)
             return (Collections.emptyList());
         return (ret);

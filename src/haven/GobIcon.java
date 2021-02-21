@@ -49,11 +49,11 @@ public class GobIcon extends GAttrib {
         this.res = res;
     }
 
-    public Tex tex() {
+    public TexI tex() {
         return (img().tex());
     }
 
-    public Tex texgrey() {
+    public TexI texgrey() {
         return (img().texgrey());
     }
 

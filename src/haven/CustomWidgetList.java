@@ -185,9 +185,9 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
 
         public void draw(GOut g) {
             super.draw(g);
-            if (cl.c.x != width - 25)
+            if (cl != null && cl.c != null && cl.c.x != width - 25)
                 cl.c.x = width - 25;
-            if (opt.c.x != width - 50)
+            if (opt != null && opt.c != null && opt.c.x != width - 50)
                 opt.c.x = width - 50;
         }
 

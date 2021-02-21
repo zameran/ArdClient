@@ -112,6 +112,10 @@ public class MapFileWidget extends Widget {
             this.seg = seg;
             this.tc = tc;
         }
+
+        public String toString() {
+            return "[" + seg + "[" + seg.id + "], " + tc + "]";
+        }
     }
 
     public interface Locator {
@@ -282,7 +286,7 @@ public class MapFileWidget extends Widget {
                         }
                         cachedImageTex.put(img.getres().name, itex);
                     }
-                    g.image(itex, c.sub(cc));
+                    g.aimage(itex, c.sub(cc), -0.25, -0.25);
 
                     if (Config.mapdrawquests) {
                         if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
@@ -501,7 +505,7 @@ public class MapFileWidget extends Widget {
                             // ui.gui.map.queuemove(mc);
                             ui.gui.map.queuemove(mc);
                         } else if (ui.modshift && !ui.modmeta && !ui.modctrl)
-                            ui.gui.map.pathto(mc);
+                            Defer.later(() -> ui.gui.map.pathto(mc));
                         else if (ui.modctrl && !ui.modmeta && !ui.modshift) {
                             ui.gui.map.moveto(mc);
                         }

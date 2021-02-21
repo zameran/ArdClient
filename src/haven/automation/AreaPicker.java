@@ -779,14 +779,14 @@ public class AreaPicker extends Window implements Runnable {
         for (int i = 0; i < retry; i++) {
             pauseCheck();
             botLog("try " + (i + 1) + " of " + retry + " pathfinding " + pgob + "...", Color.WHITE);
-            boolean yea;
+            boolean yea = cheakHit(pgob);
 
             //1. purus check the path
-            {
+            if (!yea) {
                 botLog("purus path", Color.WHITE);
                 ui.gui.map.purusPfRightClick(pgob.gob, -1, 1, 0, null);
 
-                while (!ui.gui.map.pastaPathfinder.isInterrupted() && ui.gui.map.pastaPathfinder.isAlive())
+                while (ui.gui.map.pastaPathfinder.isAlive() && !ui.gui.map.pastaPathfinder.isInterrupted())
                     sleep(10);
 
                 yea = ui.gui.map.foundPath;
@@ -798,8 +798,12 @@ public class AreaPicker extends Window implements Runnable {
             if (!yea) {
                 botLog("sloth path", Color.WHITE);
                 yea = ui.gui.map.pathto(pgob.gob);
-                while (!ui.gui.map.isclearmovequeue())
+                for (int t = 0, sleep = 10; !ui.gui.map.isclearmovequeue(); t += sleep) {
+                    String s = "sloth path " + t / 1000 + "s";
+                    if (!maininfolbl.texts.equals(s))
+                        maininfolbl.settext(s);
                     sleep(10);
+                }
 
                 botLog("sloth path" + (yea ? "" : " not ") + " found", yea ? Color.GREEN : Color.RED);
             }
@@ -811,20 +815,7 @@ public class AreaPicker extends Window implements Runnable {
                 while (!ui.gui.map.pfthread.isInterrupted() && ui.gui.map.pfthread.isAlive())
                     sleep(10);
 
-                Hitbox[] box = Hitbox.hbfor(pgob.gob);
-                Hitbox[] pbox = Hitbox.hbfor(PBotGobAPI.player(ui).gob);
-                if (box != null && pbox != null && box.length > 0 && pbox.length > 0) {
-                    for (Hitbox hb1 : box)
-                        for (Hitbox hb2 : pbox) {
-                            if (hb1.ishitable() && hb2.ishitable()) {
-                                if (configuration.insect(hb1.points, configuration.abs(hb2.points, 1), pgob.gob, PBotGobAPI.player(ui).gob))
-                                    yea = true;
-                            } else {
-                                yea = pgob.getRcCoords().dist(PBotGobAPI.player(ui).getRcCoords()) <= 5;
-                            }
-                        }
-                } else
-                    yea = pgob.getRcCoords().dist(PBotGobAPI.player(ui).getRcCoords()) <= 5;
+                yea = cheakHit(pgob);
             }
 
             //4. without pf
@@ -840,20 +831,7 @@ public class AreaPicker extends Window implements Runnable {
                 PBotUtils.mapClick(ui, PBotGobAPI.player(ui).getRcCoords().add(x, y), 1, 0);
                 waitMoving();
 
-                Hitbox[] box = Hitbox.hbfor(pgob.gob);
-                Hitbox[] pbox = Hitbox.hbfor(PBotGobAPI.player(ui).gob);
-                if (box != null && pbox != null && box.length > 0 && pbox.length > 0) {
-                    for (Hitbox hb1 : box)
-                        for (Hitbox hb2 : pbox) {
-                            if (hb1.ishitable() && hb2.ishitable()) {
-                                if (configuration.insect(hb1.points, configuration.abs(hb2.points, 1), pgob.gob, PBotGobAPI.player(ui).gob))
-                                    yea = true;
-                            } else {
-                                yea = pgob.getRcCoords().dist(PBotGobAPI.player(ui).getRcCoords()) <= 5;
-                            }
-                        }
-                } else
-                    yea = pgob.getRcCoords().dist(PBotGobAPI.player(ui).getRcCoords()) <= 5;
+                yea = cheakHit(pgob);
             }
 
             sleep(1);
@@ -867,6 +845,28 @@ public class AreaPicker extends Window implements Runnable {
                 botLog("path not found", Color.RED);
         }
         return (false);
+    }
+
+    public boolean cheakHit(PBotGob pgob) {
+        PBotGob player = PBotGobAPI.player(ui);
+        Hitbox[] box = Hitbox.hbfor(pgob.gob);
+        Hitbox[] pbox = Hitbox.hbfor(player.gob);
+        if (box != null && pbox != null) {
+            boolean hit = false;
+            for (Hitbox hb1 : box)
+                for (Hitbox hb2 : pbox) {
+                    if (hb1.ishitable()) {
+                        hit = true;
+                        if (configuration.insect(hb1.points, configuration.abs(hb2.points, 1), pgob.gob, player.gob))
+                            return (true);
+                    }
+                }
+            if (!hit) {
+                return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
+            }
+            return (false);
+        } else
+            return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
     }
 
     public void waitMoving() throws InterruptedException {
