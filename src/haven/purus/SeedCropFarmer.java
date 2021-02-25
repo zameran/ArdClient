@@ -14,7 +14,6 @@ import haven.Sprite;
 import haven.WItem;
 import haven.Widget;
 import haven.Window;
-import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
 import haven.purus.pbot.PBotInventory;
 import haven.purus.pbot.PBotItem;
@@ -127,6 +126,10 @@ public class SeedCropFarmer extends Window implements Runnable {
                         continue crop;
                     }
                     retryharvest++;
+                    if (g.getStage() != stage) {
+                        gobs.remove(g);
+                        continue crop;
+                    }
                     lblProg2.settext("Moving to Harvest " + retryharvest);
                     if (!PBotUtils.pfGobClick(ui, g, 1, 0)) {
                         System.out.println("Path not found");
