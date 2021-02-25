@@ -653,6 +653,8 @@ public class AreaPicker extends Window implements Runnable {
                         break;
                     }
                     sleep(1);
+                    if (i + 1 == retry)
+                        objects.remove(pgob);
                 }
             }
 
@@ -799,9 +801,6 @@ public class AreaPicker extends Window implements Runnable {
                 botLog("sloth path", Color.WHITE);
                 yea = ui.gui.map.pathto(pgob.gob);
                 for (int t = 0, sleep = 10; !ui.gui.map.isclearmovequeue(); t += sleep) {
-                    String s = "sloth path " + t / 1000 + "s";
-                    if (!maininfolbl.texts.equals(s))
-                        maininfolbl.settext(s);
                     sleep(10);
                 }
 
@@ -862,11 +861,11 @@ public class AreaPicker extends Window implements Runnable {
                     }
                 }
             if (!hit) {
-                return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
+                return (pgob.getRcCoords().dist(player.getRcCoords()) <= 3);
             }
             return (false);
         } else
-            return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
+            return (pgob.getRcCoords().dist(player.getRcCoords()) <= 3);
     }
 
     public void waitMoving() throws InterruptedException {
@@ -1121,7 +1120,7 @@ public class AreaPicker extends Window implements Runnable {
     public void botLog(String msg, Color clr) {
         try {
             maininfolbl.settext(msg, clr);
-            System.out.println(msg);
+            System.out.println("AreaPicker: " + msg);
             ui.gui.botlog.append(msg, clr);
         } catch (Exception ignore) {
         }
