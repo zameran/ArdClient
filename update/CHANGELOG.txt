@@ -1,3 +1,11 @@
+20210225.
+Hot Fixes
+-- Fixed IllegalMonitorStateException of move queue
+-- In parallel, the display of tracking on the map was fixed (rustroot, dowse)
+-- The farmer now checks the growth stage before harvesting (it happened that the plant grew at the most inopportune moment)
+-- Some fixes AreaPicker (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210225
 Some Fixes
 -- Quality transfer for stockpiles
