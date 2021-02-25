@@ -193,8 +193,8 @@ public class Fightview extends MovableWidget {
                             preweights.put(type, defweights.get(type));
                             defweights.put(type, b.ameter() / 100.0);
                             notfound.remove(type);
-                        } else if (Cards.lookup.get(res.layer(Resource.tooltip).t) instanceof Maneuver) {
-                            maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).t);
+                        } else if (Cards.lookup.get(res.layer(Resource.tooltip).origt) instanceof Maneuver) {
+                            maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).origt);
                             maneuvermeter = b.ameter() / 100.0;
                         }
                     });
@@ -237,7 +237,7 @@ public class Fightview extends MovableWidget {
             //Now use pre/post to determine block weight based off what we did to them
             try {
                 if (Fightview.this.lastact != null) {
-                    final Card c = Cards.lookup.getOrDefault(Fightview.this.lastact.get().layer(Resource.tooltip).t, Cards.unknown);
+                    final Card c = Cards.lookup.getOrDefault(Fightview.this.lastact.get().layer(Resource.tooltip).origt, Cards.unknown);
                     final double blockweight;
                     if (c instanceof Attack || c == Cards.flex) {
                         final Attacks atk = (Attacks) c;
@@ -326,8 +326,8 @@ public class Fightview extends MovableWidget {
                     if (type != null) {
                         defweights.put(type, b.ameter() / 100.0);
                         notfound.remove(type);
-                    } else if (Cards.lookup.get(res.layer(Resource.tooltip).t) instanceof Maneuver) {
-                        maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).t);
+                    } else if (Cards.lookup.get(res.layer(Resource.tooltip).origt) instanceof Maneuver) {
+                        maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).origt);
                         maneuvermeter = b.ameter() / 100.0;
                     }
                 });
@@ -390,11 +390,11 @@ public class Fightview extends MovableWidget {
 
     private Double checkcd(String cd, Resource.Tooltip tt) {
         double base;
-        if (tt.t.contains("Flex"))
+        if (tt.origt.contains("Flex"))
             base = 1.8;
-        else if (tt.t.contains("Knocks"))
+        else if (tt.origt.contains("Knocks"))
             base = 2.7;
-        else if (tt.t.contains("Teeth"))
+        else if (tt.origt.contains("Teeth"))
             base = 2.1;
         else
             return 0.0;

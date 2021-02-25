@@ -1233,9 +1233,11 @@ public class Resource implements Serializable {
     @LayerName("tooltip")
     public class Tooltip extends Layer {
         public final String t;
+        public final String origt;
 
         public Tooltip(Message buf) {
             String text = new String(buf.bytes(), Utils.utf8);
+            origt = text;
             Resource res = super.getres();
             String locText = getLocString(BUNDLE_TOOLTIP, res, text);
 

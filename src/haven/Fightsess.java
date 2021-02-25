@@ -121,7 +121,7 @@ public class Fightsess extends Widget {
         void tick(final UI ui) {
             if (!discovered) {
                 try {
-                    card = Cards.lookup.getOrDefault(res.get().layer(Resource.tooltip).t, Cards.unknown);
+                    card = Cards.lookup.getOrDefault(res.get().layer(Resource.tooltip).origt, Cards.unknown);
                     cards = ui.gui.chrwdg.fight.cards(res.get().name);
                     discovered = true;
                 } catch (Loading l) {
