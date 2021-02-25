@@ -673,7 +673,7 @@ public class MCache {
                     ols[oi] = ol = new boolean[cmaps.x * cmaps.y];
                 for (int y = c1.y, mi = 0; y < c2.y; y++) {
                     for (int x = c1.x; x < c2.x; x++) {
-                        ol[x + (y * cmaps.x)] = mask[mi++];
+                        ol[x + (y * cmaps.x)] |= mask[mi++];
                     }
                 }
             }
