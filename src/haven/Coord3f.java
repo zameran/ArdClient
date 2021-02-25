@@ -121,6 +121,11 @@ public class Coord3f {
         return new Coord(Math.round(x), Math.round(y));
     }
 
+    public Coord3f rotate(float a) {
+        return new Coord3f(
+                (float) (((x * Math.cos(a)) - (y * Math.sin(a)))),
+                (float) (((x * Math.sin(a)) + (y * Math.cos(a)))), z);
+    }
 
     public Coord3f rot(Coord3f p, float a) {
         float c = (float) Math.cos(a), s = (float) Math.sin(a), C = 1.0f - c;

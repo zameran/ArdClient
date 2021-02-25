@@ -341,16 +341,22 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private float elevorig, anglorig;
 
         public void tick(double dt) {
-            Coord3f cc = getcc();
+            Coord3f cc = getcenter();
             cc.y = -cc.y;
             if (Config.disableelev)
                 cc.z = 0;
             view.update(PointedCam.compute(cc.add(camoff).add(0.0f, 0.0f, 15f), dist, elev, angl));
         }
 
+        public Coord3f getcenter() {
+            return getcc();
+        }
+
         public float angle() {
             return (angl);
         }
+
+        public void setDist(final float d) { this.dist = d; }
 
         public boolean click(Coord c) {
             elevorig = elev;
@@ -535,6 +541,60 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
+    static {
+        camtypes.put("ortho", OrthoCam.class);
+    }
+
+    public class FreeStyle extends FreeCam {
+        private Coord3f plcc = null;
+        private Coord3f focus = null;
+        private Coord doff;
+
+        public FreeStyle() {
+            setDist(250f);
+        }
+        @Override
+        public void tick(double dt) {
+            super.tick(dt);
+            final Coord3f nplcc = getcc();
+            if (Math.abs(nplcc.dist(plcc)) > (30 * 11)) {
+                reset();
+            }
+            plcc = nplcc;
+        }
+
+        @Override
+        public Coord3f getcenter() {
+            if (focus == null) {
+                focus = plcc = getcc();
+            }
+            return new Coord3f(focus);
+        }
+
+        public void reset() {
+            focus = getcc();
+        }
+
+        @Override
+        public boolean click(Coord c) {
+            doff = c;
+            return super.click(c);
+        }
+
+        public void drag(final Coord c) {
+            if (ui.modflags() == 0) {
+                focus = focus.add(new Coord3f(c.add(doff.inv())).rotate(-angle() + (float) (Math.PI / 2)));
+                doff = c;
+            } else {
+                super.drag(c);
+            }
+        }
+    }
+
+    static {
+        camtypes.put("freestyle", FreeStyle.class);
+    }
+
     public class SOrthoCam extends OrthoCam {
         private Coord dragorig = null;
         private float anglorig;
@@ -662,10 +722,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
 
             return (false);
         }
-    }
-
-    static {
-        camtypes.put("ortho", SOrthoCam.class);
     }
 
     @RName("mapview")
@@ -951,34 +1007,51 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-
     public void toggleCamera() {
+        // TODO : [zameran] : What the freacking out code?! WHATAFUCK??????
         if ((camera != null && !ui.gui.chat.hasfocus) || (camera != null && !ui.gui.chatwnd.visible)) {
             String cam = "";
+
             if (camera instanceof MapView.FollowCam)
                 curcamera = "follow";
-            if (camera instanceof MapView.OrthoCam)
+            else if (camera instanceof MapView.OrthoCam)
                 curcamera = "ortho";
-            if (camera instanceof MapView.FreeCam)
+            else if (camera instanceof MapView.FreeCam && !(camera instanceof MapView.FreeStyle))
                 curcamera = "bad";
-            if (camera instanceof MapView.TopDownCam)
+            else if (camera instanceof MapView.TopDownCam)
                 curcamera = "topdown";
+            else if (camera instanceof MapView.FreeStyle)
+                curcamera = "freestyle";
+            else
+                curcamera = "follow";
 
-            if (curcamera.equals("follow")) {
-                cam = "ortho";
-                PBotUtils.sysMsg(ui, "Switched to Ortho Cam", Color.white);
-            } else if (curcamera.equals("ortho")) {
-                cam = "bad";
-                PBotUtils.sysMsg(ui, "Switched to Bad Cam", Color.white);
-            } else if (curcamera.equals("bad")) {
-                cam = "topdown";
-                PBotUtils.sysMsg(ui, "Switched to Topdown Cam", Color.white);
-            } else if (curcamera.equals("topdown")) {
-                cam = "follow";
-                PBotUtils.sysMsg(ui, "Switched to Follow Cam", Color.white);
+            dev.sysPrintStackTrace(String.format("Current camera is set to: %s", curcamera));
+
+            switch (curcamera) {
+                case "follow":
+                    cam = "ortho";
+                    PBotUtils.sysMsg(ui, "Switched to Ortho Cam", Color.white);
+                    break;
+                case "ortho":
+                    cam = "bad";
+                    PBotUtils.sysMsg(ui, "Switched to Bad Cam", Color.white);
+                    break;
+                case "bad":
+                    cam = "topdown";
+                    PBotUtils.sysMsg(ui, "Switched to Topdown Cam", Color.white);
+                    break;
+                case "topdown":
+                    cam = "freestyle";
+                    PBotUtils.sysMsg(ui, "Switched to Freestyle Cam", Color.white);
+                    break;
+                case "freestyle":
+                    cam = "follow";
+                    PBotUtils.sysMsg(ui, "Switched to Follow Cam", Color.white);
+                    break;
             }
 
-            // String cam = camera instanceof MapView.OrthoCam ? "bad" : "ortho";
+            dev.sysPrintStackTrace(String.format("Cam is set to: %s", cam));
+
             String[] args = new String[0];
             camera = makecam(camtypes.get(cam), args);
             Utils.setpref("defcam", cam);

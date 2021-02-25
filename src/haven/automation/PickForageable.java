@@ -17,7 +17,7 @@ import static haven.OCache.posres;
 
 public class PickForageable implements Runnable {
     private GameUI gui;
-    public static final HashSet<String> gates = new HashSet(Arrays.asList("brickwallgate", "drystonewallgate", "drystonewallbiggate", "palisadegate", "palisadebiggate", "polegate", "polebiggate"));
+    private static final HashSet<String> gates = new HashSet(Arrays.asList("brickwallgate", "brickbiggate", "drystonewallgate", "drystonewallbiggate", "palisadegate", "palisadebiggate", "polegate", "polebiggate"));
 
     public PickForageable(GameUI gui) {
         this.gui = gui;

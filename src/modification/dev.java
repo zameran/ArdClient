@@ -14,7 +14,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -87,20 +86,7 @@ public class dev {
         }
 
         if (!skip_log && logging) {
-            System.out.print("[" + LocalTime.now() + "]");
-
-            System.out.print(" || " + who);
-            if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
-
-            System.out.print(" || " + widget + "(" + id + ")");
-            if (widget instanceof GItem) {
-                try {
-                    Resource res = ((GItem) widget).getres();
-                    System.out.print("[" + res + "]");
-                } catch (Exception e) {
-                    System.out.print(e);
-                }
-            }
+            printStacktrace(who, widget, id);
 
             int a;
             if (id == -1) a = 1;
@@ -140,6 +126,23 @@ public class dev {
         }
     }
 
+    private static void printStacktrace(String who, Widget widget, int id) {
+        System.out.print("[" + LocalTime.now() + "]");
+
+        System.out.print(" || " + who);
+        if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
+
+        System.out.print(" || " + widget + "(" + id + ")");
+        if (widget instanceof GItem) {
+            try {
+                Resource res = ((GItem) widget).getres();
+                System.out.print("[" + res + "]");
+            } catch (Exception e) {
+                System.out.print(e);
+            }
+        }
+    }
+
     public static void sysLogRemote(String who, Widget widget, int id, String type, int parent, Object[] pargs, Object... cargs) {
         UI ui = null;
         if (widget.ui != null) ui = widget.ui;
@@ -147,26 +150,8 @@ public class dev {
         boolean skip_log = false;
 
         if (!skip_log && logging) {
-            System.out.print("[" + LocalTime.now() + "]");
-//            System.out.print(" || ");
-//            for (int i = 1; i < stackTraceElementsLength; i++) {
-//                System.out.print("{" + stackTraceElements[i].getClassName() + "(" + stackTraceElements[i].getMethodName() + ")(" + stackTraceElements[i].getLineNumber() + ")");
-//                if (i != stackTraceElementsLength - 1) System.out.print(">");
-//            }
-            System.out.print(" || " + who);
-            if (widget.ui != null && widget.ui.sess != null) System.out.print("[" + widget.ui.sess.username + "]");
+            printStacktrace(who, widget, id);
 
-            System.out.print(" || " + widget + "(" + id + ")");
-            if (widget instanceof GItem) {
-                try {
-                    Resource res = ((GItem) widget).getres();
-                    System.out.print("[" + res + "]");
-                } catch (Exception e) {
-                    System.out.print(e);
-                }
-            }
-
-//            if (name != null) System.out.print(" || " + name);
             if (type != null) System.out.print(" || " + type);
             if (parent != -1) {
                 System.out.print(" || ");
@@ -184,11 +169,11 @@ public class dev {
         }
     }
 
-    private static void argsMethod(Object[] pargs) {
-        if (pargs != null) {
-            System.out.print(" || [" + pargs.length + "]:");
-            for (int i = 0; i < pargs.length; i++) {
-                System.out.print("{" + pargs[i] + "}");
+    private static void argsMethod(Object[] args) {
+        if (args != null) {
+            System.out.print(" || [" + args.length + "]:");
+            for (Object arg : args) {
+                System.out.print("{" + args + "}");
             }
         }
     }
@@ -221,9 +206,8 @@ public class dev {
     public static String collectionToString(Collection<?> collection) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        Iterator<?> it = collection.iterator();
-        while (it.hasNext()) {
-            sb.append("[").append(it.next()).append("]");
+        for (Object o : collection) {
+            sb.append("[").append(o).append("]");
         }
         sb.append("]");
         return sb.toString();

@@ -543,23 +543,33 @@ public class Resource implements Serializable {
         private void handle(Queued res) {
             for (ResSource src : sources) {
                 try {
-                    InputStream in = src.get(res.name);
-                    try {
-                        Resource ret = new Resource(this, res.name, res.ver);
+                    String resName = res.name;
+
+                    //if (resName.equalsIgnoreCase("gfx/hud/chr/con")) resName = resName.concat("1");
+                    //else if (resName.equalsIgnoreCase("gfx/hud/chr/fev/con")) resName = resName.concat("1");
+
+                    try (InputStream in = src.get(resName)) {
+                        Resource ret = new Resource(this, resName, res.ver);
                         ret.source = src;
                         ret.load(in);
                         res.res = ret;
                         res.error = null;
                         break;
-                    } finally {
-                        in.close();
+                    }
+                    catch (IOException e) {
+                        /*
+                        // NOTE : Just ignore resources, that not found on local cache...
+                        if (e instanceof FileNotFoundException) {
+                            System.out.println(String.format("Resource file not found! [%s->%s]", res.name, resName));
+                        } else {
+                            System.out.println(String.format("Weird IO exception on %s->%s (%d)\n", res.name, resName, res.ver));
+                            e.printStackTrace();
+                        }
+                        */
                     }
                 } catch (Throwable t) {
                     LoadException error;
-                    if (t instanceof LoadException)
-                        error = (LoadException) t;
-                    else
-                        error = new LoadException(String.format("Load error in resource %s(v%d), from %s", res.name, res.ver, src), t, null);
+                    error = new LoadException(String.format("Load error in resource %s(v%d), from %s", res.name, res.ver, src), t, null);
                     error.src = src;
                     if (res.error != null) {
                         error.prev = res.error;
