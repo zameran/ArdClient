@@ -4616,7 +4616,7 @@ public class OptWnd extends Window {
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw cave tiles on large map").tex();
+                return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
             }
         });
 

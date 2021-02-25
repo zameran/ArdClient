@@ -43,7 +43,7 @@ import java.security.PrivilegedAction;
 @Resource.LayerName("tex")
 public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
     transient private byte[] img, mask;
-    transient private final TexL tex;
+    transient protected final TexL tex;
     private final Coord off, sz;
     public final int id;
 
