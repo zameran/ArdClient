@@ -1216,16 +1216,15 @@ public class Resource implements Serializable {
                     dev.resourceLog("image", outputfile.getPath(), "NULL");
                     return;
                 }
-                new Thread("decode image " + outputfile.getPath()) {
-                    public void run() {
-                        try {
-                            ImageIO.write(img, "png", outputfile);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("image", outputfile.getPath(), "CREATED");
+                Defer.later(() -> {
+                    try {
+                        ImageIO.write(img, "png", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }.start();
+                    dev.resourceLog("image", outputfile.getPath(), "CREATED");
+                    return (null);
+                });
             }
         }
     }
@@ -1515,19 +1514,18 @@ public class Resource implements Serializable {
             String filename = name.substring(name.lastIndexOf('.') + 1) + ".class";
             File f = new File(dir, filename);
             if (!f.exists()) {
-                new Thread("decode code " + f.getPath()) {
-                    public void run() {
-                        try {
-                            FileOutputStream fout = new FileOutputStream(f);
-                            fout.write(data);
-                            fout.flush();
-                            fout.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("code", f.getPath(), "CREATED");
+                Defer.later(() -> {
+                    try {
+                        FileOutputStream fout = new FileOutputStream(f);
+                        fout.write(data);
+                        fout.flush();
+                        fout.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }.start();
+                    dev.resourceLog("code", f.getPath(), "CREATED");
+                    return (null);
+                });
             }
         }
     }
@@ -1552,17 +1550,16 @@ public class Resource implements Serializable {
         public void decode() {
             Path path = Paths.get("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             if (!Files.exists(path.resolve(name))) {
-                new Thread("decode src " + path.resolve(name)) {
-                    public void run() {
-                        try {
-                            Files.createDirectories(path);
-                            Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("src", path.resolve(name), "CREATED");
+                Defer.later(() -> {
+                    try {
+                        Files.createDirectories(path);
+                        Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }.start();
+                    dev.resourceLog("src", path.resolve(name), "CREATED");
+                    return (null);
+                });
             }
         }
     }
@@ -1868,17 +1865,15 @@ public class Resource implements Serializable {
                     String filename = name.substring(name.lastIndexOf('/') + 1) + "_" + i + ".mid";
                     File outputfile = new File(dir, filename);
                     if (!outputfile.exists()) {
-
-                        new Thread("decode midi " + outputfile.getPath()) {
-                            public void run() {
-                                try {
-                                    MidiSystem.write(seq, i, outputfile);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                dev.resourceLog("midi", outputfile.getPath(), "CREATED");
+                        Defer.later(() -> {
+                            try {
+                                MidiSystem.write(seq, i, outputfile);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        }.start();
+                            dev.resourceLog("midi", outputfile.getPath(), "CREATED");
+                            return (null);
+                        });
                     }
                 }
             }
