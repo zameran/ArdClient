@@ -87,25 +87,27 @@ public class MapWnd extends Window {
     private final Collection<Runnable> deferred = new LinkedList<>();
     private static final Tex plx = Text.renderstroked("\u2716", Color.red, Color.BLACK, Text.num12boldFnd).tex();
     private Predicate<Marker> filter = (m -> true);
-    private final static Comparator<Marker> namecmp = ((a, b) -> a.nm.compareTo(b.nm));
-    private Map<Color, Tex> xmap = new HashMap<Color, Tex>(6);
-    private Map<Long, Tex> namemap = new HashMap<>(50);
-    private Map<Coord, Coord> questlinemap = new HashMap<>();
+    private final static Comparator<Marker> namecmp = (Comparator.comparing(a -> a.nm));
+    private final Map<Color, Tex> xmap = new HashMap<>(6);
+    private final Map<Long, Tex> namemap = new HashMap<>(50);
+    private final Map<Coord, Coord> questlinemap = new HashMap<>();
 
     private final List<TempMark> tempMarkList = new ArrayList<>();
     private long lastMarkCheck = System.currentTimeMillis();
 
     public static class TempMark {
-        final long start;
+        long start;
         final long id;
         Coord2d rc;
+        Coord gc;
         MapFileWidget.Location loc;
         TexI icon;
 
-        public TempMark(long id, Coord2d rc, MapFileWidget.Location loc, TexI icon) {
+        public TempMark(long id, Coord2d rc, Coord gc, MapFileWidget.Location loc, TexI icon) {
             start = System.currentTimeMillis();
             this.id = id;
             this.rc = rc;
+            this.gc = gc;
             this.loc = loc;
             this.icon = icon;
         }
@@ -246,19 +248,19 @@ public class MapWnd extends Window {
             return (super.mousedown(c, button));
         }
 
-        private void drawTracking(GOut g, final Location ploc) {
-            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
+        private void drawTracking(GOut g) {
             final double dist = 90000.0D;
             synchronized (ui.gui.dowsewnds) {
                 for (final DowseWnd wnd : ui.gui.dowsewnds) {
-                    final Coord mc = new Coord2d(wnd.startc).floor(tilesz);
+                    final Coord mc = getRealCoord(new Coord2d(wnd.startc).floor(tilesz));
                     final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
                     final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
-                    final Coord cloc = xlate(ploc);
-                    if (cloc != null) {
-                        final Coord gc = cloc.add(mc.sub(pc).div(scalef()));
-                        final Coord mlc = cloc.add(lc.sub(pc).div(scalef()));
-                        final Coord mrc = cloc.add(rc.sub(pc).div(scalef()));
+                    Location loc = this.curloc;
+                    if (loc != null) {
+                        Coord hsz = sz.div(2);
+                        final Coord gc = hsz.sub(loc.tc).add(mc).div(scalef());
+                        final Coord mlc = hsz.sub(loc.tc).add(lc).div(scalef());
+                        final Coord mrc = hsz.sub(loc.tc).add(rc).div(scalef());
                         g.chcolor(new Color(configuration.dowsecolor, true));
                         g.dottedline(gc, mlc, 1);
                         g.dottedline(gc, mrc, 1);
@@ -268,9 +270,8 @@ public class MapWnd extends Window {
             }
         }
 
-        private Set<Long> drawparty(GOut g, final Location ploc) {
+        private Set<Long> drawparty(GOut g) {
             final Set<Long> ignore = new HashSet<>();
-            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
             double angle;
             try {
                 synchronized (ui.sess.glob.party) {
@@ -284,11 +285,13 @@ public class MapWnd extends Window {
                         if (ui.sess.glob.party.memb.size() == 1) //don't do anything if you don't have a party
                             continue;
 
-
-                        final Coord mc = new Coord2d(ppc).floor(tilesz);
-                        final Coord gc = xlate(new Location(ploc.seg, ploc.tc.add(mc.sub(pc).div(MapFileWidget.scalef()))));
-                        ignore.add(m.gobid);
-                        if (gc != null) {
+                        final Coord pc = new Coord2d(ppc).floor(tilesz);
+                        final Coord mc = getRealCoord(pc);
+                        Location loc = this.curloc;
+                        if (loc != null) {
+                            Coord hsz = sz.div(2);
+                            final Coord gc = mc.equals(Coord.z) ? getNotRealCoord(pc) : hsz.sub(loc.tc).add(mc.div(scalef()));
+                            ignore.add(m.gobid);
                             Gob gob = m.getgob();
 
                             if (gob == null) {//party member not in draw distance, draw a party colored X instead.
@@ -348,21 +351,32 @@ public class MapWnd extends Window {
          * Then follow map.movequeue
          * XXX: does it need an icon?
          */
-        private void drawmovement(GOut g, final Location ploc) {
-            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
+        private void drawmovement(GOut g) {
             final Coord2d movingto = mv.movingto();
             final Iterator<Coord2d> queue = mv.movequeue();
             Coord last;
             if (movingto != null) {
                 //Make the line first
                 g.chcolor(new Color(configuration.pfcolor, true));
-                final Coord cloc = xlate(ploc);
-                if (cloc != null) {
-                    last = cloc.add(movingto.floor(tilesz).sub(pc).div(scalef()));
-                    g.dottedline(cloc, last, 2);
+                Location loc = this.curloc;
+                if (loc != null) {
+                    Coord hsz = sz.div(2);
+
+                    final Coord mpc = new Coord2d(mv.getcc()).floor(tilesz);
+                    final Coord rpc = getRealCoord(mpc);
+                    final Coord pc = rpc.equals(Coord.z) ? getNotRealCoord(mpc) : hsz.sub(loc.tc).add(rpc.div(scalef()));
+
+                    final Coord lc = movingto.floor(tilesz);
+                    final Coord rlast = getRealCoord(lc);
+                    last = rlast.equals(Coord.z) ? getNotRealCoord(lc) : hsz.sub(loc.tc).add(rlast.div(scalef()));
+
+                    g.dottedline(pc, last, 2);
                     if (queue.hasNext()) {
                         while (queue.hasNext()) {
-                            final Coord next = cloc.add(queue.next().floor(tilesz).sub(pc).div(scalef()));
+                            final Coord n = queue.next().floor(tilesz);
+                            final Coord rnext = getRealCoord(n);
+                            final Coord next = rnext.equals(Coord.z) ? getNotRealCoord(n) : hsz.sub(loc.tc).add(rnext.div(scalef()));
+
                             g.dottedline(last, next, 2);
                             last = next;
                         }
@@ -371,8 +385,7 @@ public class MapWnd extends Window {
             }
         }
 
-        private void questgiverLines(GOut g, final Location ploc) {
-            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
+        private void questgiverLines(GOut g) {
             final double dist = 90000.0D;
             List<Coord2d> questQueue = new ArrayList<>(mv.questQueue());
             try {
@@ -381,7 +394,7 @@ public class MapWnd extends Window {
                         ui.gui.mapfile.view.follow = false;
                         final Gob player = mv.player();
                         double angle = player.rc.angle(coord);
-                        final Coord mc = new Coord2d(player.rc).floor(tilesz);
+                        final Coord mc = getRealCoord(player.rc.floor(tilesz));
                         final Coord lc = mc.add((int) (Math.cos(angle) * dist), (int) (Math.sin(angle) * dist));
                         questlinemap.put(mc, lc);
                     }
@@ -390,10 +403,11 @@ public class MapWnd extends Window {
                 }
                 if (questlinemap.size() > 0) {
                     for (Map.Entry<Coord, Coord> entry : questlinemap.entrySet()) {
-                        final Coord cloc = xlate(ploc);
-                        if (cloc != null) {
-                            final Coord gc = cloc.add(entry.getKey().sub(pc).div(scalef()));
-                            final Coord mlc = cloc.add(entry.getValue().sub(pc).div(scalef()));
+                        Location loc = this.curloc;
+                        if (loc != null) {
+                            Coord hsz = sz.div(2);
+                            final Coord gc = hsz.sub(loc.tc).add(entry.getKey().div(scalef()));
+                            final Coord mlc = hsz.sub(loc.tc).add(entry.getValue().div(scalef()));
                             g.chcolor(new Color(configuration.questlinecolor, true));
                             g.dottedline(gc, mlc, 2);
                             g.chcolor();
@@ -405,16 +419,38 @@ public class MapWnd extends Window {
             }
         }
 
-        private void drawmarks(GOut g, final Location ploc) {
-            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
-            Location tloc = this.curloc;
-            synchronized (tempMarkList) {
-                for (TempMark cm : tempMarkList) {
-                    if (tloc != null && tloc.seg == cm.loc.seg) {
+        private Coord getRealCoord(Coord c) {
+            Optional<MCache.Grid> obgo = ui.sess.glob.map.getgrido(c.div(cmaps));
+            if (obgo.isPresent()) {
+                MCache.Grid obg = obgo.get();
+                MapFile.GridInfo info = view.file.gridinfo.get(obg.id);
+                if (info == null) {
+                    return (Coord.z);
+                } else
+                    return (c.add(info.sc.sub(obg.gc).mul(cmaps)));
+            }
+            return (Coord.z);
+        }
+
+        private Coord getNotRealCoord(Coord c) {
+            Coord plc = new Coord2d(mv.getcc()).floor(tilesz);
+            Location ploc = resolve(player);
+            Coord cloc = xlate(ploc);
+            if (cloc != null) {
+                return (cloc.add(c.sub(plc).div(scalef())));
+            }
+            return (Coord.z);
+        }
+
+        private void drawmarks(GOut g) {
+            Location loc = this.curloc;
+            if (loc != null) {
+                Coord hsz = sz.div(2);
+                synchronized (tempMarkList) {
+                    for (TempMark cm : tempMarkList) {
                         TexI tex = cm.icon;
-                        Coord c = xlate(ploc);
-                        if (c != null)
-                            g.aimage(tex, c.add(cm.rc.floor(tilesz).sub(pc).div(scalef())), 0.5, 0.5);
+                        Coord gc = cm.gc.equals(Coord.z) ? getNotRealCoord(cm.rc.floor(tilesz)) : hsz.sub(loc.tc).add(cm.gc.div(scalef()));
+                        g.aimage(tex, gc, 0.5, 0.5);
                     }
                 }
             }
@@ -429,12 +465,12 @@ public class MapWnd extends Window {
                 final Location loc = resolve(player);
                 Coord ploc = xlate(resolve(player));
                 if (ploc != null) {
-                    drawmovement(g.reclip(view.c, view.sz), loc);
-                    questgiverLines(g.reclip(view.c, view.sz), loc);
-                    drawTracking(g.reclip(view.c, view.sz), loc);
+                    drawmovement(g.reclip(view.c, view.sz));
+                    questgiverLines(g.reclip(view.c, view.sz));
+                    drawTracking(g.reclip(view.c, view.sz));
 
                     if (configuration.tempmarks && !configuration.bigmaphidemarks)
-                        drawmarks(g.reclip(view.c, view.sz), loc);
+                        drawmarks(g.reclip(view.c, view.sz));
                     double angle = 0;
                     if (mv.player() != null)
                         angle = mv.player().geta();
@@ -456,7 +492,7 @@ public class MapWnd extends Window {
 
                     final Set<Long> ignore;
                     if (Config.mapdrawparty)
-                        ignore = drawparty(g, loc);
+                        ignore = drawparty(g);
                     g.chcolor();
                 }
             } catch (Loading l) {
@@ -477,7 +513,7 @@ public class MapWnd extends Window {
             }
         }
 
-        public void checkmarks() {
+        public void checkmarks() { //FIXME double draw?
             Defer.later(() -> {
                 synchronized (tempMarkList) {
                     final List<TempMark> marks = new ArrayList<>(tempMarkList);
@@ -488,19 +524,21 @@ public class MapWnd extends Window {
                                 tempMarkList.remove(cm);
                             }
                         } else {
-                            if (g.getRcCoords() != cm.rc) {
+                            Location loc = this.curloc;
+                            if (loc != null) {
                                 for (TempMark customMark : tempMarkList) {
-                                    if (customMark.id == cm.id) {
-                                        customMark.rc = g.getRcCoords();
-                                        break;
-                                    }
-                                }
-                            }
-                            Location tloc = this.curloc;
-                            if (tloc != null && tloc.seg != cm.loc.seg) {
-                                for (TempMark customMark : tempMarkList) {
-                                    if (customMark.id == cm.id) {
-                                        customMark.loc = tloc;
+                                    if (cm.id == customMark.id) {
+                                        customMark.start = System.currentTimeMillis();
+                                        if (!customMark.rc.equals(g.getRcCoords())) {
+                                            customMark.rc = g.getRcCoords();
+                                            customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
+                                        }
+                                        if (customMark.gc.equals(Coord.z)) {
+                                            customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
+                                        }
+                                        if (customMark.loc.seg != loc.seg) {
+                                            customMark.loc = loc;
+                                        }
                                         break;
                                     }
                                 }
@@ -511,7 +549,7 @@ public class MapWnd extends Window {
                             if (disp.sc == null)
                                 continue;
                             GobIcon.Image img = disp.img;
-                            if (disp.gob.id == cm.id) {
+                            if (cm.id == disp.gob.id) {
                                 if (!img.rot)
                                     dg = disp.gob;
                                 break;
@@ -522,19 +560,21 @@ public class MapWnd extends Window {
                                 tempMarkList.remove(cm);
                             }
                         } else {
-                            if (dg.rc != cm.rc) {
+                            Location loc = this.curloc;
+                            if (loc != null) {
                                 for (TempMark customMark : tempMarkList) {
-                                    if (customMark.id == cm.id) {
-                                        customMark.rc = dg.rc;
-                                        break;
-                                    }
-                                }
-                            }
-                            Location tloc = this.curloc;
-                            if (tloc != null && tloc.seg != cm.loc.seg) {
-                                for (TempMark customMark : tempMarkList) {
-                                    if (customMark.id == cm.id) {
-                                        customMark.loc = tloc;
+                                    if (cm.id == customMark.id) {
+                                        customMark.start = System.currentTimeMillis();
+                                        if (!customMark.rc.equals(dg.rc)) {
+                                            customMark.rc = dg.rc;
+                                            customMark.gc = getRealCoord(dg.rc.floor(tilesz));
+                                        }
+                                        if (customMark.gc.equals(Coord.z)) {
+                                            customMark.gc = getRealCoord(dg.rc.floor(tilesz));
+                                        }
+                                        if (customMark.loc.seg != loc.seg) {
+                                            customMark.loc = loc;
+                                        }
                                         break;
                                     }
                                 }
@@ -577,7 +617,7 @@ public class MapWnd extends Window {
                                             tex = (TexI) LocalMiniMap.dooricn;
                                     }
                                     if (tex != null && this.curloc != null)
-                                        tempMarkList.add(new TempMark(gob.id, gob.rc, this.curloc, tex));
+                                        tempMarkList.add(new TempMark(gob.id, gob.rc, getRealCoord(gob.rc.floor(tilesz)), this.curloc, tex));
                                 }
                             } catch (Loading l) {
                             }
@@ -595,7 +635,7 @@ public class MapWnd extends Window {
                                 tex = (TexI) cachedtex(disp.gob);
                             }
                             if (tex != null && this.curloc != null)
-                                tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, this.curloc, tex));
+                                tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, getRealCoord(disp.gob.rc.floor(tilesz)), this.curloc, tex));
                         }
                     }
                 }
