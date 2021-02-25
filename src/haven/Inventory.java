@@ -205,65 +205,64 @@ public class Inventory extends Widget implements DTarget {
                 }
             }
         } else if (msg.startsWith("transfer-identical")) {
-            Window stockpile = ui.gui.getwnd("Stockpile");
-            Window smelter = ui.gui.getwnd("Ore Smelter");
-            Window kiln = ui.gui.getwnd("Kiln");
-            if (stockpile == null || smelter != null || kiln != null) {
-                boolean eq = msg.endsWith("eq");
-                List<WItem> items = getIdenticalItems((GItem) args[0], eq);
-                if (!eq) {
-                    int asc = msg.endsWith("asc") ? 1 : -1;
-                    items.sort((a, b) -> {
-                        QBuff aq = a.item.quality();
-                        QBuff bq = b.item.quality();
-                        if (aq == null || bq == null)
-                            return 0;
-                        else if (aq.q == bq.q)
-                            return 0;
-                        else if (aq.q > bq.q)
-                            return asc;
-                        else
-                            return -asc;
-                    });
-                }
+//            Window stockpile = ui.gui.getwnd("Stockpile");
+//            Window smelter = ui.gui.getwnd("Ore Smelter");
+//            Window kiln = ui.gui.getwnd("Kiln");
+//            if (stockpile == null || smelter != null || kiln != null) {
+            boolean eq = msg.endsWith("eq");
+            List<WItem> items = getIdenticalItems((GItem) args[0], eq);
+            if (!eq) {
+                int asc = msg.endsWith("asc") ? 1 : -1;
+                items.sort((a, b) -> {
+                    QBuff aq = a.item.quality();
+                    QBuff bq = b.item.quality();
+                    if (aq == null || bq == null)
+                        return 0;
+                    else if (aq.q == bq.q)
+                        return 0;
+                    else if (aq.q > bq.q)
+                        return asc;
+                    else
+                        return -asc;
+                });
+            }
 
-                Color colorIdentical = null;
-                for (WItem item : items) {
-                    try {
-                        if (Config.transfercolor) {
-                            GItem g = (GItem) args[0];
-                            if (g.quality() != null) {
-                                if (g.quality().color != null) {
-                                    if (colorIdentical == null) {
-                                        colorIdentical = g.quality().color;
-                                    }
-                                    if (!item.qq.color.equals(colorIdentical)) {
-                                        continue;
-                                    }
+            Color colorIdentical = null;
+            for (WItem item : items) {
+                try {
+                    if (Config.transfercolor) {
+                        GItem g = (GItem) args[0];
+                        if (g.quality() != null) {
+                            if (g.quality().color != null) {
+                                if (colorIdentical == null) {
+                                    colorIdentical = g.quality().color;
+                                }
+                                if (!item.qq.color.equals(colorIdentical)) {
+                                    continue;
                                 }
                             }
                         }
-                        item.item.wdgmsg("transfer", Coord.z);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
                     }
-                }
-
-            } else {
-                for (Widget w = stockpile.lchild; w != null; w = w.prev) {
-                    if (w instanceof ISBox) {
-                        ISBox isb = (ISBox) w;
-                        int freespace = isb.getfreespace();
-                        for (WItem item : getIdenticalItems((GItem) args[0])) {
-                            if (freespace-- <= 0)
-                                break;
-                            item.item.wdgmsg("take", new Coord(item.sz.x / 2, item.sz.y / 2));
-                            isb.drop(null, null);
-                        }
-                        break;
-                    }
+                    item.item.wdgmsg("transfer", Coord.z);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
             }
+//            } else {
+//                for (Widget w = stockpile.lchild; w != null; w = w.prev) {
+//                    if (w instanceof ISBox) {
+//                        ISBox isb = (ISBox) w;
+//                        int freespace = isb.getfreespace();
+//                        for (WItem item : getIdenticalItems((GItem) args[0])) {
+//                            if (freespace-- <= 0)
+//                                break;
+//                            item.item.wdgmsg("take", new Coord(item.sz.x / 2, item.sz.y / 2));
+//                            isb.drop(null, null);
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
         } else {
             super.wdgmsg(sender, msg, args);
         }
