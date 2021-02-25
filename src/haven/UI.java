@@ -226,6 +226,10 @@ public class UI {
 //                        throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
                     return;
                 }
+                //fix for calf info
+                if (pargs.length > 0 && pargs[0].equals("!w_px^oy5S+c") && cargs.length > 0 && cargs[0].toString().contains("-- With")) {
+                    pargs[0] = new Coord(0, 72);
+                }
                 pwdg.addchild(wdg, pargs);
 
                 if (pwdg instanceof Window && gui != null)

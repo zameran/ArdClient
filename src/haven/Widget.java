@@ -487,7 +487,7 @@ public class Widget {
     public void addchild(Widget child, Object... args) {
         if (args[0] instanceof Coord) {
             Coord c = (Coord) args[0];
-            String opt = (args.length > 1) ? (String) args[1] : "";
+            String opt = (args.length > 1) && args[1] instanceof String ? (String) args[1] : "";
             if (opt.indexOf('u') < 0)
                 c = UI.scale(c);
             add(child, c);
