@@ -258,9 +258,9 @@ public class MapWnd extends Window {
                     Location loc = this.curloc;
                     if (loc != null) {
                         Coord hsz = sz.div(2);
-                        final Coord gc = hsz.sub(loc.tc).add(mc).div(scalef());
-                        final Coord mlc = hsz.sub(loc.tc).add(lc).div(scalef());
-                        final Coord mrc = hsz.sub(loc.tc).add(rc).div(scalef());
+                        final Coord gc = hsz.sub(loc.tc).add(mc.div(scalef()));
+                        final Coord mlc = hsz.sub(loc.tc).add(lc.div(scalef()));
+                        final Coord mrc = hsz.sub(loc.tc).add(rc.div(scalef()));
                         g.chcolor(new Color(configuration.dowsecolor, true));
                         g.dottedline(gc, mlc, 1);
                         g.dottedline(gc, mrc, 1);
@@ -420,14 +420,20 @@ public class MapWnd extends Window {
         }
 
         private Coord getRealCoord(Coord c) {
-            Optional<MCache.Grid> obgo = ui.sess.glob.map.getgrido(c.div(cmaps));
-            if (obgo.isPresent()) {
-                MCache.Grid obg = obgo.get();
-                MapFile.GridInfo info = view.file.gridinfo.get(obg.id);
-                if (info == null) {
-                    return (Coord.z);
-                } else
-                    return (c.add(info.sc.sub(obg.gc).mul(cmaps)));
+            try {
+                MCache.Grid obg = ui.sess.glob.map.getgrid(c.div(cmaps));
+                if (!view.file.lock.writeLock().tryLock())
+                    throw (new Loading());
+                try {
+                    MapFile.GridInfo info = view.file.gridinfo.get(obg.id);
+                    if (info == null) {
+                        throw (new Loading());
+                    } else
+                        return (c.add(info.sc.sub(obg.gc).mul(cmaps)));
+                } finally {
+                    view.file.lock.writeLock().unlock();
+                }
+            } catch (Exception ignore) {
             }
             return (Coord.z);
         }
