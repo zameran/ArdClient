@@ -26,10 +26,12 @@ import java.util.Set;
  */
 public class GobHitmap {
     private final static HitTile nulltile = new HitTile(null);
+    private final static HitTile gobtile = new HitTile(Tile.GOB);
+
 
     private static class HitTile {
-        private Tile tile;
-        private Set<Long> ownedby = new HashSet<>();
+        private final Tile tile;
+        private final Set<Long> ownedby = new HashSet<>();
 
         private HitTile(final Tile t) {
             this.tile = t;
@@ -193,7 +195,7 @@ public class GobHitmap {
             } else {
                 c = new Coord(x, y);
             }
-            map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+            map.put(c, map.getOrDefault(c, gobtile));
             map.get(c).add(g);
             coords.add(c);
 
@@ -216,7 +218,7 @@ public class GobHitmap {
         while (queue.size() > 0) {
             c = queue.pop();
             if (map.getOrDefault(c, nulltile).tile != Tile.GOB) {
-                map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+                map.put(c, map.getOrDefault(c, gobtile));
                 map.get(c).add(g);
                 coords.add(c);
                 queue.add(c.add(1, 0));
@@ -328,7 +330,7 @@ public class GobHitmap {
                         for (int y = off.y; y < br.y; ++y) {
                             //if (configuration.contains(coordes, new Coord2d(x, y))) {
                             final Coord c = new Coord(x, y);
-                            map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+                            map.put(c, map.getOrDefault(c, gobtile));
                             map.get(c).add(g);
                             coords.add(c);
                             //}
@@ -370,7 +372,7 @@ public class GobHitmap {
                         for (x = off.x; x < br.x; ++x)
                             for (y = off.y; y < br.y; ++y) {
                                 final Coord c = new Coord(x, y);
-                                map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+                                map.put(c, map.getOrDefault(c, gobtile));
                                 map.get(c).add(g);
                                 coords.add(c);
                             }
@@ -487,7 +489,7 @@ public class GobHitmap {
 //                for (x = off.x; x < br.x; ++x)
 //                    for (y = off.y; y < br.y; ++y) {
 //                        final Coord c = new Coord(x, y);
-//                        map.put(c, map.getOrDefault(c, new HitTile(Tile.GOB)));
+//                        map.put(c, map.getOrDefault(c, gobtile));
 //                        map.get(c).add(g);
 //                        coords.add(c);
 //                    }
