@@ -58,4 +58,8 @@ public class GobCustomSprite extends Sprite {
         hlt0 = Text.renderstroked(val, new Color(255, 227, 168), Color.BLACK, Text.num12boldFnd).tex();
         tex = hlt0;
     }
+
+    public void setLife(int time) {
+        this.life = time;
+    }
 }

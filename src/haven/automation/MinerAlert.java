@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MinerAlert extends Window {
     private int countiron, countgold, countsilver, countcopper, counttin, countbasaslt, countcinnabar, countdolomite, countfeldspar, countflint, countgneiss, countgranite, counthornblende;
@@ -73,6 +74,17 @@ public class MinerAlert extends Window {
         put("sylvanite", "20% Gold");
         put("nagyagite", "25% Gold");
     }};
+
+    private final Map<String, GobCustomSprite> cachedSpriteList = new HashMap<>();
+    private GobCustomSprite getCachedSprite(String text, int time) {
+        GobCustomSprite gcs = cachedSpriteList.get(text);
+        if (gcs == null) {
+            gcs = new GobCustomSprite(text, time);
+        } else {
+            gcs.setLife(time);
+        }
+        return (gcs);
+    }
 
     public MinerAlert() {
         super(new Coord(220, 320), "Miner Alert", "Miner Alert");
@@ -280,7 +292,7 @@ public class MinerAlert extends Window {
                                             maxmarks--;
                                             final Gob g2 = ui.sess.glob.oc.new ModdedGob(mc2, 0);
                                             g2.addol(new Mark(4000));
-                                            g2.addol(new GobCustomSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
+                                            g2.addol(getCachedSprite(res.basename().substring(0, 1).toUpperCase() + res.basename().substring(1) + " " + smeltchance.get(res.basename()), 4000));
                                         }
                                     });
                                 });
