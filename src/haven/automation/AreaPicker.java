@@ -618,35 +618,43 @@ public class AreaPicker extends Window implements Runnable {
                     }
                     mark(pgob);
                     if (pfRightClick(pgob)) {
-                        waitForFlowerMenu();
-                        if (petalExists()) {
-                            if (choosePetal()) {
-                                if (!waitFlowermenuClose()) {
-                                    botLog("Can't close the flowermenu", Color.WHITE);
-                                    stop();
-                                }
-                                waitMoving();
-                                byte wr = waitForHourglass();
-                                if (wr == 1)
-                                    botLog("hourglass is finish", Color.WHITE);
-                                else if (wr == 0)
-                                    botLog("hourglass timeout", Color.WHITE);
-                                else if (wr == 2) {
-                                    botLog("hourglass stopped. folding", Color.WHITE);
-                                    storages = storaging(storages);
-                                }
-                            } else {
-                                if (!closeFlowermenu()) {
-                                    botLog("Can't close the flowermenu", Color.WHITE);
-                                    stop();
-                                } else {
-                                    objects.remove(pgob);
-                                    break;
-                                }
+                        if (checkflowers().size() == 0) {
+                            botLog("flowermenu not required", Color.WHITE);
+                            if (waitForPickUp(pgob.getGobId())) {
+                                objects.remove(pgob);
+                                break;
                             }
                         } else {
-                            objects.remove(pgob);
-                            break;
+                            waitForFlowerMenu();
+                            if (petalExists()) {
+                                if (choosePetal()) {
+                                    if (!waitFlowermenuClose()) {
+                                        botLog("Can't close the flowermenu", Color.WHITE);
+                                        stop();
+                                    }
+                                    waitMoving();
+                                    byte wr = waitForHourglass();
+                                    if (wr == 1)
+                                        botLog("hourglass is finish", Color.WHITE);
+                                    else if (wr == 0)
+                                        botLog("hourglass timeout", Color.WHITE);
+                                    else if (wr == 2) {
+                                        botLog("hourglass stopped. folding", Color.WHITE);
+                                        storages = storaging(storages);
+                                    }
+                                } else {
+                                    if (!closeFlowermenu()) {
+                                        botLog("Can't close the flowermenu", Color.WHITE);
+                                        stop();
+                                    } else {
+                                        objects.remove(pgob);
+                                        break;
+                                    }
+                                }
+                            } else {
+                                objects.remove(pgob);
+                                break;
+                            }
                         }
                     } else {
                         objects.remove(pgob);
@@ -870,8 +878,9 @@ public class AreaPicker extends Window implements Runnable {
 
     public void waitMoving() throws InterruptedException {
         botLog("moving...", Color.WHITE);
-        while (PBotGobAPI.player(ui).isMoving())
+        while (PBotGobAPI.player(ui).isMoving()) {
             sleep(10);
+        }
         botLog("move stop", Color.WHITE);
     }
 
@@ -947,12 +956,26 @@ public class AreaPicker extends Window implements Runnable {
         return (false);
     }
 
+    public boolean waitForPickUp(long id) throws InterruptedException {
+        botLog("pick up ground item waiting...", Color.WHITE);
+        boolean r = false;
+        for (int i = 0, sleep = 10; i < waitingtime; i += sleep) {
+            if (PBotGobAPI.findGobById(ui, id) == null) {
+                r = true;
+                break;
+            }
+            sleep(sleep);
+        }
+
+        if (r)
+            botLog("ground item picked", Color.WHITE);
+        else
+            botLog("ground item didn't pick", Color.WHITE);
+        return (r);
+    }
+
     public boolean waitForFlowerMenu() {
         botLog("flowermenu opening waiting...", Color.WHITE);
-        if (checkflowers().size() == 0) {
-            botLog("flowermenu not required", Color.WHITE);
-            return (false);
-        }
         boolean r = PBotUtils.waitForFlowerMenu(ui, waitingtime);
         if (r)
             botLog("flowermenu opened", Color.WHITE);
@@ -1536,8 +1559,10 @@ public class AreaPicker extends Window implements Runnable {
 
     public void destroy() {
         super.destroy();
-        if (runthread != null && runthread.isAlive())
-            runthread.interrupt();
+        try {
+            stop();
+        } catch (InterruptedException ignore) {
+        }
     }
 
 
