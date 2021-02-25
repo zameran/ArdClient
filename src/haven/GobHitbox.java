@@ -88,8 +88,8 @@ public class GobHitbox extends Sprite {
     }
 
     private static final BBox[] bboxCalf = new BBox[]{new BBox(new Coord(-9, -3), new Coord(9, 3))};
-    private static final BBox[] bboxLamb = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
-    private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
+    private static final BBox[] bboxLamb = new BBox[]{new BBox(new Coord(-4, -2), new Coord(5, 2))};
+    private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-3, -2), new Coord(4, 2))};
     private static final BBox[] bboxPig = new BBox[]{new BBox(new Coord(-6, -3), new Coord(6, 3))};
 //    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
     private static final BBox[] bboxHorse = new BBox[]{new BBox(new Coord(-8, -4), new Coord(8, 4))};
