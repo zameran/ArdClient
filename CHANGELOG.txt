@@ -1,3 +1,10 @@
+20210225
+Some Fixes
+-- Quality transfer for stockpiles
+-- Fixed problems with coordinates on a large map (triangulation, temp marks, and more)
+-- Some fixes AreaPicker, animal hitboxex (goat, lamb), pregant info, out of memory, miner alert, combat actions info. (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210221
 Temporary marks (Modification - Map). Fixes.
 ~
