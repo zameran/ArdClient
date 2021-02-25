@@ -241,6 +241,19 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
 
         protected void changed(int group) {
+            this.group = group;
+        }
+
+        public void draw(GOut g) {
+            for (int i = 0; i < gc.length; i++) {
+                if (i == group) {
+                    g.chcolor();
+                    g.frect(new Coord(i * 20, 0), new Coord(19, 19));
+                }
+                g.chcolor(gc[i]);
+                g.frect(new Coord(2 + (i * 20), 2), new Coord(15, 15));
+            }
+            g.chcolor();
         }
 
         public void update(int group) {

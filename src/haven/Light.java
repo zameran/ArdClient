@@ -319,9 +319,18 @@ public class Light implements Rendered {
                     (int) (buf.cpfloat() * 255.0)));
         }
 
+        private static Color cold2(Message buf) {
+            return (new Color((int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0),
+                    (int) (buf.float32() * 255.0)));
+        }
+
         public Res(Resource res, Message buf) {
             res.super();
-            this.id = buf.int16();
+            int ver = buf.uint8();
+            if (ver == 0) {
+                this.id = buf.int8();
                 this.amb = cold(buf);
                 this.dif = cold(buf);
                 this.spc = cold(buf);
@@ -344,6 +353,33 @@ public class Light implements Rendered {
                         throw (new Resource.LoadException("Unknown light data: " + t, getres()));
                     }
                 }
+            } else if (ver == 1) {
+                this.id = buf.int16();
+                this.amb = cold2(buf);
+                this.dif = cold2(buf);
+                this.spc = cold2(buf);
+                while (!buf.eom()) {
+                    int t = buf.uint8();
+                    if (t == 1) {
+                        hatt = true;
+                        ac = buf.float32();
+                        al = buf.float32();
+                        aq = buf.float32();
+                    } else if (t == 2) {
+                        float x = buf.float32();
+                        float y = buf.float32();
+                        float z = buf.float32();
+                        dir = new Coord3f(x, y, z);
+                    } else if (t == 3) {
+                        hexp = true;
+                        exp = buf.float32();
+                    } else {
+                        throw (new Resource.LoadException("Unknown light data: " + t, getres()));
+                    }
+                }
+            } else {
+                throw (new Resource.LoadException("Unknown light version: " + ver, getres()));
+            }
         }
 
         public Light make() {

@@ -802,7 +802,7 @@ public class MapFile {
             int[] z = new int[cmaps.x * cmaps.y];
             for (int i = 0; i < cg.tiles.length; i++) {
                 tiles[i] = (byte) (tmap[cg.tiles[i]]);
-                z[i] = cg.z[i];
+                z[i] = Math.round(cg.z[i]);
             }
             Grid g = new Grid(cg.id, infos, tiles, z, System.currentTimeMillis());
             g.norepl = norepl;

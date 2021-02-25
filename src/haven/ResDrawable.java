@@ -107,11 +107,21 @@ public class ResDrawable extends Drawable {
         //System.out.println(this.res.get().name);
         //System.out.println(gob.type);
 
-        if (res.name.equals("gfx/terobjs/items/hats/mooncap")) {
-            spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), sdt);
-            return;
-        }
-        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce")) {
+//        for (String hat : configuration.hatslist) {
+//            if (res.name.equals(hat)) {
+//                try {
+//                    Resource r = Resource.remote().loadwait(configuration.hatreplace);
+//                    spr = Sprite.create(gob, r, sdt);
+//                    return;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
+//                    spr = Sprite.create(gob, r, sdt);
+//                    return;
+//                }
+//            }
+//        }
+        if (res.name.equals("gfx/terobjs/trees/yulestar-fir") || res.name.equals("gfx/terobjs/trees/yulestar-spruce") || res.name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
             spr = Sprite.create(gob, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), sdt);
             return;
         }
@@ -122,9 +132,11 @@ public class ResDrawable extends Drawable {
         try {
             init();
             String name = getres().name;
-            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce")) {
+            if (name.equals("gfx/terobjs/trees/yulestar-fir") || name.equals("gfx/terobjs/trees/yulestar-spruce") || name.equals("gfx/terobjs/trees/yulestar-silverfir")) {
                 if (name.equals("gfx/terobjs/trees/yulestar-fir"))
                     rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
+                else if (name.equals("gfx/terobjs/trees/yulestar-spruce"))
+                    rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
                 else
                     rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
                 rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));

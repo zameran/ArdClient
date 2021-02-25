@@ -45,6 +45,10 @@ public class Coord3f {
         this(c.x, c.y, c.z);
     }
 
+    public Coord3f(Coord2d c) {
+        this((float) c.x, (float) c.y, 0);
+    }
+
     public Coord3f(Coord c) {
         this(c.x, c.y, 0);
     }

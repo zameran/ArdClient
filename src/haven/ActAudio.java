@@ -173,7 +173,7 @@ public class ActAudio extends GLState.Abstract {
                     public CS cons() {
                         return (clip.stream());
                     }
-                });
+                }, 0);
             }
 
             public int hashCode() {

@@ -67,8 +67,13 @@ public class StaticSprite extends Sprite {
                 rl.add(mr.mat.get().apply(mr.m));
         }
         for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
-            if ((lr.id < 0) || (((1 << lr.id) & fl) != 0))
-                rl.add(lr.l.make(owner));
+            if ((lr.id < 0) || (((1 << lr.id) & fl) != 0)) {
+//                try {
+                    rl.add(lr.l.make(owner));
+//                } catch (Exception e) {
+                //e.printStackTrace(); //FIXME Tried to fetch non-present res-loaded class haven.RenderLink$ArgLink from gfx/fx/eq
+//                }
+            }
         }
         if (res.layer(Resource.audio, "amb") != null)
             rl.add(new ActAudio.Ambience(res));

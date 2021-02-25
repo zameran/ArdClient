@@ -1,3 +1,67 @@
+20210221
+Temporary marks (Modification - Map). Fixes.
+~
+
+20210218
+Miscellaneous fixes.
+~
+
+20210214
+Cloth Painter (Modification). Fixes.
+~
+
+20210208
+Hats fix. A lot of fix. AreaPicker improve.
+~
+
+20210204
+Bug Fixes
+~
+
+20210201.1
+Choosing any hat instead of a broken one (Modification - Broken hat replacer)
+~
+
+20210201
+Area Picker (Pre-release universal script)
+~
+
+20210128
+Scripts fix.
+~
+
+20210126
+CraftDBWnd fix. Disables animation - disable smoke (ISmoke).
+~
+
+20210125
+New Craft and Build res image. Fix buddy color, beltwnd null res, helleyehat. Trying to fix pathfinding (fix and improve). Custom marks improve (Modification - Map - Additional marks). Area Picker (WIP - need testing and suggestions).
+~
+
+20210120
+adv fix. Musicbot tracks fix.
+~
+
+20210118
+Destroy area extension. Fix music bot thread. Last merge. Roster fix.
+~
+
+20210115
+Instant Flowermenu option (Modification).
+~
+
+20210111
+Sound manager - text input. Map 8x zoom.
+~
+
+20210106
+Save grid state. Fix color. Fix pointer null.
+~
+
+20210105
+Zoom of map now saving. Fixed alt ping for rus. Tree stage color autumn fix.
+~
+
 20210101
 Simple large map option and draw cave tiles option (Modification - Map). Fix.
 ~

@@ -35,4 +35,22 @@ public class ResHashMap<E> {
             return Optional.empty();
         }
     }
+
+    public Optional<E> getc(String key) {
+        if (key != null && !key.equals("")) {
+            do {
+                if (map.containsKey(key)) {
+                    return Optional.of(map.get(key));
+                } else {
+                    //One choice left
+                    if (map.containsKey(""))
+                        return Optional.of(map.get(""));
+                    else
+                        return Optional.empty();
+                }
+            } while (true);
+        } else {
+            return Optional.empty();
+        }
+    }
 }

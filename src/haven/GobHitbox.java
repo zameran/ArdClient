@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GobHitbox extends Sprite {
     public static States.ColState fillclrstate = new States.ColState(DefSettings.HIDDENCOLOR.get());
-    public static States.ColState bbclrstate = new States.ColState(new Color(255, 255, 255, 255));
+    public static States.ColState bbclrstate = new States.ColState(DefSettings.GUIDESCOLOR.get());
     private BBox[] b;
     private int mode;
     private States.ColState clrstate;
@@ -96,7 +96,7 @@ public class GobHitbox extends Sprite {
 //    private static final BBox[] bboxSmelter = new BBox[]{new BBox(new Coord(-12, -12), new Coord(12, 20))};
 //    private static final BBox[] bboxWallseg = new BBox[]{new BBox(new Coord(-5, -6), new Coord(6, 5))};
 //    private static final BBox[] bboxHwall = new BBox[]{new BBox(new Coord(-1, 0), new Coord(0, 11))};
-    private static final BBox[] bboxCupboard = new BBox[]{new BBox(new Coord(-5, -5), new Coord(5, 5))};
+//    private static final BBox[] bboxCupboard = new BBox[]{new BBox(new Coord(-5, -5), new Coord(5, 5))};
 
     public static BBox[] getBBox(Gob gob) {
         Resource res = null;
@@ -122,8 +122,6 @@ public class GobHitbox extends Sprite {
             return bboxGoat;
         else if (name.startsWith("gfx/kritter/pig/"))
             return bboxPig;
-        else if (name.endsWith("cupboard"))
-            return bboxCupboard;
 
             // dual state gobs
 //        if (name.endsWith("gate") && name.startsWith("gfx/terobjs/arch")) {

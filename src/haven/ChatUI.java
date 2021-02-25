@@ -640,7 +640,7 @@ public class ChatUI extends Widget {
 
         public Log(String name) {
             super(false);
-            this.name = name;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
         }
 
         public String name() {
@@ -784,7 +784,7 @@ public class ChatUI extends Widget {
 
         public SimpleChat(boolean closable, String name) {
             super(closable);
-            this.name = name;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);;
         }
 
         public void uimsg(String msg, Object... args) {
@@ -872,7 +872,7 @@ public class ChatUI extends Widget {
 
         public MultiChat(boolean closable, String name, int urgency) {
             super(closable);
-            this.name = name;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);
             this.urgency = urgency;
         }
 
@@ -992,7 +992,7 @@ public class ChatUI extends Widget {
 
         public DiscordChat(boolean closable, String name, int urgency) {
             super(closable);
-            this.name = name;
+            this.name = Resource.getLocString(Resource.BUNDLE_LABEL, name);;
             this.urgency = urgency;
         }
 

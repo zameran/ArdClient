@@ -54,6 +54,7 @@ public class MusicWnd extends Window {
     public double multiplier = 1;
     public int[] diapasone = new int[2];
     public int[] octaves = new int[10];
+    public boolean paused;
 
     public CheckBox disableKeys;
 
@@ -96,12 +97,9 @@ public class MusicWnd extends Window {
         this.act = new int[maxpoly];
         this.start = System.currentTimeMillis() / 1000.0;
 
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("run");
-                playMusic();
-            }
+        runnable = () -> {
+            System.out.println("run");
+            playMusic();
         };
         thread = new Thread(runnable, "music");
 
@@ -114,6 +112,11 @@ public class MusicWnd extends Window {
         try {
             if (allTracks.a) {
                 for (int i = 1; i < allT.normalNotes.size(); i++) {
+                    if (!ui.rwidgets.containsKey(this)) {
+                        break;
+                    }
+                    while (paused)
+                        Thread.sleep(10);
                     int octave = (allT.normalNotes.get(i - 1).getKey() / 12);
                     int note = allT.normalNotes.get(i - 1).getKey() % 12;
 
@@ -153,6 +156,11 @@ public class MusicWnd extends Window {
 
             } else {
                 for (int i = 1; i < currentT.normalNotes.size(); i++) {
+                    if (!ui.rwidgets.containsKey(this)) {
+                        break;
+                    }
+                    while (paused)
+                        Thread.sleep(10);
                     int octave = (currentT.normalNotes.get(i - 1).getKey() / 12);
                     int note = currentT.normalNotes.get(i - 1).getKey() % 12;
 
@@ -260,79 +268,7 @@ public class MusicWnd extends Window {
 			add(channelLst, new Coord(310, 150));*/
 
             if (trackCheckList != null) trackCheckList.reqdestroy();
-            trackCheckList = new CheckListbox(100, 16) {
-                @Override
-                protected void itemclick(CheckListboxItem itm, int button) {
-                    super.itemclick(itm, button);
-                    //delete duplicate
-                    int td = 0;
-                    for (int i = 0; i + td < tracksList.size(); i++) {
-                        for (int j = i + 1; j < tracksList.size(); j++) {
-                            if (("Track " + trackList.get(i).number + ": " + trackList.get(i).size).equals(("Track " + trackList.get(j).number + ": " + trackList.get(j).size))) {
-                                PBotUtils.sysMsg(ui, "Track " + trackList.get(i).number + ": " + trackList.get(i).size + " removed");
-                                tracksList.remove(i);
-                                td++;
-                            }
-                        }
-                    }
-
-                    if (itm.selected) {
-                        PBotUtils.sysMsg(ui, itm + " selected");
-                        for (int i = 0; i < trackList.size(); i++) {
-                            if (("Track " + trackList.get(i).number + ": " + trackList.get(i).size).equals(itm.name)) {
-                                PBotUtils.sysMsg(ui, "Track " + trackList.get(i).number + ": " + trackList.get(i).size + " added");
-                                tracksList.add(trackList.get(i).number);
-                            } else
-                                PBotUtils.sysMsg(ui, "Track " + trackList.get(i).number + ": " + trackList.get(i).size + " not found");
-                        }
-                    } else {
-                        PBotUtils.sysMsg(ui, itm + " unselected");
-                        for (int i = 0; i < tracksList.size(); i++) {
-                            if (("Track " + trackList.get(i).number + ": " + trackList.get(i).size).equals(itm.name)) {
-                                for (int j = 0; i < tracksList.size(); j++)
-                                    if (trackList.get(i).number == tracksList.get(j)) {
-                                        PBotUtils.sysMsg(ui, "Track " + trackList.get(i).number + ": " + trackList.get(i).size + " removed");
-                                        tracksList.remove(j);
-                                    }
-                            } else
-                                PBotUtils.sysMsg(ui, "Track " + trackList.get(i).number + ": " + trackList.get(i).size + " not found");
-                        }
-                    }
-                    PBotUtils.sysMsg(ui, "tracksList size " + tracksList.size());
-
-                    ArrayList<midiNote> cumn = new ArrayList<>();
-                    for (int x = 0; x < tracksList.size(); x++) {
-                        for (int i = 0; i < trackList.size(); i++) {
-                            if (trackList.get(i).number == tracksList.get(x)) {
-                                PBotUtils.sysMsg(ui, "trackList.get(i).number == " + trackList.get(i).number);
-                                for (Integer t : tracksList) {
-                                    if (t == trackList.size())
-                                        if (trackList.get(i).normalNotes.size() != 0)
-                                            for (int j = 0; j < trackList.get(i).normalNotes.size(); j++) {
-                                                if (cumn.size() == 0) {
-                                                    cumn.add(trackList.get(i).normalNotes.get(j));
-                                                } else {
-                                                    for (int k = 0; k < cumn.size(); k++) {
-                                                        if (trackList.get(i).normalNotes.get(j).getTick() <= cumn.get(k).getTick()) {
-                                                            cumn.add(k, trackList.get(i).normalNotes.get(j));
-                                                            break;
-                                                        } else {
-                                                            if (k == cumn.size() - 1) {
-                                                                cumn.add(trackList.get(i).normalNotes.get(j));
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                }
-                            }
-                        }
-                    }
-
-                    currentT = new midiTrack(cumn, 0, cumn.size());
-                    PBotUtils.sysMsg(ui, currentT.normalNotes.size() + "");
-                }
-            };
+            trackCheckList = new CheckListbox(160, 16);
             add(trackCheckList, new Coord(205, 150));
 			/*trackLst = new Listbox<String>(100, 16, 20) {
 				@Override
@@ -444,40 +380,34 @@ public class MusicWnd extends Window {
                 setDiapasone();
 
                 for (int i = 0; i < trackList.size(); i++) {
-                    trackCheckList.items.add(new CheckListboxItem("Track " + trackList.get(i).number + ": " + trackList.get(i).size));
+                    trackCheckList.items.add(new CheckListboxItem("Track " + trackList.get(i).number + ": " + trackList.get(i).size + "(" + trackList.get(i).normalSize + ")"));
                 }
 
                 ArrayList<midiNote> almn = new ArrayList<>();
                 for (int i = 0; i < trackList.size(); i++) {
-//					System.out.println(i +"/" + trackList.size() + " trackList.size()");
                     if (trackList.get(i).normalNotes.size() != 0)
                         for (int j = 0; j < trackList.get(i).normalNotes.size(); j++) {
-//							System.out.println(j +"/" + trackList.get(i).normalNotes.size() + " trackList.get(i).normalNotes.size()");
                             if (almn.size() == 0) {
-//								System.out.println("j " + trackList.get(i).normalNotes.get(j).getTick());
                                 almn.add(trackList.get(i).normalNotes.get(j));
                             } else {
                                 for (int k = 0; k < almn.size(); k++) {
                                     if (trackList.get(i).normalNotes.get(j).getTick() <= almn.get(k).getTick()) {
-//										System.out.println("k yes " + trackList.get(i).normalNotes.get(j).getKey());
                                         almn.add(k, trackList.get(i).normalNotes.get(j));
                                         break;
                                     } else {
                                         if (k == almn.size() - 1) {
                                             almn.add(trackList.get(i).normalNotes.get(j));
                                         }
-//										System.out.println("k no " + trackList.get(i).normalNotes.get(j).getTick());
                                     }
                                 }
                             }
                         }
                 }
 
-//				System.out.println("almn " + almn.size());
                 allT = new midiTrack(almn, 0, almn.size());
-                for (int i = 0; i < allT.normalNotes.size(); i++) {
-                    System.out.println("@" + allT.normalNotes.get(i).getTick() + " channel:" + allT.normalNotes.get(i).getChannel() + " note:" + allT.normalNotes.get(i).getMsg() + " key:" + allT.normalNotes.get(i).getKey() + " velocity:" + allT.normalNotes.get(i).getVelocity());
-                }
+//                for (int i = 0; i < allT.normalNotes.size(); i++) {
+//                    System.out.println("@" + allT.normalNotes.get(i).getTick() + " channel:" + allT.normalNotes.get(i).getChannel() + " note:" + allT.normalNotes.get(i).getMsg() + " key:" + allT.normalNotes.get(i).getKey() + " velocity:" + allT.normalNotes.get(i).getVelocity());
+//                }
             } else {
                 PBotUtils.sysMsg(ui, "Parsing null");
             }
@@ -487,16 +417,56 @@ public class MusicWnd extends Window {
     }
 
     public void play() {
-        System.out.println("play");
+        if (!allTracks.a) {
+            tracksList.clear();
+            for (int i = 0; i < trackCheckList.items.size(); i++) {
+                if (trackCheckList.items.get(i).selected) {
+                    Integer n = Integer.parseInt(trackCheckList.items.get(i).name.substring(trackCheckList.items.get(i).name.indexOf(" ") + 1, trackCheckList.items.get(i).name.indexOf(":")));
+                    tracksList.add(n);
+                }
+            }
+
+            if (tracksList.size() > 0) {
+                ArrayList<midiNote> cumn = new ArrayList<>();
+                for (int x = 0; x < tracksList.size(); x++) {
+                    for (int i = 0; i < trackList.size(); i++) {
+                        if (trackList.get(i).number == tracksList.get(x)) {
+                            if (trackList.get(i).normalNotes.size() > 0)
+                                for (int j = 0; j < trackList.get(i).normalNotes.size(); j++) {
+                                    if (cumn.size() == 0) {
+                                        cumn.add(trackList.get(i).normalNotes.get(j));
+                                    } else {
+                                        for (int k = 0; k < cumn.size(); k++) {
+                                            if (trackList.get(i).normalNotes.get(j).getTick() <= cumn.get(k).getTick()) {
+                                                cumn.add(k, trackList.get(i).normalNotes.get(j));
+                                                break;
+                                            } else {
+                                                if (k == cumn.size() - 1) {
+                                                    cumn.add(trackList.get(i).normalNotes.get(j));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                        }
+                    }
+                }
+                if (cumn.size() > 0) {
+                    currentT = new midiTrack(cumn, 0, cumn.size());
+                } else {
+                    PBotUtils.sysMsg(ui, "Channels is empty (it's haven't sounds)");
+                }
+            }
+        }
+
         if (tracksList.size() > 0 || allTracks.a) {
             if (trackList.size() > 0) {
                 if (thread.isAlive()) thread.interrupt();
                 thread = new Thread(runnable, "music");
                 thread.start();
-                PBotUtils.sysMsg(ui, "thread start");
             } else PBotUtils.sysMsg(ui, "trackList 0");
         } else {
-            PBotUtils.sysMsg(ui, "Select a channels " + tracksList.size());
+            PBotUtils.sysMsg(ui, "Channels not selected");
         }
     }
 
@@ -509,7 +479,7 @@ public class MusicWnd extends Window {
 
     public void pause() {
         try {
-            thread.wait();
+            paused = !paused;
         } catch (Exception e) {
             e.printStackTrace();
         }

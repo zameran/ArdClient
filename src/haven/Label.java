@@ -95,6 +95,11 @@ public class Label extends Widget {
         sz = this.text.sz();
     }
 
+    public void settext(String text, Color clr) {
+        settext(text);
+        setcolor(clr);
+    }
+
     public void setcolor(Color color) {
         col = color;
         this.text = f.render(texts, col);

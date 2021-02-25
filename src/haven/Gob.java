@@ -71,7 +71,6 @@ import java.util.function.Consumer;
 
 public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.HasPose {
     public int cropstgmaxval = 0;
-    private Overlay gobpath = null;
     private Overlay bowvector = null;
     public static final Text.Foundry gobhpf = new Text.Foundry(Text.serif, 14).aa(true);
     private static final Material.Colors dframeEmpty = new Material.Colors(new Color(0, 255, 0, 200));
@@ -166,9 +165,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
 
         public boolean setup(RenderList rl) {
             if (spr != null) {
-                if (name().equals("gfx/terobjs/trees/yulestar-fir") || name().equals("gfx/terobjs/trees/yulestar-spruce")) {
+                if (name().equals("gfx/terobjs/trees/yulestar-fir") || name().equals("gfx/terobjs/trees/yulestar-spruce") || name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
                     if (name().equals("gfx/terobjs/trees/yulestar-fir"))
                         rl.prepc(Location.xlate(new Coord3f(0, 0, 45)));
+                    else if (name().equals("gfx/terobjs/trees/yulestar-spruce"))
+                        rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
                     else
                         rl.prepc(Location.xlate(new Coord3f(0, 0, 60)));
                     rl.prepc(Location.rot(new Coord3f(0, 1, 0), (float) Math.PI / 2));
@@ -407,9 +408,9 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 });
             }
             if (ui.gui.mapfile != null && resources.customMarkObj) {
-                for (String item : resources.customMarkObjs) {
-                    if (name.equals(item)) {
-                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(item));
+                for (Map.Entry<String, Boolean> entry : resources.customMarks.entrySet()) {
+                    if (name.equals(entry.getKey()) && entry.getValue()) {
+                        ui.gui.mapfile.markobj(id, this, resources.getDefaultTextName(entry.getKey()));
                     }
                 }
             }
@@ -475,9 +476,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //Check for any special attributes we should attach
                 Alerted.checkAlert(name, this);
 
-                if (Movable.isMovable(name)) {
-                    setattr(new Movable(this));
-                }
                 if (Hidden.isHidden(name)) {
                     setattr(new Hidden(this));
                 }
@@ -898,23 +896,23 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         synchronized (attr) {
             attr.put(ac, a);
         }
-        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
-            final UI ui = glob.ui.get();
-            if (ui != null) {
-                try {
-                    Gob pl = glob.oc.getgob(ui.gui.map.plgob);
-                    if (pl != null) {
-                        Following follow = pl.getattr(Following.class);
-                        if (pl == this ||
-                                (follow != null && follow.tgt() == this)) {
-                            gobpath = new Overlay(new GobPath(this));
-                            ols.add(gobpath);
-                        }
-                    }
-                } catch (Exception e) {
-                }//ignore, this is just a draw a line on player movement. Not critical.
-            }
-        }
+//        if (DefSettings.SHOWPLAYERPATH.get() && gobpath == null && a instanceof LinMove) {
+//            final UI ui = glob.ui.get();
+//            if (ui != null) {
+//                try {
+//                    Gob pl = glob.oc.getgob(ui.gui.map.plgob);
+//                    if (pl != null) {
+//                        Following follow = pl.getattr(Following.class);
+//                        if (pl == this ||
+//                                (follow != null && follow.tgt() == this)) {
+//                            gobpath = new Overlay(new GobPath(this));
+//                            ols.add(gobpath);
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                }//ignore, this is just a draw a line on player movement. Not critical.
+//            }
+//        }
     }
 
     public void delayedsetattr(GAttrib a, Consumer<Gob> cb) {
@@ -933,11 +931,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
     public void delattr(Class<? extends GAttrib> c) {
         synchronized (attr) {
             attr.remove(attrclass(c));
-        }
-        if (attrclass(c) == Moving.class && gobpath != null) {
-            ols.remove(gobpath);
-            gobpath = null;
-            MapView.pllastcc = null;
         }
     }
 
@@ -1053,7 +1046,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
         } else {
             synchronized (ols) {
                 for (Overlay ol : ols) {
-                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce")) {
+                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce") || ol.name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
                         if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
                             ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
                     }
@@ -1063,6 +1056,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     if (ol.spr instanceof Overlay.SetupMod)
                         ((Overlay.SetupMod) ol.spr).setupmain(rl);
                 }
+            }
+
+            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
+//                    if (Movable.isMovable(name)) {}
+                if (isMoving() && getattr(Movable.class) == null)
+                    setattr(new Movable(this));
             }
 
             if (configuration.resizableworld) {
@@ -1112,7 +1111,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             }
             if (configuration.showtreeberry && (type == Type.TREE || type == Type.BUSH)) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                if (stage == 32) {
+                if (stage == 32 || stage == 48) {
                     rl.prepc(Rendered.eyesort);
 //                    rl.prepc(Rendered.deflt);
 //                    rl.prepc(Rendered.first);

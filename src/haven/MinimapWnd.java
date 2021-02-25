@@ -30,11 +30,11 @@ public class MinimapWnd extends ResizableWnd {
             }
 
             public void click() {
-                if ((ui.gui.map != null) && !ui.gui.map.visol(0)) {
-                    ui.gui.map.enol(0, 1);
+                if ((ui.gui.map != null) && !ui.gui.map.visol("cplot")) {
+                    ui.gui.map.enol("cplot");
                     DefSettings.SHOWPCLAIM.set(true);
                 } else {
-                    ui.gui.map.disol(0, 1);
+                    ui.gui.map.disol("cplot");
                     DefSettings.SHOWPCLAIM.set(false);
                 }
             }
@@ -45,11 +45,11 @@ public class MinimapWnd extends ResizableWnd {
             }
 
             public void click() {
-                if ((ui.gui.map != null) && !ui.gui.map.visol(2)) {
-                    ui.gui.map.enol(2, 3);
+                if ((ui.gui.map != null) && !ui.gui.map.visol("vlg")) {
+                    ui.gui.map.enol("vlg");
                     DefSettings.SHOWVCLAIM.set(true);
                 } else {
-                    ui.gui.map.disol(2, 3);
+                    ui.gui.map.disol("vlg");
                     DefSettings.SHOWVCLAIM.set(false);
                 }
             }
@@ -60,11 +60,11 @@ public class MinimapWnd extends ResizableWnd {
             }
 
             public void click() {
-                if ((ui.gui.map != null) && !ui.gui.map.visol(4)) {
-                    ui.gui.map.enol(4, 5);
+                if ((ui.gui.map != null) && !ui.gui.map.visol("realm")) {
+                    ui.gui.map.enol("realm");
                     DefSettings.SHOWKCLAIM.set(true);
                 } else {
-                    ui.gui.map.disol(4, 5);
+                    ui.gui.map.disol("realm");
                     DefSettings.SHOWKCLAIM.set(false);
                 }
             }

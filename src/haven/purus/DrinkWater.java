@@ -152,7 +152,7 @@ public class DrinkWater implements Runnable {
         return true;
     }
 
-    private boolean sipMode(WItem drinkFromThis) {
+    private boolean sipMode(WItem drinkFromThis) throws InterruptedException {
         int stamina = PBotUtils.getStamina(gui.ui);
         int sips = configuration.siponce ? 1 : (configuration.autosipthreshold - stamina) / 10;
 //                while (PBotUtils.getStamina(gui.ui) < configuration.autosipthreshold && canDrinkFrom(drinkFromThis)) {
@@ -220,7 +220,7 @@ public class DrinkWater implements Runnable {
         return true;
     }
 
-    private boolean waitDrinkPose() {
+    private boolean waitDrinkPose() throws InterruptedException {
         int limit = configuration.sipwaiting;
         int sleep = 10;
         int cycles = 0;
@@ -243,7 +243,7 @@ public class DrinkWater implements Runnable {
     private boolean canDrinkFrom(WItem item) {
         Pattern liquidPattern = Pattern.compile(String.format("[0-9.]+ l of (%s)",
                 //	String.join("|", new String[] { "Water", "Piping Hot Tea", "Tea" }), Pattern.CASE_INSENSITIVE));
-                String.join("|", configuration.liquids), Pattern.CASE_INSENSITIVE));
+                String.join("|", configuration.liquids)), Pattern.CASE_INSENSITIVE);
         ItemInfo.Contents contents = getContents(item);
         if (contents != null && contents.sub != null && contents.content >= 0.05) {
             synchronized (item.item.ui) {
@@ -285,12 +285,8 @@ public class DrinkWater implements Runnable {
         return "";
     }
 
-    private void sleep(int timeInMs) {
-        try {
-            Thread.sleep(timeInMs);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void sleep(int timeInMs) throws InterruptedException {
+        Thread.sleep(timeInMs);
     }
 
     private ItemInfo.Contents getContents(WItem item) {
@@ -299,7 +295,7 @@ public class DrinkWater implements Runnable {
         synchronized (item.item.ui) {
             try {
                 for (ItemInfo info : item.item.info())
-                    if (info != null && info instanceof ItemInfo.Contents)
+                    if (info instanceof ItemInfo.Contents)
                         return (ItemInfo.Contents) info;
             } catch (Loading ignored) {
             }

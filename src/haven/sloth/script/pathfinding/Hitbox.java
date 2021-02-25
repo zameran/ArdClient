@@ -4,7 +4,6 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
-import haven.GobHitbox;
 import haven.MessageBuf;
 import haven.RenderLink;
 import haven.ResDrawable;
@@ -13,6 +12,7 @@ import haven.sloth.gob.Type;
 import haven.sloth.util.ResHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +21,27 @@ import java.util.Optional;
  */
 public class Hitbox {
     private static final ResHashMap<Hitbox[]> hitboxes = new ResHashMap<>();
-    private static final Hitbox[] NOHIT = new Hitbox[]{new Hitbox(new Coord(-1, -1), new Coord(1, 1))};
+    private static final List<Kit> nohitablekits = new ArrayList<>();
+    private static final List<String> nohitableids = new ArrayList<>(Arrays.asList("build", "ext"));
+    private static final List<String> nocacheends = new ArrayList<>(Arrays.asList("gate", "/pow"));
+    private static final Hitbox[] NOHIT = new Hitbox[]{new Hitbox(new Coord(-1, -1), new Coord(1, 1), false, false)};
     private static final int BUFFER_SIZE = 2;
+
+    private static class Kit {
+        public final String resname;
+        public final String overlay;
+        public final String obstid;
+
+        public Kit(String resname, String overlay, String obstid) {
+            this.resname = resname;
+            this.overlay = overlay;
+            this.obstid = obstid;
+        }
+
+        public boolean equals(Kit kit) {
+            return (resname.equals(kit.resname) && overlay.equals(kit.overlay) && obstid.equals(kit.obstid));
+        }
+    }
 
     static {
         hitboxes.put("gfx/terobjs/herbs", NOHIT);
@@ -72,7 +91,9 @@ public class Hitbox {
         hitboxes.put("gfx/kritter/goat", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
         hitboxes.put("gfx/kritter/sheep/lamb", new Hitbox[]{new Hitbox(new Coord(-6, -2), new Coord(6, 2))});
 
-        hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
+//        hitboxes.put("gfx/terobjs/cupboard", new Hitbox[]{new Hitbox(new Coord(-5, -5), new Coord(5, 5))});
+
+        nohitablekits.add(new Kit("gfx/terobjs/vehicle/wagon", "gfx/terobjs/vehicle/encampmentspices", "ext"));
     }
 
     //Offset and Size with a "buffer" around it to avoid clipping
@@ -84,19 +105,23 @@ public class Hitbox {
 
     private final boolean hitable;
 
+    public boolean ishitable() {
+        return hitable;
+    }
+
     public float zplus = 0;
 
-    public Hitbox(final Coord off, final Coord sz, boolean hitable, boolean buffer) {
+    public Hitbox(final Coord off, final Coord br, boolean hitable, boolean buffer) {
         Coord ac = !buffer ? off : off.add(BUFFER_SIZE, BUFFER_SIZE);
-        Coord bc = !buffer ? sz : sz.add(BUFFER_SIZE * 2, BUFFER_SIZE * 2);
+        Coord bc = !buffer ? br : br.add(BUFFER_SIZE * 2, BUFFER_SIZE * 2);
         this.points = new Coord2d[]{
                 new Coord2d(ac.x, -ac.y), new Coord2d(bc.x, -ac.y), new Coord2d(bc.x, -bc.y), new Coord2d(ac.x, -bc.y)
         };
         this.hitable = hitable;
     }
 
-    public Hitbox(final Coord off, final Coord sz) {
-        this(off, sz, true, false);
+    public Hitbox(final Coord off, final Coord br) {
+        this(off, br, true, false);
     }
 
     public Hitbox() {
@@ -111,14 +136,32 @@ public class Hitbox {
         this.hitable = hitable;
     }
 
+    public Coord2d offset() {
+        double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
+        for (Coord2d c2 : points) {
+            minx = Math.min(minx, c2.x);
+            miny = Math.min(miny, c2.y);
+        }
+//        return Coord.z.sub(BUFFER_SIZE, BUFFER_SIZE);
+//        return new Coord2d(minx, miny).round().add(BUFFER_SIZE, BUFFER_SIZE);
+        return new Coord2d(minx, miny);
+//        return Coord.z;
+//        return new Coord2d(minx, miny).round().sub(BUFFER_SIZE, BUFFER_SIZE);
+    }
 
-//    public Coord offset() {
-//        return Coord.z;
-//    }
-//
-//    public Coord size() {
-//        return Coord.z;
-//    }
+    public Coord2d size() {
+        double maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE, minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
+        for (Coord2d c2 : points) {
+            maxx = Math.max(maxx, c2.x);
+            maxy = Math.max(maxy, c2.y);
+            minx = Math.min(minx, c2.x);
+            miny = Math.min(miny, c2.y);
+        }
+        return new Coord2d(maxx - minx, maxy - miny);
+//        return new Coord2d(maxx - minx, maxy - miny).round()/*.add(BUFFER_SIZE * 2, BUFFER_SIZE * 2)*/;
+//        return new Coord2d(maxx, maxy).ceil();
+//        return new Coord2d(maxx - minx, maxy - miny).round().add(BUFFER_SIZE, BUFFER_SIZE);
+    }
 
     boolean canHit() {
         return hitable;
@@ -132,20 +175,27 @@ public class Hitbox {
 
             if (res.name.endsWith("/consobj")) {
                 ResDrawable rd = gob.getattr(ResDrawable.class);
-                if (rd != null && rd.sdt.rbuf.length >=4) {
+                if (rd != null && rd.sdt.rbuf.length >= 4) {
                     MessageBuf buf = rd.sdt.clone();
                     return new Hitbox[]{new Hitbox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
                 }
             }
 
-            Optional<Hitbox[]> hitbox = hitboxes.get(res.name);
-            if (hitbox.isPresent()) {
-                if (gob.type == Type.WALLSEG && Config.flatwalls) {
-                    for (Hitbox h : hitbox.get()) {
-                        h.zplus = 10;
-                    }
+            if (res.name.endsWith("/trellis")) {
+                Optional<Hitbox[]> hitbox = hitboxes.getc(res.name);
+                if (hitbox.isPresent()) {
+                    return hitbox.get();
                 }
-                return hitbox.get();
+            } else {
+                Optional<Hitbox[]> hitbox = hitboxes.get(res.name);
+                if (hitbox.isPresent()) {
+                    if (gob.type == Type.WALLSEG && Config.flatwalls) {
+                        for (Hitbox h : hitbox.get()) {
+                            h.zplus = 10;
+                        }
+                    }
+                    return hitbox.get();
+                }
             }
 
             Resource.Neg neg = res.layer(Resource.Neg.class);
@@ -294,7 +344,8 @@ public class Hitbox {
                 obs = 0;
                 for (int o = 0; o < obsts.size(); o++) {
                     for (int i = 0; i < obsts.get(o).ep.length; i++) {
-                        hb[obs] = new Hitbox(obsts.get(o).ep[i], true);
+                        boolean hitable = checkHitable(gob, obsts.get(o));
+                        hb[obs] = new Hitbox(obsts.get(o).ep[i], hitable);
                         obs++;
                     }
                 }
@@ -320,15 +371,77 @@ public class Hitbox {
                         h.zplus = 10;
                     }
                 }
-                hitboxes.put(res.name, hb);
+                boolean isAdd = true;
+                for (String s : nocacheends)
+                    if (res.name.endsWith(s)) {
+                        isAdd = false;
+                        break;
+                    }
+                if (isAdd)
+                    hitboxes.put(res.name, hb);
                 return hb;
-            } else if (neg != null) {
-                final Hitbox[] hb = new Hitbox[]{new Hitbox(neg.bc, neg.bs, true, false)};
-                hitboxes.put(res.name, hb);
+            }
+            if (neg != null) {
+                boolean hitable = checkHitable(gob);
+                final Hitbox[] hb = new Hitbox[]{new Hitbox(neg.bc, neg.bs, hitable, false)};
+                boolean isAdd = true;
+                for (String s : nocacheends)
+                    if (res.name.endsWith(s)) {
+                        isAdd = false;
+                        break;
+                    }
+                if (isAdd)
+                    hitboxes.put(res.name, hb);
                 return hb;
             }
         }
         return null;
+    }
+
+    public static boolean checkOverlay(Gob gob, String id) {
+        Optional<String> resname = gob.resname();
+        if (resname.isPresent())
+            for (Kit kit : nohitablekits)
+                if (kit.resname.equals(resname.get()))
+                    for (Gob.Overlay ol : gob.ols)
+                        if (ol.res != null && ol.res.get() != null)
+                            if (ol.res.get().name.equals(kit.overlay))
+                                if (kit.obstid.equals(id))
+                                    return (true);
+        return (false);
+    }
+
+    public static boolean checkHitable(Gob gob, Resource.Obst obst) {
+        Optional<Resource> ores = gob.res();
+        if (ores.isPresent()) {
+            Resource res = ores.get();
+            String id = obst.id;
+            if (id != null)
+                for (String s : nohitableids)
+                    if (s.equals(id))
+                        return (false);
+            ResDrawable rd = gob.getattr(ResDrawable.class);
+            if (rd != null)
+                if (res.name.endsWith("gate") && rd.sdt.peekrbuf(0) == 1)
+                    return (false);
+//            if (checkOverlay(gob, id)) return (false);
+        }
+        return (true);
+    }
+
+    public static boolean checkHitable(Gob gob) {
+        Optional<Resource> ores = gob.res();
+        if (ores.isPresent()) {
+            Resource res = ores.get();
+            ResDrawable rd = gob.getattr(ResDrawable.class);
+            if (rd != null)
+                if (res.name.endsWith("/pow") && (rd.sdt.peekrbuf(0) == 33 || rd.sdt.peekrbuf(0) == 17))
+                    return (false);
+                if (res.name.equals("gfx/terobjs/vflag"))
+                    return (false);
+//            if (checkOverlay(gob, id)) return (false);
+        }
+        return (true);
     }
 
 

@@ -487,15 +487,21 @@ public class WItem extends Widget implements DTarget {
     }
 
     public Coord size() {
-        Indir<Resource> res = item.getres().indir();
-        if (res.get() != null) {
-            Tex tex = res.get().layer(Resource.imgc).tex();
-            if (tex == null)
-                return new Coord(1, 1);
-            else
-                return tex.sz().div(30);
+        GSprite spr = item.spr();
+        if (spr != null) {
+            return spr.sz().div(30);
         } else {
-            return new Coord(1, 1);
+            return new Coord(0, 0);
         }
+//        Indir<Resource> res = item.getres().indir();
+//        if (res.get() != null) {
+//            Tex tex = res.get().layer(Resource.imgc).tex();
+//            if (tex == null)
+//                return new Coord(1, 1);
+//            else
+//                return tex.sz().div(30);
+//        } else {
+//            return new Coord(1, 1);
+//        }
     }
 }

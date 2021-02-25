@@ -69,29 +69,29 @@ public class BPRadSprite extends Sprite {
         this.sidx = sa;
     }
 
-    private void setz(Glob var1, Coord2d var2) {
-        FloatBuffer var3 = this.posa.data;
-        int var4 = this.posa.size() / 2;
+    private void setz(Glob glob, Coord2d rc) {
+        FloatBuffer pa = this.posa.data;
+        int p = this.posa.size() / 2;
 
         try {
-            float var5 = (float) var1.map.getcz(var2.x, var2.y);
+            float rz = (float) glob.map.getcz(rc.x, rc.y);
 
-            for (int var6 = 0; var6 < var4; ++var6) {
-                float var7 = (float) var1.map.getcz(var2.x + (double) var3.get(var6 * 3), var2.y - (double) var3.get(var6 * 3 + 1)) - var5;
-                var3.put(var6 * 3 + 2, var7 + 10.0F);
-                var3.put((var4 + var6) * 3 + 2, var7 - 10.0F);
+            for (int i = 0; i < p; ++i) {
+                float z = (float) glob.map.getcz(rc.x + (double) pa.get(i * 3), rc.y - (double) pa.get(i * 3 + 1)) - rz;
+                pa.put(i * 3 + 2, z + 10.0F);
+                pa.put((p + i) * 3 + 2, z - 10.0F);
             }
         } catch (Loading var8) {
         }
 
     }
 
-    public boolean tick(int var1) {
-        Coord2d var2 = ((Gob) this.owner).rc;
-        if (this.lc == null || !this.lc.equals(var2)) {
+    public boolean tick(int dt) {
+        Coord2d rc = ((Gob) this.owner).rc;
+        if (this.lc == null || !this.lc.equals(rc)) {
             if (!Config.disableelev)
-                this.setz((Glob) this.owner.context(Glob.class), var2);
-            this.lc = var2;
+                this.setz(this.owner.context(Glob.class), rc);
+            this.lc = rc;
         }
 
         return false;

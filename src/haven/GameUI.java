@@ -236,7 +236,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         add(new Widget(new Coord(360, umpanel.sz.y)) {
             @Override
             public void draw(GOut g) {
-                c.x = umpanel.c.x - 360;
+                if (c.x != umpanel.c.x - 360)
+                    c.x = umpanel.c.x - 360;
                 if (Config.showservertime) {
                     Tex mtime = ui.sess.glob.mservertimetex;
                     Tex ltime = ui.sess.glob.lservertimetex;
@@ -483,6 +484,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     }
 
     public void toggleGridLines() {
+        Config.showgridlines = !Config.showgridlines;
+        Utils.setprefb("showgridlines", Config.showgridlines);
         if (map != null)
             map.togglegrid();
     }
@@ -2096,6 +2099,17 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         msg(msg, color, color);
     }
 
+    public void botmsg(String msg, Color color, Color logcol) {
+        msgtime = Utils.rtime();
+        lastmsg = msgfoundry.render(msg, color);
+        botlog.append(msg, logcol);
+        Audio.play(msgsfx);
+    }
+
+    public void botmsg(String msg, Color color) {
+        botmsg(msg, color, color);
+    }
+
     private static final Resource errsfx = Resource.local().loadwait("sfx/error");
     private static final Resource msgsfx = Resource.local().loadwait("sfx/msg");
 
@@ -2153,6 +2167,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                 Window wnd = (Window) w;
                 if (wnd.cap != null && cap.equals(wnd.origcap))
                     return wnd;
+            }
+        }
+        return null;
+    }
+
+    public Window getwnd(Window wnd) {
+        for (Widget w = lchild; w != null; w = w.prev) {
+            if (w instanceof Window) {
+                if (w.equals(wnd))
+                    return (Window) w;
             }
         }
         return null;

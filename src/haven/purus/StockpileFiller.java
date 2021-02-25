@@ -182,7 +182,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                             stop = true;
                             stop();
                         }
-                        PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
+                        PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
                         int retry = 0;
                         while (ui.gui.getwnd("Stockpile") == null) {
                             if (!PBotUtils.isMoving(ui))
@@ -194,7 +194,7 @@ public class StockpileFiller extends Window implements GobSelectCallback, ItemCl
                                 setInfo("Retry : " + retry);
                                 PBotUtils.sysLogAppend(ui, "Retrying stockpile interaction", "white");
                                 PBotUtils.dropItem(ui, 0);
-                                PBotUtils.PathfinderRightClick(ui, stockpiles.get(0), 0);
+                                PBotUtils.pfRightClick(ui, stockpiles.get(0), 0);
                             }
                             PBotUtils.sleep(10);
                         }

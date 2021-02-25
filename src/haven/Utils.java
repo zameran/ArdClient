@@ -457,6 +457,32 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
+    public static void saveCustomList(ObservableMap<String, Boolean> list, String jsonname) {
+        synchronized (list) {
+            Gson gson = (new GsonBuilder()).create();
+            Config.saveFile(jsonname + ".json", gson.toJson(list.base));
+        }
+    }
+
+    public static ObservableMap<String, Boolean> loadCustomList(List<String> defaultlist, String jsonname) {
+        String json = Config.loadFile(jsonname + ".json");
+        ObservableMap<String, Boolean> list = new ObservableMap<>(new HashMap<>());
+        if (json != null) {
+            try {
+                Gson gson = (new GsonBuilder()).create();
+                Type collectionType = new TypeToken<HashMap<String, Boolean>>() {
+                }.getType();
+                list.putAll(gson.fromJson(json, collectionType));
+            } catch (Exception ignored) {
+            }
+        }
+        if (list.size() == 0) {
+            defaultlist.forEach(k -> list.put(k, false));
+        }
+        return list;
+    }
+
     public static JSONObject[] getprefjsona(String prefname, JSONObject[] def) {
         try {
             String jsonstr = Utils.getpref(prefname, null);

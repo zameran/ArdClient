@@ -167,6 +167,20 @@ public class PBotUtils {
             sleep(25);
     }
 
+    public static boolean waitFlowermenuClose(UI ui, int limit) {
+        int cycles = 0;
+        int sleep = 25;
+        while (ui.root.findchild(FlowerMenu.class) != null) {
+            if (cycles == limit) {
+                return false;
+            } else {
+                sleep(sleep);
+                cycles += sleep;
+            }
+        }
+        return true;
+    }
+
 //    public static void waitFlowermenuClose() {
 //        waitFlowermenuClose(PBotAPI.modeui());
 //    }
@@ -360,6 +374,25 @@ public class PBotUtils {
         while (ui.root.findchild(FlowerMenu.class) != null) {
             sleep(15);
         }
+    }
+
+    public static boolean closeFlowermenu(UI ui, int limit) {
+        int cycles = 0;
+        int sleep = 15;
+        FlowerMenu menu = ui.root.findchild(FlowerMenu.class);
+        if (menu != null) {
+            menu.choose(null);
+            menu.destroy();
+        }
+        while (ui.root.findchild(FlowerMenu.class) != null) {
+            if (cycles == limit) {
+                return false;
+            } else {
+                sleep(sleep);
+                cycles += sleep;
+            }
+        }
+        return true;
     }
 
 //    public static void closeFlowermenu() {
@@ -655,6 +688,18 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("drop", Coord.z, ui.gui.map.player().rc.floor(posres), mod);
         while (getItemAtHand(ui) != null)
             sleep(25);
+    }
+
+    public static boolean dropItemFromHand(UI ui, int mod, int timeout) {
+        ui.gui.map.wdgmsg("drop", Coord.z, ui.gui.map.player().rc.floor(posres), mod);
+        int retries = 0;
+        while (getItemAtHand(ui) != null) {
+            if (retries > timeout / 25)
+                return false;
+            retries++;
+            sleep(25);
+        }
+        return true;
     }
 
 //    public static void dropItemFromHand(int mod) {
@@ -1885,12 +1930,16 @@ public class PBotUtils {
         item.item.wdgmsg("transfer", Coord.z);
     }
 
+
+    /**
+     * Boshaw (sloth) PathFinding
+     */
+
     public static boolean pfmove(UI ui, int x, int y) {
-//        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfLeftClick(ui, x, y);
+        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+        pfwait(ui);
+        return yea;
+//        return pfLeftClick(ui, x, y);
     }
 
 //    public static boolean pfmove(int x, int y) {
@@ -1898,11 +1947,10 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmove(UI ui, double x, double y) {
-//        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfLeftClick(ui, x, y);
+        boolean yea = ui.gui.map.pathto(new Coord2d(x, y));
+        pfwait(ui);
+        return yea;
+//        return pfLeftClick(ui, x, y);
     }
 
 //    public static boolean pfmove(double x, double y) {
@@ -1910,11 +1958,10 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmovegob(UI ui, PBotGob gob) {
-//        boolean yea = ui.gui.map.pathto(gob.gob);
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfGobClick(ui, gob.gob, 1, 0);
+        boolean yea = ui.gui.map.pathto(gob.gob);
+        pfwait(ui);
+        return yea;
+//        return pfGobClick(ui, gob.gob, 1, 0);
     }
 
 //    public static boolean pfmovegob(PBotGob gob) {
@@ -1922,11 +1969,10 @@ public class PBotUtils {
 //    }
 
     public static boolean pfmovegob(UI ui, Gob gob) {
-//        boolean yea = ui.gui.map.pathto(gob);
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfGobClick(ui, gob, 1, 0);
+        boolean yea = ui.gui.map.pathto(gob);
+        pfwait(ui);
+        return yea;
+//        return pfGobClick(ui, gob, 1, 0);
     }
 
 //    public static boolean pfmovegob(Gob gob) {
@@ -1935,11 +1981,10 @@ public class PBotUtils {
 
     //new boshaw pf right clicks.
     public static boolean PathfinderRightClick(UI ui, Gob gob, int mod) {
-//        boolean yea = ui.gui.map.pathtoRightClick(gob, mod);
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfRightClick(ui, gob, mod);
+        boolean yea = ui.gui.map.pathtoRightClick(gob, mod);
+        pfwait(ui);
+        return yea;
+//        return pfRightClick(ui, gob, mod);
     }
 
 //    public static boolean PathfinderRightClick(Gob gob, int mod) {
@@ -1947,16 +1992,20 @@ public class PBotUtils {
 //    }
 
     public static boolean PathfinderRightClick(UI ui, PBotGob gob, int mod) {
-//        boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
-//        while (!ui.gui.map.isclearmovequeue())
-//            PBotUtils.sleep(10);
-//        return yea;
-        return pfRightClick(ui, gob, mod);
+        boolean yea = ui.gui.map.pathtoRightClick(gob.gob, mod);
+        pfwait(ui);
+        return yea;
+//        return pfRightClick(ui, gob, mod);
     }
 
 //    public static boolean PathfinderRightClick(PBotGob gob, int mod) {
 //        return PathfinderRightClick(PBotAPI.modeui(), gob.gob, mod);
 //    }
+
+    public static void pfwait(UI ui) {
+        while (ui.gui != null && ui.gui.map != null && !ui.gui.map.isclearmovequeue())
+            PBotUtils.sleep(10);
+    }
 
     public static String getRes(PBotGob gob) {
         return gob.gob.getres().name;

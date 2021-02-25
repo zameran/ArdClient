@@ -1,7 +1,4 @@
-/* Preprocessed source code */
 package haven.res.lib.vmat;
-
-/* $use: lib/uspr */
 
 import haven.GLState;
 import haven.GOut;
@@ -11,8 +8,9 @@ import modification.dev;
 
 public class Wrapping implements Rendered {
     static {
-        dev.checkFileVersion("lib/vmat", 31);
+        dev.checkFileVersion("lib/vmat", 34);
     }
+
     public final Rendered r;
     public final GLState st;
     public final int mid;

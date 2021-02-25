@@ -10,14 +10,20 @@ public class ColorPreview extends Widget {
     private Color col;
     private ColorPicker cp = null;
     private final Consumer<Color> callback;
+    public String name;
 
-    public ColorPreview(Coord sz, Color cl, Consumer<Color> callback) {
+    public ColorPreview(Coord sz, Color cl, Consumer<Color> callback, String name) {
         super(sz);
         this.callback = callback;
+        this.name = name;
         col = cl;
-        tooltip = RichText.Parser.quote(String.format("Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
+        tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
                 col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
         tooltip = RichText.render((String) tooltip, 200);
+    }
+
+    public ColorPreview(Coord sz, Color cl, Consumer<Color> callback) {
+        this(sz, cl, callback, "");
     }
 
     public ColorPreview(Coord sz, Color cl) {
@@ -25,6 +31,10 @@ public class ColorPreview extends Widget {
     }
 
     public void draw(GOut g) {
+        g.chcolor(Color.WHITE);
+        g.rect(Coord.z, sz);
+        g.chcolor();
+
         g.chcolor(col);
         g.frect(Coord.z, sz);
         g.chcolor();
@@ -32,6 +42,10 @@ public class ColorPreview extends Widget {
 
     public void setColor(final Color ncol) {
         this.col = ncol;
+    }
+
+    public Color getColor() {
+        return (col);
     }
 
     public boolean mousedown(Coord c, int btn) {
@@ -43,7 +57,7 @@ public class ColorPreview extends Widget {
             cp = new ColorPicker(col, (color -> {
                 cp = null;
                 col = color;
-                tooltip = RichText.Parser.quote(String.format("Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
+                tooltip = RichText.Parser.quote(String.format((this.name.equals("") ? "" : this.name +"\n") + "Red: %d\nGreen: %d\nBlue: %d\nAlpha: %d",
                         col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()));
                 tooltip = RichText.render((String) tooltip, 200);
                 callback.accept(col);

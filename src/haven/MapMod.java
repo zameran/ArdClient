@@ -69,12 +69,10 @@ public class MapMod extends Window implements MapView.Grabber {
         map = ui.sess.glob.map;
         mv = getparent(GameUI.class).map;
         grab = mv.new GrabXL(this);
-        mv.enol(17);
         mv.grab(grab);
     }
 
     public void destroy() {
-        mv.disol(17);
         if (!walkmod)
             mv.release(grab);
         if (ol != null)
@@ -91,7 +89,7 @@ public class MapMod extends Window implements MapView.Grabber {
         Coord tc = mc.div(MCache.tilesz2);
         if (ol != null)
             ol.destroy();
-        ol = map.new Overlay(tc, tc, 1 << 17);
+        ol = map.new Overlay(Area.sized(tc, new Coord(1, 1)), MapView.selol);
         sc = tc;
         grab.mv = true;
         mgrab = ui.grabmouse(mv);
@@ -131,7 +129,7 @@ public class MapMod extends Window implements MapView.Grabber {
             c1.y = sc.y;
             c2.y = tc.y;
         }
-        ol.update(c1, c2);
+        ol.update(new Area(c1, c2.add(1, 1)));
         this.c1 = c1;
         this.c2 = c2;
         Coord sz = tc.sub(sc).positive().add(1, 1);

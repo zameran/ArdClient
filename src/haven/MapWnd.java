@@ -33,11 +33,15 @@ import haven.MapFile.SMarker;
 import haven.MapFileWidget.Locator;
 import haven.MapFileWidget.MapLocator;
 import haven.MapFileWidget.SpecLocator;
+import haven.purus.pbot.PBotGob;
+import haven.purus.pbot.PBotGobAPI;
+import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
 import modification.configuration;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -87,6 +92,24 @@ public class MapWnd extends Window {
     private Map<Long, Tex> namemap = new HashMap<>(50);
     private Map<Coord, Coord> questlinemap = new HashMap<>();
 
+    private final List<TempMark> tempMarkList = new ArrayList<>();
+    private long lastMarkCheck = System.currentTimeMillis();
+
+    public static class TempMark {
+        final long start;
+        final long id;
+        Coord2d rc;
+        MapFileWidget.Location loc;
+        TexI icon;
+
+        public TempMark(long id, Coord2d rc, MapFileWidget.Location loc, TexI icon) {
+            start = System.currentTimeMillis();
+            this.id = id;
+            this.rc = rc;
+            this.loc = loc;
+            this.icon = icon;
+        }
+    }
 
     public MapWnd(MapFile file, MapView mv, Coord sz, String title) {
         super(sz, title, title, true);
@@ -153,6 +176,7 @@ public class MapWnd extends Window {
                         zoomtex = null;
                         Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
                         MapFileWidget.zoom++;
+                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                         tc = tc.div(MapFileWidget.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
@@ -166,6 +190,7 @@ public class MapWnd extends Window {
                         zoomtex = null;
                         Coord tc = view.curloc.tc.mul(MapFileWidget.scalef());
                         MapFileWidget.zoom--;
+                        Utils.setprefi("zoomlmap", MapFileWidget.zoom);
                         tc = tc.div(MapFileWidget.scalef());
                         view.curloc.tc.x = tc.x;
                         view.curloc.tc.y = tc.y;
@@ -229,11 +254,12 @@ public class MapWnd extends Window {
                     final Coord mc = new Coord2d(wnd.startc).floor(tilesz);
                     final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
                     final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
-                    final Coord gc = xlate(new Location(ploc.seg, ploc.tc.add(mc.sub(pc))));
-                    final Coord mlc = xlate(new Location(ploc.seg, ploc.tc.add(lc.sub(pc))));
-                    final Coord mrc = xlate(new Location(ploc.seg, ploc.tc.add(rc.sub(pc))));
-                    if (gc != null && mlc != null && mrc != null) {
-                        g.chcolor(Color.MAGENTA);
+                    final Coord cloc = xlate(ploc);
+                    if (cloc != null) {
+                        final Coord gc = cloc.add(mc.sub(pc).div(scalef()));
+                        final Coord mlc = cloc.add(lc.sub(pc).div(scalef()));
+                        final Coord mrc = cloc.add(rc.sub(pc).div(scalef()));
+                        g.chcolor(new Color(configuration.dowsecolor, true));
                         g.dottedline(gc, mlc, 1);
                         g.dottedline(gc, mrc, 1);
                         g.chcolor();
@@ -329,52 +355,49 @@ public class MapWnd extends Window {
             Coord last;
             if (movingto != null) {
                 //Make the line first
-                g.chcolor(Color.MAGENTA);
+                g.chcolor(new Color(configuration.pfcolor, true));
                 final Coord cloc = xlate(ploc);
-                last = xlate(new Location(ploc.seg, ploc.tc.add(movingto.floor(tilesz).sub(pc).div(scalef()))));
-                if (last != null && cloc != null) {
+                if (cloc != null) {
+                    last = cloc.add(movingto.floor(tilesz).sub(pc).div(scalef()));
                     g.dottedline(cloc, last, 2);
                     if (queue.hasNext()) {
                         while (queue.hasNext()) {
-                            final Coord next = xlate(new Location(ploc.seg, ploc.tc.add(queue.next().floor(tilesz).sub(pc).div(scalef()))));
-                            if (next != null) {
-                                g.dottedline(last, next, 2);
-                                last = next;
-                            } else {
-                                break;
-                            }
+                            final Coord next = cloc.add(queue.next().floor(tilesz).sub(pc).div(scalef()));
+                            g.dottedline(last, next, 2);
+                            last = next;
                         }
                     }
                 }
             }
         }
 
-
         private void questgiverLines(GOut g, final Location ploc) {
-            List<Coord2d> questQueue = new ArrayList<>();
             final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
             final double dist = 90000.0D;
-            questQueue.addAll(mv.questQueue());
+            List<Coord2d> questQueue = new ArrayList<>(mv.questQueue());
             try {
                 if (questQueue.size() > 0) {
                     for (Coord2d coord : questQueue) {
                         ui.gui.mapfile.view.follow = false;
-                        final Gob player = ui.gui.map.player();
-                        double angle = ui.gui.map.player().rc.angle(coord);
+                        final Gob player = mv.player();
+                        double angle = player.rc.angle(coord);
                         final Coord mc = new Coord2d(player.rc).floor(tilesz);
                         final Coord lc = mc.add((int) (Math.cos(angle) * dist), (int) (Math.sin(angle) * dist));
-                        final Coord gc = xlate(new Location(ploc.seg, ploc.tc.add(mc.sub(pc))));
-                        final Coord mlc = xlate(new Location(ploc.seg, ploc.tc.add(lc.sub(pc))));
-                        questlinemap.put(gc, mlc);
+                        questlinemap.put(mc, lc);
                     }
                     questQueue.clear();
                     mv.questQueue().clear();
                 }
                 if (questlinemap.size() > 0) {
                     for (Map.Entry<Coord, Coord> entry : questlinemap.entrySet()) {
-                        g.chcolor(Color.MAGENTA);
-                        g.dottedline(entry.getKey(), entry.getValue(), 2);
-                        g.chcolor();
+                        final Coord cloc = xlate(ploc);
+                        if (cloc != null) {
+                            final Coord gc = cloc.add(entry.getKey().sub(pc).div(scalef()));
+                            final Coord mlc = cloc.add(entry.getValue().sub(pc).div(scalef()));
+                            g.chcolor(new Color(configuration.questlinecolor, true));
+                            g.dottedline(gc, mlc, 2);
+                            g.chcolor();
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -382,6 +405,20 @@ public class MapWnd extends Window {
             }
         }
 
+        private void drawmarks(GOut g, final Location ploc) {
+            final Coord pc = new Coord2d(mv.getcc()).floor(tilesz);
+            Location tloc = this.curloc;
+            synchronized (tempMarkList) {
+                for (TempMark cm : tempMarkList) {
+                    if (tloc != null && tloc.seg == cm.loc.seg) {
+                        TexI tex = cm.icon;
+                        Coord c = xlate(ploc);
+                        if (c != null)
+                            g.aimage(tex, c.add(cm.rc.floor(tilesz).sub(pc).div(scalef())), 0.5, 0.5);
+                    }
+                }
+            }
+        }
 
         public void draw(GOut g) {
             g.chcolor(0, 0, 0, 128);
@@ -392,6 +429,12 @@ public class MapWnd extends Window {
                 final Location loc = resolve(player);
                 Coord ploc = xlate(resolve(player));
                 if (ploc != null) {
+                    drawmovement(g.reclip(view.c, view.sz), loc);
+                    questgiverLines(g.reclip(view.c, view.sz), loc);
+                    drawTracking(g.reclip(view.c, view.sz), loc);
+
+                    if (configuration.tempmarks && !configuration.bigmaphidemarks)
+                        drawmarks(g.reclip(view.c, view.sz), loc);
                     double angle = 0;
                     if (mv.player() != null)
                         angle = mv.player().geta();
@@ -415,9 +458,6 @@ public class MapWnd extends Window {
                     if (Config.mapdrawparty)
                         ignore = drawparty(g, loc);
                     g.chcolor();
-                    drawmovement(g.reclip(view.c, view.sz), loc);
-                    questgiverLines(g.reclip(view.c, view.sz), loc);
-                    drawTracking(g.reclip(view.c, view.sz), loc);
                 }
             } catch (Loading l) {
             }
@@ -427,6 +467,174 @@ public class MapWnd extends Window {
             if (domark)
                 return (markcurs);
             return (super.getcurs(c));
+        }
+
+        public void tick(double dt) {
+            super.tick(dt);
+            if (configuration.tempmarks && System.currentTimeMillis() - lastMarkCheck > configuration.tempmarksfrequency) {
+                checkmarks();
+                lastMarkCheck = System.currentTimeMillis();
+            }
+        }
+
+        public void checkmarks() {
+            Defer.later(() -> {
+                synchronized (tempMarkList) {
+                    final List<TempMark> marks = new ArrayList<>(tempMarkList);
+                    for (TempMark cm : marks) {
+                        PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
+                        if (g == null) {
+                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                                tempMarkList.remove(cm);
+                            }
+                        } else {
+                            if (g.getRcCoords() != cm.rc) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.rc = g.getRcCoords();
+                                        break;
+                                    }
+                                }
+                            }
+                            Location tloc = this.curloc;
+                            if (tloc != null && tloc.seg != cm.loc.seg) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.loc = tloc;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        Gob dg = null;
+                        for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
+                            if (disp.sc == null)
+                                continue;
+                            GobIcon.Image img = disp.img;
+                            if (disp.gob.id == cm.id) {
+                                if (!img.rot)
+                                    dg = disp.gob;
+                                break;
+                            }
+                        }
+                        if (dg == null) {
+                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                                tempMarkList.remove(cm);
+                            }
+                        } else {
+                            if (dg.rc != cm.rc) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.rc = dg.rc;
+                                        break;
+                                    }
+                                }
+                            }
+                            Location tloc = this.curloc;
+                            if (tloc != null && tloc.seg != cm.loc.seg) {
+                                for (TempMark customMark : tempMarkList) {
+                                    if (customMark.id == cm.id) {
+                                        customMark.loc = tloc;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    marks.clear();
+                    marks.addAll(tempMarkList);
+
+                    OCache oc = ui.sess.glob.oc;
+                    synchronized (oc) {
+                        for (Gob gob : oc) {
+                            try {
+                                Optional<Resource> ores = gob.res();
+                                if (!ores.isPresent())
+                                    continue;
+                                Resource res = ores.get();
+                                TempMark m = getTMark(marks, gob.id);
+                                if (m == null) {
+                                    GobIcon icon = gob.getattr(GobIcon.class);
+                                    TexI tex = null;
+                                    if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                                        CheckListboxItem itm = Config.icons.get(res.basename());
+                                        if (configuration.tempmarksall || (itm != null && !itm.selected)) {
+                                            if (icon != null)
+                                                tex = (TexI) cachedtex(gob);
+                                            else
+                                                tex = (TexI) Config.additonalicons.get(res.name);
+                                        }
+                                    } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
+                                        tex = (TexI) LocalMiniMap.roadicn;
+                                    } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
+                                        tex = (TexI) LocalMiniMap.roadicn;
+                                    } else if (gob.type == Type.DUNGEONDOOR) {
+                                        int stage = 0;
+                                        if (gob.getattr(ResDrawable.class) != null)
+                                            stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
+                                        if (stage == 10 || stage == 14)
+                                            tex = (TexI) LocalMiniMap.dooricn;
+                                    }
+                                    if (tex != null && this.curloc != null)
+                                        tempMarkList.add(new TempMark(gob.id, gob.rc, this.curloc, tex));
+                                }
+                            } catch (Loading l) {
+                            }
+                        }
+                    }
+
+                    for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
+                        if (disp.sc == null)
+                            continue;
+                        TempMark m = getTMark(marks, disp.gob.id);
+                        if (m == null) {
+                            GobIcon.Image img = disp.img;
+                            TexI tex = null;
+                            if (!img.rot) {
+                                tex = (TexI) cachedtex(disp.gob);
+                            }
+                            if (tex != null && this.curloc != null)
+                                tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, this.curloc, tex));
+                        }
+                    }
+                }
+                return (null);
+            });
+        }
+
+        private Tex cachedtex(Gob gob) {
+            GobIcon icon = gob.getattr(GobIcon.class);
+            if (icon != null) {
+                boolean isdead = gob.isDead();
+                int size = 20;
+                Indir<Resource> indir = icon.res;
+                if (indir != null) {
+                    Resource res = indir.get();
+                    if (res != null) {
+                        Tex itex = cachedImageTex.get(res.name + (isdead ? "-dead" : ""));
+                        if (itex == null) {
+                            GobIcon.Image img = icon.img();
+                            itex = isdead ? img.texgrey() : img.tex();
+                            if ((itex.sz().x > size) || (itex.sz().y > size)) {
+                                BufferedImage buf = img.rimg.img;
+                                buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
+                                itex = new TexI(buf);
+                            }
+                            cachedImageTex.put(res.name + (isdead ? "-dead" : ""), itex);
+                        }
+                        return (itex);
+                    }
+                }
+            }
+            return (null);
+        }
+
+        private TempMark getTMark(List<TempMark> marks, long id) {
+            for (TempMark cm : marks)
+                if (id == cm.id)
+                    return (cm);
+            return (null);
         }
     }
 
@@ -842,7 +1050,12 @@ public class MapWnd extends Window {
                         if (info == null)
                             throw (new Loading());
                         Coord sc = tc.add(info.sc.sub(obg.gc).mul(cmaps));
-                        long oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
+                        long oid = 0;
+                        try {
+                            oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
+                        } catch (NumberFormatException e) {
+                            oid = Long.MAX_VALUE - Math.abs(sc.x * sc.y);
+                        }
                         SMarker prev = view.file.smarkers.get(oid);
                         rnm = rnm + " [" + sc.x + ", " + sc.y + "]";
                         if (prev == null) {

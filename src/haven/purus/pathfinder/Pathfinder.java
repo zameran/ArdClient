@@ -30,7 +30,8 @@ public class Pathfinder extends Thread {
     private Coord2d dest;
     private Gob destGob;
     private String action;
-    private boolean DEBUG = false, stop;
+    private boolean stop;
+    public static boolean DEBUG = false;
 
     // Move to center of the location tile
     public Pathfinder(GameUI gui, Coord2d dest, String action) {
@@ -97,8 +98,18 @@ public class Pathfinder extends Thread {
         if (coordToTile(gui.map.player().rc.sub(origin)).equals(tile))
             return;
         clickTile(tile, origin);
-        while (gui.map.player().isMoving() || !coordToTile(gui.map.player().rc.sub(origin)).equals(tile)) { // For now lets assume that player starts from different tile so we only have to check that he has moved to correct tile and is not walking anymore
-            sleep(25);
+        for (int i = 0, sleep = 25; gui.map.player().isMoving() || !coordToTile(gui.map.player().rc.sub(origin)).equals(tile); ) { // For now lets assume that player starts from different tile so we only have to check that he has moved to correct tile and is not walking anymore
+            if (!gui.map.player().isMoving()) {
+                if (i > 1000) {
+                    clickTile(tile, origin);
+                    i = 0;
+                } else {
+                    i += sleep;
+                }
+            } else {
+                i = 0;
+            }
+            sleep(sleep);
             if (stop)
                 return;
         }

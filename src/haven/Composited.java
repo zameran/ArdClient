@@ -29,8 +29,14 @@ package haven;
 import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
+import haven.resutil.WaterTile;
 import haven.sloth.gob.Type;
+import modification.configuration;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -215,8 +221,22 @@ public class Composited implements Rendered, MapView.Clickable {
 
         public boolean setup(RenderList r) {
             m.setup(r);
-            for (Layer lay : this.lay)
+            for (Layer lay : this.lay) {
+                for (GLState gs : lay.mat.states) {
+                    if (gs instanceof TexGL.TexDraw) {
+                        String s = gs.toString().substring("TexDraw(TexR(".length(), gs.toString().lastIndexOf(','));
+                        if (configuration.painedcloth.get(s) == null) {
+                            configuration.painedcloth.put(s, false);
+                            Utils.saveCustomList(configuration.painedcloth, "PaintedClothList");
+                        }
+
+                        if (configuration.paintcloth) {
+                            configuration.paintcloth(s, r);
+                        }
+                    }
+                }
                 r.add(lay, null);
+            }
             return (false);
         }
 
@@ -231,10 +251,25 @@ public class Composited implements Rendered, MapView.Clickable {
 
         private SpriteEqu(ED ed) {
             super(ed);
-            if (ed.res.res.get().name.equals("gfx/terobjs/items/hats/mooncap"))
-                this.spr = Sprite.create(eqowner, Resource.remote().loadwait("gfx/terobjs/items/sprucecap"), ed.res.sdt.clone());
-            else
-                this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+//            Sprite s = null;
+//            for (String hat : configuration.hatslist) {
+//                if (ed.res.res.get().name.equals(hat)) {
+//                    try {
+//                        Resource r = Resource.remote().loadwait(configuration.hatreplace);
+//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+//                        break;
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Resource r = Resource.remote().loadwait(configuration.defaultbrokenhat);
+//                        s = Sprite.create(eqowner, r, ed.res.sdt.clone());
+//                        break;
+//                    }
+//                }
+//            }
+//            if (s == null)
+//                s = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
+//            this.spr = s;
+            this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
         public void draw(GOut g) {

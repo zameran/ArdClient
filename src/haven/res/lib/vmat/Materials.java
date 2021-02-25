@@ -1,7 +1,4 @@
-/* Preprocessed source code */
 package haven.res.lib.vmat;
-
-/* $use: lib/uspr */
 
 import haven.GLState;
 import haven.Gob;
@@ -16,9 +13,10 @@ import java.util.Collections;
 import java.util.Map;
 
 public class Materials extends Mapping {
-	static {
-		dev.checkFileVersion("lib/vmat", 31);
-	}
+    static {
+        dev.checkFileVersion("lib/vmat", 34);
+    }
+
     public static final Map<Integer, Material> empty = Collections.<Integer, Material>emptyMap();
     public final Map<Integer, Material> mats;
 

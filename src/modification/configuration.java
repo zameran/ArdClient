@@ -3,15 +3,27 @@ package modification;
 import haven.CheckListboxItem;
 import haven.Config;
 import haven.Coord;
+import haven.Coord2d;
 import haven.Gob;
+import haven.Light;
 import haven.MainFrame;
+import haven.Material;
 import haven.OCache;
 import haven.PUtils;
+import haven.RenderList;
+import haven.Rendered;
 import haven.Session;
+import haven.States;
 import haven.Tex;
 import haven.TexI;
 import haven.Utils;
+import haven.resutil.WaterTile;
 import haven.sloth.gfx.SnowFall;
+import haven.sloth.util.ObservableMap;
+import org.apache.commons.collections4.list.TreeList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -19,14 +31,17 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +52,29 @@ public class configuration {
     public static String picturePath = modificationPath + "/picture";
     public static String errorPath = "errors";
     public static String pbotErrorPath = "pboterrors";
+    public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
+    public static List<String> normalhatslist = new TreeList<>(Arrays.asList(
+            "gfx/terobjs/items/linkhat",
+            "gfx/terobjs/items/hats/jesterscap",
+            "gfx/terobjs/items/hats/blackguardsmanscap",
+            "gfx/terobjs/items/hats/deputyshat",
+            "gfx/terobjs/items/hats/redcorsairshat",
+            "gfx/terobjs/items/hats/inquisitorshat",
+            "gfx/terobjs/items/hats/yulebell",
+            "gfx/terobjs/items/hats/christmusketeershat",
+            "gfx/terobjs/items/hats/magicrown",
+            "gfx/terobjs/items/hats/evileyehat",
+            "gfx/terobjs/items/hats/highwaymanhat",
+            "gfx/terobjs/items/hats/exotichat",
+            "gfx/terobjs/items/hats/spiderfarmershat",
+            "gfx/terobjs/items/hats/flagshipcaptain",
+            "gfx/terobjs/items/hats/merrygreenhat",
+            "gfx/terobjs/items/sprucecap",
+            "gfx/terobjs/largechest"
+    ));
+    public static ObservableMap<String, Boolean> customHats = Utils.loadCustomList(normalhatslist, "CustomHats");
+    public static String defaultbrokenhat = "gfx/terobjs/items/sprucecap";
+    public static String hatreplace = Utils.getpref("hatreplace", defaultbrokenhat);
 
     public static boolean customTitleBoolean = Utils.getprefb("custom-title-bol", false);
 
@@ -77,6 +115,10 @@ public class configuration {
     public static boolean scaletree = Utils.getprefb("scaletree", false);
     public static int scaletreeint = Utils.getprefi("scaletreeint", 25);
 
+    public static boolean instflmopening = Utils.getprefb("instflmopening", true);
+    public static boolean instflmchosen = Utils.getprefb("instflmchosen", false);
+    public static boolean instflmcancel = Utils.getprefb("instflmcancel", true);
+
     public static boolean proximityspecial = Utils.getprefb("proximityspecial", false);
     public static boolean customquality = Utils.getprefb("customquality", false);
     public static String qualitypos = Utils.getpref("qualitypos", "Left-Bottom");
@@ -84,12 +126,13 @@ public class configuration {
     public static String numericpos = Utils.getpref("numericpos", "Right-Top");
     public static boolean showstudytime = Utils.getprefb("showstudytime", true);
     public static String studytimepos = Utils.getpref("studytimepos", "Left-Top");
+
     public static Coord infopos(String pos, Coord parsz, Coord tsz) {
         switch (pos) {
             case "Right-Center":
-                return new Coord(parsz.x - tsz.x, parsz.y / 2  - tsz.y / 2);
+                return new Coord(parsz.x - tsz.x, parsz.y / 2 - tsz.y / 2);
             case "Left-Center":
-                return new Coord(0, parsz.y / 2  - tsz.y / 2);
+                return new Coord(0, parsz.y / 2 - tsz.y / 2);
             case "Top-Center":
                 return new Coord(parsz.x / 2 - tsz.x / 2, 0);
             case "Bottom-Center":
@@ -99,7 +142,7 @@ public class configuration {
             case "Right-Bottom":
                 return new Coord(parsz.x - tsz.x, parsz.y - tsz.y);
             case "Center":
-                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y / 2  - tsz.y / 2);
+                return new Coord(parsz.x / 2 - tsz.x / 2, parsz.y / 2 - tsz.y / 2);
             case "Left-Bottom":
                 return new Coord(0, parsz.y - tsz.y);
             case "Left-Top":
@@ -107,6 +150,8 @@ public class configuration {
                 return new Coord(0, 0);
         }
     }
+
+    public static boolean showpolownersinfo = Utils.getprefb("showpolownersinfo", false);
     public static boolean oldmountbar = Utils.getprefb("oldmountbar", false);
     public static boolean newmountbar = Utils.getprefb("newmountbar", true);
     public static boolean showtroughstatus = Utils.getprefb("showtroughstatus", false);
@@ -139,12 +184,7 @@ public class configuration {
     public static boolean autoselectchat = Utils.getprefb("autoselectchat", true);
 
     public static List<String> liquids = new ArrayList<String>(Arrays.asList("Water", "Milk", "Aurochs Milk", "Cowsmilk", "Sheepsmilk", "Goatsmilk", "Piping Hot Tea", "Tea", "Applejuice", "Pearjuice", "Grapejuice", "Stale grapejuice", "Cider", "Perry", "Wine", "Beer", "Weißbier", "Mead", "Spring Water")) {{
-        sort(new Comparator<String>() {
-            @Override
-            public int compare(String l1, String l2) {
-                return l1.compareTo(l2);
-            }
-        });
+        sort(String::compareTo);
     }};
     public static String autoDrinkLiquid = Utils.getpref("autoDrinkLiquid", "Water");
     public static boolean drinkorsip = Utils.getprefb("drinkorsip", false);
@@ -169,11 +209,19 @@ public class configuration {
     public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
     public static boolean simplelmap = Utils.getprefb("simplelmap", false);
     public static boolean cavetileonmap = Utils.getprefb("cavetileonmap", false);
+    public static boolean tempmarks = Utils.getprefb("tempmarks", false);
+    public static boolean tempmarksall = Utils.getprefb("tempmarksall", false);
+    public static int tempmarkstime = Utils.getprefi("tempmarkstime", 300);
+    public static int tempmarksfrequency = Utils.getprefi("tempmarksfrequency", 500);
 
     public static float badcamdistdefault = Utils.getpreff("badcamdistdefault", 50.0f);
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
     public static float badcamelevdefault = Utils.getpreff("badcamelevdefault", (float) Math.PI / 4.0f);
     public static float badcamangldefault = Utils.getpreff("badcamangldefault", 0.0f);
+
+    public static int pfcolor = Utils.getprefi("pfcolor", Color.MAGENTA.hashCode());
+    public static int dowsecolor = Utils.getprefi("dowsecolor", Color.MAGENTA.hashCode());
+    public static int questlinecolor = Utils.getprefi("questlinecolor", Color.MAGENTA.hashCode());
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);
 
@@ -476,6 +524,7 @@ public class configuration {
 
     }
 
+
     public static boolean snowfalloverlay = Utils.getprefb("snowfalloverlay", false);
     public static boolean blizzardoverlay = Utils.getprefb("blizzardoverlay", false);
 
@@ -568,6 +617,7 @@ public class configuration {
 
     public static SnowThread snowThread;
 
+    public static boolean autoflower = Utils.getprefb("autoflower", true);
     public static List<String> exclusion = new ArrayList<>(Arrays.asList("Gild", "Meditate", "Sing"));
 
     public static void addPetal(String name) {
@@ -583,6 +633,228 @@ public class configuration {
             if (Config.petalsearch != null && Config.flowerlist != null && Config.petalsearch.text.equals(""))
                 Config.flowerlist.items.add(ci);
             Utils.setcollection("petalcol", Config.flowermenus.keySet());
+        }
+    }
+
+
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2) {
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(polygon1[i1], polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1], polygon2[i2], polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1]))
+                    return (true);
+        return (false);
+    }
+
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2, Coord2d gobc1, Coord2d gobc2) {
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(polygon1[i1].add(gobc1), polygon1[i1 + 1 == polygon1.length ? 0 : i1 + 1].add(gobc1),
+                        polygon2[i2].add(gobc2), polygon2[i2 + 1 == polygon2.length ? 0 : i2 + 1].add(gobc2)))
+                    return (true);
+        return (false);
+    }
+
+    public static boolean insect(Coord2d[] polygon1, Coord2d[] polygon2, Gob gob1, Gob gob2) {
+        Coord2d gobc1 = gob1.rc, gobc2 = gob2.rc;
+        Coord2d[] p1 = new Coord2d[polygon1.length], p2 = new Coord2d[polygon2.length];
+        for (int i = 0; i < polygon1.length; i++)
+            p1[i] = polygon1[i].rotate((float) gob1.a).add(gobc1);
+        for (int i = 0; i < polygon2.length; i++)
+            p2[i] = polygon2[i].rotate((float) gob2.a).add(gobc2);
+        for (int i1 = 0; i1 < polygon1.length; i1++)
+            for (int i2 = 0; i2 < polygon2.length; i2++)
+                if (crossing(p1[i1], p1[i1 + 1 == p1.length ? 0 : i1 + 1], p2[i2], p2[i2 + 1 == p2.length ? 0 : i2 + 1]))
+                    return (true);
+        return (false);
+    }
+
+    public static double vectormul(double ax, double ay, double bx, double by) {
+        return (ax * by - ay * bx);
+    }
+
+    public static boolean crossing(Coord2d c1, Coord2d c2, Coord2d c3, Coord2d c4) {
+//        int v1 = (int) Math.round(vectormul(c4.x - c3.x, c4.y - c3.y, c3.x - c1.x, c3.y - c1.y));
+//        int v2 = (int) Math.round(vectormul(c4.x - c3.x, c4.y - c3.y, c3.x - c1.x, c3.y - c1.y));
+//        int v3 = (int) Math.round(vectormul(c2.x - c1.x, c2.y - c1.y, c1.x - c3.x, c1.y - c3.y));
+//        int v4 = (int) Math.round(vectormul(c2.x - c1.x, c2.y - c1.y, c1.x - c4.x, c1.y - c4.y));
+        Line2D l1 = new Line2D.Double(c1.x, c1.y, c2.x, c2.y);
+        Line2D l2 = new Line2D.Double(c3.x, c3.y, c4.x, c4.y);
+        return l1.intersectsLine(l2);
+//        return ((v1 * v2) < 0 && (v3 * v4) < 0);
+    }
+
+    public static Coord2d abs(Coord2d c, double adding) {
+        return (new Coord2d(c.x + (c.x / Math.abs(c.x) * adding), c.y + (c.y / Math.abs(c.y) * adding)));
+    }
+
+    public static Coord2d[] abs(Coord2d[] c, double adding) {
+        Coord2d[] c2 = new Coord2d[c.length];
+        for (int i = 0; i < c.length; i++)
+            c2[i] = abs(c[i], adding);
+        return (c2);
+    }
+
+
+    public static boolean paintcloth = Utils.getprefb("paintcloth", false);
+    public static ObservableMap<String, Boolean> painedcloth = Utils.loadCustomList(new ArrayList<>(), "PaintedClothList");
+    public static String[] clothfilters = new String[]{"Rendered.eyesort", "Rendered.deflt", "Rendered.first", "Rendered.last", "Rendered.postfx", "Rendered.postpfx", "States.vertexcolor", "WaterTile.surfmat", "Light.vlights", "WaterTile.wfog"};
+    public static String clothcol = "Material.Colors";
+
+    public static JSONObject loadjson(String filename) {
+        String result = "";
+        BufferedReader br = null;
+        try {
+            File file = new File(filename);
+            if (file.exists() && !file.isDirectory()) {
+                FileReader fr = new FileReader(filename);
+                br = new BufferedReader(fr);
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+                while (line != null) {
+                    sb.append(line);
+                    line = br.readLine();
+                }
+                result = sb.toString();
+            } else {
+                FileWriter jsonWriter = null;
+                try {
+                    jsonWriter = new FileWriter(filename);
+                    jsonWriter.write(new JSONObject().toString());
+                    return (new JSONObject());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (jsonWriter != null) {
+                            jsonWriter.flush();
+                            jsonWriter.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return (new JSONObject(result));
+    }
+
+    public static JSONObject painedclothjson = loadjson("PaintedCloth.json");
+
+    public static void paintcloth(String res, RenderList r) {
+        for (String ps : configuration.painedcloth.keySet()) {
+            if (res.contains(ps)) {
+                boolean check = configuration.painedcloth.get(ps);
+                if (check) {
+                    JSONObject o = new JSONObject();
+                    try {
+                        o = configuration.painedclothjson.getJSONObject(ps);
+                    } catch (JSONException ignored) {
+                    }
+                    if (o.length() > 0) {
+                        for (String n : o.keySet()) {
+                            if (n.equals(configuration.clothcol)) {
+                                JSONArray ar = new JSONArray();
+                                try {
+                                    ar = o.getJSONArray(configuration.clothcol);
+                                } catch (JSONException ignored) {
+                                }
+                                if (ar.length() > 0) {
+                                    boolean f = false;
+                                    int ac = -1, dc = -1, sc = -1, ec = -1, shine = 0;
+                                    try {
+                                        f = ar.getBoolean(0);
+                                    } catch (JSONException ignored) {
+                                    }
+                                    JSONObject colorj = new JSONObject();
+                                    try {
+                                        colorj = ar.getJSONObject(1);
+                                    } catch (JSONException ignored) {
+                                    }
+                                    if (colorj.length() > 0) {
+                                        try {
+                                            ac = colorj.getInt("Ambient");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            dc = colorj.getInt("Diffuse");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            sc = colorj.getInt("Specular");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            ec = colorj.getInt("Emission");
+                                        } catch (JSONException ignored) {
+                                        }
+                                        try {
+                                            shine = colorj.getInt("Shine");
+                                        } catch (JSONException ignored) {
+                                        }
+                                    }
+
+                                    if (f)
+                                        r.prepc(new Material.Colors(
+                                                new Color(ac, true),
+                                                new Color(dc, true),
+                                                new Color(sc, true),
+                                                new Color(ec, true),
+                                                shine / 100f
+                                        ));
+                                }
+                            } else {
+                                boolean f = false;
+                                try {
+                                    f = o.getBoolean(n);
+                                } catch (JSONException ignored) {
+                                }
+                                if (f)
+                                    switch (n) {
+                                        case "Rendered.eyesort":
+                                            r.prepc(Rendered.eyesort);
+                                            break;
+                                        case "Rendered.deflt":
+                                            r.prepc(Rendered.deflt);
+                                            break;
+                                        case "Rendered.first":
+                                            r.prepc(Rendered.first);
+                                            break;
+                                        case "Rendered.last":
+                                            r.prepc(Rendered.last);
+                                            break;
+                                        case "Rendered.postfx":
+                                            r.prepc(Rendered.postfx);
+                                            break;
+                                        case "Rendered.postpfx":
+                                            r.prepc(Rendered.postpfx);
+                                            break;
+                                        case "States.vertexcolor":
+                                            r.prepc(States.vertexcolor);
+                                            break;
+                                        case "WaterTile.surfmat":
+                                            r.prepc(WaterTile.surfmat);
+                                            break;
+                                        case "Light.vlights":
+                                            r.prepc(Light.vlights);
+                                            break;
+                                        case "WaterTile.wfog":
+                                            r.prepc(WaterTile.wfog);
+                                            break;
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

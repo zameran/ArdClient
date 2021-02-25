@@ -165,7 +165,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
 
                 if (waitSleep()) return false;
                 if (PBotWindowAPI.getWindow(ui, "Stockpile") == null)
-                    PBotUtils.PathfinderRightClick(ui, fstock, 0);
+                    PBotUtils.pfRightClick(ui, fstock, 0);
                 if (waitSleep()) return false;
                 if (PBotWindowAPI.waitForWindow(ui, "Stockpile", 5000) == null) return false;
                 if (waitSleep()) return false;

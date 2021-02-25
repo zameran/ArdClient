@@ -231,7 +231,8 @@ public interface RenderLink {
             } else if (t == 2) {
                 l = Collect.parse(res, buf);
             } else if (t == 3) {
-                l = Parameters.parse(res, buf);
+//                l = Parameters.parse(res, buf);
+                l = Collect.parse(res, buf);
             } else {
                 throw (new Resource.LoadException("Invalid renderlink type: " + t, res));
             }

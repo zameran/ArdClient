@@ -241,6 +241,7 @@ public class Pointer extends Widget {
                     return true;
                 }
                 ui.gui.map.wdgmsg("click", rootpos().add(c), this.tc.floor(posres), button, ui.modflags(), 0, (int) gobid, this.tc.floor(posres), 0, -1);
+                ui.gui.map.pllastcc = this.tc;
                 if (button == 3 && !ui.modshift) {//only add to marker map if map open
                     try {
                         if (!ui.gui.mapfile.visible)
@@ -257,6 +258,7 @@ public class Pointer extends Widget {
                     return true;
                 }
                 ui.gui.map.wdgmsg("click", rootpos().add(c), this.tc.floor(posres), button, ui.modflags());
+                ui.gui.map.pllastcc = this.tc;
                 if (button == 3 && !ui.modshift) {//only add to marker map if map open
                     try {
                         if (!ui.gui.mapfile.visible)

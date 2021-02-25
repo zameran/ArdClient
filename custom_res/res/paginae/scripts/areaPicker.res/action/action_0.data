@@ -1,0 +1,16 @@
+#String pr
+paginae/amber/amber
+#uint16 pver
+1
+#String name
+Area Picker
+#String preq
+
+#uint16 hk
+67
+#uint16 ad length
+2
+#String ad[0]
+@
+#String ad[1]
+areaPicker

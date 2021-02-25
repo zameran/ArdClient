@@ -34,8 +34,8 @@ public abstract class Dropbox<T> extends ListWidget<T> {
     public static final Coord itemtextc = new Coord(5, 0);
     public static final Tex drop = Resource.loadtex("gfx/hud/dropdown");
     public final int listh;
-    private final Coord dropc;
-    private Droplist dl;
+    private Coord dropc;
+    protected Droplist dl;
     private int selhighlight;
 
     public Dropbox(int w, int listh, int itemh) {
@@ -45,12 +45,14 @@ public abstract class Dropbox<T> extends ListWidget<T> {
     }
 
     public Dropbox(int listh, List<String> values) {
-        this(calcWidth(values), listh, calcHeight(values));
+        this(calcWidth(values) + drop.sz().x + 2, listh, calcHeight(values));
     }
 
     private static int calcWidth(List<String> names) {
+        if (names.size() == 0)
+            return 0;
         List<Integer> widths = names.stream().map((v) -> Text.render(v).sz().x).collect(Collectors.toList());
-        return widths.stream().reduce(Integer::max).get() + 22;
+        return widths.stream().reduce(Integer::max).get();
     }
 
     private static int calcHeight(List<String> values) {
@@ -134,5 +136,14 @@ public abstract class Dropbox<T> extends ListWidget<T> {
             return (true);
         }
         return (true);
+    }
+
+    public void resize(Coord sz) {
+        super.resize(sz);
+        dropc = new Coord(sz.x - drop.sz().x - 1, 1);
+    }
+
+    public void resizedl(List<String> values) {
+        dl.resize(new Coord(calcWidth(values) + Scrollbar.sflarp.sz().x + 2, Math.min(listh, listitems()) * itemh));
     }
 }

@@ -52,6 +52,7 @@ public class Button extends SIWidget {
     static Text.Furnace nf = new PUtils.BlurFurn(new PUtils.TexFurn(tf, Window.ctex), 1, 1, new Color(80, 40, 0));
     protected boolean a = false;
     private UI.Grab d = null;
+    public String stext, origtext;
 
     @RName("btn")
     public static class $Btn implements Factory {
@@ -72,6 +73,8 @@ public class Button extends SIWidget {
 
     public static Button wrapped(int w, String text) {
         Button ret = new Button(w, tf.renderwrap(Resource.getLocString(Resource.BUNDLE_BUTTON, text), w - 10));
+        ret.stext = Resource.getLocString(Resource.BUNDLE_BUTTON, text);
+        ret.origtext = text;
         return (ret);
     }
 
@@ -86,7 +89,9 @@ public class Button extends SIWidget {
 
     public Button(int w, String text, boolean lg, Runnable action) {
         this(w, lg);
-        this.text = nf.render(Resource.getLocString(Resource.BUNDLE_BUTTON, text));
+        this.stext = Resource.getLocString(Resource.BUNDLE_BUTTON, text);
+        this.origtext = text;
+        this.text = nf.render(stext);
         this.cont = this.text.img;
         this.action = action;
         if (this.text != null)
@@ -166,13 +171,21 @@ public class Button extends SIWidget {
     }
 
     public void change(String text, Color col) {
-        this.text = tf.render(Resource.getLocString(Resource.BUNDLE_BUTTON, text), col);
+        this.stext = Resource.getLocString(Resource.BUNDLE_BUTTON, text);
+        this.origtext = text;
+        this.text = tf.render(stext, col);
         this.cont = this.text.img;
         redraw();
     }
 
     public void change(String text) {
         this.text = nf.render(text);
+        this.cont = this.text.img;
+        redraw();
+    }
+
+    public void change(Color col) {
+        this.text = tf.render(stext, col);
         this.cont = this.text.img;
         redraw();
     }

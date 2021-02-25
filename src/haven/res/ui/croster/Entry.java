@@ -28,7 +28,7 @@ public class Entry extends Widget {
     public static final Coord SIZE = new Coord(WIDTH, HEIGHT);
     public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32);
     public static final Function<Integer, String> percent = v -> String.format("%d%%", v);
-    public static final Function<Number, String> quality = v -> Long.toString(Math.round(v.doubleValue()));
+    public static final Function<Number, String> quality = v -> Double.toString(v.doubleValue());
     public static final Function<Entry, Tex> namerend = e -> {
         return (CharWnd.attrf.render(e.name, BuddyWnd.gc[e.grp]).tex());
     };

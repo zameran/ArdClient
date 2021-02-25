@@ -144,7 +144,7 @@ public class BeltWnd extends MovableWidget {
         }
 
         private void use() {
-            if (res != null) {
+            if (res != null && res.get() != null) {
                 if (Config.confirmmagic && res.get().name.startsWith("paginae/seid/") && !res.get().name.equals("paginae/seid/rawhide")) {
                     Window confirmwnd = new Window(new Coord(225, 100), "Confirm") {
                         @Override

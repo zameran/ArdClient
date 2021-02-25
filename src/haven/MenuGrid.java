@@ -30,10 +30,12 @@ import haven.Resource.AButton;
 import haven.automation.AddBranchesToOven;
 import haven.automation.AddCoalToSmelter;
 import haven.automation.AddWoodToSmokeShed;
+import haven.automation.AreaPicker;
 import haven.automation.ButcherFish;
 import haven.automation.CoalToSmelters;
 import haven.automation.Coracleslol;
 import haven.automation.CountGobs;
+import haven.automation.DestroyArea;
 import haven.automation.Discord;
 import haven.automation.Dismount;
 import haven.automation.DreamHarvester;
@@ -928,6 +930,27 @@ public class MenuGrid extends Widget {
                     }
             ));
         }
+
+        addSpecial(new haven.MenuGrid.SpecialPagina(this, "paginae::amber::destroyarea",
+                Resource.local().load("paginae/amber/DestroyArea"),
+                (pag) -> {
+                    if (ui.gui != null && ui.gui.getwnd("Destroy Gobs in Area") == null) {
+                        DestroyArea sw = new DestroyArea();
+                        ui.gui.add(sw, new Coord(ui.gui.sz.x / 2 - sw.sz.x / 2, ui.gui.sz.y / 2 - sw.sz.y / 2 - 200));
+                        synchronized (GobSelectCallback.class) {
+                            ui.gui.map.registerGobSelect(sw);
+                        }
+                    }
+                }
+        ));
+        addSpecial(new haven.MenuGrid.SpecialPagina(this, "paginae::scripts::areapicker",
+                Resource.local().load("paginae/scripts/areaPicker"),
+                (pag) -> {
+                    if (ui.gui != null && ui.gui.getwnd(AreaPicker.scriptname) == null) {
+                        ui.gui.add(new AreaPicker());
+                    }
+                }
+        ));
 
         addSpecial(new SpecialPagina(this, "paginae::windows::chat",
                 Resource.local().load("paginae/windows/chat"),

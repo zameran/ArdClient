@@ -5,7 +5,9 @@ import haven.Coord2d;
 import haven.DefSettings;
 import haven.GAttrib;
 import haven.Gob;
+import haven.GobPath;
 import haven.KinInfo;
+import haven.LinMove;
 import haven.Loading;
 import haven.Moving;
 import haven.RenderList;
@@ -68,33 +70,39 @@ public class Movable extends GAttrib implements Rendered {
     private GobPathSprite pathol = null;
 
     public void setup(RenderList rl) {
-        if (pathol != null) {
-            if (((gob.type == Type.HUMAN || gob.type == Type.VEHICLE) && DefSettings.SHOWGOBPATH.get()) ||
-                    ((gob.type == Type.ANIMAL || gob.type == Type.DANGANIMAL) && DefSettings.SHOWANIMALPATH.get())) {
-                rl.add(pathol, null);
+        if (gob.isMoving()) {
+            if (DefSettings.SHOWPLAYERPATH.get() && gob.isplayer()) {
+                rl.add(new GobPath(gob), null);
+            } else if (pathol != null) {
+                if (((gob.type == Type.HUMAN || gob.type == Type.VEHICLE || gob.type == Type.WATERVEHICLE) && DefSettings.SHOWGOBPATH.get()) ||
+                        ((gob.type == Type.ANIMAL || gob.type == Type.SMALLANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) && DefSettings.SHOWANIMALPATH.get())) {
+                    rl.add(pathol, null);
+                }
             }
         }
     }
 
     public void tick() {
-        if (((gob.type == Type.HUMAN || gob.type == Type.VEHICLE) && DefSettings.SHOWGOBPATH.get()) ||
-                ((gob.type == Type.ANIMAL || gob.type == Type.DANGANIMAL) && DefSettings.SHOWANIMALPATH.get())) {
+        if (((gob.type == Type.HUMAN || gob.type == Type.VEHICLE || gob.type == Type.WATERVEHICLE) && DefSettings.SHOWGOBPATH.get()) ||
+                ((gob.type == Type.ANIMAL || gob.type == Type.SMALLANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) && DefSettings.SHOWANIMALPATH.get())) {
             Moving mv = gob.getattr(Moving.class);
             if (mv != null) {
                 try {
                     mv.getDest().ifPresent((t) -> {
                         final Coord2d grc = new Coord2d(gob.getc());
+                        LinMove lm = gob.getattr(LinMove.class);
+                        if (lm != null)
+                            t = lm.getDest().orElse(t);
                         if (pathol == null || (pathol.dest != t || pathol.rc != grc)) {
-
                             UI ui = null;
                             while (ui == null)
                                 ui = gob.glob.ui.get();
 
                             //We need a new path setup
                             final States.ColState col;
-                            if (gob.type == Type.VEHICLE) {
+                            if (gob.type == Type.VEHICLE || gob.type == Type.WATERVEHICLE) {
                                 col = vehiclepathcol;
-                            } else if (gob.type == Type.ANIMAL || gob.type == Type.DANGANIMAL) {
+                            } else if (gob.type == Type.ANIMAL || gob.type == Type.SMALLANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) {
                                 col = animalpathcol;
                             } else {
                                 //Humans, based off kin
@@ -121,21 +129,25 @@ public class Movable extends GAttrib implements Rendered {
                                 oz = myz;
                             }
                             try {
-                                if (ui.gui != null && ui.gui.map != null && ui.gui.map.player() != null && gob.id == ui.gui.map.player().id) // if this is our path, exit, we draw this in Gob class where it's more accurate.
+                                if (ui.gui != null && ui.gui.map != null && ui.gui.map.player() != null && gob.id == ui.gui.map.player().id) { // if this is our path, exit, we draw this in Gob class where it's more accurate.
+                                    dispose();
                                     return;
+                                }
                             } catch (Exception e) {
+                                dispose();
                                 return;
                             }
                             pathol = new GobPathSprite(t, grc, (float) grc.dist(t), (float) (oz - myz), col);
+                        } else {
+                            dispose();
                         }
                     });
                 } catch (Loading l) {
+                    dispose();
                     //Try again another frame, getc() likely error'd
                 }
             } else {
-                if (pathol != null)
-                    pathol.dispose();
-                pathol = null;
+                dispose();
             }
         }
     }
@@ -143,5 +155,6 @@ public class Movable extends GAttrib implements Rendered {
     public void dispose() {
         if (pathol != null)
             pathol.dispose();
+        pathol = null;
     }
 }
