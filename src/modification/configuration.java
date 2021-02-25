@@ -224,6 +224,7 @@ public class configuration {
     public static int questlinecolor = Utils.getprefi("questlinecolor", Color.MAGENTA.hashCode());
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);
+    public static int crosterresid = Utils.getprefi("crosterresid", -1);
 
     public static String[] customMenuGrid = new String[]{Utils.getpref("customMenuGrid0", "6"), Utils.getpref("customMenuGrid1", "4")};
 

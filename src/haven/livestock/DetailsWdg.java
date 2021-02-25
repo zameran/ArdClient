@@ -48,7 +48,8 @@ public class DetailsWdg extends Widget {
                 valStr += "%";
 
             Label lbl = new Label(valStr, Text.labelFnd);
-            add(lbl, new Coord(col.x + offx, 5));
+            if (col != null)
+                add(lbl, new Coord(col.x + offx, 5));
         }
 
         del = new Label("\u2718", Text.delfnd, Color.RED) {
@@ -59,7 +60,8 @@ public class DetailsWdg extends Widget {
             }
         };
         Column col = animal.getColumns().get("X");
-        add(del, new Coord(col.x + offx, 3));
+        if (col != null)
+            add(del, new Coord(col.x + offx, 3));
     }
 
     @Override
