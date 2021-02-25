@@ -2863,23 +2863,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                                     return;
                                 }
                             }
-                        }
-                        tooltip = null;
-                    }
-
-                    protected void nohit(Coord pc) {
-                        tooltip = null;
-                    }
-                });
-            }
-        } else if (ui.modshift && ui.modctrl && Config.resinfo) {
-            long now = System.currentTimeMillis();
-            if (now - lastmmhittest > 500 || lasthittestc.dist(c) > tilesz.x) {
-                lastmmhittest = now;
-                lasthittestc = c;
-                delay(new Hittest(c, 0) {
-                    public void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                        if (inf == null) {
+                        } else {
                             MCache map = ui.sess.glob.map;
                             int t = map.gettile(mc.floor(tilesz));
                             Resource res = map.tilesetr(t);
@@ -2891,7 +2875,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         tooltip = null;
                     }
 
-                    public void nohit(Coord pc) {
+                    protected void nohit(Coord pc) {
                         tooltip = null;
                     }
                 });
