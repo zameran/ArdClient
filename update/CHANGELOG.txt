@@ -1,3 +1,7 @@
+20210226 - Hot Fixes
+-- Fixed a bug when the script tries to get information from a not loaded item (FillCheeseTray script)
+~
+
 20210225.
 Hot Fixes
 -- Fixed IllegalMonitorStateException of move queue
