@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 public class VarSprite extends UnivSprite {
     static {
-        dev.checkFileVersion("lib/vmat", 34);
+        dev.checkFileVersion("lib/vmat", 35);
     }
 
     private Gob.ResAttr.Cell<Mapping> aptr;

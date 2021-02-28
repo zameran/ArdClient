@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class Materials extends Mapping {
     static {
-        dev.checkFileVersion("lib/vmat", 34);
+        dev.checkFileVersion("lib/vmat", 35);
     }
 
     public static final Map<Integer, Material> empty = Collections.<Integer, Material>emptyMap();
