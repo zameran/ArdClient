@@ -957,10 +957,14 @@ public class SeedCropFarmer extends Window implements Runnable {
     }
 
     public boolean inHandHarvestItem() {
-        if (PBotUtils.getItemAtHand(ui) != null && PBotUtils.getItemAtHand(ui).getResname().equals(seedName))
-            return (true);
-        else
-            return (false);
+        if (PBotUtils.getItemAtHand(ui) != null) {
+            while (PBotUtils.getItemAtHand(ui).getResname() == null) {
+                PBotUtils.sleep(10);
+            }
+            if (PBotUtils.getItemAtHand(ui).getResname().equals(seedName))
+                return (true);
+        }
+        return (false);
     }
 
     public boolean inHandToInventory() {
