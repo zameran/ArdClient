@@ -4751,7 +4751,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.add(new IndirCheckBox("Sloth Debug", DefSettings.DEBUG));
         appender.addRow(new Button(50, "Resource") {
                             @Override
                             public void click() {
