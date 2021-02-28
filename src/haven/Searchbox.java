@@ -100,9 +100,9 @@ public abstract class Searchbox<T> extends Listbox<T> {
 
     private void updinfo() {
         if (cursidx >= 0)
-            this.info = Text.renderf(Color.WHITE, "%s (%d/%d)", searching, cursidx + 1, sought.length);
+            this.info = Button.nf.render(String.format("%s (%d/%d)", searching, cursidx + 1, sought.length));
         else
-            this.info = Text.renderf(Color.WHITE, "%s (%d)", searching, sought.length);
+            this.info = Button.nf.render(String.format("%s (%d)", searching, sought.length));
     }
 
     public void search(String text) {
