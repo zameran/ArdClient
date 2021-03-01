@@ -92,6 +92,7 @@ public class Pathfinder extends Thread {
     // Click tile at its center point
     private void clickTile(Coord tile, Coord2d origin) {
         gui.map.wdgmsg("click", PBotUtils.getCenterScreenCoord(gui.ui), origin.add(tile.x * 11, tile.y * 11).add(11 / 2.0, 11 / 2.0).floor(posres), 1, 0);
+        gui.map.pllastcc = origin.add(tile.x * 11, tile.y * 11).add(11 / 2.0, 11 / 2.0);
     }
 
     private void moveToTileAndWait(Coord tile, Coord2d origin) {
@@ -246,6 +247,7 @@ public class Pathfinder extends Thread {
                 }
                 // Randomly click around and hope that player moves to correct position, timeout after few retries
                 gui.map.wdgmsg("click", PBotUtils.getCenterScreenCoord(gui.ui), gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11).floor(posres), 1, 0);
+                gui.map.pllastcc = gui.map.player().rc.add(rng.nextInt() % 11, rng.nextInt() % 11);
                 do {
                     sleep(250);
                     if (stop)
@@ -334,8 +336,10 @@ public class Pathfinder extends Thread {
             if (destGob != null) {
                 if (action != null && action.length() > 0)
                     gui.act(action);
-                if (destGob != null && destGob.rc != null)
+                if (destGob != null && destGob.rc != null) {
                     gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(posres), button, mod, 0, (int) destGob.id, destGob.rc.floor(posres), 0, meshid);
+                    gui.map.pllastcc = destGob.rc;
+                }
                 //	gui.map.wdgmsg("click", gob.sc, mc, clickb, modflags, 0, (int) gob.id, gob.rc.floor(posres), 0, meshid);
             }
         } catch (Exception e) {

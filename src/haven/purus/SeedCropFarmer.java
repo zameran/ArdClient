@@ -666,6 +666,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     int y = location.y + getrandom();
                                     Coord finalloc = new Coord(x, y);
                                     ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                                    ui.gui.map.pllastcc = finalloc.mul(posres);
                                     PBotUtils.sleep(1000);
                                     PBotUtils.pfGobClick(ui, g, 1, 0);
                                 }
@@ -674,6 +675,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         }
                         //shift right click
                         ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
+                        ui.gui.map.pllastcc = g.rc;
                         PBotUtils.sleep(2000);//wait 2 seconds to start moving
                         while (PBotUtils.getItemAtHand(ui) == null & PBotUtils.findObjectByNames(ui, 5000, groundname) != null && PBotUtils.isMoving(ui)) {
                             if (stopThread)
@@ -892,6 +894,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 + cropName.substring(cropName.lastIndexOf("/") + 1).substring(1)
                 + " Farmer stopped!", Color.white);
         ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
+        ui.gui.map.pllastcc = ui.gui.map.player().rc;
         stopThread = true;
         this.destroy();
     }

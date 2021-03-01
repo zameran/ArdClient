@@ -195,6 +195,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, int x, int y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(x, y);
     }
 
 //    public static void mapClick(int x, int y, int btn, int mod) {
@@ -211,6 +212,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, double x, double y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(x, y);
     }
 
     /**
@@ -222,6 +224,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, Coord2d c, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c.floor(posres), btn, mod);
+        ui.gui.map.pllastcc = c;
     }
 
     /**
@@ -234,6 +237,7 @@ public class PBotUtils {
      */
     public static void mapFinalClick(UI ui, int x, int y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord(x, y), btn, mod);
+        ui.gui.map.pllastcc = new Coord(x, y).mul(posres);
     }
 
     /**
@@ -245,6 +249,7 @@ public class PBotUtils {
      */
     public static void mapFinalClick(UI ui, Coord c, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c, btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(c).mul(posres);
     }
 
 //    public static void mapClick(double x, double y, int btn, int mod) {
@@ -864,6 +869,7 @@ public class PBotUtils {
     // Modifier 1 - shift; 2 - ctrl; 4 - alt;
     public static void doClick(UI ui, Gob gob, int button, int mod) {
         ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
 //    public static void doClick(Gob gob, int button, int mod) {
@@ -872,6 +878,7 @@ public class PBotUtils {
 
     public static void doClickCrop(UI ui, Gob gob) {
         ui.gui.map.wdgmsg("click", gob.sc, gob.rc.floor(posres), 3, 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
 //    public static void doClickCrop(Gob gob) {
@@ -1200,6 +1207,7 @@ public class PBotUtils {
 
     public static void mapInteractLeftClick(UI ui, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 1, ui.modflags());
+        ui.gui.map.pllastcc = player(ui).rc;
     }
 
 //    public static void mapInteractLeftClick(int mod) {

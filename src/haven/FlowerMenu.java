@@ -484,7 +484,7 @@ public class FlowerMenu extends Widget {
 
                 wdgmsg("cl", option.num, ui.modflags());
                 lastSel = option.name;
-                ui.gui.map.pllastcc = null;
+//                ui.gui.map.pllastcc = null;
 
                 try {
                     if (option.name.contains("Giddy") && Config.horseautorun) {

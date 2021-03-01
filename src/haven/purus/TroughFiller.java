@@ -103,6 +103,7 @@ public class TroughFiller extends Window implements GobSelectCallback {
 
                         Gob g = PBotUtils.findObjectByNames(ui, 5000, terobjs);
                         ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
+                        ui.gui.map.pllastcc = g.rc;
                         PBotUtils.sleep(1000);
                         while (PBotUtils.getItemAtHand(ui) == null & PBotUtils.findObjectByNames(ui, 5000, terobjs) != null && PBotUtils.isMoving(ui))
                             PBotUtils.sleep(10);

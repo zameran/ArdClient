@@ -964,6 +964,7 @@ public class LocalMiniMap extends Widget {
                     mv.queuemove(c2p(c.sub(delta)));
                 } else if (button == clickBind) {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), 1, ui.modflags());
+                    mv.pllastcc = mc;
                     mv.clearmovequeue();
                 }
                 return true;
@@ -973,6 +974,7 @@ public class LocalMiniMap extends Widget {
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+                    mv.pllastcc = mc;
                     if (gob.getres() != null) {
                         CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                         if (itm != null && itm.selected)

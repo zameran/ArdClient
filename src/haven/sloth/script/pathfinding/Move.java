@@ -62,7 +62,7 @@ public class Move {
             } else {
                 mv.wdgmsg("click", fake, inf.gob.rc.floor(OCache.posres), cb, flags, 1, (int) inf.gob.id, inf.gob.rc.floor(OCache.posres), inf.olid, inf.meshid);
             }
-
+            mv.pllastcc = inf.gob.rc;
         }
     }
 

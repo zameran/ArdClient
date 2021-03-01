@@ -417,6 +417,7 @@ public class TrellisFarmer extends Window implements Runnable {
         // Stops thread
         PBotUtils.sysMsg(ui, "Trellis Farmer stopped!", Color.white);
         ui.gui.map.wdgmsg("click", Coord.z, ui.gui.map.player().rc.floor(posres), 1, 0);
+        ui.gui.map.pllastcc = ui.gui.map.player().rc;
         stopThread = true;
         this.destroy();
     }
