@@ -265,7 +265,7 @@ public class Config {
     public static boolean temporaryswimming = Utils.getprefb("temporaryswimming", false);
     public static boolean disableelev = Utils.getprefb("disableelev", false);
     public static boolean obviousridges = Utils.getprefb("obviousridges", false);
-    public static String treeboxclr = Utils.getpref("treeboxclr", "D7FF00");
+//    public static String treeboxclr = Utils.getpref("treeboxclr", "D7FF00");
     public static String discordtoken = Utils.getpref("discordtoken", "Null");
     public static String discordchannel = Utils.getpref("discordchannel", "");
     public static String discordalertstring = Utils.getpref("discordalertstring", "Null");

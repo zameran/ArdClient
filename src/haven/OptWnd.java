@@ -2697,25 +2697,6 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
-        appender.addRow(new Label("Tree bounding box color (6-digit HEX):"),
-                new TextEntry(85, Config.treeboxclr) {
-                    @Override
-                    public boolean type(char c, KeyEvent ev) {
-                        if (!parent.visible)
-                            return false;
-
-                        boolean ret = buf.key(ev);
-                        if (text.length() == 6) {
-                            Color clr = Utils.hex2rgb(text);
-                            if (clr != null) {
-                                GobHitbox.fillclrstate = new States.ColState(clr);
-                                Utils.setpref("treeboxclr", text);
-                            }
-                        }
-                        return ret;
-                    }
-                }
-        );
 
         appender.addRow(new Label("Chat font size (req. restart):"), makeFontSizeChatDropdown());
         appender.add(new CheckBox("Font antialiasing") {
