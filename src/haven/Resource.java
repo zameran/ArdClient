@@ -585,7 +585,9 @@ public class Resource implements Serializable {
                          * properly handled. This could be the wrong
                          * way of going about it, however; I'm not
                          * sure. */
-                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
+//                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
+                        System.out.printf("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur);
+                        return (cur.indir());
                     }
                 }
                 synchronized (queue) {
@@ -594,7 +596,7 @@ public class Resource implements Serializable {
                         if (ver != -1) {
                             if (ver < cq.ver) { //who cares, don't kill the client over this...
                                 //throw(new LoadException(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver), null));
-                                System.out.println(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver));
+                                System.out.printf("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver);
                                 cq.boostprio(prio);
                                 return (cq);
                             } else if (ver == cq.ver) {
@@ -1968,7 +1970,8 @@ public class Resource implements Serializable {
         if (this.ver == -1)
             this.ver = ver;
         else if (ver != this.ver)
-            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+//            throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+            System.out.println("Wrong res version (" + ver + " != " + this.ver + ") " +  this);
         while (!in.eom()) {
             String title = in.string();
 //            dev.resourceLog("DECODING", this, title);
