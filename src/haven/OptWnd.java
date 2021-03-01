@@ -5423,6 +5423,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("Show overlays while hidden") {
+            {
+                a = configuration.showhiddenoverlay;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("showhiddenoverlay", val);
+                configuration.showhiddenoverlay = val;
+                a = val;
+            }
+        });
         appender.add(ColorPreWithLabel("Hidden/Hitbox color: ", HIDDENCOLOR, val -> {
             GobHitbox.fillclrstate = new States.ColState(val);
             HitboxMesh.updateColor(new States.ColState(val));

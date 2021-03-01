@@ -1044,26 +1044,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 hid.setup(rl);
             }
         } else {
-            synchronized (ols) {
-                for (Overlay ol : ols) {
-                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce") || ol.name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
-                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
-                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
-                    }
-                    rl.add(ol, null);
-                }
-                for (Overlay ol : ols) {
-                    if (ol.spr instanceof Overlay.SetupMod)
-                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
-                }
-            }
-
-            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
-//                    if (Movable.isMovable(name)) {}
-                if (isMoving() && getattr(Movable.class) == null)
-                    setattr(new Movable(this));
-            }
-
             if (configuration.resizableworld) {
                 float scale = (float) configuration.worldsize;
                 rl.prepc(new Location(new Matrix4f(
@@ -1081,14 +1061,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 rl.prepc(WaterTile.surfmat);
                 rl.prepc(States.xray);
             }
-
-            final GobHealth hlt = getattr(GobHealth.class);
-            if (hlt != null)
-                rl.prepc(hlt.getfx());
-
-            final GobQuality qlty = getattr(GobQuality.class);
-            if (qlty != null)
-                rl.prepc(qlty.getfx());
 
             if (Config.showrackstatus && type == Type.CHEESERACK) {
                 if (ols.size() == 3)
@@ -1140,10 +1112,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 //while open : empty == 1, 1 item to half items = 5, half full = 13, full 29
                 //while closed : empty = 2, 1 item to half items = 6, half full= 14, full 30
             }
-
-            if (MapView.markedGobs.contains(id))
-                rl.prepc(MapView.markedFx);
-
             if (Config.showdframestatus && type == Type.TANTUB) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
                 // BotUtils.sysLogAppend("Sprite num : "+stage,"white");
@@ -1199,7 +1167,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (stage == -38 || stage == 58 || stage == 57 || stage == -6 || stage == -7 || stage == 122 || stage == 121)
                     rl.prepc(dframeWater);
             }
-
             if (configuration.showtroughstatus && type == Type.TROUGH) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
@@ -1208,18 +1175,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (stage == 0)
                     rl.prepc(cRackFull);
             }
-
             if (configuration.showbeehivestatus && type == Type.BEEHIVE) {
                 int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
 
                 if (stage == 5 || stage == 6 || stage == 7)
                     rl.prepc(cRackFull);
             }
-
-            if (OverlayData.isHighlighted(name())) {
-                rl.prepc(new Material.Colors(OverlayData.get(name()).highlightColor));
-            }
-
             if (Config.showdframestatus && type == Type.DFRAME) {
                 boolean done = true;
                 boolean empty = true;
@@ -1244,78 +1205,76 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 else if (empty && type != Type.TANTUB)
                     rl.prepc(dframeEmpty);
             }
-
-
             if (Config.highlightpots && type == Type.GARDENPOT && ols.size() == 2)
                 rl.prepc(potDOne);
-
-
-            for (final haven.sloth.gob.Rendered attr : renderedattrs) {
-                attr.setup(rl);
-            }
-
-            GobHighlight highlight = getattr(GobHighlight.class);
-            if (highlight != null) {
-                if (highlight.cycle <= 0)
-                    delattr(GobHighlight.class);
-                else
-                    rl.prepc(highlight.getfx());
-            }
-
-
             Drawable d = getattr(Drawable.class);
             try {
                 if (d != null) {
-                    if (Config.hidegobs && type == Type.TREE && Config.hideTrees) {
+                    if (Config.hidegobs) {
                         GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
-                    } else if (Config.hidegobs && type == Type.BUSH && Config.hideBushes) { //bushes
-                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
-                    } else if (Config.hidegobs && type == Type.BOULDER && Config.hideboulders) {
-                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                        if (bbox != null && Config.showoverlay) {
+                            if (type == Type.TREE && Config.hideTrees) {
+                                rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                            } else if (type == Type.BUSH && Config.hideBushes) {
+                                rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                            } else if (type == Type.BOULDER && Config.hideboulders) {
+                                rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                            } else {
+                                d.setup(rl);
+                            }
+                        } else {
+                            d.setup(rl);
+                        }
                     } else {
                         d.setup(rl);
                     }
-                    if (Config.showarchvector && type == Type.HUMAN && d instanceof Composite) {
-                        boolean targetting = false;
-                        Gob followGob = null;
-                        Moving moving = getattr(Moving.class);
-                        if (moving != null && moving instanceof Following)
-                            followGob = ((Following) moving).tgt();
-                        for (Composited.ED ed : ((Composite) d).comp.cequ) {
-                            try {
-                                Resource res = ed.res.res.get();
-                                if (res != null && (res.name.endsWith("huntersbow") || res.name.endsWith("rangersbow")) && ed.res.sdt.peekrbuf(0) == 5) {
-                                    targetting = true;
-                                    if (bowvector == null) {
-                                        bowvector = new Overlay(new GobArcheryVector(this, followGob));
-                                        ols.add(bowvector);
-                                    }
-                                    break;
-                                }
-                            } catch (Loading l) {
-                            }
-                        }
-                        if (!targetting && bowvector != null) {
-                            ols.remove(bowvector);
-                            bowvector = null;
-                        }
-                    }
-
                 }
             } catch (Exception e) {
-                //TODO: This is a weird issue that can pop up on startup, need to look into it
                 return false;
             }
             if (Config.showboundingboxes) {
                 GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                 if (bbox != null)
                     rl.add(new Overlay(new GobHitbox(this, bbox, false)), null);
+            }
+            if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {
+                for (HitboxMesh mesh : hitboxmesh)
+                    rl.add(mesh, null);
+            }
+        }
+        if (!(hid != null && Config.hideuniquegobs) || configuration.showhiddenoverlay) {
+            synchronized (ols) {
+                for (Overlay ol : ols) {
+                    if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce") || ol.name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
+                        if (ol.spr == null || ol.spr.res == null || ol.spr.res.name.contains("trees/yulestar-"))
+                            ol.spr = Sprite.create(this, Resource.remote().loadwait("gfx/terobjs/items/yulestar"), ol.sdt);
+                    }
+                    rl.add(ol, null);
+                }
+                for (Overlay ol : ols) {
+                    if (ol.spr instanceof Overlay.SetupMod)
+                        ((Overlay.SetupMod) ol.spr).setupmain(rl);
+                }
+            }
+            if (MapView.markedGobs.contains(id))
+                rl.prepc(MapView.markedFx);
+            final GobHealth hlt = getattr(GobHealth.class);
+            if (hlt != null)
+                rl.prepc(hlt.getfx());
+            final GobQuality qlty = getattr(GobQuality.class);
+            if (qlty != null)
+                rl.prepc(qlty.getfx());
+            if (OverlayData.isHighlighted(name())) {
+                OverlayData.OverlayGob og = OverlayData.get(name());
+                if (og != null)
+                    rl.prepc(new Material.Colors(og.highlightColor));
+            }
+            GobHighlight highlight = getattr(GobHighlight.class);
+            if (highlight != null) {
+                if (highlight.cycle <= 0)
+                    delattr(GobHighlight.class);
+                else
+                    rl.prepc(highlight.getfx());
             }
             if (Config.showplantgrowstage) {
                 if ((type != null && type == Type.PLANT) || (type != null && type == Type.MULTISTAGE_PLANT)) {
@@ -1369,6 +1328,21 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                     }
                 }
             }
+            if (type == Type.HUMAN || type == Type.VEHICLE || type == Type.WATERVEHICLE || type == Type.ANIMAL || type == Type.SMALLANIMAL || type == Type.TAMEDANIMAL || type == Type.DANGANIMAL) {
+//                    if (Movable.isMovable(name)) {}
+                if (isMoving() && getattr(Movable.class) == null)
+                    setattr(new Movable(this));
+            }
+            if (type == Type.TAMEDANIMAL) {
+                CattleId cattleId = getattr(CattleId.class);
+                if (cattleId != null) {
+                    if (findol(CattleIdSprite.id) == null) {
+                        CattleIdSprite sprite = new CattleIdSprite(cattleId);
+                        addol(new Overlay(CattleIdSprite.id, sprite));
+                        cattleId.sprite = sprite;
+                    }
+                }
+            }
             if (Config.stranglevinecircle && type == Type.STRANGLEVINE) {
                 if (ols.size() > 0)
                     return (false);
@@ -1388,8 +1362,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 else if (isDead() && ol != null)
                     ols.remove(ol);
             }
-
-
             Speaking sp = getattr(Speaking.class);
             if (sp != null)
                 rl.add(sp.fx, null);
@@ -1397,22 +1369,44 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (ki != null)
                 rl.add(ki.fx, null);
 
-            if (DefSettings.SHOWHITBOX.get() && hitboxmesh != null && hitboxmesh.length != 0) {
-                for (HitboxMesh mesh : hitboxmesh)
-                    rl.add(mesh, null);
-            }
-
-            if (type == Type.TAMEDANIMAL) {
-                CattleId cattleId = getattr(CattleId.class);
-                if (cattleId != null) {
-                    if (findol(CattleIdSprite.id) == null) {
-                        CattleIdSprite sprite = new CattleIdSprite(cattleId);
-                        addol(new Overlay(CattleIdSprite.id, sprite));
-                        cattleId.sprite = sprite;
+            Composite d = getattr(Composite.class);
+            try {
+                if (d != null) {
+                    if (Config.showarchvector && type == Type.HUMAN) {
+                        boolean targetting = false;
+                        Gob followGob = null;
+                        Following moving = getattr(Following.class);
+                        if (moving != null)
+                            followGob = moving.tgt();
+                        for (Composited.ED ed : d.comp.cequ) {
+                            try {
+                                Resource res = ed.res.res.get();
+                                if (res != null && (res.name.endsWith("huntersbow") || res.name.endsWith("rangersbow")) && ed.res.sdt.peekrbuf(0) == 5) {
+                                    targetting = true;
+                                    if (bowvector == null) {
+                                        bowvector = new Overlay(new GobArcheryVector(this, followGob));
+                                        ols.add(bowvector);
+                                    }
+                                    break;
+                                }
+                            } catch (Loading l) {
+                            }
+                        }
+                        if (!targetting && bowvector != null) {
+                            ols.remove(bowvector);
+                            bowvector = null;
+                        }
                     }
                 }
+            } catch (Exception e) {
+                //TODO: This is a weird issue that can pop up on startup, need to look into it
+                return false;
+            }
+            for (final haven.sloth.gob.Rendered attr : renderedattrs) {
+                attr.setup(rl);
             }
         }
+
         return (false);
     }
 
