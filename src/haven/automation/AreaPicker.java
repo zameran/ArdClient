@@ -172,6 +172,12 @@ public class AreaPicker extends Window implements Runnable {
                         updateinfo("gob");
                     }
                 }
+                protected void drawitemname(GOut g, CheckListboxItem itm) {
+                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                    Tex T = t.tex();
+                    g.image(T, new Coord(2, 2), t.sz());
+                    T.dispose();
+                }
             };
             selectedgobsearch = new ResizableTextEntry(selectedgoblbox.sz.x, "") {
                 public void changed() {
@@ -213,12 +219,12 @@ public class AreaPicker extends Window implements Runnable {
         };
         selectedflowerwnd = new Window(Coord.z, "Selecting petals") {{
             WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            flowermenulist.forEach(i -> selectedflowerlist.add(new CheckListboxItem(i)));
+            flowermenulist.forEach((i) -> selectedflowerlist.add(new CheckListboxItem(i)));
             ArrayList<String> temp = new ArrayList<>();
-            for (String s : flowermenulist) {
+            flowermenulist.forEach((s) -> {
                 String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
                 temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
-            }
+            });
             selectedflowerlbox = new CheckListbox(calcWidthString(temp), 10) {
                 protected void itemclick(CheckListboxItem itm, int button) {
                     if (!isblocked()) {
@@ -349,6 +355,12 @@ public class AreaPicker extends Window implements Runnable {
                         updatelist("storage");
                         updateinfo("storage");
                     }
+                }
+                protected void drawitemname(GOut g, CheckListboxItem itm) {
+                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                    Tex T = t.tex();
+                    g.image(T, new Coord(2, 2), t.sz());
+                    T.dispose();
                 }
             };
             selectedstoragesearch = new ResizableTextEntry(selectedstoragelbox.sz.x, "") {
@@ -1177,9 +1189,13 @@ public class AreaPicker extends Window implements Runnable {
 
             selectedgoblist.clear();
             selectedgoblbox.items.clear();
-            areagoblist.forEach(i -> selectedgoblist.add(new CheckListboxItem(i)));
+            ArrayList<String> temp = new ArrayList<>();
+            areagoblist.forEach((i) -> {
+                selectedgoblist.add(new CheckListboxItem(i));
+                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+            });
             selectedgoblbox.items.addAll(selectedgoblist);
-            selectedgoblbox.resize(calcWidthCheckListbox(selectedgoblist), selectedgoblbox.sz.y);
+            selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
             selectedgobwnd.pack();
             selectedgobsearch.settext("");
             if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
@@ -1205,9 +1221,13 @@ public class AreaPicker extends Window implements Runnable {
 
             selectedstoragelist.clear();
             selectedstoragelbox.items.clear();
-            areastoragelist.forEach(i -> selectedstoragelist.add(new CheckListboxItem(i)));
+            ArrayList<String> temp = new ArrayList<>();
+            areastoragelist.forEach((i) -> {
+                selectedstoragelist.add(new CheckListboxItem(i));
+                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+            });
             selectedstoragelbox.items.addAll(selectedstoragelist);
-            selectedstoragelbox.resize(calcWidthCheckListbox(selectedstoragelist), selectedstoragelbox.sz.y);
+            selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
             selectedstoragewnd.pack();
             selectedstoragesearch.settext("");
             if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
@@ -1478,7 +1498,7 @@ public class AreaPicker extends Window implements Runnable {
     public Comparator<CheckListboxItem> listboxsort() {
         return (o1, o2) -> {
             int b = Boolean.compare(o2.selected, o1.selected);
-            return b == 0 ? o1.name.compareTo(o2.name) : b;
+            return b == 0 ? configuration.getShortName(o1.name).compareTo(configuration.getShortName(o2.name)) : b;
         };
     }
 

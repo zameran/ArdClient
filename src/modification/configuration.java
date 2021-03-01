@@ -517,13 +517,13 @@ public class configuration {
         }
     }
 
-    public static String getDefaultTextName(String gobname) {
-        if (gobname.contains("/")) {
-            int p = gobname.lastIndexOf('/');
-            if (p < 0) return (gobname);
-            return gobname.substring(p + 1, p + 2).toUpperCase() + gobname.substring(p + 2);
-        } else return gobname;
-
+    public static String getShortName(String name) {
+        if (name.contains("/")) {
+            int p = name.lastIndexOf('/');
+            if (p < 0) return (name);
+            return (name.substring(p + 1, p + 2).toUpperCase() + name.substring(p + 2));
+        } else
+            return (name.substring(0, 1).toUpperCase());
     }
 
 

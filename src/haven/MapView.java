@@ -3481,7 +3481,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         ui.gui.add(new OverlaySelector(name), ui.mc);
                         break;
                     case 6: //Mark gob on map
-                        ui.gui.mapfile.markobj(g.id, g, configuration.getDefaultTextName(g.resname().get()));
+                        ui.gui.mapfile.markobj(g.id, g, configuration.getShortName(g.resname().get()));
                         break;
                     case 7: //Mark gob to custom marks
                         resources.customMarks.put(g.resname().get(), true);
