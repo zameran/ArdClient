@@ -1,3 +1,11 @@
+20210301 - Random Keyboard Pokes
+-- Changed MarkerList in the map window to modern
+-- Added option to show overlays while object is hidden (Options - Hidden)
+-- Updated 4k character statusbar meters, and the speedometer
+-- Added Eagle Owl to Dander Animal list
+-- Some fixes AreaPicker, Farmer, Resource wrong version, plant sprite, map temp marks (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210226 - Hot Fixes
 -- Fixed a bug when the script tries to get information from a not loaded item (FillCheeseTray script)
 ~
