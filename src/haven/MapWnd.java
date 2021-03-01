@@ -96,6 +96,9 @@ public class MapWnd extends Window {
     private long lastMarkCheck = System.currentTimeMillis();
 
     public static class TempMark {
+        String name;
+        boolean dead;
+        boolean near = true;
         long start;
         final long id;
         Coord2d rc;
@@ -103,8 +106,10 @@ public class MapWnd extends Window {
         MapFileWidget.Location loc;
         TexI icon;
 
-        public TempMark(long id, Coord2d rc, Coord gc, MapFileWidget.Location loc, TexI icon) {
+        public TempMark(String name, boolean dead, long id, Coord2d rc, Coord gc, MapFileWidget.Location loc, TexI icon) {
             start = System.currentTimeMillis();
+            this.name = name;
+            this.dead = dead;
             this.id = id;
             this.rc = rc;
             this.gc = gc;
@@ -221,8 +226,7 @@ public class MapWnd extends Window {
 
         public boolean clickmarker(DisplayMarker mark, int button) {
             if (button == 1 && ui.modflags() == 0) {
-                list.change2(mark.m);
-                list.display(mark.m);
+                focus(mark.m);
                 return (true);
             }
             return (false);
@@ -230,10 +234,9 @@ public class MapWnd extends Window {
 
         public boolean clickloc(Location loc, int button) {
             if (domark && (button == 1)) {
-                Marker nm = new PMarker(loc.seg.id, loc.tc, "New marker", BuddyWnd.gc[new Random().nextInt(BuddyWnd.gc.length)]);
+                Marker nm = new PMarker(loc.seg.id, loc.tc, "", BuddyWnd.gc[new Random().nextInt(BuddyWnd.gc.length)]);
                 file.add(nm);
-                list.change2(nm);
-                list.display(nm);
+                focus(nm);
                 domark = false;
                 return (true);
             }
@@ -335,7 +338,6 @@ public class MapWnd extends Window {
                             g.polyline(1, front, right, notch, left);
                             g.chcolor();
                         }
-
                     }
                 }
             } catch (Loading l) {
@@ -454,7 +456,7 @@ public class MapWnd extends Window {
                 Coord hsz = sz.div(2);
                 synchronized (tempMarkList) {
                     for (TempMark cm : tempMarkList) {
-                        TexI tex = cm.icon;
+                        Tex tex = cachedzoomtex(cm.icon, cm.name, MapFileWidget.zoom);
                         Coord gc = cm.gc.equals(Coord.z) ? getNotRealCoord(cm.rc.floor(tilesz)) : hsz.sub(loc.tc).add(cm.gc.div(scalef()));
                         g.aimage(tex, gc, 0.5, 0.5);
                     }
@@ -468,15 +470,15 @@ public class MapWnd extends Window {
             g.chcolor();
             super.draw(g);
             try {
-                final Location loc = resolve(player);
-                Coord ploc = xlate(resolve(player));
-                if (ploc != null) {
-                    drawmovement(g.reclip(view.c, view.sz));
-                    questgiverLines(g.reclip(view.c, view.sz));
-                    drawTracking(g.reclip(view.c, view.sz));
+                drawmovement(g);
+                questgiverLines(g);
+                drawTracking(g);
+                if (configuration.tempmarks && !configuration.bigmaphidemarks)
+                    drawmarks(g);
 
-                    if (configuration.tempmarks && !configuration.bigmaphidemarks)
-                        drawmarks(g.reclip(view.c, view.sz));
+                final Location loc = resolve(player);
+                Coord ploc = xlate(loc);
+                if (ploc != null) {
                     double angle = 0;
                     if (mv.player() != null)
                         angle = mv.player().geta();
@@ -495,12 +497,12 @@ public class MapWnd extends Window {
                     g.chcolor(Color.BLACK);
                     g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                     g.chcolor();
-
-                    final Set<Long> ignore;
-                    if (Config.mapdrawparty)
-                        ignore = drawparty(g);
-                    g.chcolor();
                 }
+
+                final Set<Long> ignore;
+                if (Config.mapdrawparty)
+                    ignore = drawparty(g);
+                g.chcolor();
             } catch (Loading l) {
             }
         }
@@ -519,21 +521,25 @@ public class MapWnd extends Window {
             }
         }
 
-        public void checkmarks() { //FIXME double draw?
+        public void checkmarks() {
             Defer.later(() -> {
                 synchronized (tempMarkList) {
                     final List<TempMark> marks = new ArrayList<>(tempMarkList);
                     for (TempMark cm : marks) {
                         PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
                         if (g == null) {
-                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                            if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && PBotGobAPI.player(ui).getRcCoords().dist(cm.rc) < 40 * 10)) {
                                 tempMarkList.remove(cm);
-                            }
+                            } else if (cm.near)
+                                cm.near = false;
                         } else {
                             Location loc = this.curloc;
                             if (loc != null) {
                                 for (TempMark customMark : tempMarkList) {
                                     if (cm.id == customMark.id) {
+                                        if (!customMark.near) {
+                                            customMark.near = true;
+                                        }
                                         customMark.start = System.currentTimeMillis();
                                         if (!customMark.rc.equals(g.getRcCoords())) {
                                             customMark.rc = g.getRcCoords();
@@ -545,11 +551,21 @@ public class MapWnd extends Window {
                                         if (customMark.loc.seg != loc.seg) {
                                             customMark.loc = loc;
                                         }
+                                        if (customMark.dead != g.isKnocked()) {
+                                            customMark.dead = g.isKnocked();
+                                            customMark.icon = (TexI) setTex(g.gob);
+                                        }
                                         break;
                                     }
                                 }
                             }
                         }
+                    }
+
+                    marks.clear();
+                    marks.addAll(tempMarkList);
+
+                    for (TempMark cm : marks) {
                         Gob dg = null;
                         for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
                             if (disp.sc == null)
@@ -562,7 +578,7 @@ public class MapWnd extends Window {
                             }
                         }
                         if (dg == null) {
-                            if (System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) {
+                            if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && PBotGobAPI.player(ui).getRcCoords().dist(cm.rc) < 40 * 10)) {
                                 tempMarkList.remove(cm);
                             }
                         } else {
@@ -570,6 +586,9 @@ public class MapWnd extends Window {
                             if (loc != null) {
                                 for (TempMark customMark : tempMarkList) {
                                     if (cm.id == customMark.id) {
+                                        if (!customMark.near) {
+                                            customMark.near = true;
+                                        }
                                         customMark.start = System.currentTimeMillis();
                                         if (!customMark.rc.equals(dg.rc)) {
                                             customMark.rc = dg.rc;
@@ -580,6 +599,10 @@ public class MapWnd extends Window {
                                         }
                                         if (customMark.loc.seg != loc.seg) {
                                             customMark.loc = loc;
+                                        }
+                                        if (customMark.dead != dg.isDead()) {
+                                            customMark.dead = dg.isDead();
+                                            customMark.icon = (TexI) setTex(dg);
                                         }
                                         break;
                                     }
@@ -598,37 +621,20 @@ public class MapWnd extends Window {
                                 Optional<Resource> ores = gob.res();
                                 if (!ores.isPresent())
                                     continue;
-                                Resource res = ores.get();
                                 TempMark m = getTMark(marks, gob.id);
                                 if (m == null) {
-                                    GobIcon icon = gob.getattr(GobIcon.class);
-                                    TexI tex = null;
-                                    if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
-                                        CheckListboxItem itm = Config.icons.get(res.basename());
-                                        if (configuration.tempmarksall || (itm != null && !itm.selected)) {
-                                            if (icon != null)
-                                                tex = (TexI) cachedtex(gob);
-                                            else
-                                                tex = (TexI) Config.additonalicons.get(res.name);
-                                        }
-                                    } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
-                                        tex = (TexI) LocalMiniMap.roadicn;
-                                    } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
-                                        tex = (TexI) LocalMiniMap.roadicn;
-                                    } else if (gob.type == Type.DUNGEONDOOR) {
-                                        int stage = 0;
-                                        if (gob.getattr(ResDrawable.class) != null)
-                                            stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
-                                        if (stage == 10 || stage == 14)
-                                            tex = (TexI) LocalMiniMap.dooricn;
-                                    }
-                                    if (tex != null && this.curloc != null)
-                                        tempMarkList.add(new TempMark(gob.id, gob.rc, getRealCoord(gob.rc.floor(tilesz)), this.curloc, tex));
+                                    TexI tex = (TexI) setTex(gob);
+                                    Location loc = this.curloc;
+                                    if (tex != null && loc != null)
+                                        tempMarkList.add(new TempMark(gob.getres().name, gob.isDead(), gob.id, gob.rc, getRealCoord(gob.rc.floor(tilesz)), loc, tex));
                                 }
                             } catch (Loading l) {
                             }
                         }
                     }
+
+                    marks.clear();
+                    marks.addAll(tempMarkList);
 
                     for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
                         if (disp.sc == null)
@@ -641,12 +647,38 @@ public class MapWnd extends Window {
                                 tex = (TexI) cachedtex(disp.gob);
                             }
                             if (tex != null && this.curloc != null)
-                                tempMarkList.add(new TempMark(disp.gob.id, disp.gob.rc, getRealCoord(disp.gob.rc.floor(tilesz)), this.curloc, tex));
+                                tempMarkList.add(new TempMark(disp.gob.getres().name, disp.gob.isDead(), disp.gob.id, disp.gob.rc, getRealCoord(disp.gob.rc.floor(tilesz)), this.curloc, tex));
                         }
                     }
                 }
                 return (null);
             });
+        }
+
+        private Tex setTex(Gob gob) {
+            GobIcon icon = gob.getattr(GobIcon.class);
+            Resource res = gob.getres();
+            Tex tex = null;
+            if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                CheckListboxItem itm = Config.icons.get(res.basename());
+                if (configuration.tempmarksall || (itm != null && !itm.selected)) {
+                    if (icon != null)
+                        tex = cachedtex(gob);
+                    else
+                        tex = Config.additonalicons.get(res.name);
+                }
+            } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
+                tex = LocalMiniMap.roadicn;
+            } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
+                tex = LocalMiniMap.roadicn;
+            } else if (gob.type == Type.DUNGEONDOOR) {
+                int stage = 0;
+                if (gob.getattr(ResDrawable.class) != null)
+                    stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
+                if (stage == 10 || stage == 14)
+                    tex = LocalMiniMap.dooricn;
+            }
+            return (tex);
         }
 
         private Tex cachedtex(Gob gob) {
@@ -674,6 +706,16 @@ public class MapWnd extends Window {
                 }
             }
             return (null);
+        }
+
+        private Tex cachedzoomtex(Tex tex, String name, int z) {
+            Tex itex = cachedZoomImageTex.get(name + "_zoom" + z);
+            if (itex == null) {
+                Coord zoomc = new Coord2d(tex.sz()).mul(scaleFactors[0] / scaleFactors[z] + 0.5).round();
+                itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
+                cachedZoomImageTex.put(name + "_zoom" + z, itex);
+            }
+            return (itex);
         }
 
         private TempMark getTMark(List<TempMark> marks, long id) {
@@ -747,7 +789,7 @@ public class MapWnd extends Window {
         }
     }
 
-    public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32);
+    public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32), found = new Color(255, 255, 0, 32);
 
     public void toggleMapGrid() {
         configuration.bigmapshowgrid = !configuration.bigmapshowgrid;
@@ -764,9 +806,10 @@ public class MapWnd extends Window {
             new Pair<>("--- Custom ---", "flg"),
             new Pair<>("Abyssal Chasm", "abyssalchasm"),
             new Pair<>("Ancient Windthrow", "windthrow"),
-            new Pair<>("Fairy Stone", "fairystone"),
-            new Pair<>("Lily Pad Lotus", "lilypadlotus"),
+            new Pair<>("Cave Organ", "caveorgan"),
             new Pair<>("Clay Pit", "claypit"),
+            new Pair<>("Coral Reef", "coralreef"),
+            new Pair<>("Fairy Stone", "fairystone"),
             new Pair<>("Crystal Rock", "crystalpatch"),
             new Pair<>("Geyser", "geyser"),
             new Pair<>("Great Cave Organ", "caveorgan"),
@@ -774,10 +817,16 @@ public class MapWnd extends Window {
             new Pair<>("Headwaters", "headwaters"),
             new Pair<>("Heart of the Woods", "woodheart"),
             new Pair<>("Ice Spire", "icespire"),
+            new Pair<>("Irminsul", "irminsul"),
             new Pair<>("Jotun Mussel", "jotunmussel"),
+            new Pair<>("Kelp Island", "algaeblob"),
+            new Pair<>("Lilypad Lotus", "lilypadlotus"),
+            new Pair<>("Monolith", "monolith"),
             new Pair<>("Quest Givers", "qst"),
+            new Pair<>("Rock Crystal", "crystalpatch"),
             new Pair<>("Salt Basin", "saltbasin"),
             new Pair<>("Swirling Vortex", "watervortex"),
+            new Pair<>("Tarpit", "tarpit"),
             new Pair<>("Cave", "cave")
     };
 
@@ -823,7 +872,7 @@ public class MapWnd extends Window {
         return modes;
     }
 
-    public class MarkerList extends Listbox<Marker> {
+    public class MarkerList extends Searchbox<Marker> {
         private final Text.Foundry fnd = CharWnd.attrf;
 
         public Marker listitem(int idx) {
@@ -834,16 +883,24 @@ public class MapWnd extends Window {
             return (markers.size());
         }
 
+        public boolean searchmatch(int idx, String txt) {
+            return(markers.get(idx).nm.toLowerCase().contains(txt.toLowerCase()));
+        }
+
         public MarkerList(int w, int n) {
             super(w, n, 20);
         }
 
-        private Function<String, Text> names = new CachedFunction<>(500, nm -> fnd.render(nm));
+        private Function<String, Text> names = new CachedFunction<>(500, fnd::render);
 
         protected void drawbg(GOut g) {
         }
 
         public void drawitem(GOut g, Marker mark, int idx) {
+            if(soughtitem(idx)) {
+                g.chcolor(found);
+                g.frect(Coord.z, g.sz());
+            }
             g.chcolor(((idx % 2) == 0) ? every : other);
             g.frect(Coord.z, g.sz);
             if (mark instanceof PMarker)
@@ -894,9 +951,11 @@ public class MapWnd extends Window {
                             view.file.update(mark);
                             commit();
                             change2(null);
+                            setfocus(MarkerList.this);
                         }
                     });
                 }
+                setfocus(namesel);
                 namesel.settext(mark.nm);
                 namesel.buf.point = mark.nm.length();
                 namesel.commit();
@@ -916,6 +975,7 @@ public class MapWnd extends Window {
                     public void click() {
                         view.file.remove(mark);
                         change2(null);
+                        setfocus(MarkerList.this);
                     }
                 });
                 MapWnd.this.resize(asz);
@@ -952,6 +1012,11 @@ public class MapWnd extends Window {
 
     public void recenter() {
         view.follow(player);
+    }
+
+    public void focus(Marker m) {
+        list.change2(m);
+        list.display(m);
     }
 
     private static final Tex sizer = Resource.loadtex("gfx/hud/wnd/sizer");
@@ -1096,14 +1161,14 @@ public class MapWnd extends Window {
                         if (info == null)
                             throw (new Loading());
                         Coord sc = tc.add(info.sc.sub(obg.gc).mul(cmaps));
-                        long oid = 0;
+                        long oid;
                         try {
                             oid = Long.parseLong(Math.abs(sc.x) + "" + Math.abs(sc.y) + "" + Math.abs(sc.x * sc.y) + ""); //FIXME bring true obj id
                         } catch (NumberFormatException e) {
                             oid = Long.MAX_VALUE - Math.abs(sc.x * sc.y);
                         }
                         SMarker prev = view.file.smarkers.get(oid);
-                        rnm = rnm + " [" + sc.x + ", " + sc.y + "]";
+//                        rnm = rnm + " [" + sc.x + ", " + sc.y + "]";
                         if (prev == null) {
                             view.file.add(new SMarker(info.seg, sc, rnm, oid, new Resource.Spec(Resource.remote(), iconRes.name, iconRes.ver)));
                         } else {
@@ -1138,12 +1203,12 @@ public class MapWnd extends Window {
 
     @Override
     public boolean type(char key, KeyEvent ev) {
-        if (key == 27) {
-            if (cbtn.visible) {
-                show(false);
-            }
-            return true;
-        }
+//        if (key == 27) {
+//            if (cbtn.visible) {
+//                show(false);
+//            }
+//            return true;
+//        }
         return super.type(key, ev);
     }
 }

@@ -80,11 +80,12 @@ public class MapFileWidget extends Widget {
     private String biome, seginfo;
     public static int zoom = Utils.getprefi("zoomlmap", 0);
     public static int zoomlvls = 8;
-    private static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public static Map<String, Tex> cachedTextTex = new HashMap<>();
     public static Map<String, Tex> cachedImageTex = new HashMap<>();
+    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
 
     public static Tex getCachedTextTex(String text) {
         Tex tex = cachedTextTex.get(text);
@@ -502,7 +503,6 @@ public class MapFileWidget extends Widget {
                         //Translate this to real map units and add to current map position
                         final Coord2d mc = plc.sub(offset.mul(MCache.tilesz).mul(scalef()));
                         if (ui.modmeta && !ui.modshift && !ui.modctrl) {
-                            // ui.gui.map.queuemove(mc);
                             ui.gui.map.queuemove(mc);
                         } else if (ui.modshift && !ui.modmeta && !ui.modctrl)
                             Defer.later(() -> ui.gui.map.pathto(mc));
