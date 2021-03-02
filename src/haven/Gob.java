@@ -1268,7 +1268,7 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             try {
                 if (d != null) {
                     if (!(hid != null && Config.hideuniquegobs)) {
-                        if (Config.hidegobs && (type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders)) {
+                        if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
                             GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
                             if (bbox != null && Config.showoverlay)
                                 rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
