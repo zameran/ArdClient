@@ -1,3 +1,10 @@
+20210304 - Default cattle roster upgrade
+-- Now you can sort animals by two types (for example, sex and quality - left mouse button (main) and right mouse button (side))
+-- Marked animals are now highlighted like in the old livestock manager
+-- Added columns with final quality next to their percentages
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210302 - There's nothing here
 -- Fixed hidden boulders
 -- Now more boulders are boulders
