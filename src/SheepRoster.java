@@ -15,25 +15,32 @@ public class SheepRoster extends CattleRoster<Sheep> {
     }
 
     public static List<Column> cols = initcols(
-            new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+            new Column<>("Name", Comparator.comparing((Entry e) -> e.name), 200),
 
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Sheep e) -> e.ram).reversed(), 20).runon(),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Sheep e) -> e.lamb).reversed(), 20).runon(),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Sheep e) -> e.dead).reversed(), 20).runon(),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Sheep e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Sheep e) -> e.ram).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Sheep e) -> e.lamb).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Sheep e) -> e.dead).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Sheep e) -> e.pregnant).reversed(), 20),
 
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Sheep e) -> e.q).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Sheep e) -> e.q).reversed()),
 
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Sheep e) -> e.meat).reversed()),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Sheep e) -> e.milk).reversed()),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/woolquantity"), Comparator.comparing((Sheep e) -> e.milk).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Sheep e) -> e.meat).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Sheep e) -> e.milk).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/woolquantity"), Comparator.comparing((Sheep e) -> e.wool).reversed()),
 
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Sheep e) -> e.meatq).reversed()),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Sheep e) -> e.milkq).reversed()),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/woolquality"), Comparator.comparing((Sheep e) -> e.milkq).reversed()),
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Sheep e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Sheep e) -> e.meatq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Sheep e) -> e.tmeatq).reversed()),
 
-            new Column<Sheep>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Sheep e) -> e.seedq).reversed())
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Sheep e) -> e.milkq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Sheep e) -> e.tmilkq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/woolquality"), Comparator.comparing((Sheep e) -> e.woolq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/woolquality"), Comparator.comparing((Sheep e) -> e.twoolq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Sheep e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Sheep e) -> e.thideq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Sheep e) -> e.seedq).reversed())
     );
 
     protected List<Column> cols() {
@@ -63,6 +70,10 @@ public class SheepRoster extends CattleRoster<Sheep> {
         ret.milkq = (Integer) args[n++];
         ret.woolq = (Integer) args[n++];
         ret.hideq = (Integer) args[n++];
+        ret.tmeatq = ret.meatq * ret.q / 100;
+        ret.tmilkq = ret.milkq * ret.q / 100;
+        ret.twoolq = ret.woolq * ret.q / 100;
+        ret.thideq = ret.hideq * ret.q / 100;
         ret.seedq = (Integer) args[n++];
         return (ret);
     }

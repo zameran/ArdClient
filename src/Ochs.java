@@ -13,6 +13,7 @@ public class Ochs extends Entry {
 
     public int meat, milk;
     public int meatq, milkq, hideq;
+    public double tmeatq, tmilkq, thideq;
     public int seedq;
     public boolean bull, calf, dead, pregnant;
 
@@ -32,8 +33,11 @@ public class Ochs extends Entry {
         drawcol(g, CowRoster.cols.get(i), 1, meat, null, i++);
         drawcol(g, CowRoster.cols.get(i), 1, milk, null, i++);
         drawcol(g, CowRoster.cols.get(i), 1, meatq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, tmeatq, quality, i++);
         drawcol(g, CowRoster.cols.get(i), 1, milkq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, tmilkq, quality, i++);
         drawcol(g, CowRoster.cols.get(i), 1, hideq, percent, i++);
+        drawcol(g, CowRoster.cols.get(i), 1, thideq, quality, i++);
         drawcol(g, CowRoster.cols.get(i), 1, seedq, null, i++);
         super.draw(g);
     }

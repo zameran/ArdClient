@@ -10,6 +10,7 @@ public class Horse extends Entry {
 
     public int meat, milk;
     public int meatq, milkq, hideq;
+    public double tmeatq, tmilkq, thideq;
     public int seedq;
     public int end, stam, mb;
     public boolean stallion, foal, dead, pregnant;
@@ -33,8 +34,11 @@ public class Horse extends Entry {
         drawcol(g, HorseRoster.cols.get(i), 1, meat, null, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, milk, null, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, meatq, percent, i++);
+        drawcol(g, HorseRoster.cols.get(i), 1, tmeatq, quality, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, milkq, percent, i++);
+        drawcol(g, HorseRoster.cols.get(i), 1, tmilkq, quality, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, hideq, percent, i++);
+        drawcol(g, HorseRoster.cols.get(i), 1, thideq, quality, i++);
         drawcol(g, HorseRoster.cols.get(i), 1, seedq, null, i++);
         super.draw(g);
     }

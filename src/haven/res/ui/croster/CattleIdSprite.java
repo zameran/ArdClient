@@ -8,6 +8,7 @@ import haven.Coord3f;
 import haven.GLState;
 import haven.GOut;
 import haven.Location;
+import haven.MapView;
 import haven.Matrix4f;
 import haven.PView;
 import haven.Projection;
@@ -77,8 +78,17 @@ public class CattleIdSprite extends Sprite {
             if ((rnm != null) && (wnd != null) && wnd.visible) {
                 Coord nmc = sc.sub(rnm.sz().x / 2, -rnm.sz().y);
                 g.image(rnm, nmc);
-                if ((entry != null) && entry.mark.a)
-                    g.image(CheckBox.smark, nmc.sub(CheckBox.smark.sz().x, 0));
+                if (entry != null) {
+                    boolean c = MapView.markedGobs.contains(cattleId.gob.id);
+                    if (entry.mark.a) {
+                        g.image(CheckBox.smark, nmc.sub(CheckBox.smark.sz().x, 0));
+                        if (!c)
+                            MapView.markedGobs.add(cattleId.gob.id);
+                    } else {
+                        if (c)
+                            MapView.markedGobs.remove(cattleId.gob.id);
+                    }
+                }
             }
         }
     }
