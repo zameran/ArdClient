@@ -8,7 +8,6 @@ import haven.GSprite;
 import haven.GSprite.Owner;
 import haven.Glob;
 import haven.Indir;
-import haven.Inventory;
 import haven.ItemInfo;
 import haven.ItemInfo.SpriteOwner;
 import haven.Label;
@@ -17,7 +16,6 @@ import haven.Message;
 import haven.MessageBuf;
 import haven.ResData;
 import haven.Resource;
-import haven.Resource.Image;
 import haven.Resource.Pagina;
 import haven.RichText;
 import haven.Tex;
@@ -37,6 +35,9 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Random;
 
+import static haven.Inventory.invsq;
+import static haven.Inventory.sqsz;
+
 // ui/barterstand
 public class Shopbox extends Widget implements SpriteOwner, Owner {
     public static final Text any = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Any"));
@@ -46,9 +47,9 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public static final Coord buyc = new Coord(5, 43);
     public static final Coord buyca = new Coord(5, 66);
     public static final Coord pricec = new Coord(200, 5);
-    public static final Coord qualc = (new Coord(200, 5)).add(Inventory.invsq.sz()).add(40, 0);
+    public static final Coord qualc = (new Coord(200, 5)).add(invsq.sz()).add(40, 0);
     public static final Coord cbtnc = new Coord(200, 66);
-    public static final Coord spipec = new Coord(85, 66);
+    public static final Coord spipec = new Coord(85, 43);
     public static final Coord bpipec = new Coord(280, 66);
     public ResData res;
     public Spec price;
@@ -70,85 +71,85 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     public final boolean admin;
     public final AttrCache<Tex> itemnum = new One(this);
     private List<ItemInfo> cinfo;
-    private Tex longtip = null;
+    private Tex longtip = null, fulltip = null;
     private Tex pricetip = null;
     private Random rnd = null;
     private int count = 0;
 
-    public static Widget mkwidget(UI ui, Object... var1) {
-        boolean var2 = ((Integer) var1[0]).intValue() != 0;
-        return new Shopbox(var2);
+    public static Widget mkwidget(UI ui, Object... args) {
+        boolean adm = (Integer) args[0] != 0;
+        return (new Shopbox(adm));
     }
 
-    public Shopbox(boolean var1) {
+    public Shopbox(boolean admin) {
         super(bg.sz());
-        if (this.admin = var1) {
-            this.spipe = (Button) this.add(new Button(75, "Connect"), spipec);
-            this.bpipe = (Button) this.add(new Button(75, "Connect"), bpipec);
-            this.cbtn = (Button) this.add(new Button(75, "Change"), cbtnc);
-            this.pnume = (TextEntry) this.adda(new TextEntry(30, ""), pricec.add(Inventory.invsq.sz()).add(5, 0), 0.0D, 1.0D);
-            this.pnume.canactivate = true;
-            this.pnume.dshow = true;
-            this.adda(new Label("Quality:"), qualc.add(0, 0), 0.0D, 1.0D);
-            this.pqe = (TextEntry) this.adda(new TextEntry(40, ""), qualc.add(40, 0), 0.0D, 1.0D);
-            this.pqe.canactivate = true;
-            this.pqe.dshow = true;
+        if (this.admin = admin) {
+            spipe = add(new Button(75, "Connect"), spipec);
+            bpipe = add(new Button(75, "Connect"), bpipec);
+            cbtn = add(new Button(75, "Change"), cbtnc);
+            pnume = adda(new TextEntry(30, ""), pricec.add(invsq.sz()).add(5, 0), 0, 1);
+            pnume.canactivate = true;
+            pnume.dshow = true;
+            adda(new Label("Quality:"), qualc.add(0, 0), 0, 1);
+            pqe = adda(new TextEntry(40, ""), qualc.add(40, 0), 0, 1);
+            pqe.canactivate = true;
+            pqe.dshow = true;
         }
     }
 
     public void draw(GOut g) {
         g.image(bg, Coord.z);
-        ResData var2 = this.res;
-        GOut var3;
-        if (var2 != null) {
-            label56:
+        ResData res = this.res;
+        GOut sg;
+        if (res != null) {
+            sprite:
             {
-                var3 = g.reclip(itemc, Inventory.invsq.sz());
-                var3.image(Inventory.invsq, Coord.z);
+                sg = g.reclip(itemc, invsq.sz());
+                sg.image(invsq, Coord.z);
                 GSprite var4 = this.spr;
                 if (var4 == null) {
                     try {
-                        var4 = this.spr = GSprite.create(this, (Resource) var2.res.get(), var2.sdt.clone());
+                        var4 = this.spr = GSprite.create(this, res.res.get(), res.sdt.clone());
                     } catch (Loading var7) {
-                        var3.image(((Image) WItem.missing.layer(Resource.imgc)).tex(), Coord.z, Inventory.sqsz);
-                        break label56;
+                        sg.image((WItem.missing.layer(Resource.imgc)).tex(), Coord.z, sqsz);
+                        break sprite;
                     }
                 }
 
-                var4.draw(var3);
-                if (this.itemnum.get() != null) {
-                    var3.aimage((Tex) this.itemnum.get(), Inventory.sqsz, 1.0D, 1.0D);
+                var4.draw(sg);
+                if (itemnum.get() != null) {
+                    sg.aimage(itemnum.get(), sqsz, 1, 1);
                 }
 
-                if (this.num != null) {
-                    g.aimage(this.num.tex(), itemc.add(Inventory.invsq.sz()).add(5, 0), 0.0D, 2.3D);
+                if (num != null) {
+                    g.aimage(num.tex(), itemc.add(invsq.sz()).add(5, 0), 0, 2.3);
                 }
 
                 if (quality != null) {
-                    g.aimage(qlbl.tex(), itemc.add(Inventory.invsq.sz()).add(5, 0), 0.0D, 1.0D);
-                    g.aimage(quality.tex(), itemc.add(Inventory.invsq.sz()).add(8 + qlbl.tex().sz().x, 0), 0.0D, 1.0D);
+                    g.aimage(qlbl.tex(), itemc.add(invsq.sz()).add(5, 0), 0, 1);
+                    g.aimage(quality.tex(), itemc.add(invsq.sz()).add(8 + qlbl.tex().sz().x, 0), 0, 1);
                 }
             }
         }
 
-        Spec var8 = this.price;
-        if (var8 != null) {
-            var3 = g.reclip(pricec, Inventory.invsq.sz());
-            var3.image(Inventory.invsq, Coord.z);
+        Spec price = this.price;
+        if (price != null) {
+            sg = g.reclip(pricec, invsq.sz());
+            sg.image(invsq, Coord.z);
 
             try {
-                var8.spr().draw(var3);
-            } catch (Loading var6) {
-                var3.image(((Image) WItem.missing.layer(Resource.imgc)).tex(), Coord.z, Inventory.sqsz);
+                price.spr().draw(sg);
+            } catch (Loading l) {
+                sg.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, sqsz);
             }
 
-            if (!this.admin && this.pnumt != null) {
-                g.aimage(this.pnumt.tex(), pricec.add(Inventory.invsq.sz()), 0.0D, 1.0D);
+            if (!admin && pnumt != null) {
+                g.aimage(pnumt.tex(), pricec.add(invsq.sz()), 0, 1);
             }
 
-            if (!this.admin && this.pqt != null) {
-                g.aimage(qlbl.tex(), qualc, 0.0D, 1.0D);
-                g.aimage(this.pqt.tex(), qualc.add(qlbl.tex().sz().x + 4, 0), 0.0D, 1.0D);
+            if (!admin && pqt != null) {
+                g.aimage(qlbl.tex(), qualc, 0, 1);
+                g.aimage(pqt.tex(), qualc.add(qlbl.tex().sz().x + 4, 0), 0, 1);
             }
         }
 
@@ -156,154 +157,157 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     }
 
     public List<ItemInfo> info() {
-        if (this.cinfo == null) {
-            this.cinfo = ItemInfo.buildinfo(this, this.info);
+        if (cinfo == null) {
+            cinfo = ItemInfo.buildinfo(this, info);
             QBuff qb = quality();
             if (qb != null)
                 quality = Text.render((int) qb.q + "");
         }
-        return this.cinfo;
+        return (cinfo);
     }
 
     private QBuff getQBuff(List<ItemInfo> infolist) {
         for (ItemInfo info : infolist) {
             if (info instanceof QBuff)
-                return (QBuff) info;
+                return ((QBuff) info);
         }
-        return null;
+        return (null);
     }
 
     private QBuff quality() {
         try {
             for (ItemInfo info : info()) {
                 if (info instanceof ItemInfo.Contents)
-                    return getQBuff(((ItemInfo.Contents) info).sub);
+                    return (getQBuff(((ItemInfo.Contents) info).sub));
             }
             return getQBuff(info());
         } catch (Loading l) {
         }
-        return null;
+        return (null);
     }
 
-    public Object tooltip(Coord var1, Widget var2) {
-        ResData var3 = this.res;
-        if (var1.isect(itemc, Inventory.sqsz) && var3 != null) {
+    public Object tooltip(Coord c, Widget prev) {
+        ResData res = this.res;
+        if (c.isect(itemc, sqsz) && (res != null)) {
             try {
-                if (this.longtip == null) {
-                    BufferedImage var4 = ItemInfo.longtip(this.info());
-                    Pagina var5 = ((Resource) var3.res.get()).layer(Resource.pagina);
-                    if (var5 != null) {
-                        var4 = ItemInfo.catimgs(0, new BufferedImage[]{var4, RichText.render("\n" + var5.text, 200, new Object[0]).img});
+                if (ui.modflags() == UI.MOD_SHIFT) {
+                    if (longtip == null) {
+                        BufferedImage ti = ItemInfo.longtip(info());
+                        Pagina pg = res.res.get().layer(Resource.pagina);
+                        if (pg != null)
+                            ti = ItemInfo.catimgs(0, ti, RichText.render("\n" + pg.text, UI.scale(200)).img);
+                        longtip = new TexI(ti);
                     }
-
-                    this.longtip = new TexI(var4);
+                    return (longtip);
+                } else {
+                    if (fulltip == null) {
+                        BufferedImage ti = ItemInfo.longtip(info());
+                        Pagina pg = res.res.get().layer(Resource.pagina);
+                        if (pg != null)
+                            ti = ItemInfo.catimgs(0, ti, RichText.render("\n" + pg.text, UI.scale(200)).img);
+                        fulltip = new TexI(ti);
+                    }
+                    return (fulltip);
                 }
-
-                return this.longtip;
-            } catch (Loading var6) {
-                return "...";
+            } catch (Loading l) {
+                return ("...");
             }
-        } else if (var1.isect(pricec, Inventory.sqsz) && this.price != null) {
-            try {
-                if (this.pricetip == null) {
-                    this.pricetip = this.price.longtip();
-                }
-
-                return this.pricetip;
-            } catch (Loading var7) {
-                return "...";
-            }
-        } else {
-            return super.tooltip(var1, var2);
         }
+        if (c.isect(pricec, sqsz) && (price != null)) {
+            try {
+                if (pricetip == null)
+                    pricetip = price.longtip();
+                return (pricetip);
+            } catch (Loading l) {
+                return ("...");
+            }
+        }
+        return (super.tooltip(c, prev));
     }
 
     @Deprecated
     public Glob glob() {
-        return this.ui.sess.glob;
+        return (ui.sess.glob);
     }
 
     public Resource resource() {
-        return (Resource) this.res.res.get();
+        return (res.res.get());
     }
 
     public GSprite sprite() {
-        if (this.spr == null) {
-            throw new Loading("Still waiting for sprite to be constructed");
-        } else {
-            return this.spr;
-        }
+        if (spr == null)
+            throw (new Loading("Still waiting for sprite to be constructed"));
+        return (spr);
     }
 
     public Resource getres() {
-        return (Resource) this.res.res.get();
+        return (res.res.get());
     }
 
     public Random mkrandoom() {
-        if (this.rnd == null) {
-            this.rnd = new Random();
-        }
-
-        return this.rnd;
+        if (rnd == null)
+            rnd = new Random();
+        return (rnd);
     }
 
-    private static Integer parsenum(TextEntry var0) {
+    private static Integer parsenum(TextEntry e) {
         try {
-            return var0.buf.line.equals("") ? Integer.valueOf(0) : Integer.valueOf(Integer.parseInt(var0.buf.line));
-        } catch (NumberFormatException var2) {
-            return null;
+            if (e.buf.line.equals(""))
+                return (0);
+            return (Integer.parseInt(e.buf.line));
+        } catch (NumberFormatException exc) {
+            return (null);
         }
     }
 
-    public boolean mousedown(Coord var1, int var2) {
-        if (var2 == 3 && var1.isect(pricec, Inventory.sqsz) && this.price != null) {
-            this.wdgmsg("pclear", new Object[0]);
-            return true;
-        } else {
-            return super.mousedown(var1, var2);
+    public boolean mousedown(Coord c, int button) {
+        if ((button == 3) && c.isect(pricec, sqsz) && (price != null)) {
+            wdgmsg("pclear");
+            return (true);
         }
+        return (super.mousedown(c, button));
     }
 
-    public void wdgmsg(Widget var1, String var2, Object... var3) {
-        if (var1 == this.bbtn) {
+    public void wdgmsg(Widget sender, String msg, Object... args) {
+        if (sender == bbtn) {
             if (ui.modshift && !ui.modctrl) {
                 for (int i = 0; i <= 5; i++)
-                    this.wdgmsg("buy", new Object[0]);
+                    wdgmsg("buy");
             } else if (ui.modshift && ui.modctrl) {
                 for (int i = 0; i <= 20; i++)
-                    this.wdgmsg("buy", new Object[0]);
+                    wdgmsg("buy");
             } else {
-                this.wdgmsg("buy", new Object[0]);
+                wdgmsg("buy");
             }
-        } else if (var1 == this.bbtn100) {
+        } else if (sender == bbtn100) {
             if (count > 0) {
                 for (int i = 0; i < count; i++)
-                    this.wdgmsg("buy", new Object[0]);
+                    wdgmsg("buy");
             } else {
                 ui.gui.msg("You can't buy 0 items.");
             }
-        } else if (var1 == this.spipe) {
-            this.wdgmsg("spipe", new Object[0]);
-        } else if (var1 == this.bpipe) {
-            this.wdgmsg("bpipe", new Object[0]);
-        } else if (var1 == this.cbtn) {
-            this.wdgmsg("change", new Object[0]);
-        } else if (var1 != this.pnume && var1 != this.pqe) {
-            super.wdgmsg(var1, var2, var3);
+        } else if (sender == spipe) {
+            wdgmsg("spipe");
+        } else if (sender == bpipe) {
+            wdgmsg("bpipe");
+        } else if (sender == cbtn) {
+            wdgmsg("change");
+        } else if ((sender == pnume) || (sender == pqe)) {
+            wdgmsg("price", parsenum(pnume), parsenum(pqe));
         } else {
-            this.wdgmsg("price", new Object[]{parsenum(this.pnume), parsenum(this.pqe)});
+            super.wdgmsg(sender, msg, args);
         }
     }
 
     private void updbtn() {
-        boolean var1 = this.price != null && this.pnum > 0;
-        if (var1 && this.bbtn == null || this.bbtn100 == null) {
-            this.bbtn = (Button) this.add(new Button(75, "Buy"), buyc);
-            this.bbtn.tooltip = "Left click to buy 1, Shift left click to buy 5, ctrl shift left click to buy 20.";
-            this.bbtn100 = (Button) this.add(new Button(75, "Buy x"), buyca);
-            this.bbtn100.tooltip = "Type the number in box press enter and press this button.";
+        boolean canbuy = price != null && pnum > 0;
+        if (canbuy && bbtn == null || bbtn100 == null) {
+            bbtn = add(new Button(75, "Buy"), buyc);
+            bbtn.tooltip = "Left click to buy 1, Shift left click to buy 5, ctrl shift left click to buy 20.";
+            bbtn100 = add(new Button(75, "Buy x"), buyca);
+            bbtn100.tooltip = "Type the number in box press enter and press this button.";
 
-            tbuy = this.add(new TextEntry(40, "") {
+            tbuy = add(new TextEntry(40, "") {
                 @Override
                 public boolean keydown(KeyEvent e) {
                     return !(e.getKeyCode() >= KeyEvent.VK_F1 && e.getKeyCode() <= KeyEvent.VK_F12);
@@ -323,7 +327,7 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                     return false;
                 }
             }, new Coord(82, 66));
-        } else if (!var1 && this.bbtn != null) {
+        } else if (!canbuy && this.bbtn != null) {
             this.bbtn.reqdestroy();
             this.bbtn = null;
             this.bbtn100 = null;
@@ -331,114 +335,108 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
 
     }
 
-    private static Text rnum(String var0, int var1) {
-        return var1 < 1 ? null : Text.render(String.format(var0, new Object[]{Integer.valueOf(var1)}));
+    private static Text rnum(String fmt, int n) {
+        if (n < 1)
+            return (null);
+        return (Text.render(String.format(fmt, n)));
     }
 
-    public void uimsg(String var1, Object... var2) {
-        if (var1 == "res") {
+    public void uimsg(String name, Object... args) {
+        if (name == "res") {
             this.res = null;
             this.spr = null;
-            if (var2.length > 0) {
-                ResData var3 = new ResData(this.ui.sess.getres(((Integer) var2[0]).intValue()), Message.nil);
-                if (var2.length > 1) {
-                    var3.sdt = new MessageBuf((byte[]) ((byte[]) var2[1]));
+            if (args.length > 0) {
+                ResData res = new ResData(ui.sess.getres((Integer) args[0]), Message.nil);
+                if (args.length > 1) {
+                    res.sdt = new MessageBuf((byte[]) args[1]);
                 }
-
-                this.res = var3;
+                this.res = res;
             }
-        } else if (var1 == "tt") {
-            this.info = var2;
-            this.cinfo = null;
-            this.longtip = null;
-        } else {
-            int var7;
-            if (var1 == "n") {
-                var7 = ((Integer) var2[0]).intValue();
-                this.num = Text.render(String.format("%d left", new Object[]{Integer.valueOf(var7)}));
-            } else if (var1 == "price") {
-                byte var8 = 0;
-                if (var2[var8] == null) {
-                    var7 = var8 + 1;
-                    this.price = null;
-                } else {
-                    var7 = var8 + 1;
-                    Indir<Resource> var4 = this.ui.sess.getres(((Integer) var2[var8]).intValue());
-                    Object var5 = Message.nil;
-                    if (var2[var7] instanceof byte[]) {
-                        var5 = new MessageBuf((byte[]) ((byte[]) var2[var7++]));
-                    }
-
-                    Object var6 = null;
-                    if (var2[var7] instanceof Object[]) {
-                        for (var6 = new Object[0][]; var2[var7] instanceof Object[]; var6 = Utils.extend((Object[]) var6, var2[var7++])) {
-                            ;
-                        }
-                    }
-
-                    this.price = new Spec(new ResData(var4, (Message) var5), Spec.uictx(this.ui), (Object[]) var6);
-                }
-
-                this.pricetip = null;
-                this.pnum = ((Integer) var2[var7++]).intValue();
-                this.pq = ((Integer) var2[var7++]).intValue();
-                if (!this.admin) {
-                    this.pnumt = rnum("×%d", this.pnum);
-                    this.pqt = this.pq > 0 ? rnum("%d+", this.pq) : any;
-                } else {
-                    this.pnume.settext(this.pnum > 0 ? Integer.toString(this.pnum) : "");
-                    this.pnume.commit();
-                    this.pqe.settext(this.pq > 0 ? Integer.toString(this.pq) : "");
-                    this.pqe.commit();
-                }
-
-                this.updbtn();
+            updbtn();
+        } else if (name == "tt") {
+            info = args;
+            cinfo = null;
+            longtip = null;
+            fulltip = null;
+        } else if (name == "n") {
+            int num = (Integer) args[0];
+            this.num = Text.render(String.format("%d left", num));
+        } else if (name == "price") {
+            int a = 0;
+            if (args[a] == null) {
+                a++;
+                price = null;
             } else {
-                super.uimsg(var1, var2);
+                Indir<Resource> res = ui.sess.getres((Integer) args[a++]);
+                Message sdt = Message.nil;
+                if (args[a] instanceof byte[])
+                    sdt = new MessageBuf((byte[]) args[a++]);
+                Object[] info = null;
+                if (args[a] instanceof Object[]) {
+                    info = new Object[0][];
+                    while (args[a] instanceof Object[])
+                        info = Utils.extend(info, args[a++]);
+                }
+                price = new Spec(new ResData(res, sdt), Spec.uictx(ui), info);
             }
+            pricetip = null;
+            pnum = (Integer) args[a++];
+            pq = (Integer) args[a++];
+            if (!admin) {
+                pnumt = rnum("\u00d7%d", pnum);
+                pqt = (pq > 0) ? rnum("%d+", pq) : any;
+            } else {
+                pnume.settext((pnum > 0) ? Integer.toString(pnum) : "");
+                pnume.commit();
+                pqe.settext((pq > 0) ? Integer.toString(pq) : "");
+                pqe.commit();
+            }
+            updbtn();
+        } else {
+            super.uimsg(name, args);
         }
     }
 
     @Override
-    public <C> C context(Class<C> var1) {
-        return Spec.uictx.context(var1, this.ui);
+    public <C> C context(Class<C> con) {
+        return Spec.uictx.context(con, this.ui);
     }
 
     public abstract class AttrCache<T> {
         private List<ItemInfo> forinfo;
         private T save;
 
-        public AttrCache(Shopbox var1) {
+        public AttrCache(Shopbox shopbox) {
             this.forinfo = null;
             this.save = null;
         }
 
         public T get() {
             try {
-                List<ItemInfo> var1 = info();
-                if (var1 != this.forinfo) {
-                    this.save = find(var1);
-                    this.forinfo = var1;
+                List<ItemInfo> info = info();
+                if (info != forinfo) {
+                    save = find(info);
+                    forinfo = info;
                 }
-            } catch (Loading var2) {
-                return null;
+            } catch (Loading l) {
+                return (null);
             }
 
-            return this.save;
+            return (save);
         }
 
-        protected abstract T find(List<ItemInfo> var1);
+        protected abstract T find(List<ItemInfo> info);
     }
 
 
     class One extends AttrCache<Tex> {
-        One(Shopbox var1) {
-            super(var1);
+        One(Shopbox shopbox) {
+            super(shopbox);
         }
 
-        protected Tex find(List<ItemInfo> var1) {
-            GItem.NumberInfo var2 = ItemInfo.find(GItem.NumberInfo.class, var1);
-            return var2 == null ? null : new TexI(Utils.outline2(Text.render(Integer.toString(var2.itemnum()), Color.WHITE).img, Utils.contrast(Color.WHITE)));
+        protected Tex find(List<ItemInfo> info) {
+            GItem.NumberInfo numberInfo = ItemInfo.find(GItem.NumberInfo.class, info);
+            return numberInfo == null ? null : new TexI(Utils.outline2(Text.render(Integer.toString(numberInfo.itemnum()), Color.WHITE).img, Utils.contrast(Color.WHITE)));
         }
     }
 }

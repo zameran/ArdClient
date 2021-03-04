@@ -9,6 +9,7 @@ import haven.ResData;
 import haven.Resource;
 import haven.RichText;
 import haven.Text;
+import haven.UI;
 import haven.Utils;
 import haven.res.lib.tspec.Spec;
 import haven.res.ui.tt.attrmod.AttrMod;
@@ -43,6 +44,7 @@ public class ISlots extends Tip implements NumberInfo {
     public static final String chc = "192,192,255";
 
     public void layout(Layout l) {
+        UI ui = owner.glob().ui.get();
         l.cmp.add(ch.img, new Coord(0, l.cmp.sz.y));
         if (attrs.length > 0) {
             String chanceStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Chance: $col[%s]{%d%%} to $col[%s]{%d%%}");
@@ -62,30 +64,28 @@ public class ISlots extends Tip implements NumberInfo {
             l.cmp.add(head, new Coord(10, l.cmp.sz.y));
         }
 
-        Map<Resource, Integer> totalAttr = new HashMap<Resource, Integer>();
-        int sitems = 0;
+        Map<Resource, Integer> totalAttr = new HashMap<>();
 
-        for (ItemInfo ii : owner.info()) {
-            if (ii instanceof AttrMod) {
-                for (AttrMod.Mod mod : ((AttrMod) ii).mods) {
-                    boolean exist = false;
-                    for (Map.Entry<Resource, Integer> entry : totalAttr.entrySet()) {
-                        if (entry.getKey().equals(mod.attr)) {
-                            exist = true;
-                            entry.setValue(entry.getValue() + mod.mod);
-                            break;
-                        }
-                    }
-                    if (!exist)
-                        totalAttr.put(mod.attr, mod.mod);
-                }
-            }
-        }
-        if (totalAttr.size() > 0) sitems++;
+//        for (ItemInfo ii : owner.info()) {
+//            if (ii instanceof AttrMod) {
+//                for (AttrMod.Mod mod : ((AttrMod) ii).mods) {
+//                    boolean exist = false;
+//                    for (Map.Entry<Resource, Integer> entry : totalAttr.entrySet()) {
+//                        if (entry.getKey().equals(mod.attr)) {
+//                            exist = true;
+//                            entry.setValue(entry.getValue() + mod.mod);
+//                            break;
+//                        }
+//                    }
+//                    if (!exist)
+//                        totalAttr.put(mod.attr, mod.mod);
+//                }
+//            }
+//        }
 
         for (SItem si : s) {
-            si.layout(l);
-            sitems++;
+            if (ui == null || ui.modflags() == UI.MOD_SHIFT)
+                si.layout(l);
 
             for (ItemInfo ii : si.info) {
                 if (ii instanceof AttrMod) {
@@ -104,25 +104,22 @@ public class ISlots extends Tip implements NumberInfo {
                 }
             }
         }
+        if (ui == null || ui.modflags() != UI.MOD_SHIFT)
+            if (totalAttr.size() > 0) {
+                List<AttrMod.Mod> lmods = new ArrayList<>();
+                List<Map.Entry<Resource, Integer>> sortAttr = totalAttr.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList());
+                for (Map.Entry<Resource, Integer> entry : sortAttr) {
+                    lmods.add(new AttrMod.Mod(entry.getKey(), entry.getValue()));
+                }
+
+                BufferedImage tip = AttrMod.modimg(lmods);
+                l.cmp.add(tip, new Coord(10, l.cmp.sz.y));
+            }
 
         if (left > 0) {
             String gildStr = Resource.getLocString(Resource.BUNDLE_LABEL, "Gildable \u00d7%d");
             String gild2Str = Resource.getLocString(Resource.BUNDLE_LABEL, "Gildable");
             l.cmp.add(Text.slotFnd.render(left > 1 ? String.format(gildStr, left) : gild2Str).img, new Coord(10, l.cmp.sz.y));
-        }
-
-        if (totalAttr.size() > 0 && sitems > 1) {
-            BufferedImage totalString = RichText.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Total:")).img;
-            l.cmp.add(totalString, new Coord(0, l.cmp.sz.y));
-
-            List<AttrMod.Mod> lmods = new ArrayList<>();
-            List<Map.Entry<Resource, Integer>> sortAttr = totalAttr.entrySet().stream().sorted(this::BY_PRIORITY).collect(Collectors.toList());
-            for (Map.Entry<Resource, Integer> entry : sortAttr) {
-                lmods.add(new AttrMod.Mod(entry.getKey(), entry.getValue()));
-            }
-
-            BufferedImage tip = AttrMod.modimg(lmods);
-            l.cmp.add(tip, new Coord(10, l.cmp.sz.y));
         }
     }
 

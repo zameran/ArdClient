@@ -133,7 +133,7 @@ public class WItem extends Widget implements DTarget {
     }
 
     public double hoverstart;
-    private ItemTip shorttip = null, longtip = null;
+    private ItemTip shorttip = null, longtip = null, fulltip = null;
     private List<ItemInfo> ttinfo = null;
 
     public Object tooltip(Coord c, Widget prev) {
@@ -161,9 +161,15 @@ public class WItem extends Widget implements DTarget {
                     shorttip = new ShortTip(info);
                 return (shorttip);
             } else {
-                if (longtip == null)
-                    longtip = new LongTip(info);
-                return (longtip);
+                if (ui.modflags() == UI.MOD_SHIFT) {
+                    if (longtip == null)
+                        longtip = new LongTip(info);
+                    return (longtip);
+                } else {
+                    if (fulltip == null)
+                        fulltip = new LongTip(info);
+                    return (fulltip);
+                }
             }
         } catch (Loading e) {
             return ("...");
