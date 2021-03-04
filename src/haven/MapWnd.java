@@ -255,15 +255,14 @@ public class MapWnd extends Window {
             final double dist = 90000.0D;
             synchronized (ui.gui.dowsewnds) {
                 for (final DowseWnd wnd : ui.gui.dowsewnds) {
-                    final Coord mc = getRealCoord(new Coord2d(wnd.startc).floor(tilesz));
-                    final Coord lc = mc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
-                    final Coord rc = mc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
+                    if (wnd.mapc == null || wnd.mapc.equals(Coord.z))
+                        wnd.mapc = getRealCoord(new Coord2d(wnd.startc).floor(tilesz));
                     Location loc = this.curloc;
-                    if (loc != null) {
+                    if (loc != null && wnd.mapc != null && !wnd.mapc.equals(Coord.z)) {
                         Coord hsz = sz.div(2);
-                        final Coord gc = hsz.sub(loc.tc).add(mc.div(scalef()));
-                        final Coord mlc = hsz.sub(loc.tc).add(lc.div(scalef()));
-                        final Coord mrc = hsz.sub(loc.tc).add(rc.div(scalef()));
+                        final Coord gc = hsz.sub(loc.tc).add(wnd.mapc.div(scalef()));
+                        final Coord mlc = gc.add((int) (Math.cos(Math.toRadians(wnd.a1())) * dist), (int) (Math.sin(Math.toRadians(wnd.a1())) * dist));
+                        final Coord mrc = gc.add((int) (Math.cos(Math.toRadians(wnd.a2())) * dist), (int) (Math.sin(Math.toRadians(wnd.a2())) * dist));
                         g.chcolor(new Color(configuration.dowsecolor, true));
                         g.dottedline(gc, mlc, 1);
                         g.dottedline(gc, mrc, 1);
