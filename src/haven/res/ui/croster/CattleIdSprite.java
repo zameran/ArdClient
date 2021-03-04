@@ -74,12 +74,12 @@ public class CattleIdSprite extends Sprite {
         fsc = proj.toscreen(mv.mul4(Coord3f.o), wndsz);
         sczu = proj.toscreen(mv.mul4(Coord3f.zu), wndsz).sub(fsc);
         final Coord sc = new Coord(fsc.add(sczu.mul(25)));
+        boolean c = MapView.markedGobs.contains(cattleId.gob.id);
         if (sc.isect(Coord.z, g.sz())) {
             if ((rnm != null) && (wnd != null) && wnd.visible) {
-                Coord nmc = sc.sub(rnm.sz().x / 2, -rnm.sz().y);
-                g.image(rnm, nmc);
                 if (entry != null) {
-                    boolean c = MapView.markedGobs.contains(cattleId.gob.id);
+                    Coord nmc = sc.sub(rnm.sz().x / 2, -rnm.sz().y);
+                    g.image(rnm, nmc);
                     if (entry.mark.a) {
                         g.image(CheckBox.smark, nmc.sub(CheckBox.smark.sz().x, 0));
                         if (!c)
@@ -88,7 +88,13 @@ public class CattleIdSprite extends Sprite {
                         if (c)
                             MapView.markedGobs.remove(cattleId.gob.id);
                     }
+                } else {
+                    if (c)
+                        MapView.markedGobs.remove(cattleId.gob.id);
                 }
+            } else {
+                if (c)
+                    MapView.markedGobs.remove(cattleId.gob.id);
             }
         }
     }

@@ -1400,10 +1400,13 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (type == Type.TAMEDANIMAL) {
                 CattleId cattleId = getattr(CattleId.class);
                 if (cattleId != null) {
-                    if (findol(CattleIdSprite.id) == null) {
+                    Overlay co = findol(CattleIdSprite.id);
+                    if (co == null) {
                         CattleIdSprite sprite = new CattleIdSprite(cattleId);
                         addol(new Overlay(CattleIdSprite.id, sprite));
                         cattleId.sprite = sprite;
+                    } else if (cattleId.sprite == null) {
+                        cattleId.sprite = (CattleIdSprite) co.spr;
                     }
                 }
             }

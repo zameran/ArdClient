@@ -8,6 +8,7 @@ import haven.Window;
 import modification.dev;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class RosterWindow extends Window {
         TypeButton btn = this.add(rost.button());
         btn.action(() -> show(rost));
         buttons.add(btn);
-        buttons.sort((a, b) -> (a.order - b.order));
+        buttons.sort(Comparator.comparingInt(a -> a.order));
         int x = 0;
         for (Widget wdg : buttons) {
             wdg.move(new Coord(x, btny));
