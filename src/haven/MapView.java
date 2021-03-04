@@ -2523,7 +2523,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             return;
                         }
                     }
-
                 } else if (Config.proximityaggropvp && !Config.proximityaggro && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
                     Gob target = null;
                     synchronized (glob.oc) {
@@ -2540,7 +2539,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             return;
                         }
                     }
-
                 } else if (Config.proximityaggro && !Config.proximityaggropvp && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
                     Gob target = null;
                     synchronized (glob.oc) {
@@ -2581,7 +2579,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     }
                 } else {
                     Gob gob = inf.gob;
-                    if (gob != null && !ui.modctrl && !ui.modshift && !ui.modmeta && clickb == 1 && curs.name.equals("gfx/hud/curs/study")) {
+                    if (gob != null && !ui.modctrl && !ui.modshift && !ui.modmeta && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/study")) {
                         //we're inspecting an object, prepared to intercept the system message.
                         ui.gui.inspectedgobid = gob.id;
                     }
@@ -2594,7 +2592,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             glob.oc.changed(gob);
                         } else {
                             wdgmsg("click", args);
-                            pllastcc = mc;
+                            pllastcc = gob.rc;
                         }
                     } else if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modctrl && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
@@ -2646,20 +2644,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             clearmovequeue();
                         }
                         wdgmsg("click", args);
-                        pllastcc = mc;
-                        if (gob != null && gob.getres() != null) {
+                        pllastcc = gob.rc;
+                        if (gob.getres() != null) {
                             CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                             if (itm != null && itm.selected)
                                 startMusselsPicker(gob);
                         }
-                     /*   if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().equals("mussels") || gob.getres().basename().equals("oyster")))
-                            startMusselsPicker(gob);
-                        if (Config.autopickclay && gob.getres() != null &&  gob.getres().basename().equals("clay-gray"))
-                            startMusselsPicker(gob);
-                        if (Config.autopickbarnacles && gob.getres() != null &&  gob.getres().basename().equals("goosebarnacle"))
-                            startMusselsPicker(gob);
-                        if (Config.autopickcattails && gob.getres() != null &&  gob.getres().basename().equals("cattail"))
-                            startMusselsPicker(gob);*/
                     }
                 }
             }
