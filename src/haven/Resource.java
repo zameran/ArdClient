@@ -1214,13 +1214,13 @@ public class Resource implements Serializable {
             if (filename.equals("con.png")) filename = "_" + filename;
             File outputfile = new File(dir, filename);
             if (!outputfile.exists()) {
-                if (img == null) {
+                if (rawimage == null) {
                     dev.resourceLog("image", outputfile.getPath(), "NULL");
                     return;
                 }
                 Defer.later(() -> {
                     try {
-                        ImageIO.write(img, "png", outputfile);
+                        ImageIO.write(rawimage, "png", outputfile);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
