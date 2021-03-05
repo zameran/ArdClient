@@ -49,7 +49,7 @@ public class WItem extends Widget implements DTarget2 {
     public GItem item;
     public static final Color famountclr = new Color(24, 116, 205);
 
-    private static final Color qualitybg() {
+    private static Color qualitybg() {
         return new Color(20, 20, 20, 255 - Config.qualitybgtransparency);
     }
 
@@ -412,7 +412,7 @@ public class WItem extends Widget implements DTarget2 {
             if (!locked) {
                 if (ui.gui.itemClickCallback != null) {
                     ui.gui.itemClickCallback.itemClick(this);
-                    return true;
+                    return (true);
                 }
                 if (ui.modctrl && ui.modmeta)
                     wdgmsg("drop-identical", this.item);
