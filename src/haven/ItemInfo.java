@@ -508,6 +508,7 @@ public abstract class ItemInfo {
                 throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
         }
+        ret.add(new AdHoc(owner, "\n" + (owner instanceof ResOwner ? ((ResOwner) owner).resource().name : owner.toString())));
         return (ret);
     }
 

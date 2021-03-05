@@ -248,8 +248,6 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public synchronized List<ItemInfo> info() {
         if (info == null && rawinfo != null) {
             info = ItemInfo.buildinfo(this, rawinfo);
-            //configuration.resourceLog(getname(), "tt", info);
-            info.add(new ItemInfo.AdHoc(this, "\n" + getres().name));
             try {
                 // getres() can throw Loading, ignore it
                 FoodService.checkFood(info, getres().name);
