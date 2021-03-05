@@ -456,8 +456,11 @@ public class MapWnd extends Window {
                 synchronized (tempMarkList) {
                     for (TempMark cm : tempMarkList) {
                         Tex tex = cachedzoomtex(cm.icon, cm.name, MapFileWidget.zoom);
-                        Coord gc = cm.gc.equals(Coord.z) ? getNotRealCoord(cm.rc.floor(tilesz)) : hsz.sub(loc.tc).add(cm.gc.div(scalef()));
-                        g.aimage(tex, gc, 0.5, 0.5);
+                        if (!cm.gc.equals(Coord.z)) {
+                            Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
+                            if (tex != null)
+                                g.aimage(tex, gc, 0.5, 0.5);
+                        }
                     }
                 }
             }
@@ -709,7 +712,7 @@ public class MapWnd extends Window {
 
         private Tex cachedzoomtex(Tex tex, String name, int z) {
             Tex itex = cachedZoomImageTex.get(name + "_zoom" + z);
-            if (itex == null) {
+            if (itex == null && tex != null) {
                 Coord zoomc = new Coord2d(tex.sz()).mul(scaleFactors[0] / scaleFactors[z] + 0.5).round();
                 itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
                 cachedZoomImageTex.put(name + "_zoom" + z, itex);
