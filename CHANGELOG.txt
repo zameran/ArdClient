@@ -1,3 +1,11 @@
+20210306 - Some fixes
+-- Fixed shift tooltip, slow fillcheesetray, temporary marks, special menu
+-- Gilding window (it was already but did not work)
+-- Some additions for PBot
+-- In general -  there is nothing to see here
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210305 - Minor fixes and features
 -- Compact interface for displaying tooltip for gilding (overcome by shift). Now your item with 1000 gilding will fit in the screen
 -- Fixed bugs with names and marks and highlighting for animals (occurred for example when deleting an animal from the table)
