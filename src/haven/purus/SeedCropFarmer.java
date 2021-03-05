@@ -389,7 +389,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                     break;
                                 }
                                 List<PBotItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName);
-                                ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 1, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
+                                ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 3, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
                                 for (int i = 0; PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size(); i++) {
                                     if (stopThread)
                                         break;
@@ -455,7 +455,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                                         break;
                                     }
                                     List<PBotItem> list = PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName);
-                                    ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 1, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
+                                    ui.gui.map.wdgmsg("itemact", Coord.z, containers.get(0).rc.floor(posres), 3, 0, (int) containers.get(0).id, containers.get(0).rc.floor(posres), 0, -1);
                                     for (int i = 0; PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() == list.size(); i++) {
                                         if (stopThread)
                                             return;
@@ -744,7 +744,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         }
                         int cnt = PBotUtils.invFreeSlots(ui);
                         try {
-                            ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 1, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
+                            ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 3, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
                         } catch (IndexOutOfBoundsException lolindexes) {
                             PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
                             stop = true;
@@ -810,7 +810,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                     int cnt = PBotUtils.invFreeSlots(ui);
                     try {
-                        ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 1, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
+                        ui.gui.map.wdgmsg("itemact", Coord.z, stockpiles.get(0).rc.floor(posres), 3, 0, (int) stockpiles.get(0).id, stockpiles.get(0).rc.floor(posres), 0, -1);
                     } catch (IndexOutOfBoundsException lolindexes) {
                         PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
                         stop();
