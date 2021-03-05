@@ -52,7 +52,7 @@ public class FillCheeseTray implements Runnable {
                 for (int l = 0; l < 4; l++) {
                     PBotItem hand = PBotUtils.getItemAtHand(gui.ui);
                     List<PBotItem> curds = getCurds();
-                    while (hand == null && getCurds().size() > 0) {
+                    while (hand == null && curds.size() > 0) {
                         curds.get(curds.size() - 1).takeItem(1000);
                         hand = PBotUtils.getItemAtHand(gui.ui);
                     }
@@ -60,9 +60,9 @@ public class FillCheeseTray implements Runnable {
                         PBotUtils.sysMsg(gui.ui, "Don't appear to have curds, stopping.", Color.white);
                         return;
                     }
-                    tray.itemact(0);
+                    tray.itemact(3);
 
-                    for (int i = 0, sleep = 10; i < 1000; i += sleep) {
+                    /*for (int i = 0, sleep = 10; i < 1000; i += sleep) {
                         while (tray.getResname() == null)
                             PBotUtils.sleep(sleep);
                         if (!tray.getResname().endsWith("cheesetray"))
@@ -72,7 +72,7 @@ public class FillCheeseTray implements Runnable {
                         PBotUtils.sleep(sleep);
                     }
                     if (PBotUtils.getItemAtHand(gui.ui) != null)
-                        break;
+                        break;*/
                 }
             }
 
