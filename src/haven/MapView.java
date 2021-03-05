@@ -2592,7 +2592,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             glob.oc.changed(gob);
                         } else {
                             wdgmsg("click", args);
-                            pllastcc = gob.rc;
+                            pllastcc = mc;
                         }
                     } else if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modctrl && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
@@ -2644,7 +2644,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             clearmovequeue();
                         }
                         wdgmsg("click", args);
-                        pllastcc = gob.rc;
+                        pllastcc = mc;
                         if (gob.getres() != null) {
                             CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                             if (itm != null && itm.selected)

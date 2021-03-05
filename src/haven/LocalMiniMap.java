@@ -956,8 +956,6 @@ public class LocalMiniMap extends Widget {
                 return false;
             Coord csd = c.sub(delta);
             Coord2d mc = c2p(csd);
-            if (button == clickBind)
-                mv.pllastcc = mc;
             Gob gob = findicongob(csd.add(delta));
             if (gob == null) { //click tile
                 if (ui.modmeta && button == clickBind) {
