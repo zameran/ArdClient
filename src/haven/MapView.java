@@ -2471,7 +2471,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-            if (clickb == 3 && ui.modmeta && ui.gui.vhand == null) {
+            if (clickb == 3 && ui.modflags() == UI.MOD_META && ui.gui.vhand == null) {
                 final Optional<Gob> clickgob = gobFromClick(inf);
                 if (clickgob.isPresent()) {
                     showSpecialMenu(clickgob.get());

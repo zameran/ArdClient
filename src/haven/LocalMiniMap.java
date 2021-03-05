@@ -967,7 +967,7 @@ public class LocalMiniMap extends Widget {
                 }
                 return true;
             } else {
-                if (ui.modmeta) {
+                if (ui.modflags() == UI.MOD_META) {
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
