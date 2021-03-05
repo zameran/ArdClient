@@ -31,6 +31,7 @@ public class ItemDrag extends WItem {
 
     public ItemDrag(Coord dc, GItem item) {
         super(item);
+        z(100);
         this.doff = dc;
     }
 
