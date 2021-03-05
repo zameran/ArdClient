@@ -384,9 +384,7 @@ public class WItem extends Widget implements DTarget2 {
             }
         } else
             g.image(missing.layer(Resource.imgc).tex(), Coord.z, sz);
-
     }
-
 
     private void drawamountbar(GOut g, double content, boolean isseeds) {
         double capacity;
@@ -418,40 +416,44 @@ public class WItem extends Widget implements DTarget2 {
                 }
                 if (ui.modctrl && ui.modmeta)
                     wdgmsg("drop-identical", this.item);
-                else if (ui.modctrl && ui.modshift) {
-                    String name = ItemInfo.find(ItemInfo.Name.class, item.info()).str.text;
-                    name = name.replace(' ', '_');
-                    if (!Resource.language.equals("en")) {
-                        int i = name.indexOf('(');
-                        if (i > 0)
-                            name = name.substring(i + 1, name.length() - 1);
-                    }
-                    try {
-                        WebBrowser.self.show(new URL(String.format("http://ringofbrodgar.com/wiki/%s", name)));
-                    } catch (MalformedURLException e) {
-                    } catch (Exception e) {
-                        getparent(GameUI.class).error("Could not launch web browser.");
-                    }
-                } else if (ui.modshift && !ui.modmeta) {
+                else if (ui.modshift && !ui.modmeta) {
                     // server side transfer all identical: pass third argument -1 (or 1 for single item)
+//                    int n = ui.modmeta ? -1 : 1;
+//                    item.wdgmsg("transfer", c, n);
                     item.wdgmsg("transfer", c);
-                } else if (ui.modctrl) {
-                    int n = ui.modmeta ? -1 : 1;
-                    item.wdgmsg("drop", c, n);
                 } else if (ui.modmeta)
                     wdgmsg("transfer-identical", this.item);
-                else
+                 else if (ui.modctrl) {
+                    int n = ui.modmeta ? -1 : 1;
+                    item.wdgmsg("drop", c, n);
+                } else
                     item.wdgmsg("take", c);
                 return (true);
             }
         } else if (btn == 2) {
             if (ui.modmeta)
                 wdgmsg("transfer-identical-eq", this.item);
+            else if (ui.modctrl && ui.modshift) {
+                String name = ItemInfo.find(ItemInfo.Name.class, item.info()).str.text;
+                if (name.contains("kg of "))
+                    name = name.substring(name.indexOf("kg of ") + 6);
+                name = name.replace(' ', '_');
+                if (!Resource.language.equals("en")) {
+                    int i = name.indexOf('(');
+                    if (i > 0)
+                        name = name.substring(i + 1, name.length() - 1);
+                }
+                try {
+                    WebBrowser.self.show(new URL(String.format("http://ringofbrodgar.com/wiki/%s", name)));
+                } catch (MalformedURLException e) {
+                } catch (Exception e) {
+                    getparent(GameUI.class).error("Could not launch web browser.");
+                }
+            }
             return (true);
         } else if (btn == 3) {
             if (ui.modctrl && ui.modshift) {
                 locked = !locked;
-                return true;
             } else if (ui.modmeta && !(parent instanceof Equipory)) {
                 wdgmsg("transfer-identical-asc", this.item);
             } else
