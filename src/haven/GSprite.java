@@ -26,16 +26,21 @@
 
 package haven;
 
+import org.json.JSONObject;
+
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public abstract class GSprite implements Drawn {
     public final Owner owner;
     public static final List<Factory> factories;
+    public static Map<String, GSprite> cachedSpr = new HashMap<>();
 
     static {
         factories = Arrays.asList(new Factory[]{
@@ -91,6 +96,23 @@ public abstract class GSprite implements Drawn {
     }
 
     public static GSprite create(Owner owner, Resource res, Message sdt) {
+        JSONObject jo = new JSONObject();
+        jo.put("Resource", res.toString());
+        jo.put("Message", sdt.toString());
+
+        GSprite spr = cachedSpr.get(jo.toString());
+        if (spr == null) {
+            try {
+                spr = getSpr(owner, res, sdt);
+                cachedSpr.put(jo.toString(), spr);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return spr;
+    }
+
+    public static GSprite getSpr(Owner owner, Resource res, Message sdt) {
         {
             Factory f = res.getcode(Factory.class, false);
             if (f != null)
