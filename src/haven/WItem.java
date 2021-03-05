@@ -43,7 +43,7 @@ import static haven.Inventory.sqsz;
 import static haven.Text.num10Fnd;
 import static haven.Text.num11Fnd;
 
-public class WItem extends Widget implements DTarget {
+public class WItem extends Widget implements DTarget2 {
     public static final Resource missing = Resource.local().loadwait("gfx/invobjs/missing");
     public static final Tex lockt = Resource.loadtex("custom/inv/locked");
     public GItem item;
