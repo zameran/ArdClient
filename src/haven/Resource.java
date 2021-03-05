@@ -495,7 +495,6 @@ public class Resource implements Serializable {
                 if (error != null)
                     if (dev.skipexceptions) {
                         System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
-                        res = Resource.local().loadwait("gfx/invobjs/missing");
                     } else {
                         throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));
                     }
