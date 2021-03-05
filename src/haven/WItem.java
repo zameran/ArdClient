@@ -153,7 +153,7 @@ public class WItem extends Widget implements DTarget2 {
             if (info.size() < 1)
                 return (null);
             if (info != ttinfo) {
-                shorttip = longtip = null;
+                shorttip = longtip = fulltip = null;
                 ttinfo = info;
             }
             if (now - hoverstart < 1.0 && !Config.longtooltips) {
@@ -162,13 +162,13 @@ public class WItem extends Widget implements DTarget2 {
                 return (shorttip);
             } else {
                 if (ui.modflags() == UI.MOD_SHIFT) {
-                    if (longtip == null)
-                        longtip = new LongTip(info);
-                    return (longtip);
-                } else {
                     if (fulltip == null)
                         fulltip = new LongTip(info);
                     return (fulltip);
+                } else {
+                    if (longtip == null)
+                        longtip = new LongTip(info);
+                    return (longtip);
                 }
             }
         } catch (Loading e) {
