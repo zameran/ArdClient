@@ -48,7 +48,7 @@ public class PBotGob {
     /**
      * Itemact with gob, to fill trough with item in hand for example
      *
-     * @param mod 1 = shift, 2 = ctrl, 4 = alt
+     * @param mod 1 = shift, 2 = ctrl, 4 = alt, 3 = shift + ctrl (all)
      */
     public void itemClick(int mod) {
         ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), mod, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);

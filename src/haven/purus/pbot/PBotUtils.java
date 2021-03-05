@@ -1938,6 +1938,26 @@ public class PBotUtils {
         item.item.wdgmsg("transfer", Coord.z);
     }
 
+    /**
+     * @param item Item to transfer
+     * @param n    -1 = all; 1 = single
+     */
+    public static void transferItem(WItem item, int n) {
+        item.item.wdgmsg("transfer", Coord.z, n);
+    }
+
+    public void transfer_identical(WItem item) {
+        item.wdgmsg("transfer-identical", item.item);
+    }
+
+    public void transfer_identical_eq(WItem item) {
+        item.wdgmsg("transfer-identical-eq", item.item);
+    }
+
+    public void drop_identical(WItem item) {
+        item.wdgmsg("drop-identical", item.item);
+    }
+
 
     /**
      * Boshaw (sloth) PathFinding
