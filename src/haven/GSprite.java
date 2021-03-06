@@ -102,12 +102,9 @@ public abstract class GSprite implements Drawn {
 
         GSprite spr = cachedSpr.get(jo.toString());
         if (spr == null) {
-            try {
-                spr = getSpr(owner, res, sdt);
+            spr = getSpr(owner, res, sdt);
+            if (spr != null)
                 cachedSpr.put(jo.toString(), spr);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return spr;
     }
