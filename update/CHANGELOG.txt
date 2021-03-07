@@ -1,3 +1,11 @@
+20210307
+-- Out of memory possible fix
+-- Gilding window switch option (Modification - New gilding window)
+-- Updated wound list
+-- Fixed resource name tooltip
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210306 - Some fixes
 -- Fixed shift tooltip, slow fillcheesetray, temporary marks, special menu
 -- Gilding window (it was already but did not work)
