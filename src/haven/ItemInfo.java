@@ -508,7 +508,14 @@ public abstract class ItemInfo {
                 throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
         }
-        ret.add(new AdHoc(owner, "\n" + (owner instanceof ResOwner ? ((ResOwner) owner).resource().name : owner.toString())));
+        String s;
+        if (owner instanceof ResOwner)
+            s = ((ResOwner) owner).resource().name;
+        else if (owner instanceof MenuGrid.PagButton)
+            s = ((MenuGrid.PagButton) owner).res.name;
+        else
+            s = owner.toString();
+        ret.add(new AdHoc(owner, "\n" + s));
         return (ret);
     }
 
