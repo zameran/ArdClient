@@ -1071,19 +1071,21 @@ public class Config {
         put("paginae/wound/blackeye", new String[]{
                 "gfx/invobjs/hartshornsalve",
                 "gfx/invobjs/honeybroadaid",
-                "gfx/invobjs/toadbutter"
+                "gfx/invobjs/toadbutter",
+                "gfx/invobjs/rootfill"
         });
         put("paginae/wound/bladekiss", new String[]{
                 "gfx/invobjs/gauze",
                 "gfx/invobjs/toadbutter"
         });
         put("paginae/wound/somethingbroken", new String[]{
-                "gfx/invobjs/camomilecompress"
+                "gfx/invobjs/splint"
         });
         put("paginae/wound/infectedsore", new String[]{
                 "gfx/invobjs/camomilecompress",
                 "gfx/invobjs/soapbar",
-                "gfx/invobjs/opium"
+                "gfx/invobjs/opium",
+                "gfx/invobjs/antpaste"
         });
         put("paginae/wound/nastylaceration", new String[]{
                 "gfx/invobjs/stitchpatch",
@@ -1091,13 +1093,21 @@ public class Config {
         });
         put("paginae/wound/sealfinger", new String[]{
                 "gfx/invobjs/hartshornsalve",
-                "gfx/invobjs/kelpcream"
+                "gfx/invobjs/kelpcream",
+                "gfx/invobjs/antpaste"
         });
         put("paginae/wound/coalcough", new String[]{
                 "gfx/invobjs/opium"
         });
         put("paginae/wound/beesting", new String[]{
-                "gfx/invobjs/kelpcream"
+                "gfx/invobjs/kelpcream",
+                "gfx/invobjs/antpaste"
+        });
+        put("paginae/wound/crabcaressed", new String[]{
+                "gfx/invobjs/antpaste"
+        });
+        put("paginae/wound/leechburns", new String[]{
+                "gfx/invobjs/toadbutter"
         });
     }};
 
