@@ -3602,6 +3602,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         });
+        appender.add(new CheckBox("New gilding window") {
+            {
+                a = configuration.newgildingwindow;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("newgildingwindow", val);
+                configuration.newgildingwindow = val;
+                a = val;
+            }
+        });
         appender.add(new CheckBox("New overlay for plant stage") {
             {
                 a = configuration.newCropStageOverlay;

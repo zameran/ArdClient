@@ -488,7 +488,7 @@ public class WItem extends Widget implements DTarget2 {
     }
 
     public boolean iteminteract(WItem target, Coord cc, Coord ul) {
-        if (!GildingWnd.processGilding(ui, this, target)) {
+        if (!configuration.newgildingwindow || !GildingWnd.processGilding(ui, this, target)) {
             item.wdgmsg("itemact", ui.modflags());
         }
         return (true);
