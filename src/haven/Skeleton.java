@@ -26,6 +26,7 @@
 
 package haven;
 
+import javax.media.opengl.GL2;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -312,33 +313,33 @@ public class Skeleton {
             });
         }
 
-//        public class BoneAlign extends Location {
-//            private final Coord3f ref;
-//            private final int orig, tgt;
-//            private int cseq = -1;
-//
-//            public BoneAlign(Coord3f ref, Bone orig, Bone tgt) {
-//                super(Matrix4f.identity());
-//                this.ref = ref;
-//                this.orig = orig.idx;
-//                this.tgt = tgt.idx;
-//            }
-//
-//            public Matrix4f fin(Matrix4f p) {
-//                if (cseq != seq) {
-//                    Coord3f cur = new Coord3f(gpos[tgt][0] - gpos[orig][0], gpos[tgt][1] - gpos[orig][1], gpos[tgt][2] - gpos[orig][2]).norm();
-//                    Coord3f axis = cur.cmul(ref).norm();
-//                    float ang = (float) Math.acos(cur.dmul(ref));
-//		    /*
-//		    System.err.println(cur + ", " + ref + ", " + axis + ", " + ang);
-//		    */
-//                    update(Transform.makexlate(new Matrix4f(), new Coord3f(gpos[orig][0], gpos[orig][1], gpos[orig][2]))
-//                            .mul1(Transform.makerot(new Matrix4f(), axis, -ang)));
-//                    cseq = seq;
-//                }
-//                return (super.fin(p));
-//            }
-//        }
+        public class BoneAlign extends Location {
+            private final Coord3f ref;
+            private final int orig, tgt;
+            private int cseq = -1;
+
+            public BoneAlign(Coord3f ref, Bone orig, Bone tgt) {
+                super(Matrix4f.identity());
+                this.ref = ref;
+                this.orig = orig.idx;
+                this.tgt = tgt.idx;
+            }
+
+            public Matrix4f fin(Matrix4f p) {
+                if (cseq != seq) {
+                    Coord3f cur = new Coord3f(gpos[tgt][0] - gpos[orig][0], gpos[tgt][1] - gpos[orig][1], gpos[tgt][2] - gpos[orig][2]).norm();
+                    Coord3f axis = cur.cmul(ref).norm();
+                    float ang = (float) Math.acos(cur.dmul(ref));
+		    /*
+		    System.err.println(cur + ", " + ref + ", " + axis + ", " + ang);
+		    */
+                    update(Transform.makexlate(new Matrix4f(), new Coord3f(gpos[orig][0], gpos[orig][1], gpos[orig][2]))
+                            .mul1(Transform.makerot(new Matrix4f(), axis, -ang)));
+                    cseq = seq;
+                }
+                return (super.fin(p));
+            }
+        }
 
         public void boneoff(int bone, float[] offtrans) {
             /* It would be nice if these "new float"s get
@@ -370,31 +371,31 @@ public class Skeleton {
             offtrans[9] = yz + xw;
         }
 
-//        public final Rendered debug = new Rendered() {
-//            public void draw(GOut g) {
-//                BGL gl = g.gl;
-//                g.st.put(Light.lighting, null);
-//                g.state(States.xray);
-//                g.apply();
-//                gl.glBegin(GL2.GL_LINES);
-//                for (int i = 0; i < blist.length; i++) {
-//                    if (blist[i].parent != null) {
-//                        int pi = blist[i].parent.idx;
-//                        gl.glColor3f(1.0f, 0.0f, 0.0f);
-//                        gl.glVertex3f(gpos[pi][0], gpos[pi][1], gpos[pi][2]);
-//                        gl.glColor3f(0.0f, 1.0f, 0.0f);
-//                        gl.glVertex3f(gpos[i][0], gpos[i][1], gpos[i][2]);
-//                    }
-//                }
-//                gl.glEnd();
-//            }
-//
-//            public boolean setup(RenderList rl) {
-//                rl.prepo(States.vertexcolor);
-//                rl.prepo(States.xray);
-//                return (true);
-//            }
-//        };
+        public final Rendered debug = new Rendered() {
+            public void draw(GOut g) {
+                BGL gl = g.gl;
+                g.st.put(Light.lighting, null);
+                g.state(States.xray);
+                g.apply();
+                gl.glBegin(GL2.GL_LINES);
+                for (int i = 0; i < blist.length; i++) {
+                    if (blist[i].parent != null) {
+                        int pi = blist[i].parent.idx;
+                        gl.glColor3f(1.0f, 0.0f, 0.0f);
+                        gl.glVertex3f(gpos[pi][0], gpos[pi][1], gpos[pi][2]);
+                        gl.glColor3f(0.0f, 1.0f, 0.0f);
+                        gl.glVertex3f(gpos[i][0], gpos[i][1], gpos[i][2]);
+                    }
+                }
+                gl.glEnd();
+            }
+
+            public boolean setup(RenderList rl) {
+                rl.prepo(States.vertexcolor);
+                rl.prepo(States.xray);
+                return (true);
+            }
+        };
     }
 
     public interface HasPose {
@@ -1095,24 +1096,24 @@ public class Skeleton {
                     });
                 }
             };
-//            opcodes[3] = new HatingJava() {
-//                public Command make(Message buf) {
-//                    float rx1 = (float) buf.cpfloat();
-//                    float ry1 = (float) buf.cpfloat();
-//                    float rz1 = (float) buf.cpfloat();
-//                    float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
-//                    final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
-//                    final String orignm = buf.string();
-//                    final String tgtnm = buf.string();
-//                    return (new Command() {
-//                        public GLState make(Pose pose) {
-//                            Bone orig = pose.skel().bones.get(orignm);
-//                            Bone tgt = pose.skel().bones.get(tgtnm);
-//                            return (pose.new BoneAlign(ref, orig, tgt));
-//                        }
-//                    });
-//                }
-//            };
+            opcodes[3] = new HatingJava() {
+                public Command make(Message buf) {
+                    float rx1 = (float) buf.cpfloat();
+                    float ry1 = (float) buf.cpfloat();
+                    float rz1 = (float) buf.cpfloat();
+                    float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
+                    final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
+                    final String orignm = buf.string();
+                    final String tgtnm = buf.string();
+                    return (new Command() {
+                        public GLState make(Pose pose) {
+                            Bone orig = pose.skel().bones.get(orignm);
+                            Bone tgt = pose.skel().bones.get(tgtnm);
+                            return (pose.new BoneAlign(ref, orig, tgt));
+                        }
+                    });
+                }
+            };
             opcodes[16] = new HatingJava() {
                 public Command make(Message buf) {
                     final float x = buf.float32();
