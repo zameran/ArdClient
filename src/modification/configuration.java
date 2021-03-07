@@ -35,11 +35,16 @@ import java.awt.geom.Line2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -111,6 +116,7 @@ public class configuration {
     public static boolean newCropStageOverlay = Utils.getprefb("newCropStageOverlay", false);
 
     public static boolean newQuickSlotWdg = Utils.getprefb("newQuickSlotWdg", false);
+    public static boolean newgildingwindow = Utils.getprefb("newgildingwindow", true);
 
     public static boolean scaletree = Utils.getprefb("scaletree", false);
     public static int scaletreeint = Utils.getprefi("scaletreeint", 25);
@@ -749,6 +755,25 @@ public class configuration {
         return (new JSONObject(result));
     }
 
+    public static void savejson(String filename, JSONObject jsonObject) {
+        FileWriter jsonWriter = null;
+        try {
+            jsonWriter = new FileWriter(filename);
+            jsonWriter.write(jsonObject.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (jsonWriter != null) {
+                    jsonWriter.flush();
+                    jsonWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static JSONObject painedclothjson = loadjson("PaintedCloth.json");
 
     public static void paintcloth(String res, RenderList r) {
@@ -858,5 +883,58 @@ public class configuration {
                 }
             }
         }
+    }
+
+    public static byte[] createBytes(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(bos);
+            out.writeObject(object);
+            out.flush();
+            return (bos.toByteArray());
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
+            }
+        }
+    }
+
+    public static Object readBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        ObjectInput in = null;
+        try {
+            in = new ObjectInputStream(bis);
+            return (in.readObject());
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
+            }
+        }
+    }
+
+    public static byte[] imageToBytes(BufferedImage img) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "jpg", baos);
+        return baos.toByteArray();
+    }
+
+    public static BufferedImage bytesToImage(byte[] bytes) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        return ImageIO.read(bais);
+    }
+
+    public static byte[] JSONArrayToBytes(JSONArray jsonArray) {
+        byte[] bytes = new byte[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); i++) {
+            bytes[i] = (byte) (((int) jsonArray.get(i)) & 0xFF);
+        }
+        return (bytes);
     }
 }

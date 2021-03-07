@@ -40,7 +40,6 @@ import java.util.Random;
 public abstract class GSprite implements Drawn {
     public final Owner owner;
     public static final List<Factory> factories;
-    public static Map<String, GSprite> cachedSpr = new HashMap<>();
 
     static {
         factories = Arrays.asList(new Factory[]{
@@ -96,20 +95,6 @@ public abstract class GSprite implements Drawn {
     }
 
     public static GSprite create(Owner owner, Resource res, Message sdt) {
-        JSONObject jo = new JSONObject();
-        jo.put("Resource", res.toString());
-        jo.put("Message", sdt.toString());
-
-        GSprite spr = cachedSpr.get(jo.toString());
-        if (spr == null) {
-            spr = getSpr(owner, res, sdt);
-            if (spr != null)
-                cachedSpr.put(jo.toString(), spr);
-        }
-        return spr;
-    }
-
-    public static GSprite getSpr(Owner owner, Resource res, Message sdt) {
         {
             Factory f = res.getcode(Factory.class, false);
             if (f != null)
