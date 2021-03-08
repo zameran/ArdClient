@@ -607,6 +607,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         DefSettings.PAUSED.set(!DefSettings.PAUSED.get());
     }
 
+    public void fixClient() {
+        PBotUtils.sysMsg(ui, String.format("Before: %d keys. %d mouses. Game focused!", ui.keygrab.size(), ui.mousegrab.size()));
+        ui.keygrab.clear();
+        ui.mousegrab.clear();
+        setfocus(map);
+        PBotUtils.sysMsg(ui, String.format("After: %d keys. %d mouses. Game focused!", ui.keygrab.size(), ui.mousegrab.size()));
+    }
+
     public void toggleCharacter() {
         if ((chrwdg != null) && chrwdg.show(!chrwdg.visible)) {
             chrwdg.raise();
