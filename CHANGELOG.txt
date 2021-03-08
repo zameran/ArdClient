@@ -1,3 +1,10 @@
+20210308
+-- Fixed Cattle Roster highlight
+-- Fixed Gilding window matching
+-- Remove CTRL+RMB highlight (CTRL+ALT+LRM alternative)
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210307
 -- Out of memory possible fix
 -- Gilding window switch option (Modification - New gilding window)
