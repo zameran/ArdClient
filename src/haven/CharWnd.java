@@ -2530,12 +2530,12 @@ public class CharWnd extends Window {
 
     public Glob.CAttr findattr(Resource res) {
         for (SAttr skill : this.skill) {
-            if (res == skill.res) {
+            if (res.name.equals(skill.res.name)) {
                 return skill.attr;
             }
         }
         for (Attr stat : base) {
-            if (res == stat.res) {
+            if (res.name.equals(stat.res.name)) {
                 return stat.attr;
             }
         }
