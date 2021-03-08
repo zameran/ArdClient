@@ -2583,18 +2583,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         //we're inspecting an object, prepared to intercept the system message.
                         ui.gui.inspectedgobid = gob.id;
                     }
-                    if (ui.modctrl && clickb == 3 && gob != null && gob.type == Type.TAMEDANIMAL) {//only highlight on ctrl right clicks if we're clicking on an animal during milking
-                        if (!gob.getres().name.contains("horse")) {//cant milk horses, so dont mark, send a right click.
-                            if (markedGobs.contains(gob.id))
-                                markedGobs.remove(gob.id);
-                            else
-                                markedGobs.add(gob.id);
-                            glob.oc.changed(gob);
-                        } else {
-                            wdgmsg("click", args);
-                            pllastcc = mc;
-                        }
-                    } else if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modctrl && clickb == 1 && Config.shooanimals) {
+                     if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modflags() == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
                         if (res != null && (res.name.startsWith("gfx/kritter/horse") ||
                                 res.name.startsWith("gfx/kritter/sheep") ||
@@ -2604,13 +2593,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             shooanimal = gob;
                             new Thread(new ShooTargeted(ui.gui), "ShooTargeted").start();
                         }
-                    } else if (ui.modmeta && ui.modctrl && clickb == 1 && gob != null) {
+                    } else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META) && clickb == 1 && gob != null) {
                         if (markedGobs.contains(gob.id))
                             markedGobs.remove(gob.id);
                         else
                             markedGobs.add(gob.id);
                         glob.oc.changed(gob);
-                    } else if (ui.modmeta && clickb == 1) {
+                    } else if (ui.modflags() == UI.MOD_META && clickb == 1) {
                         if (gobselcb != null)
                             gobselcb.gobselect(gob);
 

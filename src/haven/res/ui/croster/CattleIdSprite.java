@@ -88,13 +88,7 @@ public class CattleIdSprite extends Sprite {
                         if (c)
                             MapView.markedGobs.remove(cattleId.gob.id);
                     }
-                } else {
-                    if (c)
-                        MapView.markedGobs.remove(cattleId.gob.id);
                 }
-            } else {
-                if (c)
-                    MapView.markedGobs.remove(cattleId.gob.id);
             }
         }
     }
