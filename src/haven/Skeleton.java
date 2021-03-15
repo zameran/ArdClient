@@ -91,6 +91,14 @@ public class Skeleton {
         }
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Bone bone : bones.values()) {
+            sb.append("<").append(bone.name).append(", ").append(bone.ipos).append(" : ").append(bone.irax).append(">");
+        }
+        return (sb.toString());
+    }
+
     private static float[] rotasq(float[] q, float[] axis, float angle) {
         float m = (float) Math.sin(angle / 2.0);
         q[0] = (float) Math.cos(angle / 2.0);
@@ -591,7 +599,7 @@ public class Skeleton {
         }
 
         public String toString() {
-            return ("Skeleton(" + res.name + ")");
+            return ("Skeleton(" + res.name + ")" + super.toString());
         }
     }
 
@@ -627,6 +635,13 @@ public class Skeleton {
         }
 
         public void init() {
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(getres()).append(" ");
+            sb.append(s.toString());
+            return (sb.toString());
         }
     }
 

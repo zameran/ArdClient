@@ -585,7 +585,7 @@ public class Resource implements Serializable {
                          * way of going about it, however; I'm not
                          * sure. */
 //                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
-                        System.out.printf("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur);
+                        System.out.println(String.format("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur));
                         return (cur.indir());
                     }
                 }
@@ -595,7 +595,7 @@ public class Resource implements Serializable {
                         if (ver != -1) {
                             if (ver < cq.ver) { //who cares, don't kill the client over this...
                                 //throw(new LoadException(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver), null));
-                                System.out.printf("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver);
+                                System.out.println(String.format("Weird version number on %s (%d > %d)", cq.name, cq.ver, ver));
                                 cq.boostprio(prio);
                                 return (cq);
                             } else if (ver == cq.ver) {
