@@ -1,3 +1,7 @@
+20210315
+-- Small farmer fix. Added trough folding
+~
+
 20210313
 -- Fixed a bug with terrible lags in the rubble of the archer tower
 (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
