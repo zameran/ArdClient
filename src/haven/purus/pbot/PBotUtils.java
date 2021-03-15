@@ -1657,6 +1657,17 @@ public class PBotUtils {
         }
     }
 
+    public static boolean waitForWindow(UI ui, String windowName, int timeout) {
+        int retries = 0;
+        while (ui.gui.getwnd(windowName) == null) {
+            if (retries > timeout / 50)
+                return false;
+            retries++;
+            sleep(50);
+        }
+        return true;
+    }
+
 //    public static void waitForWindow(String windowName) {
 //        waitForWindow(PBotAPI.modeui(), windowName);
 //    }

@@ -33,8 +33,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
     }
 
     public void added() {
-        final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
-        int y = 0;
         PBotUtils.sysMsg(ui, "Hold alt and left click containers to select them.", Color.white);
         Button carrotBtn = new Button(140, "Carrot") {
             @Override
@@ -52,9 +50,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(carrotBtn, new Coord(20, y));
-        y += 35;
-
         Button carrotseedBtn = new Button(140, "Carrot Seeds") {
             @Override
             public void click() {
@@ -72,9 +67,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(carrotseedBtn, new Coord(20, y));
-        y += 35;
-
         Button beetBtn = new Button(140, "Beetroot") {
             @Override
             public void click() {
@@ -90,9 +82,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(beetBtn, new Coord(20, y));
-        y += 35;
-
         Button turnipBtn = new Button(140, "Turnip") {
             @Override
             public void click() {
@@ -108,9 +97,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(turnipBtn, new Coord(20, y));
-        y += 35;
-
         Button turnipseedBtn = new Button(140, "Turnip Seeds") {
             @Override
             public void click() {
@@ -127,9 +113,21 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(turnipseedBtn, new Coord(20, y));
-        y += 35;
+        Button turnip2Btn = new Button(140, "Turnip Stage 3") {
+            @Override
+            public void click() {
+                if (ca != null && cb != null) {
+                    // Start beetroot onion farmer and close this window
+                    SeedCropFarmer bf = new SeedCropFarmer(ca, cb, "gfx/terobjs/plants/turnip", "gfx/invobjs/turnip", 2, replant, containeronly, replantcontainer, containers, false, null);
 
+                    ui.gui.add(bf, new Coord(ui.gui.sz.x / 2 - bf.sz.x / 2, ui.gui.sz.y / 2 - bf.sz.y / 2 - 200));
+                    new Thread(bf).start();
+                    this.parent.destroy();
+                } else {
+                    PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
+                }
+            }
+        };
         Button onionBtn = new Button(140, "Yellow Onion") {
             @Override
             public void click() {
@@ -146,9 +144,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(onionBtn, new Coord(20, y));
-        y += 35;
-
         Button redOnionBtn = new Button(140, "Red Onion") {
             @Override
             public void click() {
@@ -165,9 +160,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(redOnionBtn, new Coord(20, y));
-        y += 35;
-
         Button leekBtn = new Button(140, "Leeks") {
             @Override
             public void click() {
@@ -183,9 +175,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(leekBtn, new Coord(20, y));
-        y += 35;
-
         Button pumpkinBtn = new Button(140, "Pumpkin") {
             @Override
             public void click() {
@@ -199,9 +188,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(pumpkinBtn, new Coord(20, y));
-        y += 35;
-
         Button barleyBtn = new Button(140, "Barley") {
             @Override
             public void click() {
@@ -220,9 +206,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(barleyBtn, new Coord(20, y));
-        y = 0;
-
         Button wheatBtn = new Button(140, "Wheat") {
             @Override
             public void click() {
@@ -241,9 +224,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(wheatBtn, new Coord(190, y));
-        y += 35;
-
         Button milletBtn = new Button(140, "Millet") {
             @Override
             public void click() {
@@ -262,9 +242,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(milletBtn, new Coord(190, y));
-        y += 35;
-
         Button flaxBtn = new Button(140, "Flax") {
             @Override
             public void click() {
@@ -282,9 +259,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(flaxBtn, new Coord(190, y));
-        y += 35;
-
         Button hempBtn = new Button(140, "Hemp") {
             @Override
             public void click() {
@@ -301,9 +275,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
-        //add(hempBtn, new Coord(190, y));
-        y += 35;
-
         Button poppyBtn = new Button(140, "Poppy") {
             @Override
             public void click() {
@@ -321,9 +292,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(poppyBtn, new Coord(190, y));
-        y += 35;
-
         Button pipeBtn = new Button(140, "Pipeweed") {
             @Override
             public void click() {
@@ -340,9 +308,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
-        //add(pipeBtn, new Coord(190, y));
-        y += 35;
-
         Button lettuceBtn = new Button(140, "Lettuce") {
             @Override
             public void click() {
@@ -359,9 +324,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     PBotUtils.sysMsg(ui, "Area not selected!", Color.WHITE);
             }
         };
-        //add(lettuceBtn, new Coord(190, y));
-        y += 35;
-
         Button trelHarBtn = new Button(140, "Trellis harvest") {
             @Override
             public void click() {
@@ -377,9 +339,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(trelHarBtn, new Coord(190, y));
-        y += 35;
-
         Button trelDesBtn = new Button(140, "Trellis destroy") {
             @Override
             public void click() {
@@ -395,9 +354,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(trelDesBtn, new Coord(190, y));
-        y += 35;
-
         Button trelPlantBtn = new Button(140, "Trellis plant") {
             @Override
             public void click() {
@@ -412,9 +368,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(trelPlantBtn, new Coord(190, y));
-        y += 35;
-
         Button areaSelBtn = new Button(140, "Select Area") {
             @Override
             public void click() {
@@ -422,9 +375,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 ui.gui.map.farmSelect = true;
             }
         };
-        //add(areaSelBtn, new Coord(190, y));
-
-        y += 35;
         stockpilearea = new Button(140, "Stockpile Area") {
             @Override
             public void click() {
@@ -437,7 +387,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 }
             }
         };
-        //add(stockpilearea, new Coord(190, y));
 
         replantChkbox = new CheckBox("Replant") {
             {
@@ -454,7 +403,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 replantBarrelChkbox.a = !val;
             }
         };
-        //add(replantChkbox, new Coord(15, y));
         replantBarrelChkbox = new CheckBox("Plant+Barrel") {
             {
                 a = replantcontainer;
@@ -470,8 +418,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 fillContainerChkbox.a = !val;
             }
         };
-        //add(replantBarrelChkbox, new Coord(85, y));
-        y += 20;
         fillContainerChkbox = new CheckBox("Barrel") {
             {
                 a = containeronly;
@@ -487,7 +433,6 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                 replantChkbox.a = !val;
             }
         };
-        //add(fillContainerChkbox, new Coord(15, y));
         stockpileChkbox = new CheckBox("Stockpile") {
             {
                 a = stockpile;
@@ -500,9 +445,8 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
                     PBotUtils.sysMsg(ui, "Currently only objects with smaller hitboxes work with stockpile, such as flax/hemp/poppy/leeks/pipeweed.");
             }
         };
-        //add(stockpileChkbox, new Coord(85, y));
-        y -= 20;
 
+        final WidgetVerticalAppender appender = new WidgetVerticalAppender(this);
         appender.addRow(areaSelBtn, stockpilearea, new Button(140, "Water Settings") {
             @Override
             public void click() {
@@ -513,7 +457,7 @@ public class Farmer extends Window implements AreaSelectCallback, GobSelectCallb
         appender.add(new Label(""));
         appender.addRow(carrotBtn, carrotseedBtn);
         appender.add(beetBtn);
-        appender.addRow(turnipBtn, turnipseedBtn);
+        appender.addRow(turnipBtn, turnipseedBtn, turnip2Btn);
         appender.addRow(onionBtn, redOnionBtn, leekBtn);
         appender.add(pumpkinBtn);
         appender.addRow(barleyBtn, wheatBtn, milletBtn);
