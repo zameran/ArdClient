@@ -1,3 +1,10 @@
+20210316
+-- Fixed old bug with PBot drink (deleted waitForHourglass and move it to drink thread)
+-- Added [Shift] tooltip to gildable items
+-- Fixed food service and food satiation info
+-- Small fix of farmer
+~
+
 20210315
 -- Small farmer fix. Added trough folding
 ~
