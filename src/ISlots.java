@@ -114,6 +114,9 @@ public class ISlots extends Tip implements NumberInfo {
 
                 BufferedImage tip = AttrMod.modimg(lmods);
                 l.cmp.add(tip, new Coord(10, l.cmp.sz.y));
+
+                BufferedImage totalString = RichText.render("[Shift for details]", Color.GRAY).img;
+                l.cmp.add(totalString, new Coord(10, l.cmp.sz.y));
             }
 
         if (left > 0) {
