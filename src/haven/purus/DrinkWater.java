@@ -115,7 +115,7 @@ public class DrinkWater implements Runnable {
         }
     }
 
-    private boolean drinkMode(WItem drinkFromThis) {
+    private boolean drinkMode(WItem drinkFromThis) throws InterruptedException {
 //        drinkFromThis.item.wdgmsg("iact", Coord.z, 3);
 //                FlowerMenu menu = gui.ui.root.findchild(FlowerMenu.class);
 //                int retries = 0; // After 100 retries aka. 5 seconds, it will probably never appear
@@ -141,9 +141,18 @@ public class DrinkWater implements Runnable {
                 PBotUtils.sysMsg(gui.ui, "Flower not found. Water timeout expired. Drink failed.", Color.RED);
             return false;
         }
-        if (PBotUtils.choosePetal(gui.ui, "Drink"))
+        if (PBotUtils.choosePetal(gui.ui, "Drink")) {
             PBotUtils.waitFlowermenuClose(gui.ui);
-        else {
+            if (waitDrinkPose())
+                while (drinkPose()) {
+                    sleep(50);
+                }
+            else {
+                if (configuration.drinkmessage)
+                    PBotUtils.sysMsg(gui.ui, "Drink pose not found. Water timeout expired. Sip failed.", Color.RED);
+                return false;
+            }
+        } else {
             PBotUtils.closeFlowermenu(gui.ui);
             if (configuration.drinkmessage)
                 PBotUtils.sysMsg(gui.ui, "Petal not found. Water timeout expired. Drink failed.", Color.RED);

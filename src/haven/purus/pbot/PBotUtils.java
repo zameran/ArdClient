@@ -499,7 +499,6 @@ public class PBotUtils {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                waitForHourglass(ui);
             }
         }
         return true;
