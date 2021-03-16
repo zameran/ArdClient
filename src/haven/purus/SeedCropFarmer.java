@@ -134,14 +134,13 @@ public class SeedCropFarmer extends Window implements Runnable {
                     lblProg2.settext("Moving to Harvest " + retryharvest);
                     if (!PBotUtils.pfGobClick(ui, g, 1, 0)) {
                         System.out.println("Path not found");
-                        break;
-                    } else {
-                        PBotUtils.pfRightClick(ui, g, 0);
+                        gobs.remove(g);
+                        continue crop;
                     }
                     lblProg2.settext("Waiting for crop to disappear " + retryharvest);
-                    if (!harvest()) {
+                    if (!harvest(g)) {
                         System.out.println("Harvest not found");
-                        break;
+                        continue;
                     }
                 }
                 // Replant
@@ -1063,11 +1062,15 @@ public class SeedCropFarmer extends Window implements Runnable {
         return gobs;
     }
 
-    public boolean harvest() {
+    public boolean harvest(Gob g) {
+        PBotUtils.doClick(ui, g, 3, 0);
         PBotUtils.waitForFlowerMenu(ui, 1000);
         if (PBotUtils.petalExists(ui)) {
             if (PBotUtils.choosePetal(ui, "Harvest")) {
-                PBotUtils.waitFlowermenuClose(ui);
+                if (!PBotUtils.waitFlowermenuClose(ui, 1000)) {
+                    PBotUtils.closeFlowermenu(ui, 1000);
+                    return (false);
+                }
                 PBotUtils.waitForHourglass(ui, 1000);
                 return (true);
             } else
