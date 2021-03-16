@@ -7,12 +7,13 @@ import haven.resutil.FoodInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,8 +33,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class FoodService {
-    public static final String API_ENDPOINT = "http://hnhfood.vatsul.com/api/";
-    private static final String FOOD_DATA_URL = "http://hnhfood.vatsul.com/api/data/food-info.json";
+    public static final String API_ENDPOINT = "https://hnhfood.vatsul.com/api/";
+    private static final String FOOD_DATA_URL = "https://hnhfood.vatsul.com/api/data/food-info.json";
     private static final File FOOD_DATA_CACHE_FILE = new File("food_data.json");
 
     private static final Map<String, ParsedFoodInfo> cachedItems = new ConcurrentHashMap<>();
@@ -62,6 +63,11 @@ public class FoodService {
             }
         } catch (Exception ex) {
             System.err.println("Cannot load food data file: " + ex.getMessage());
+            try {
+                Files.delete(FOOD_DATA_CACHE_FILE.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -76,7 +82,7 @@ public class FoodService {
             }
             if (System.currentTimeMillis() - lastModified > TimeUnit.MINUTES.toMillis(30)) {
                 try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(FOOD_DATA_URL).openConnection();
+                    HttpsURLConnection connection = (HttpsURLConnection) new URL(FOOD_DATA_URL).openConnection();
                     connection.setRequestProperty("User-Agent", "H&H Client");
                     connection.setRequestProperty("Cache-Control", "no-cache");
                     StringBuilder stringBuilder = new StringBuilder();
@@ -184,8 +190,8 @@ public class FoodService {
 
         if (!toSend.isEmpty()) {
             try {
-                HttpURLConnection connection =
-                        (HttpURLConnection) new URL(API_ENDPOINT + "food").openConnection();
+                HttpsURLConnection connection =
+                        (HttpsURLConnection) new URL(API_ENDPOINT + "food").openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("User-Agent", "H&H Client");

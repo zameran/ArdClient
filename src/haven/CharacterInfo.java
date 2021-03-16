@@ -3,7 +3,6 @@ package haven;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -16,25 +15,25 @@ public class CharacterInfo {
         public final List<Data> els = new ArrayList<Data>();
 
         public void update(ResData t, double a) {
-            prev:
-            {
-                for (Iterator<Data> i = els.iterator(); i.hasNext(); ) {
-                    Data el = i.next();
-                    if (el.res != t)
-                        continue;
-                    if (a == 1.0)
-                        i.remove();
-                    else
-                        el.update(a);
-                    break prev;
-                }
-                Data e = new Data(t, a);
-                els.add(e);
-            }
+            Data el = get(t);
+            if (el != null)
+                if (a == 1.0)
+                    els.remove(el);
+                else
+                    el.update(a);
+            else
+                els.add(new Data(t, a));
         }
 
         public Data get(int i) {
             return els.size() > i ? els.get(i) : null;
+        }
+
+        public Data get(ResData resData) {
+            for (Data el : els)
+                if (el.res.equals(resData))
+                    return (el);
+            return (null);
         }
 
         public static class Data {
