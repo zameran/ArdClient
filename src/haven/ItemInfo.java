@@ -509,12 +509,18 @@ public abstract class ItemInfo {
             }
         }
         String s;
-        if (owner instanceof ResOwner)
-            s = ((ResOwner) owner).resource().name;
-        else if (owner instanceof MenuGrid.PagButton)
-            s = ((MenuGrid.PagButton) owner).res.name;
-        else
+        try {
+            if (owner instanceof ResOwner)
+                s = ((ResOwner) owner).resource().name;
+            else if (owner instanceof MenuGrid.PagButton)
+                s = ((MenuGrid.PagButton) owner).res.name;
+            else if (owner instanceof MenuGrid.Pagina)
+                s = ((MenuGrid.Pagina) owner).res().name;
+            else
+                s = owner.toString();
+        } catch(Exception e) {
             s = owner.toString();
+        }
         ret.add(new AdHoc(owner, "\n" + s));
         return (ret);
     }
