@@ -4824,7 +4824,7 @@ public class OptWnd extends Window {
                         }
                     }
                 });
-        appender.addRow(new Label("%appdata%/Haven and Hearth/"), hashid, new Button(50, "Remove") {
+        appender.addRow(new Label("%appdata%\\Haven and Hearth\\data\\"), hashid, new Button(50, "Remove") {
             public void click() {
                 if (hashid.text != null && !hashid.text.equals("")) {
                     try {
