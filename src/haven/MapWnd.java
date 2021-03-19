@@ -37,11 +37,16 @@ import haven.purus.pbot.PBotGob;
 import haven.purus.pbot.PBotGobAPI;
 import haven.sloth.gob.Type;
 import haven.sloth.gui.DowseWnd;
+import haven.sloth.gui.ResizableWnd;
+import integrations.mapv4.MappingClient;
 import modification.configuration;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,20 +67,19 @@ import java.util.stream.Collectors;
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 
-public class MapWnd extends Window {
+public class MapWnd extends ResizableWnd {
     public static final Resource markcurs = Resource.local().loadwait("gfx/hud/curs/flag");
     public static final Tex party = Resource.loadtex("custom/mm/pl/party");
+    private static final Tex gridblue = Resource.loadtex("gfx/hud/mmap/gridblue");
 
     public final MapFileWidget view;
     public final MapView mv;
-    public final MarkerList list;
+    public final Toolbox tool;
+    public final Widget zoombar, toolbar2;
+    public boolean decohide = false;
     private final Locator player;
     private final Widget toolbar;
-    public final Widget zoombar;
-    private final Frame viewf, listf, fdropf;
-    private final Button mebtn, mibtn;
-    private final Dropbox<Pair<String, String>> fdrop;
-    public final IButton grid, hidemarks;
+    private final Frame viewf;
     private TextEntry namesel;
     private GroupSelector colsel;
     private Button mremove;
@@ -92,7 +96,20 @@ public class MapWnd extends Window {
     private final Map<Long, Tex> namemap = new HashMap<>(50);
     private final Map<Coord, Coord> questlinemap = new HashMap<>();
 
-    private final List<TempMark> tempMarkList = new ArrayList<>();
+    private final List<TempMark> tempMarkList = new ArrayList<TempMark>() {
+        public synchronized TempMark remove(int index) {
+            return super.remove(index);
+        }
+
+        public synchronized boolean add(TempMark tempMark) {
+            return super.add(tempMark);
+        }
+    };
+
+    public synchronized List<TempMark> getTempMarkList() {
+        return (tempMarkList);
+    }
+
     private long lastMarkCheck = System.currentTimeMillis();
 
     public static class TempMark {
@@ -105,28 +122,32 @@ public class MapWnd extends Window {
         Coord gc;
         MapFileWidget.Location loc;
         TexI icon;
+        GobIcon gobIcon;
+        Tex tooltip;
 
-        public TempMark(String name, boolean dead, long id, Coord2d rc, Coord gc, MapFileWidget.Location loc, TexI icon) {
+        public TempMark(String name, GobIcon gobIcon, boolean dead, long id, Coord2d rc, Coord gc, MapFileWidget.Location loc, TexI icon) {
             start = System.currentTimeMillis();
             this.name = name;
+            this.gobIcon = gobIcon;
             this.dead = dead;
             this.id = id;
             this.rc = rc;
             this.gc = gc;
             this.loc = loc;
             this.icon = icon;
+            this.tooltip = Text.render(configuration.getShortName(name)).tex();
         }
     }
 
     public MapWnd(MapFile file, MapView mv, Coord sz, String title) {
-        super(sz, title, title, true);
+        super(sz, title, true);
+        makeHidable();
         this.mv = mv;
         this.player = new MapLocator(mv);
-        grid = add(new IButton("gfx/hud/wndmap/btns/grid", "Toggle grid on map", this::toggleMapGrid));
-        hidemarks = add(new IButton("gfx/hud/wndmap/btns/viewdist", "Toggle marks vision", this::toggleMapViewDist));
         viewf = add(new Frame(Coord.z, true));
         view = viewf.add(new View(file));
         recenter();
+        toolbar2 = add(new ToolBar());
         toolbar = add(new Widget(Coord.z));
         toolbar.add(new Img(Resource.loadtex("gfx/hud/mmap/fgwdg")), Coord.z);
         toolbar.add(new IButton("gfx/hud/mmap/home", "", "-d", "-h") {
@@ -139,36 +160,119 @@ public class MapWnd extends Window {
                 recenter();
             }
         }, Coord.z);
-        toolbar.add(new IButton("gfx/hud/mmap/mark", "", "-d", "-h") {
+        toolbar.add(new ICheckBox("gfx/hud/mmap/mark", "", "-d", "-h", "-dh") {
             {
                 tooltip = RichText.render("Add marker", 0);
             }
-
-            public void click() {
-                domark = true;
+        }, Coord.z).state(() -> domark).set(a -> domark = a);
+        toolbar.add(new ICheckBox("gfx/hud/mmap/hmark", "", "-d", "-h", "-dh") {
+            {
+                tooltip = RichText.render("Hide markers", 0);
             }
-        }, Coord.z);
+        }).state(() -> configuration.bigmaphidemarks).set(a -> configuration.bigmaphidemarks = a);
+        toolbar.add(new ICheckBox("gfx/hud/mmap/wnd", "", "-d", "-h", "-dh") {
+            {
+                tooltip = RichText.render("Compact mode", 0);
+            }
+        }).state(this::decohide).set(a -> {
+            compact(a);
+            Utils.setprefb("compact-map", a);
+        });
         toolbar.pack();
         zoombar = add(new ZoomBar());
-
-        fdrop = add(markersFilter());
-        fdropf = Frame.around(this, Collections.singletonList(fdrop));
-
-        listf = add(new Frame(new Coord(200, 200), false));
-        list = listf.add(new MarkerList(listf.inner().x, 0));
-
-        mebtn = add(new Button(95, "Export...", false) {
-            public void click() {
-                view.exportmap();
-            }
-        });
-        mibtn = add(new Button(95, "Import...", false) {
-            public void click() {
-                view.importmap();
-            }
-        });
-
+        tool = add(new Toolbox());
+        compact(Utils.getprefb("compact-map", false));
         resize(sz);
+    }
+
+    public class Toolbox extends Widget {
+        public final MarkerList list;
+        private final Frame listf, fdropf;
+        private final Button mebtn, mibtn;
+        private final Dropbox<Pair<String, String>> fdrop;
+        private TextEntry namesel;
+
+        private Toolbox() {
+            super(UI.scale(200, 200));
+            fdrop = add(markersFilter());
+            fdropf = Frame.around(this, Collections.singletonList(fdrop));
+
+            listf = add(new Frame(new Coord(200, 200), false));
+            list = listf.add(new MarkerList(listf.inner().x, 0));
+
+            mebtn = add(new Button(95, "Export...", false) {
+                public void click() {
+                    view.exportmap();
+                }
+            });
+            mibtn = add(new Button(95, "Import...", false) {
+                public void click() {
+                    view.importmap();
+                }
+            });
+        }
+
+        public void resize(int h) {
+            super.resize(new Coord(sz.x, h));
+
+            fdropf.c = new Coord(sz.x - 200, 0);
+            fdrop.c = new Coord(fdropf.c.x + 5, fdropf.c.y + 5);
+
+            listf.resize(listf.sz.x, sz.y - 140);
+            listf.c = new Coord(sz.x - listf.sz.x, fdropf.c.y + fdropf.sz.y);
+            list.resize(listf.inner());
+            mebtn.c = new Coord(sz.x - 200, sz.y - mebtn.sz.y);
+            mibtn.c = new Coord(sz.x - 95, sz.y - mibtn.sz.y);
+
+            if (namesel != null) {
+                namesel.c = listf.c.add(0, listf.sz.y + 10);
+                if (colsel != null)
+                    colsel.c = namesel.c.add(0, namesel.sz.y + 10);
+                mremove.c = new Coord(namesel.c.x, sz.y - mremove.sz.y);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private Dropbox<Pair<String, String>> markersFilter() {
+            Dropbox<Pair<String, String>> modes = new Dropbox<Pair<String, String>>(195, filters.length, Math.max(Text.render(filters[0].a.toString()).sz().y, 20)) {
+                @Override
+                protected Pair<String, String> listitem(int i) {
+                    return filters[i];
+                }
+
+                @Override
+                protected int listitems() {
+                    return filters.length;
+                }
+
+                @Override
+                protected void drawitem(GOut g, Pair<String, String> item, int i) {
+                    g.text(item.a, Dropbox.itemtextc);
+                }
+
+                @Override
+                public void change(Pair<String, String> item) {
+                    super.change(item);
+                    if (item.b == null)
+                        filter = (m -> true);
+                    else if (item.b.equals("flg"))
+                        filter = (m -> m instanceof PMarker);
+                    else if (item.b.equals("qst"))
+                        filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.startsWith("gfx/invobjs/small"));
+                    else
+                        filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.endsWith(item.b));
+                    markerseq = -1;
+                    // reset scrollbar
+                    if (list != null)
+                        list.sb.val = list.sb.min;
+//                for (MapFile.SMarker marker : view.file.smarkers.values()) {
+//                    System.out.println(marker + " [" + marker.nm + "] [" + marker.oid + "] [" + marker.res + " " + marker.res.name + " " + marker.res.ver + "]");
+//                }
+                }
+            };
+            modes.change(filters[0]);
+            return modes;
+        }
     }
 
     public class ZoomBar extends Widget {
@@ -219,14 +323,258 @@ public class MapWnd extends Window {
         }
     }
 
+    public class ToolBar extends Widget {
+        public ToolBar() {
+            super(Coord.z);
+            final int spacer = 5;
+            final ToggleButton2 pclaim = add(new ToggleButton2("gfx/hud/wndmap/btns/claim", "gfx/hud/wndmap/btns/claim-d", DefSettings.SHOWPCLAIM.get()) {
+                {
+                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display personal claims"));
+                }
+
+                public void click() {
+                    if ((ui.gui.map != null) && !ui.gui.map.visol("cplot")) {
+                        ui.gui.map.enol("cplot");
+                        DefSettings.SHOWPCLAIM.set(true);
+                    } else {
+                        ui.gui.map.disol("cplot");
+                        DefSettings.SHOWPCLAIM.set(false);
+                    }
+                }
+            }, new Coord(0, 0));
+            final ToggleButton2 vclaim = add(new ToggleButton2("gfx/hud/wndmap/btns/vil", "gfx/hud/wndmap/btns/vil-d", DefSettings.SHOWVCLAIM.get()) {
+                {
+                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display village claims"));
+                }
+
+                public void click() {
+                    if ((ui.gui.map != null) && !ui.gui.map.visol("vlg")) {
+                        ui.gui.map.enol("vlg");
+                        DefSettings.SHOWVCLAIM.set(true);
+                    } else {
+                        ui.gui.map.disol("vlg");
+                        DefSettings.SHOWVCLAIM.set(false);
+                    }
+                }
+            }, pclaim.c.add(pclaim.sz.x + spacer, 0));
+            final ToggleButton2 realm = add(new ToggleButton2("gfx/hud/wndmap/btns/realm", "gfx/hud/wndmap/btns/realm-d", DefSettings.SHOWKCLAIM.get()) {
+                {
+                    tooltip = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Display realms"));
+                }
+
+                public void click() {
+                    if ((ui.gui.map != null) && !ui.gui.map.visol("realm")) {
+                        ui.gui.map.enol("realm");
+                        DefSettings.SHOWKCLAIM.set(true);
+                    } else {
+                        ui.gui.map.disol("realm");
+                        DefSettings.SHOWKCLAIM.set(false);
+                    }
+                }
+            }, vclaim.c.add(vclaim.sz.x + spacer, 0));
+            final IButton geoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
+                private Coord2d locatedAC = null;
+                private Coord2d detectedAC = null;
+                private BufferedImage green = Resource.loadimg("hud/geoloc-green");
+                private BufferedImage red = Resource.loadimg("hud/geoloc-red");
+
+                private int state = 0;
+
+                @Override
+                public Object tooltip(Coord c, Widget prev) {
+                    if (this.locatedAC != null) {
+                        tooltip = Text.render("Located absolute coordinates: " + this.locatedAC.toGridCoordinate());
+                    } else if (this.detectedAC != null) {
+                        tooltip = Text.render("Detected login absolute coordinates: " + this.detectedAC.toGridCoordinate());
+                    } else {
+                        tooltip = Text.render("Unable to determine your current location.");
+                    }
+                    if (Config.vendanMapv4) {
+                        MappingClient.MapRef mr = MappingClient.getInstance().lastMapRef;
+                        if (mr != null) {
+                            tooltip = Text.render("Coordinates: " + mr);
+                        }
+                    }
+                    return super.tooltip(c, prev);
+                }
+
+                @Override
+                public void click() {
+                    System.out.println("Click 1");
+                    if (Config.vendanMapv4) {
+                        MappingClient.MapRef mr = MappingClient.getInstance().GetMapRef(true);
+                        if (mr != null) {
+                            MappingClient.getInstance().OpenMap(mr);
+                            return;
+                        }
+                    }
+                }
+
+                @Override
+                public void draw(GOut g) {
+                    boolean redraw = false;
+                    if (Config.vendanMapv4) {
+                        MappingClient.MapRef mr = MappingClient.getInstance().lastMapRef;
+                        if (state != 2 && mr != null) {
+                            state = 2;
+                            redraw = true;
+                        }
+                        if (state != 0 && mr == null) {
+                            state = 0;
+                            redraw = true;
+                        }
+                    }
+                    if (redraw) this.redraw();
+                    super.draw(g);
+                }
+
+                @Override
+                public void draw(BufferedImage buf) {
+                    Graphics2D g = (Graphics2D) buf.getGraphics();
+                    if (state == 2) {
+                        g.drawImage(green, 0, 0, null);
+                    } else if (state == 1) {
+                        g.drawImage(red, 0, 0, null);
+                    } else {
+                        g.drawImage(up, 0, 0, null);
+                    }
+                    g.dispose();
+                }
+            };
+            add(geoloc, realm.c.add(realm.sz.x + spacer, 0));
+            final IButton oddigeoloc = new IButton("gfx/hud/wndmap/btns/geoloc", "", "", "") {
+                private Pair<String, String> coords = null;
+                private BufferedImage green = Resource.loadimg("hud/geoloc-green");
+                private BufferedImage red = Resource.loadimg("hud/geoloc-red");
+
+                private boolean state = false;
+
+                @Override
+                public Object tooltip(Coord c, Widget prev) {
+                    Pair<String, String> coords = getCurCoords();
+                    if (coords != null) {
+                        this.coords = coords;
+                        tooltip = Text.render(String.format("Current location: %s x %s", coords.a, coords.b));
+                    } else
+                        tooltip = Text.render("Unable to determine your current location.");
+                    return super.tooltip(c, prev);
+                }
+
+                @Override
+                public void click() {
+                    Pair<String, String> coords = getCurCoords();
+                    if (coords != null) {
+                        this.coords = coords;
+                        try {
+                            WebBrowser.self.show(new URL(String.format("http://odditown.com/haven/map/#x=%s&y=%s&zoom=9", coords.a, coords.b)));
+                        } catch (WebBrowser.BrowserException e) {
+                            getparent(GameUI.class).error("Could not launch web browser.");
+                        } catch (MalformedURLException e) {
+                        }
+                    } else {
+                        getparent(GameUI.class).error("Unable to determine your current location.");
+                    }
+                }
+
+                @Override
+                public void draw(GOut g) {
+                    boolean redraw = false;
+
+                    Pair<String, String> coords = getCurCoords();
+                    if (coords != null) {
+                        this.coords = coords;
+                        if (!state) {
+                            state = true;
+                            redraw = true;
+                        }
+                    } else if (state) {
+                        state = false;
+                        redraw = true;
+                    }
+
+
+                    if (redraw) this.redraw();
+                    super.draw(g);
+                }
+
+                @Override
+                public void draw(BufferedImage buf) {
+                    Graphics2D g = (Graphics2D) buf.getGraphics();
+                    if (state) {
+                        g.drawImage(green, 0, 0, null);
+                    } else {
+                        g.drawImage(red, 0, 0, null);
+                    }
+                    g.dispose();
+                }
+
+                private Pair<String, String> getCurCoords() {
+                    try {
+                        final MapFileWidget.Location loc = view.resolve(player);
+                        Coord ploc = view.xlate(loc);
+                        return (Config.gridIdsMap.get(view.curloc.seg.gridid(ploc)));
+                    } catch (Exception e) {
+                        return (null);
+                    }
+                }
+            };
+            add(oddigeoloc, geoloc.c.add(geoloc.sz.x + spacer, 0));
+            final IButton grid = add(new IButton("gfx/hud/wndmap/btns/grid", "Toggle grid on minimap", MapWnd.this::toggleMapGrid),
+                    oddigeoloc.c.add(oddigeoloc.sz.x + spacer, 0));
+            final IButton viewdist = add(new IButton("gfx/hud/wndmap/btns/viewdist", "Toggle view range", MapWnd.this::toggleMapViewDist),
+                    grid.c.add(grid.sz.x + spacer, 0));
+            final IButton iconbtn = add(new IButton("gfx/hud/wndmap/btns/lbtn-ico", "Icon settings", () -> {
+                GameUI gui = getparent(GameUI.class);
+                if (gui != null) {
+                    if (gui.iconconf == null)
+                        return;
+                    if (gui.iconwnd == null) {
+                        gui.iconwnd = new GobIcon.SettingsWindow(gui.iconconf, () -> Utils.defer(gui::saveiconconf));
+                        gui.fitwdg(gui.add(gui.iconwnd, Utils.getprefc("wndc-icon", new Coord(200, 200))));
+                    } else {
+                        ui.destroy(gui.iconwnd);
+                        gui.iconwnd = null;
+                    }
+                }
+            }), viewdist.c.add(viewdist.sz.x + spacer, 0));
+            final Button oldsetting = add(new Button(0, "⚙") {
+                public Object tooltip(Coord c, Widget prev) {
+                    return (Text.render("old Settings").tex());
+                }
+
+                public void click() {
+                    GameUI gui = getparent(GameUI.class);
+                    if (gui != null)
+                        gui.toggleMapSettings();
+                }
+            }, iconbtn.c.add(iconbtn.sz.x + spacer, 0));
+            final Button setting = add(new Button(0, "⚙", MapWnd.this::toggleMapSettings) {
+                public Object tooltip(Coord c, Widget prev) {
+                    return (Text.render("Settings").tex());
+                }
+            }, oldsetting.c.add(oldsetting.sz.x + spacer, 0));
+            pack();
+        }
+    }
+
     private class View extends MapFileWidget {
         View(MapFile file) {
             super(file, Coord.z);
         }
 
         public boolean clickmarker(DisplayMarker mark, int button) {
-            if (button == 1 && ui.modflags() == 0) {
+            if (!decohide() && button == 1 && ui.modflags() == 0) {
                 focus(mark.m);
+                return (true);
+            }
+            return (false);
+        }
+
+        public boolean deletemarker(DisplayMarker mark, int button) {
+            if (button == 1 && ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
+                view.file.remove(mark.m);
+                tool.list.change2(null);
+                setfocus(tool.list);
                 return (true);
             }
             return (false);
@@ -453,8 +801,8 @@ public class MapWnd extends Window {
             Location loc = this.curloc;
             if (loc != null) {
                 Coord hsz = sz.div(2);
-                synchronized (tempMarkList) {
-                    for (TempMark cm : tempMarkList) {
+                for (TempMark cm : getTempMarkList()) {
+                    if (check.test(cm)) {
                         Tex tex = cachedzoomtex(cm.icon, cm.name, MapFileWidget.zoom);
                         if (!cm.gc.equals(Coord.z)) {
                             Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
@@ -465,6 +813,28 @@ public class MapWnd extends Window {
                 }
             }
         }
+
+        Predicate<TempMark> check = (mark) -> {
+            if (!Config.hideallicons && (Config.additonalicons.containsKey(mark.name))) {
+                CheckListboxItem itm = Config.icons.get(mark.name.substring(mark.name.lastIndexOf("/") + 1));
+                if (itm != null && !itm.selected)
+                    return (true);
+            }
+            if (mark.gobIcon != null && mark.gobIcon.res != null && mark.gobIcon.res.get() != null) {
+                GobIcon.Setting conf = ui.gui.mmap.iconconf.get(mark.gobIcon.res.get());
+                if (conf != null && conf.show)
+                    return (true);
+            }
+
+            if (Type.getType(mark.name) == Type.ROAD && Config.showroadmidpoint) {
+                return (true);
+            } else if (Type.getType(mark.name) == Type.ROADENDPOINT && Config.showroadendpoint) {
+                return (true);
+            } else if (Type.getType(mark.name) == Type.DUNGEONDOOR) {
+                return (true);
+            }
+            return (false);
+        };
 
         public void draw(GOut g) {
             g.chcolor(0, 0, 0, 128);
@@ -499,6 +869,9 @@ public class MapWnd extends Window {
                     g.chcolor(Color.BLACK);
                     g.polyline(1, coord1, coord2, coord3, coord4, coord5, coord6, coord7);
                     g.chcolor();
+
+                    if (configuration.bigmapshowviewdist)
+                        g.image(gridblue, ploc.sub(new Coord(44).div(scalef())), gridblue.dim.div(scalef()));
                 }
 
                 final Set<Long> ignore;
@@ -523,164 +896,114 @@ public class MapWnd extends Window {
             }
         }
 
-        public void checkmarks() {
-            Defer.later(() -> {
-                synchronized (tempMarkList) {
-                    final List<TempMark> marks = new ArrayList<>(tempMarkList);
-                    for (TempMark cm : marks) {
-                        PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
-                        if (g == null) {
-                            if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && PBotGobAPI.player(ui).getRcCoords().dist(cm.rc) < 40 * 10)) {
-                                tempMarkList.remove(cm);
-                            } else if (cm.near)
-                                cm.near = false;
-                        } else {
-                            Location loc = this.curloc;
-                            if (loc != null) {
-                                for (TempMark customMark : tempMarkList) {
-                                    if (cm.id == customMark.id) {
-                                        if (!customMark.near) {
-                                            customMark.near = true;
-                                        }
-                                        customMark.start = System.currentTimeMillis();
-                                        if (!customMark.rc.equals(g.getRcCoords())) {
-                                            customMark.rc = g.getRcCoords();
-                                            customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
-                                        }
-                                        if (customMark.gc.equals(Coord.z)) {
-                                            customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
-                                        }
-                                        if (customMark.loc.seg != loc.seg) {
-                                            customMark.loc = loc;
-                                        }
-                                        if (customMark.dead != g.isKnocked()) {
-                                            customMark.dead = g.isKnocked();
-                                            customMark.icon = (TexI) setTex(g.gob);
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
+        public Object tooltip(Coord c, Widget prev) {
+            if (configuration.tempmarks) {
+                Location loc = this.curloc;
+                if (loc != null) {
+                    Coord hsz = sz.div(2);
+                    Coord mc = c.sub(hsz).add(loc.tc);
+                    Coord hiconsize = new Coord2d(20, 20).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round().div(2);
+                    for (TempMark cm : getTempMarkList()) {
+                        if (check.test(cm)) {
+                            for (int x = -hiconsize.x; x < hiconsize.x; x++)
+                                for (int y = -hiconsize.y; y < hiconsize.y; y++)
+                                    if ((cm.gc.div(scalef())).add(new Coord(x, y)).equals(mc))
+                                        return (cm.tooltip);
                         }
                     }
+                }
+            }
+            return (super.tooltip(c, prev));
+        }
 
-                    marks.clear();
-                    marks.addAll(tempMarkList);
-
-                    for (TempMark cm : marks) {
-                        Gob dg = null;
-                        for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
-                            if (disp.sc == null)
-                                continue;
-                            GobIcon.Image img = disp.img;
-                            if (cm.id == disp.gob.id) {
-                                if (!img.rot)
-                                    dg = disp.gob;
+        public void checkmarks() {
+            Function<Gob, Tex> setTex = (gob) -> {
+                Tex tex = null;
+                try {
+                    GobIcon icon = gob.getattr(GobIcon.class);
+                    Optional<Resource> ores = gob.res();
+                    if (ores.isPresent()) {
+                        Resource res = ores.get();
+                        if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
+                            CheckListboxItem itm = Config.icons.get(res.basename());
+                            if (configuration.tempmarksall || (itm != null && !itm.selected)) {
+                                if (icon != null)
+                                    tex = cachedtex(gob);
+                                else
+                                    tex = Config.additonalicons.get(res.name);
+                            }
+                        } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
+                            tex = LocalMiniMap.roadicn;
+                        } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
+                            tex = LocalMiniMap.roadicn;
+                        } else if (gob.type == Type.DUNGEONDOOR) {
+                            int stage = 0;
+                            if (gob.getattr(ResDrawable.class) != null)
+                                stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
+                            if (stage == 10 || stage == 14)
+                                tex = LocalMiniMap.dooricn;
+                        }
+                    }
+                } catch (Loading ignored) {
+                }
+                return (tex);
+            };
+            final List<TempMark> marks = new ArrayList<>(getTempMarkList());
+            for (TempMark cm : marks) {
+                PBotGob g = PBotGobAPI.findGobById(ui, cm.id);
+                if (g == null) {
+                    if (mv.player() != null)
+                        if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && mv.player().rc.dist(cm.rc) < 40 * 10)) {
+                            tempMarkList.remove(cm);
+                        } else if (cm.near)
+                            cm.near = false;
+                } else {
+                    Location loc = this.curloc;
+                    if (loc != null) {
+                        for (TempMark customMark : getTempMarkList()) {
+                            if (cm.id == customMark.id) {
+                                if (!customMark.near) {
+                                    customMark.near = true;
+                                }
+                                customMark.start = System.currentTimeMillis();
+                                if (!customMark.rc.equals(g.getRcCoords())) {
+                                    customMark.rc = g.getRcCoords();
+                                    customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
+                                }
+                                if (customMark.gc.equals(Coord.z)) {
+                                    customMark.gc = getRealCoord(g.getRcCoords().floor(tilesz));
+                                }
+                                if (customMark.loc.seg != loc.seg) {
+                                    customMark.loc = loc;
+                                }
+                                if (customMark.dead != g.isKnocked()) {
+                                    customMark.dead = g.isKnocked();
+                                    customMark.icon = (TexI) setTex.apply(g.gob);
+                                }
+                                if (customMark.gobIcon == null) {
+                                    GobIcon gobIcon = g.gob.getattr(GobIcon.class);
+                                    if (gobIcon != null)
+                                        customMark.gobIcon = gobIcon;
+                                }
                                 break;
                             }
                         }
-                        if (dg == null) {
-                            if ((System.currentTimeMillis() - cm.start > configuration.tempmarkstime * 1000) || (cm.near && PBotGobAPI.player(ui).getRcCoords().dist(cm.rc) < 40 * 10)) {
-                                tempMarkList.remove(cm);
-                            }
-                        } else {
-                            Location loc = this.curloc;
-                            if (loc != null) {
-                                for (TempMark customMark : tempMarkList) {
-                                    if (cm.id == customMark.id) {
-                                        if (!customMark.near) {
-                                            customMark.near = true;
-                                        }
-                                        customMark.start = System.currentTimeMillis();
-                                        if (!customMark.rc.equals(dg.rc)) {
-                                            customMark.rc = dg.rc;
-                                            customMark.gc = getRealCoord(dg.rc.floor(tilesz));
-                                        }
-                                        if (customMark.gc.equals(Coord.z)) {
-                                            customMark.gc = getRealCoord(dg.rc.floor(tilesz));
-                                        }
-                                        if (customMark.loc.seg != loc.seg) {
-                                            customMark.loc = loc;
-                                        }
-                                        if (customMark.dead != dg.isDead()) {
-                                            customMark.dead = dg.isDead();
-                                            customMark.icon = (TexI) setTex(dg);
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    marks.clear();
-                    marks.addAll(tempMarkList);
-
-                    OCache oc = ui.sess.glob.oc;
-                    synchronized (oc) {
-                        for (Gob gob : oc) {
-                            try {
-                                Optional<Resource> ores = gob.res();
-                                if (!ores.isPresent())
-                                    continue;
-                                TempMark m = getTMark(marks, gob.id);
-                                if (m == null) {
-                                    TexI tex = (TexI) setTex(gob);
-                                    Location loc = this.curloc;
-                                    if (tex != null && loc != null)
-                                        tempMarkList.add(new TempMark(gob.getres().name, gob.isDead(), gob.id, gob.rc, getRealCoord(gob.rc.floor(tilesz)), loc, tex));
-                                }
-                            } catch (Loading l) {
-                            }
-                        }
-                    }
-
-                    marks.clear();
-                    marks.addAll(tempMarkList);
-
-                    for (LocalMiniMap.DisplayIcon disp : ui.gui.mmap.icons) {
-                        if (disp.sc == null)
-                            continue;
-                        TempMark m = getTMark(marks, disp.gob.id);
-                        if (m == null) {
-                            GobIcon.Image img = disp.img;
-                            TexI tex = null;
-                            if (!img.rot) {
-                                tex = (TexI) cachedtex(disp.gob);
-                            }
-                            if (tex != null && this.curloc != null)
-                                tempMarkList.add(new TempMark(disp.gob.getres().name, disp.gob.isDead(), disp.gob.id, disp.gob.rc, getRealCoord(disp.gob.rc.floor(tilesz)), this.curloc, tex));
-                        }
                     }
                 }
-                return (null);
-            });
-        }
-
-        private Tex setTex(Gob gob) {
-            GobIcon icon = gob.getattr(GobIcon.class);
-            Resource res = gob.getres();
-            Tex tex = null;
-            if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
-                CheckListboxItem itm = Config.icons.get(res.basename());
-                if (configuration.tempmarksall || (itm != null && !itm.selected)) {
-                    if (icon != null)
-                        tex = cachedtex(gob);
-                    else
-                        tex = Config.additonalicons.get(res.name);
-                }
-            } else if (gob.type == Type.ROAD && Config.showroadmidpoint) {
-                tex = LocalMiniMap.roadicn;
-            } else if (gob.type == Type.ROADENDPOINT && Config.showroadendpoint) {
-                tex = LocalMiniMap.roadicn;
-            } else if (gob.type == Type.DUNGEONDOOR) {
-                int stage = 0;
-                if (gob.getattr(ResDrawable.class) != null)
-                    stage = gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
-                if (stage == 10 || stage == 14)
-                    tex = LocalMiniMap.dooricn;
             }
-            return (tex);
+
+            marks.clear();
+            marks.addAll(getTempMarkList());
+
+            for (Gob gob : ui.sess.glob.oc.getallgobs()) {
+                if (marks.stream().noneMatch(m -> m.id == gob.id)) {
+                    TexI tex = (TexI) setTex.apply(gob);
+                    GobIcon icon = gob.getattr(GobIcon.class);
+                    Location loc = this.curloc;
+                    if (tex != null && loc != null)
+                        tempMarkList.add(new TempMark(gob.getres().name, icon, gob.isDead(), gob.id, gob.rc, getRealCoord(gob.rc.floor(tilesz)), loc, tex));
+                }
+            }
         }
 
         private Tex cachedtex(Gob gob) {
@@ -713,18 +1036,11 @@ public class MapWnd extends Window {
         private Tex cachedzoomtex(Tex tex, String name, int z) {
             Tex itex = cachedZoomImageTex.get(name + "_zoom" + z);
             if (itex == null && tex != null) {
-                Coord zoomc = new Coord2d(tex.sz()).mul(scaleFactors[0] / scaleFactors[z] + 0.5).round();
+                Coord zoomc = new Coord2d(tex.sz()).mul(MapFileWidget.zoom == 0 ? 1 : (scaleFactors[0] / scaleFactors[MapFileWidget.zoom] + 0.5)).round();
                 itex = new TexI(PUtils.uiscale(((TexI) tex).back, zoomc));
                 cachedZoomImageTex.put(name + "_zoom" + z, itex);
             }
             return (itex);
-        }
-
-        private TempMark getTMark(List<TempMark> marks, long id) {
-            for (TempMark cm : marks)
-                if (id == cm.id)
-                    return (cm);
-            return (null);
         }
     }
 
@@ -784,7 +1100,7 @@ public class MapWnd extends Window {
         if (markers != null && markers.size() > 0) {
             for (Marker marker : markers) {
                 if (marker.nm.equals(name)) {
-                    list.change2(marker);
+                    tool.list.change2(marker);
                     view.center(new SpecLocator(marker.seg, marker.tc));
                 }
             }
@@ -799,8 +1115,23 @@ public class MapWnd extends Window {
     }
 
     public void toggleMapViewDist() {
-        configuration.bigmaphidemarks = !configuration.bigmaphidemarks;
-        Utils.setprefb("bigmaphidemarks", configuration.bigmaphidemarks);
+        configuration.bigmapshowviewdist = !configuration.bigmapshowviewdist;
+        Utils.setprefb("bigmapshowviewdist", configuration.bigmapshowviewdist);
+    }
+
+    public void toggleMapSettings() {
+        GameUI gui = getparent(GameUI.class);
+        if (gui != null) {
+            if (!gui.opts.visible) {
+                gui.opts.show();
+                gui.opts.raise();
+                gui.fitwdg(gui.opts);
+                setfocus(gui.opts);
+                gui.opts.chpanel(gui.opts.mapPanel);
+            } else {
+                gui.opts.show(false);
+            }
+        }
     }
 
     private static final Pair[] filters = new Pair[]{
@@ -832,48 +1163,6 @@ public class MapWnd extends Window {
             new Pair<>("Cave", "cave")
     };
 
-    @SuppressWarnings("unchecked")
-    private Dropbox<Pair<String, String>> markersFilter() {
-        Dropbox<Pair<String, String>> modes = new Dropbox<Pair<String, String>>(195, filters.length, Math.max(Text.render(filters[0].a.toString()).sz().y, 20)) {
-            @Override
-            protected Pair<String, String> listitem(int i) {
-                return filters[i];
-            }
-
-            @Override
-            protected int listitems() {
-                return filters.length;
-            }
-
-            @Override
-            protected void drawitem(GOut g, Pair<String, String> item, int i) {
-                g.text(item.a, Dropbox.itemtextc);
-            }
-
-            @Override
-            public void change(Pair<String, String> item) {
-                super.change(item);
-                if (item.b == null)
-                    filter = (m -> true);
-                else if (item.b.equals("flg"))
-                    filter = (m -> m instanceof PMarker);
-                else if (item.b.equals("qst"))
-                    filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.startsWith("gfx/invobjs/small"));
-                else
-                    filter = (m -> m instanceof SMarker && ((SMarker) m).res.name.endsWith(item.b));
-                markerseq = -1;
-                // reset scrollbar
-                if (list != null)
-                    list.sb.val = list.sb.min;
-//                for (MapFile.SMarker marker : view.file.smarkers.values()) {
-//                    System.out.println(marker + " [" + marker.nm + "] [" + marker.oid + "] [" + marker.res + " " + marker.res.name + " " + marker.res.ver + "]");
-//                }
-            }
-        };
-        modes.change(filters[0]);
-        return modes;
-    }
-
     public class MarkerList extends Searchbox<Marker> {
         private final Text.Foundry fnd = CharWnd.attrf;
 
@@ -886,7 +1175,7 @@ public class MapWnd extends Window {
         }
 
         public boolean searchmatch(int idx, String txt) {
-            return(markers.get(idx).nm.toLowerCase().contains(txt.toLowerCase()));
+            return (markers.get(idx).nm.toLowerCase().contains(txt.toLowerCase()));
         }
 
         public MarkerList(int w, int n) {
@@ -899,7 +1188,7 @@ public class MapWnd extends Window {
         }
 
         public void drawitem(GOut g, Marker mark, int idx) {
-            if(soughtitem(idx)) {
+            if (soughtitem(idx)) {
                 g.chcolor(found);
                 g.frect(Coord.z, g.sz());
             }
@@ -913,8 +1202,14 @@ public class MapWnd extends Window {
         }
 
         protected void itemclick(Marker mark, int button) {
-            if (button == 1)
-                change(mark);
+            if (button == 1) {
+                if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
+                    view.file.remove(mark);
+                    change2(null);
+                    setfocus(MapWnd.MarkerList.this);
+                } else
+                    change(mark);
+            }
             if (button == 3)
                 change2(mark);
         }
@@ -928,9 +1223,9 @@ public class MapWnd extends Window {
         public void change2(Marker mark) {
             this.sel = mark;
 
-            if (namesel != null) {
-                ui.destroy(namesel);
-                namesel = null;
+            if (tool.namesel != null) {
+                ui.destroy(tool.namesel);
+                tool.namesel = null;
                 if (colsel != null) {
                     ui.destroy(colsel);
                     colsel = null;
@@ -942,8 +1237,8 @@ public class MapWnd extends Window {
             }
 
             if (mark != null) {
-                if (namesel == null) {
-                    namesel = MapWnd.this.add(new TextEntry(200, "") {
+                if (tool.namesel == null) {
+                    tool.namesel = tool.add(new TextEntry(200, "") {
                         {
                             dshow = true;
                         }
@@ -957,13 +1252,13 @@ public class MapWnd extends Window {
                         }
                     });
                 }
-                setfocus(namesel);
-                namesel.settext(mark.nm);
-                namesel.buf.point = mark.nm.length();
-                namesel.commit();
+                setfocus(tool.namesel);
+                tool.namesel.settext(mark.nm);
+                tool.namesel.buf.point = mark.nm.length();
+                tool.namesel.commit();
                 if (mark instanceof PMarker) {
                     PMarker pm = (PMarker) mark;
-                    colsel = MapWnd.this.add(new GroupSelector(0) {
+                    colsel = tool.add(new GroupSelector(0) {
                         public void changed(int group) {
                             this.group = group;
                             pm.color = BuddyWnd.gc[group];
@@ -973,7 +1268,7 @@ public class MapWnd extends Window {
                     if ((colsel.group = Utils.index(BuddyWnd.gc, pm.color)) < 0)
                         colsel.group = 0;
                 }
-                mremove = MapWnd.this.add(new Button(200, "Remove", false) {
+                mremove = tool.add(new Button(200, "Remove", false) {
                     public void click() {
                         view.file.remove(mark);
                         change2(null);
@@ -987,29 +1282,36 @@ public class MapWnd extends Window {
 
     public void resize(Coord sz) {
         super.resize(sz);
-
-        grid.c = new Coord(sz.x - 200, 0);
-        hidemarks.c = grid.c.add(grid.sz.x + 5, 0);
-
-        fdropf.c = new Coord(sz.x - 200, 20);
-        fdrop.c = new Coord(fdropf.c.x + 5, fdropf.c.y + 5);
-
-        listf.resize(listf.sz.x, sz.y - 140);
-        listf.c = new Coord(sz.x - listf.sz.x, fdropf.c.y + fdropf.sz.y);
-        list.resize(listf.inner());
-        mebtn.c = new Coord(sz.x - 200, sz.y - mebtn.sz.y);
-        mibtn.c = new Coord(sz.x - 95, sz.y - mibtn.sz.y);
-
-        if (namesel != null) {
-            namesel.c = listf.c.add(0, listf.sz.y + 10);
-            if (colsel != null)
-                colsel.c = namesel.c.add(0, namesel.sz.y + 10);
-            mremove.c = new Coord(namesel.c.x, sz.y - mremove.sz.y);
+        tool.resize(sz.y);
+        if (!decohide()) {
+            tool.c = new Coord(sz.x - tool.sz.x, 0);
+            viewf.resize(new Coord(sz.x - tool.sz.x - 10, sz.y));
+        } else {
+            viewf.resize(sz);
+            tool.c = Coord.z;
         }
-        viewf.resize(new Coord(sz.x - listf.sz.x - 10, sz.y));
         view.resize(viewf.inner());
-        toolbar.c = viewf.c.add(0, viewf.sz.y - toolbar.sz.y).add(2, -2);
+        toolbar2.c = viewf.c.add(viewf.sz.x / 2 - toolbar2.sz.x / 2, viewf.sz.y - toolbar2.sz.y).sub(0, 7);
+        toolbar.c = viewf.c.add(0, viewf.sz.y - toolbar.sz.y).add(UI.scale(2), UI.scale(-2));
         zoombar.c = viewf.c.add(viewf.sz.x - zoombar.sz.x, viewf.sz.y - zoombar.sz.y).sub(7, 7);
+    }
+
+    public void compact(boolean a) {
+        tool.show(!a);
+        if (a)
+            delfocusable(tool);
+        else
+            newfocusable(tool);
+        decohide(a);
+        resize(asz);
+    }
+
+    public void decohide(boolean h) {
+        this.decohide = h;
+    }
+
+    public boolean decohide() {
+        return (decohide);
     }
 
     public void recenter() {
@@ -1017,8 +1319,8 @@ public class MapWnd extends Window {
     }
 
     public void focus(Marker m) {
-        list.change2(m);
-        list.display(m);
+        tool.list.change2(m);
+        tool.list.display(m);
     }
 
     private static final Tex sizer = Resource.loadtex("gfx/hud/wnd/sizer");
@@ -1037,40 +1339,6 @@ public class MapWnd extends Window {
             return (true);
         }
         return (false);
-    }
-
-    private UI.Grab drag;
-    private Coord dragc;
-
-    public boolean mousedown(Coord c, int button) {
-        Coord cc = c.sub(ctl);
-        if ((button == 1) && (cc.x < csz.x) && (cc.y < csz.y) && (cc.y >= csz.y - 25 + (csz.x - cc.x))) {
-            if (drag == null) {
-                drag = ui.grabmouse(this);
-                dragc = asz.sub(c);
-                return (true);
-            }
-        }
-        return (super.mousedown(c, button));
-    }
-
-    public void mousemove(Coord c) {
-        if (drag != null) {
-            Coord nsz = c.add(dragc);
-            nsz.x = Math.max(nsz.x, 300);
-            nsz.y = Math.max(nsz.y, 150);
-            resize(nsz);
-        }
-        super.mousemove(c);
-    }
-
-    public boolean mouseup(Coord c, int button) {
-        if ((button == 1) && (drag != null)) {
-            drag.remove();
-            drag = null;
-            return (true);
-        }
-        return (super.mouseup(c, button));
     }
 
     public void markobj(long gobid, long oid, Indir<Resource> resid, String nm) {

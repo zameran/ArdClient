@@ -1042,11 +1042,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         return (opt);
     }
 
-    private void savewndpos() {
-        if (mapfile != null) {
-            Utils.setprefc("wndsz-map", mapfile.asz);
-        }
-    }
+//    private void savewndpos() {
+//        if (mapfile != null) {
+//            Utils.setprefc("wndsz-map", mapfile.asz);
+//        }
+//    }
 
     public void addchild(Widget child, Object... args) {
         String place = ((String) args[0]).intern();
@@ -1337,7 +1337,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } catch (Exception e) {
         }//exceptions doing these two things aren't critical, ignore
         if (now - lastwndsave > 60) {
-            savewndpos();
+//            savewndpos();
             lastwndsave = now;
         }
         double idle = Utils.rtime() - ui.lastevent;

@@ -440,37 +440,43 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (name.endsWith("log"))
                     type = Type.LOG;
 
-                Defer.later(() -> {
-                    if (getattr(GobIcon.class) == null) {
-                        if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
-                            String fistname1 = name.substring(0, name.lastIndexOf('/'));
-                            String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
-                            String lastname = name.replace(fistname, "");
-                            if (lastname.endsWith("stump"))
-                                lastname = lastname.substring(0, lastname.length() - "stump".length());
-                            if (lastname.endsWith("log"))
-                                lastname = lastname.substring(0, lastname.length() - "log".length());
+                Defer.later(new Defer.Callable<Void>() {
+                    public Void call() {
+                        if (getattr(GobIcon.class) == null) {
+                            if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
+                                String fistname1 = name.substring(0, name.lastIndexOf('/'));
+                                String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
+                                String lastname = name.replace(fistname, "");
+                                if (lastname.endsWith("stump"))
+                                    lastname = lastname.substring(0, lastname.length() - "stump".length());
+                                if (lastname.endsWith("log"))
+                                    lastname = lastname.substring(0, lastname.length() - "log".length());
 
-                            String icon = fistname + "/mm" + lastname;
-                            try {
-                                resources.IndirResource res = resources.getCachedRes(icon);
-                                if (res.get() != null)
-                                    setattr(new GobIcon(this, res));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else if (type == Type.BOULDER) {
-                            String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-                            try {
-                                resources.IndirResource res = resources.getCachedRes(icon);
-                                if (res.get() != null)
-                                    setattr(new GobIcon(this, res));
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                String icon = fistname + "/mm" + lastname;
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes(icon);
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else if (type == Type.BOULDER) {
+                                String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes(icon);
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
+                        return (null);
                     }
-                    return null;
                 });
 
                 //Check for any special attributes we should attach

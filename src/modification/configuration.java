@@ -209,6 +209,7 @@ public class configuration {
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
+    public static boolean bigmapshowviewdist = Utils.getprefb("bigmapshowviewdist", false);
     public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
     public static boolean allowtexturemap = Utils.getprefb("allowtexturemap", true);
     public static boolean allowoutlinemap = Utils.getprefb("allowoutlinemap", true);

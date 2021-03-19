@@ -4643,6 +4643,12 @@ public class OptWnd extends Window {
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw all icons on map for a while").tex();
             }
+        }, new Label("Total: ") {
+            public void tick(double dt) {
+                super.tick(dt);
+                if (ui != null && ui.gui != null && ui.gui.mapfile != null)
+                    settext("Total: " + ui.gui.mapfile.getTempMarkList().size());
+            }
         });
 
         appender.addRow(new HSlider(200, 0, 5000, configuration.tempmarkstime) {
