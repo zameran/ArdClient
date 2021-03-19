@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ItemFilter {
-    private static final Pattern q = Pattern.compile("(?:(\\w+))?(?:^|:)([\\w*]+)?(?:([<>=+~])(\\d+(?:\\.\\d+)?)?([<>=+~])?)?");
+    private static final Pattern q = Pattern.compile("(?:(\\w+))?(?:^|:)([\\w*]+)?(?:([<>=+~])(\\d+(?:\\.\\d+)?)?([<>=+~])?)?", Pattern.UNICODE_CHARACTER_CLASS);
     private static final Pattern float_p = Pattern.compile("(\\d+(?:\\.\\d+)?)");
 
     public static final String HELP_SIMPLE = "$size[20]{$b{Simple search}}\n" +
