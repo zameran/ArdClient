@@ -27,6 +27,7 @@
 package haven;
 
 import dolda.xiphutil.VorbisStream;
+import modification.configuration;
 import modification.dev;
 
 import javax.imageio.ImageIO;
@@ -1076,7 +1077,7 @@ public class Resource implements Serializable {
             nooff = (fl & 2) != 0;
             id = buf.int16();
             o = cdec(buf);
-	        so = UI.scale(o);
+            so = UI.scale(o);
             Map<String, byte[]> kvdata = new HashMap<>();
             if ((fl & 4) != 0) {
                 while (true) {
@@ -1101,10 +1102,10 @@ public class Resource implements Serializable {
             try {
                 img = readimage(new MessageInputStream(buf));
                 rawimage = img;
+                configuration.decodeimage(rawimage, Resource.this, "image", "");
             } catch (IOException e) {
                 throw (new LoadException(e, Resource.this));
             }
-            if (dev.decodeCode) decode();
             /*if (img == null)
                 throw (new LoadException("Invalid image data in " + name, Resource.this));*/
             sz = Utils.imgsz(img);
@@ -1115,7 +1116,7 @@ public class Resource implements Serializable {
                 img = scaled();
                 sz = ssz;
             }
-            if(tsz != null) {
+            if (tsz != null) {
                 /* This seems kind of ugly, but I'm not sure how to
                  * otherwise handle upwards rounding of both offset
                  * and size getting the image out of the intended
@@ -1204,29 +1205,6 @@ public class Resource implements Serializable {
         }
 
         public void init() {
-        }
-
-        public void decode() {
-            File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
-            dir.mkdirs();
-            String filename = name.substring(name.lastIndexOf('/') + 1) + ".png";
-            if (filename.equals("con.png")) filename = "_" + filename;
-            File outputfile = new File(dir, filename);
-            if (!outputfile.exists()) {
-                if (rawimage == null) {
-                    dev.resourceLog("image", outputfile.getPath(), "NULL");
-                    return;
-                }
-                Defer.later(() -> {
-                    try {
-                        ImageIO.write(rawimage, "png", outputfile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    dev.resourceLog("image", outputfile.getPath(), "CREATED");
-                    return (null);
-                });
-            }
         }
     }
 
