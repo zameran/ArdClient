@@ -55,6 +55,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -3265,7 +3266,7 @@ public class OptWnd extends Window {
             public void click() {
                 Window w = new Window(Coord.z, "Hat wardrobe");
                 WidgetVerticalAppender wva = new WidgetVerticalAppender(w);
-                final CustomWidgetList list = new CustomWidgetList(configuration.customHats, "CustomHats") {
+                final CustomWidgetList list = new CustomWidgetList(resources.customHats, "CustomHats") {
                     public void wdgmsg(Widget sender, String msg, Object... args) {
                         if (!msg.equals("changed")) {
                             super.wdgmsg(sender, msg, args);
@@ -3283,11 +3284,11 @@ public class OptWnd extends Window {
                                         }
                                     }
                                 }
-                                configuration.hatreplace = name;
+                                resources.hatreplace = name;
                                 Utils.setpref("hatreplace", name);
                             } else {
-                                configuration.hatreplace = configuration.defaultbrokenhat;
-                                Utils.setpref("hatreplace", configuration.defaultbrokenhat);
+                                resources.hatreplace = resources.defaultbrokenhat;
+                                Utils.setpref("hatreplace", resources.defaultbrokenhat);
                             }
                             Utils.saveCustomList(customlist, jsonname);
                         }
@@ -3310,9 +3311,9 @@ public class OptWnd extends Window {
                 }, new Button(45, "Load Default") {
                     @Override
                     public void click() {
-                        for (String dmark : configuration.normalhatslist) {
+                        for (String dmark : resources.normalhatslist) {
                             boolean exist = false;
-                            for (String mark : configuration.customHats.keySet()) {
+                            for (String mark : resources.customHats.keySet()) {
                                 if (dmark.equalsIgnoreCase(mark)) {
                                     exist = true;
                                     break;
@@ -3334,19 +3335,19 @@ public class OptWnd extends Window {
         });
         appender.addRow(new CheckBox("Cloth painter") {
             {
-                a = configuration.paintcloth;
+                a = resources.paintcloth;
             }
 
             public void set(boolean val) {
                 Utils.setprefb("paintcloth", val);
-                configuration.paintcloth = val;
+                resources.paintcloth = val;
                 a = val;
             }
         }, new Button(50, "Configurate") {
             public void click() {
                 Window w = new Window(Coord.z, "Cloth Painter") {{
                     WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-                    CustomWidgetList cwl = new CustomWidgetList(configuration.painedcloth, "PaintedClothList", true) {
+                    CustomWidgetList cwl = new CustomWidgetList(resources.painedcloth, "PaintedClothList", true) {
                         public void wdgmsg(Widget sender, String msg, Object... args) {
                             if (msg.equals("option")) {
                                 String name = (String) args[0];
@@ -3361,7 +3362,7 @@ public class OptWnd extends Window {
                         public JSONObject getHashJSON(String name) {
                             JSONObject jo = new JSONObject();
                             try {
-                                jo = configuration.painedclothjson.getJSONObject(name);
+                                jo = resources.painedclothjson.getJSONObject(name);
                             } catch (JSONException ignored) {
                             }
                             return (jo);
@@ -3371,7 +3372,7 @@ public class OptWnd extends Window {
                             return (new Window(Coord.z, name) {{
                                 WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
                                 wva.setHorizontalMargin(2);
-                                for (String f : configuration.clothfilters) {
+                                for (String f : resources.clothfilters) {
                                     boolean check = false;
                                     try {
                                         check = json.getBoolean(f);
@@ -3383,7 +3384,7 @@ public class OptWnd extends Window {
                                 boolean check = false;
                                 int a = -1, d = -1, s = -1, e = -1, shine = 0;
                                 try {
-                                    colar = json.getJSONArray(configuration.clothcol);
+                                    colar = json.getJSONArray(resources.clothcol);
                                 } catch (JSONException ignored) {
                                 }
                                 if (colar.length() > 0) {
@@ -3419,7 +3420,7 @@ public class OptWnd extends Window {
                                         }
                                     }
                                 }
-                                wva.addRow(cbox(configuration.clothcol, check, name),
+                                wva.addRow(cbox(resources.clothcol, check, name),
                                         ccol(a, "Ambient", name, this),
                                         ccol(d, "Diffuse", name, this),
                                         ccol(s, "Specular", name, this),
@@ -3462,13 +3463,13 @@ public class OptWnd extends Window {
                             JSONObject jo = new JSONObject();
                             List<CheckBox> cbl = json.getchilds(CheckBox.class);
                             for (CheckBox cb : cbl) {
-                                for (String f : configuration.clothfilters) {
+                                for (String f : resources.clothfilters) {
                                     if (cb.lbl.text.equals(f)) {
                                         jo.put(cb.lbl.text, cb.a);
                                         break;
                                     }
                                 }
-                                if (cb.lbl.text.equals(configuration.clothcol)) {
+                                if (cb.lbl.text.equals(resources.clothcol)) {
                                     JSONArray ja = new JSONArray();
                                     ja.put(cb.a);
                                     JSONObject co = new JSONObject();
@@ -3490,12 +3491,12 @@ public class OptWnd extends Window {
                             for (Map.Entry<String, Boolean> entry : customlist.entrySet()) {
                                 JSONObject o = new JSONObject();
                                 try {
-                                    o = configuration.painedclothjson.getJSONObject(entry.getKey());
+                                    o = resources.painedclothjson.getJSONObject(entry.getKey());
                                 } catch (JSONException ignored) {
                                 }
                                 nall.put(entry.getKey(), entry.getKey().equals(name) ? wjson(parent) : o);
                             }
-                            configuration.painedclothjson = nall;
+                            resources.painedclothjson = nall;
                         }
 
                         public void createjson() {
@@ -3503,12 +3504,12 @@ public class OptWnd extends Window {
                             for (Map.Entry<String, Boolean> entry : customlist.entrySet()) {
                                 JSONObject o = new JSONObject();
                                 try {
-                                    o = configuration.painedclothjson.getJSONObject(entry.getKey());
+                                    o = resources.painedclothjson.getJSONObject(entry.getKey());
                                 } catch (JSONException ignored) {
                                 }
                                 nall.put(entry.getKey(), o);
                             }
-                            configuration.painedclothjson = nall;
+                            resources.painedclothjson = nall;
                         }
 
                         public void savejson(String name, Widget parent) {
@@ -3516,7 +3517,7 @@ public class OptWnd extends Window {
                             FileWriter jsonWriter = null;
                             try {
                                 jsonWriter = new FileWriter("PaintedCloth.json");
-                                jsonWriter.write(configuration.painedclothjson.toString());
+                                jsonWriter.write(resources.painedclothjson.toString());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
@@ -3536,7 +3537,7 @@ public class OptWnd extends Window {
                             FileWriter jsonWriter = null;
                             try {
                                 jsonWriter = new FileWriter("PaintedCloth.json");
-                                jsonWriter.write(configuration.painedclothjson.toString());
+                                jsonWriter.write(resources.painedclothjson.toString());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
@@ -4750,7 +4751,6 @@ public class OptWnd extends Window {
             }
         });
         appender.addRow(new Button(50, "Resource") {
-                            @Override
                             public void click() {
                                 if (ui.sess != null) {
                                     ui.sess.allCache();
@@ -4758,9 +4758,99 @@ public class OptWnd extends Window {
                             }
                         },
                 new Button(50, "Clear Memory") {
-                    @Override
                     public void click() {
                         System.gc();
+                    }
+                },
+                new Button(50, "Resource Cleaner") {
+                    public void click() {
+                        new Thread(() -> {
+                            Label search = new Label("", Text.num14boldFnd) {
+                                public void draw(GOut g) {
+                                    g.chcolor(0, 0, 0, 120);
+                                    g.frect(Coord.z, sz);
+                                    g.chcolor();
+                                    super.draw(g);
+                                }
+                            };
+                            ui.root.add(search);
+                            Label[] lbl = new Label[20];
+                            for (int i = 0; i < lbl.length; i++)
+                                ui.root.add(lbl[i] = new Label("", Text.num14boldFnd) {
+                                    public void draw(GOut g) {
+                                        g.chcolor(0, 0, 0, 120);
+                                        g.frect(Coord.z, sz);
+                                        g.chcolor();
+                                        super.draw(g);
+                                    }
+                                });
+                            File file = HashDirCache.findbase();
+                            File[] listFiles = file.listFiles(new configuration.MyFileNameFilter(".0"));
+                            ArrayList<File> files = new ArrayList<>();
+                            boolean success = false;
+                            if (listFiles != null)
+                                for (int i = 0; i < listFiles.length; i++) {
+                                    if (!success)
+                                        success = true;
+                                    try {
+                                        final RandomAccessFile fp = HashDirCache.open2(listFiles[i], "r");
+                                        HashDirCache.Header head = ((HashDirCache) ResCache.global).readhead(fp);
+                                        fp.close();
+                                        if (Config.resurl.toString().equals(head.cid) && head.name.startsWith("res/")) {
+                                            files.add(listFiles[i]);
+                                            search.settext("Searching files for deleting: " + ((i + 1) + "/" + listFiles.length) + " - " + files.size() + " added");
+                                            search.move(ui.root.sz.div(2), 0.5, 0.5);
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            search.reqdestroy();
+                            for (int i = 0; i < files.size(); i++) {
+                                try {
+                                    final RandomAccessFile fp = HashDirCache.open2(files.get(i), "r");
+                                    HashDirCache.Header head = ((HashDirCache) ResCache.global).readhead(fp);
+                                    fp.close();
+                                    String text;
+                                    Color clr;
+                                    if (files.get(i).delete()) {
+                                        clr = Color.GREEN;
+                                        text = String.format("Resource %s: [%s] [%s] DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).getName());
+                                    } else {
+                                        clr = Color.RED;
+                                        text = String.format("Resource %s: [%s] [%s] NOT DELETED", (i + 1) + "/" + files.size(), head.name, files.get(i).getName());
+                                    }
+                                    String finalText = text;
+                                    Color finalClr = clr;
+                                    dev.resourceLog(finalText);
+                                    for (int j = 0; j < lbl.length; j++) {
+                                        if (lbl[j].text.text.equals("")) {
+                                            lbl[j].settext(finalText, finalClr);
+                                            lbl[j].move(ui.root.sz.div(2), 0.5, 6 - j);
+                                            break;
+                                        } else {
+                                            if (j + 1 == lbl.length)
+                                                for (int k = 0; k < lbl.length; k++) {
+                                                    if (k + 1 == lbl.length)
+                                                        lbl[k].settext(finalText, finalClr);
+                                                    else
+                                                        lbl[k].settext(lbl[k + 1].text);
+                                                    lbl[k].move(ui.root.sz.div(2), 0.5, 6 - k);
+                                                }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (success)
+                                HackThread.tg().interrupt();
+                            Arrays.stream(lbl).forEach(Widget::reqdestroy);
+                        }, "Resource Cleaner").start();
+                    }
+
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Delete only resources excluding other files such as for example maps. After completing the game turns off").tex();
                     }
                 });
         appender.add(new Label(""));

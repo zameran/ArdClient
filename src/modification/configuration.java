@@ -5,24 +5,16 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
-import haven.Light;
 import haven.MainFrame;
-import haven.Material;
 import haven.OCache;
 import haven.PUtils;
-import haven.RenderList;
-import haven.Rendered;
+import haven.Resource;
 import haven.Session;
-import haven.States;
 import haven.Tex;
 import haven.TexI;
 import haven.Utils;
-import haven.resutil.WaterTile;
 import haven.sloth.gfx.SnowFall;
-import haven.sloth.util.ObservableMap;
-import org.apache.commons.collections4.list.TreeList;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -57,29 +49,6 @@ public class configuration {
     public static String picturePath = modificationPath + "/picture";
     public static String errorPath = "errors";
     public static String pbotErrorPath = "pboterrors";
-    public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
-    public static List<String> normalhatslist = new TreeList<>(Arrays.asList(
-            "gfx/terobjs/items/linkhat",
-            "gfx/terobjs/items/hats/jesterscap",
-            "gfx/terobjs/items/hats/blackguardsmanscap",
-            "gfx/terobjs/items/hats/deputyshat",
-            "gfx/terobjs/items/hats/redcorsairshat",
-            "gfx/terobjs/items/hats/inquisitorshat",
-            "gfx/terobjs/items/hats/yulebell",
-            "gfx/terobjs/items/hats/christmusketeershat",
-            "gfx/terobjs/items/hats/magicrown",
-            "gfx/terobjs/items/hats/evileyehat",
-            "gfx/terobjs/items/hats/highwaymanhat",
-            "gfx/terobjs/items/hats/exotichat",
-            "gfx/terobjs/items/hats/spiderfarmershat",
-            "gfx/terobjs/items/hats/flagshipcaptain",
-            "gfx/terobjs/items/hats/merrygreenhat",
-            "gfx/terobjs/items/sprucecap",
-            "gfx/terobjs/largechest"
-    ));
-    public static ObservableMap<String, Boolean> customHats = Utils.loadCustomList(normalhatslist, "CustomHats");
-    public static String defaultbrokenhat = "gfx/terobjs/items/sprucecap";
-    public static String hatreplace = Utils.getpref("hatreplace", defaultbrokenhat);
 
     public static boolean customTitleBoolean = Utils.getprefb("custom-title-bol", false);
 
@@ -703,12 +672,6 @@ public class configuration {
         return (c2);
     }
 
-
-    public static boolean paintcloth = Utils.getprefb("paintcloth", false);
-    public static ObservableMap<String, Boolean> painedcloth = Utils.loadCustomList(new ArrayList<>(), "PaintedClothList");
-    public static String[] clothfilters = new String[]{"Rendered.eyesort", "Rendered.deflt", "Rendered.first", "Rendered.last", "Rendered.postfx", "Rendered.postpfx", "States.vertexcolor", "WaterTile.surfmat", "Light.vlights", "WaterTile.wfog"};
-    public static String clothcol = "Material.Colors";
-
     public static JSONObject loadjson(String filename) {
         String result = "";
         BufferedReader br = null;
@@ -775,117 +738,6 @@ public class configuration {
         }
     }
 
-    public static JSONObject painedclothjson = loadjson("PaintedCloth.json");
-
-    public static void paintcloth(String res, RenderList r) {
-        for (String ps : configuration.painedcloth.keySet()) {
-            if (res.contains(ps)) {
-                boolean check = configuration.painedcloth.get(ps);
-                if (check) {
-                    JSONObject o = new JSONObject();
-                    try {
-                        o = configuration.painedclothjson.getJSONObject(ps);
-                    } catch (JSONException ignored) {
-                    }
-                    if (o.length() > 0) {
-                        for (String n : o.keySet()) {
-                            if (n.equals(configuration.clothcol)) {
-                                JSONArray ar = new JSONArray();
-                                try {
-                                    ar = o.getJSONArray(configuration.clothcol);
-                                } catch (JSONException ignored) {
-                                }
-                                if (ar.length() > 0) {
-                                    boolean f = false;
-                                    int ac = -1, dc = -1, sc = -1, ec = -1, shine = 0;
-                                    try {
-                                        f = ar.getBoolean(0);
-                                    } catch (JSONException ignored) {
-                                    }
-                                    JSONObject colorj = new JSONObject();
-                                    try {
-                                        colorj = ar.getJSONObject(1);
-                                    } catch (JSONException ignored) {
-                                    }
-                                    if (colorj.length() > 0) {
-                                        try {
-                                            ac = colorj.getInt("Ambient");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            dc = colorj.getInt("Diffuse");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            sc = colorj.getInt("Specular");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            ec = colorj.getInt("Emission");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            shine = colorj.getInt("Shine");
-                                        } catch (JSONException ignored) {
-                                        }
-                                    }
-
-                                    if (f)
-                                        r.prepc(new Material.Colors(
-                                                new Color(ac, true),
-                                                new Color(dc, true),
-                                                new Color(sc, true),
-                                                new Color(ec, true),
-                                                shine / 100f
-                                        ));
-                                }
-                            } else {
-                                boolean f = false;
-                                try {
-                                    f = o.getBoolean(n);
-                                } catch (JSONException ignored) {
-                                }
-                                if (f)
-                                    switch (n) {
-                                        case "Rendered.eyesort":
-                                            r.prepc(Rendered.eyesort);
-                                            break;
-                                        case "Rendered.deflt":
-                                            r.prepc(Rendered.deflt);
-                                            break;
-                                        case "Rendered.first":
-                                            r.prepc(Rendered.first);
-                                            break;
-                                        case "Rendered.last":
-                                            r.prepc(Rendered.last);
-                                            break;
-                                        case "Rendered.postfx":
-                                            r.prepc(Rendered.postfx);
-                                            break;
-                                        case "Rendered.postpfx":
-                                            r.prepc(Rendered.postpfx);
-                                            break;
-                                        case "States.vertexcolor":
-                                            r.prepc(States.vertexcolor);
-                                            break;
-                                        case "WaterTile.surfmat":
-                                            r.prepc(WaterTile.surfmat);
-                                            break;
-                                        case "Light.vlights":
-                                            r.prepc(Light.vlights);
-                                            break;
-                                        case "WaterTile.wfog":
-                                            r.prepc(WaterTile.wfog);
-                                            break;
-                                    }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public static byte[] createBytes(Object object) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out;
@@ -937,5 +789,34 @@ public class configuration {
             bytes[i] = (byte) (((int) jsonArray.get(i)) & 0xFF);
         }
         return (bytes);
+    }
+
+    public static void decodeimage(BufferedImage bi, Resource res, String type, String n) {
+        if (dev.decodeCode) {
+            String hash = "";
+            try {
+                hash = Arrays.hashCode(configuration.imageToBytes(bi)) + "";
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            File dir = new File("decode" + File.separator + res.toString().replace("/", File.separator));
+            dir.mkdirs();
+            String filename = res.name.substring(res.name.lastIndexOf('/') + 1) + "_" + n + hash + ".png";
+            File outputfile = new File(dir, filename);
+            if (!outputfile.exists()) {
+                new Thread(() -> {
+                    if (bi == null) {
+                        dev.resourceLog(type, outputfile.getPath(), "NULL");
+                        return;
+                    }
+                    try {
+                        ImageIO.write(bi, "png", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    dev.resourceLog(type, outputfile.getPath(), "CREATED");
+                }, "decode " + type + " " + outputfile.getPath()).start();
+            }
+        }
     }
 }

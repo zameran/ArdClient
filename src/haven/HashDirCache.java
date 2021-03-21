@@ -108,11 +108,11 @@ public class HashDirCache implements ResCache {
         return (h);
     }
 
-    private static class Header {
+    public static class Header {
         String cid, name;
     }
 
-    private Header readhead(DataInput fp) throws IOException {
+    public Header readhead(DataInput fp) throws IOException {
         try {
             int ver = fp.readByte();
             if (ver == 1) {
@@ -144,7 +144,7 @@ public class HashDirCache implements ResCache {
         }
     }
 
-    private static RandomAccessFile open2(File path, String mode) throws IOException {
+    public static RandomAccessFile open2(File path, String mode) throws IOException {
         double[] retimes = {0.01, 0.1, 0.5, 1.0, 5.0};
         Throwable last = null;
         boolean intr = false;
