@@ -156,12 +156,12 @@ public class SeedCropFarmer extends Window implements Runnable {
                                 if (PBotUtils.getAmount(witem.witem) > 5) {
                                     while (PBotUtils.getItemAtHand(ui) == null) {
                                         lblProg2.settext("Grabbing seeds ispumpkin2");
-                                        PBotUtils.takeItem(ui, witem.witem, 1000);
+                                        witem.takeItem(1000);
                                         int retrypickup = 0;
                                         while (PBotUtils.getItemAtHand(ui) == null) {
                                             retrypickup++;
                                             if (retrypickup > 200) {
-                                                PBotUtils.takeItem(ui, witem.witem, 1000);
+                                                witem.takeItem(1000);
                                                 retrypickup = 0;
                                             }
                                             PBotUtils.sleep(10);
@@ -457,7 +457,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                 } else {
                     try {
-                        if (containeronly) { // Put items into container if inventory is full
+                        if (containeronly && !containers.isEmpty()) { // Put items into container if inventory is full
                             GItem item;
                             if (PBotUtils.invFreeSlots(ui) == 0) {
                                 lblProg2.settext("Barreling");
@@ -549,7 +549,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 cropsHarvested++;
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
             }
-            if (replantcontainer || containeronly) {
+            if ((replantcontainer || containeronly) && !containers.isEmpty()) {
                 Runnable collect = () -> {
                     lblProg2.settext("Barreling");
                     GItem item;
@@ -688,7 +688,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                 //this attempts to resolve the inventory res and ground res of what you harvested
                 if (cropName.contains("carrot") || cropName.contains("yellowonion") || cropName.contains("redonion") || cropName.contains("beet")
                         || cropName.contains("leek") || cropName.contains("turnip") || cropName.contains("pumpkin")) {
-                    groundname = seedName.replaceAll("plants", "items");
+                    groundname = seedName.replace("invobjs", "terobjs/items");
                     invname.add(cropName.replaceAll("terobjs/plants", "invobjs"));
                 } else {
                     if (cropName.contains("pipeweed")) {
@@ -750,24 +750,30 @@ public class SeedCropFarmer extends Window implements Runnable {
                         return;
                     PBotItem item = items.get(0);
                     Coord location = stockpileLocs.get(0);
-                    item.takeItem(1000);
-                    while (PBotUtils.getItemAtHand(ui) == null)
-                        PBotUtils.sleep(15);
-                    PBotGobAPI.makePile(ui);
-                    while (PBotUtils.getItemAtHand(ui) != null) {
-                        PBotUtils.sleep(15);
+                    if (Stockpiles(location, location).isEmpty()) {
+                        item.takeItem(1000);
+                        while (PBotUtils.getItemAtHand(ui) == null)
+                            PBotUtils.sleep(15);
+                        PBotGobAPI.makePile(ui);
+                        while (PBotUtils.getItemAtHand(ui) != null) {
+                            PBotUtils.sleep(15);
+                        }
+                        if (!PBotUtils.pfLeftClick(ui, location.x + 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x - 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x, location.y + 11) && !PBotUtils.pfLeftClick(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
+                            items.remove(item);
+                            stockpileLocs.remove(location);
+                            continue;
+                        }
+                        if (!PBotGobAPI.placeThing(ui, location.x, location.y, 1000))
+                            if (PBotGobAPI.unplaceThing(ui, 1000))
+                                if (!inHandToInventory()) {
+                                    System.out.println("Drop can not");
+                                    if (PBotUtils.getItemAtHand(ui) != null)
+                                        PBotUtils.dropItem(ui, 0);
+                                }
                     }
-                    if (!PBotUtils.pfLeftClick(ui, location.x, location.y) && !PBotUtils.pfLeftClick(ui, location.x - 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x, location.y + 11) && !PBotUtils.pfLeftClick(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
-                        items.remove(item);
-                        stockpileLocs.remove(location);
-                        continue;
-                    }
-                    PBotGobAPI.placeThing(ui, location.x, location.y);
-                    while (PBotUtils.getGItemAtHand(ui) != null)
-                        PBotUtils.sleep(10);
                     items.remove(item);
                     stockpileLocs.remove(location);
-                    PBotUtils.sleep(2000);//putting in small delay, seems to miss creating the last stockpile
+                    PBotUtils.sleep(1000);//putting in small delay, seems to miss creating the last stockpile
                 }
                 stockpiles.addAll(Stockpiles(PBotUtils.getSelectedAreaA(), PBotUtils.getSelectedAreaB()));
                 boolean stop = false;
@@ -879,12 +885,11 @@ public class SeedCropFarmer extends Window implements Runnable {
                         System.out.println("clicking stockpile");
                         try {
                             while (PBotUtils.getItemAtHand(ui) == null) {
-                                PBotUtils.takeItem(ui, PBotUtils.getInventoryItemsByName(ui.gui.maininv, invname.get(0)).get(0).witem, 1000);
+                                if (stopThread)
+                                    return;
+                                PBotUtils.playerInventory(ui).getInventoryItemByResnames(invname.get(0)).takeItem(1000);
                             }
                         } catch (NullPointerException q) {
-                            //break on null pointer here, bot is prob done
-                            stop = true;
-                            break;
                         }
                         int cnt = PBotUtils.invFreeSlots(ui);
                         try {
@@ -893,12 +898,6 @@ public class SeedCropFarmer extends Window implements Runnable {
                             PBotUtils.sysMsg(ui, "Critical error in stockpile list, stopping thread to prevent crash.", Color.white);
                             stop = true;
                             stop();
-                        }
-                        while (PBotUtils.invFreeSlots(ui) == cnt) {
-                            if (stopThread)
-                                return;
-                            System.out.println("waiting for inv update");
-                            PBotUtils.sleep(100);
                         }
                     }
                     if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null)
@@ -948,7 +947,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         while (PBotUtils.getItemAtHand(ui) == null) {
                             if (stopThread)
                                 return;
-                            PBotUtils.takeItem(ui, PBotUtils.getInventoryItemsByName(ui.gui.maininv, invname.get(0)).get(0).witem, 1000);
+                            PBotUtils.playerInventory(ui).getInventoryItemByResnames(invname.get(0)).takeItem(1000);
                         }
                     } catch (NullPointerException q) {
                     }
@@ -1063,6 +1062,8 @@ public class SeedCropFarmer extends Window implements Runnable {
     }
 
     public boolean harvest(Gob g) {
+        if (PBotUtils.getItemAtHand(ui) != null)
+            PBotUtils.dropItemFromHand(ui, 0, 1000);
         PBotUtils.doClick(ui, g, 3, 0);
         PBotUtils.waitForFlowerMenu(ui, 1000);
         if (PBotUtils.petalExists(ui)) {

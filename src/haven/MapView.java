@@ -110,7 +110,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Collection<Delayed> delayed2 = new LinkedList<Delayed>();
     private Collection<Rendered> extradraw = new LinkedList<Rendered>();
     public Camera camera = restorecam();
-    private Plob placing = null;
+    public Plob placing = null;
     private Grabber grab;
     public Selector selection;
     private MCache.Overlay miningOverlay;

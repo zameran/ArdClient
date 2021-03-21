@@ -1,8 +1,10 @@
 package haven.purus.pbot;
 
+import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
 import haven.Loading;
+import haven.MCache;
 import haven.UI;
 import haven.automation.GobSelectCallback;
 
@@ -391,8 +393,22 @@ public class PBotGobAPI {
     /**
      * Itemact with item in hand, for example, to make a stockpile
      */
-    public static void makePile(UI ui) {
-        ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(ui), player(ui).getRcCoords().floor(posres), 0);
+    public static boolean makePile(UI ui) {
+        Coord c = new Coord();
+        Coord2d cc = player(ui).getRcCoords();
+        double tx = Math.ceil(cc.x / MCache.tilesz.x / MCache.cutsz.x);
+        double ty = Math.ceil(cc.y / MCache.tilesz.y / MCache.cutsz.y);
+        Coord ul = new Coord((int) (tx - ui.gui.map.view - 1) * MCache.cutsz.x, (int) (ty - ui.gui.map.view - 1) * MCache.cutsz.y);
+        Coord size = ul.add(MCache.cutsz.mul(ui.gui.map.view * 2 + 1));
+        for (c.y = ul.y; c.y < size.y; c.y++)
+            for (c.x = ul.x; c.x < size.x; c.x++) {
+                String tile = PBotUtils.tileResnameAt(ui, c.mul(11).x, c.mul(11).y);
+                if (tile != null && tile.equals("gfx/tiles/field")) {
+                    ui.gui.map.wdgmsg("itemact", PBotUtils.getCenterScreenCoord(ui), c, 0);
+                    return (true);
+                }
+            }
+        return (false);
     }
 
 //    public static void makePile() {
@@ -407,6 +423,32 @@ public class PBotGobAPI {
      */
     public static void placeThing(UI ui, double x, double y) {
         ui.gui.map.wdgmsg("place", new Coord2d(x, y).floor(posres), 0, 1, 0);
+    }
+
+    public static boolean placeThing(UI ui, double x, double y, int timeout) {
+        ui.gui.map.wdgmsg("place", new Coord2d(x, y).floor(posres), 0, 1, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
+    }
+
+    public static void unplaceThing(UI ui) {
+        ui.gui.map.wdgmsg("place", player(ui).getRcCoords().floor(posres), 0, 3, 0);
+    }
+
+    public static boolean unplaceThing(UI ui, int timeout) {
+        ui.gui.map.wdgmsg("place", player(ui).getRcCoords().floor(posres), 0, 3, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
     }
 
 //    public static void placeThing(double x, double y) {
