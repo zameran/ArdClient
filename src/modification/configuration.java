@@ -774,7 +774,7 @@ public class configuration {
 
     public static byte[] imageToBytes(BufferedImage img) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(img, "jpg", baos);
+        ImageIO.write(img, "png", baos);
         return baos.toByteArray();
     }
 
