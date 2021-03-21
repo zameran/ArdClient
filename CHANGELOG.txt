@@ -1,3 +1,12 @@
+20210321
+-- Added resource cleaner (Modification - Dev - RESOURCE CLEANER) - Delete only resources excluding other files
+-- Fixed farmer stockpiles
+-- Fixed image decoder
+-- Fixed map's view distance
+-- Added again gemstone cache
+-- Fixed horse speedget
+~ (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+
 20210319
 -- Map improved (can you see when used, should not be difficult)
 -- Added quail to table
