@@ -510,12 +510,12 @@ public class MapWnd extends ResizableWnd {
 
                 private Pair<String, String> getCurCoords() {
                     try {
-                        final MapFileWidget.Location loc = view.resolve(player);
-                        Coord ploc = view.xlate(loc);
-                        return (Config.gridIdsMap.get(view.curloc.seg.gridid(ploc)));
+                        Coord mpc = new Coord2d(mv.getcc()).floor(tilesz);
+                        MCache.Grid obg = ui.sess.glob.map.getgrid(mpc.div(cmaps));
+                        return (Config.gridIdsMap.get(obg.id));
                     } catch (Exception e) {
-                        return (null);
                     }
+                    return (null);
                 }
             };
             add(oddigeoloc, geoloc.c.add(geoloc.sz.x + spacer, 0));
@@ -771,16 +771,16 @@ public class MapWnd extends ResizableWnd {
         private Coord getRealCoord(Coord c) {
             try {
                 MCache.Grid obg = ui.sess.glob.map.getgrid(c.div(cmaps));
-                if (!view.file.lock.writeLock().tryLock())
+                if (!file.lock.writeLock().tryLock())
                     throw (new Loading());
                 try {
-                    MapFile.GridInfo info = view.file.gridinfo.get(obg.id);
+                    MapFile.GridInfo info = file.gridinfo.get(obg.id);
                     if (info == null) {
                         throw (new Loading());
                     } else
                         return (c.add(info.sc.sub(obg.gc).mul(cmaps)));
                 } finally {
-                    view.file.lock.writeLock().unlock();
+                    file.lock.writeLock().unlock();
                 }
             } catch (Exception ignore) {
             }
@@ -802,7 +802,7 @@ public class MapWnd extends ResizableWnd {
             if (loc != null) {
                 Coord hsz = sz.div(2);
                 for (TempMark cm : getTempMarkList()) {
-                    if (check.test(cm)) {
+                    if (loc.seg.id == cm.loc.seg.id && check.test(cm)) {
                         Tex tex = cachedzoomtex(cm.icon, cm.name, MapFileWidget.zoom);
                         if (!cm.gc.equals(Coord.z)) {
                             Coord gc = hsz.sub(loc.tc).add(cm.gc.div(scalef()));
@@ -871,7 +871,7 @@ public class MapWnd extends ResizableWnd {
                     g.chcolor();
 
                     if (configuration.bigmapshowviewdist)
-                        g.image(gridblue, ploc.sub(new Coord(44).div(scalef())), gridblue.dim.div(scalef()));
+                        drawview(g);
                 }
 
                 final Set<Long> ignore;
@@ -879,6 +879,22 @@ public class MapWnd extends ResizableWnd {
                     ignore = drawparty(g);
                 g.chcolor();
             } catch (Loading l) {
+            }
+        }
+
+        public void drawview(GOut g) {
+            Coord2d sgridsz = new Coord2d(MCache.cmaps);
+            Gob player = ui.gui.map.player();
+            if (player != null) {
+                Location loc = this.curloc;
+                if (loc != null) {
+                    Coord hsz = sz.div(2);
+                    Coord rcd = getRealCoord(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz).floor(tilesz));
+                    Coord rc = hsz.sub(loc.tc).add(rcd.div(scalef()));
+                    g.chcolor(Color.BLUE);
+                    g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).div(scalef()));
+                    g.chcolor();
+                }
             }
         }
 

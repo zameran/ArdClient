@@ -829,11 +829,8 @@ public class LocalMiniMap extends Widget {
 
             g.image(resize, sz.sub(resize.sz()));
 
-            if (Config.mapshowviewdist) {
-                Gob player = mv.player();
-                if (player != null)
-                    g.image(gridblue, p2c(player.rc).add(delta).sub((int) (44 * zoom), (int) (44 * zoom)), gridblue.dim.mul(zoom));
-            }
+            if (Config.mapshowviewdist)
+                drawview(g);
         }
         drawicons(g);
 
@@ -896,6 +893,17 @@ public class LocalMiniMap extends Widget {
         if (MinimapWnd.biometex != null)
             g.image(MinimapWnd.biometex, Coord.z);
         //Improve minimap player markers slightly commit skip
+    }
+
+    public void drawview(GOut g) {
+        Coord2d sgridsz = new Coord2d(MCache.cmaps);
+        Gob player = ui.gui.map.player();
+        if (player != null) {
+            Coord rc = p2c(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz)).add(delta);
+            g.chcolor(Color.BLUE);
+            g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
+            g.chcolor();
+        }
     }
 
     private void drawTracking(GOut g) {
