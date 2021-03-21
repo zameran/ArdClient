@@ -1322,7 +1322,7 @@ public class PBotUtils {
 
     //Will set player speed to whatever int you send it.
     public static void setSpeed(UI ui, int speed) {
-        Speedget speedwdg = ui.gui.speedget.get();
+        Speedget speedwdg = ui.gui.speed;
         if (speedwdg != null)
             speedwdg.set(speed);
     }
@@ -1333,7 +1333,7 @@ public class PBotUtils {
 
     //should return current max move speed? maybe?
     public static int maxSpeed(UI ui) {
-        Speedget speedwdg = ui.gui.speedget.get();
+        Speedget speedwdg = ui.gui.speed;
         if (speedwdg != null)
             return speedwdg.max;
         else
@@ -1603,6 +1603,32 @@ public class PBotUtils {
      */
     public static void placeThing(UI ui, int x, int y) {
         ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
+    }
+
+    public static boolean placeThing(UI ui, double x, double y, int timeout) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
+    }
+
+    public static void unplaceThing(UI ui) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.floor(posres), 0, 3, 0);
+    }
+
+    public static boolean unplaceThing(UI ui, int timeout) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.floor(posres), 0, 3, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
     }
 
 //    public static void placeThing(int x, int y) {

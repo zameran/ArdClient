@@ -124,7 +124,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public ChatWnd chatwnd;
     private int saferadius = 1;
     private int dangerradius = 1;
-    public WeakReference<Speedget> speedget;
     public ChatUI.Channel syslog;
     public ChatUI.Channel botlog;
     public Window hidden, deleted, alerted, highlighted, overlayed, gobspawner;
