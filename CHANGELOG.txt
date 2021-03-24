@@ -1,3 +1,9 @@
+Details in https://github.com/Cediner/ArdClient/commits/Unstable
+20210325
+-- Improved mapping (autoupload marks, individual options for each account)
+-- Fixed fightview draw
+~
+
 20210324
 -- Some graphic minimap fixes (color for view squad, scaling minimap icons, temporary marks)
 ~ (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
