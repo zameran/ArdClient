@@ -553,45 +553,49 @@ public class Fightview extends MovableWidget {
     }
 
     public void draw(GOut g) {
-        int y = 10;
+        try {
+            int y = 10;
 //        if (curava != null)
 //            y = curava.c.y + curava.sz.y + 10;
-        int x = width - bg.sz().x - 10;
-        for (Relation rel : lsrel) {
-            if (rel == current) {
-                g.chcolor(Color.YELLOW);
-                g.image(bg, new Coord(x, y));
-                g.chcolor();
-            } else {
-                g.image(bg, new Coord(x, y));
-            }
-
-            rel.ava.c = new Coord(x + 115, y + 3);
-            rel.give.c = new Coord(x + 125, y + 41);
-            rel.purs.c = new Coord(x + 43, y + 6);
-            rel.show(true);
-            g.chcolor(Color.GREEN);
-            FastText.printf(g, new Coord(12, y + 3), "IP %d", rel.ip);
-            g.chcolor(Color.RED);
-            FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
-            final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
-            if (gob != null) {
-                g.chcolor(new Color(200, 200, 200));
-                FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
-                FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
-            }
-            g.chcolor();
-            final Coord c = new Coord(13, y + 32);
-            for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
-                if (!(wdg instanceof Buff))
-                    continue;
-                final Buff buf = (Buff) wdg;
-                if (buf.ameter >= 0 && buf.isOpening()) {
-                    buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
-                    c.x += Buff.scframe.sz().x + 2;
+            int x = width - bg.sz().x - 10;
+            for (Relation rel : lsrel) {
+                if (rel == current) {
+                    g.chcolor(Color.YELLOW);
+                    g.image(bg, new Coord(x, y));
+                    g.chcolor();
+                } else {
+                    g.image(bg, new Coord(x, y));
                 }
+
+                rel.ava.c = new Coord(x + 115, y + 3);
+                rel.give.c = new Coord(x + 125, y + 41);
+                rel.purs.c = new Coord(x + 43, y + 6);
+                rel.show(true);
+                g.chcolor(Color.GREEN);
+                FastText.printf(g, new Coord(12, y + 3), "IP %d", rel.ip);
+                g.chcolor(Color.RED);
+                FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
+                final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                if (gob != null) {
+                    g.chcolor(new Color(200, 200, 200));
+                    FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
+                    FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
+                }
+                g.chcolor();
+                final Coord c = new Coord(13, y + 32);
+                for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
+                    if (!(wdg instanceof Buff))
+                        continue;
+                    final Buff buf = (Buff) wdg;
+                    if (buf.ameter >= 0 && buf.isOpening()) {
+                        buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
+                        c.x += Buff.scframe.sz().x + 2;
+                    }
+                }
+                y += bg.sz().y + ymarg;
             }
-            y += bg.sz().y + ymarg;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         super.draw(g);
     }
