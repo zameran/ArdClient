@@ -87,10 +87,10 @@ public class Config {
     public static String mapperUrl = Utils.getpref("mapperUrl", Utils.getpref("navigationEndpoint", "http://example.com"));
     public static boolean mapperHashName = Utils.getprefb("mapperHashName", true);
     public static boolean mapperEnabled = Utils.getprefb("mapperEnabled", true);
-    public static boolean vendanMapv4 = Utils.getprefb("vendan-mapv4", false);
-    public static boolean vendanGreenMarkers = Utils.getprefb("vendan-mapv4-green-markers", false);
-    public static boolean enableNavigationTracking = Utils.getprefb("enableNavigationTracking", false);
-    public static boolean sendCustomMarkers = Utils.getprefb("sendCustomMarkers", false);
+//    public static boolean vendanMapv4 = Utils.getprefb("vendan-mapv4", false);
+//    public static boolean vendanGreenMarkers = Utils.getprefb("vendan-mapv4-green-markers", false);
+//    public static boolean enableNavigationTracking = Utils.getprefb("enableNavigationTracking", false);
+//    public static boolean sendCustomMarkers = Utils.getprefb("sendCustomMarkers", false);
     public static URL screenurl = geturl("http://game.havenandhearth.com/mt/ss");
     public static boolean hideflocomplete = Utils.getprefb("hideflocomplete", false);
     public static boolean mapdrawparty = Utils.getprefb("mapdrawparty", false);
@@ -1212,11 +1212,6 @@ public class Config {
             }
         }
 
-        if (Config.vendanMapv4) {
-            MappingClient.getInstance().SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
-            MappingClient.getInstance().EnableGridUploads(Config.vendanMapv4);
-            MappingClient.getInstance().EnableTracking(Config.enableNavigationTracking);
-        }
         loadLogins();
         Iconfinder.loadConfig();
     }

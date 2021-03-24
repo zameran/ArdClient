@@ -80,10 +80,10 @@ public class Glob {
     public boolean night = false; //true is night
     public Tex bservertimetex;
 
-    private static WeakReference<Glob> reference = new WeakReference<>(null);
+    private static Map<String, Glob> reference = new HashMap<>();
 
-    public static Glob getByReference() {
-        return reference.get();
+    public static Glob getByReference(String name) {
+        return reference.get(name);
     }
 
     public Glob(Session sess) {
@@ -91,7 +91,7 @@ public class Glob {
         gobhitmap = new GobHitmap();
         map = new MCache(sess);
         party = new Party(this);
-        reference = new WeakReference<>(this);
+        reference.put(sess.username, this);
     }
 
     @Resource.PublishedCode(name = "wtr")

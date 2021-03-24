@@ -659,31 +659,38 @@ public class OptWnd extends Window {
 
         appender.addRow(new Label("Server URL:"),
                 new TextEntry(240, Utils.getpref("vendan-mapv4-endpoint", "")) {
-                    @Override
                     public boolean keydown(KeyEvent ev) {
                         if (!parent.visible)
                             return false;
                         Utils.setpref("vendan-mapv4-endpoint", text);
-                        System.out.println(text);
-                        MappingClient.getInstance().SetEndpoint(text);
-                        System.out.println(Utils.getpref("vendan-mapv4-endpoint", ""));
-
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            MappingClient.getInstance(ui.sess.username).SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
+                        }
                         return buf.key(ev);
                     }
                 }
         );
 
         appender.add(new CheckBox("Enable mapv4 mapper") {
-            {
-                a = Config.vendanMapv4;
+            public void set(boolean val) {
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    configuration.saveMapSetting(ui.sess.username, val, "mapper");
+                    MappingClient.getInstance(ui.sess.username).EnableGridUploads(val);
+//                    MappingClient.getInstance(ui.sess.username).EnableTracking(val);
+                    a = val;
+                }
             }
 
-            public void set(boolean val) {
-                Utils.setprefb("vendan-mapv4", val);
-                Config.vendanMapv4 = val;
-                MappingClient.getInstance().EnableGridUploads(Config.vendanMapv4);
-                MappingClient.getInstance().EnableTracking(Config.vendanMapv4);
-                a = val;
+            public void tick(double dt) {
+                super.tick(dt);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    boolean b = configuration.loadMapSetting(ui.sess.username, "mapper");
+                    if (a != b) {
+                        a = b;
+                        MappingClient.getInstance(ui.sess.username).EnableGridUploads(a);
+//                        MappingClient.getInstance(ui.sess.username).EnableTracking(a);
+                    }
+                }
             }
         });
 
@@ -699,26 +706,41 @@ public class OptWnd extends Window {
 //            }
 //        });
         appender.add(new CheckBox("Enable navigation tracking") {
-            {
-                a = Config.enableNavigationTracking;
+            public void set(boolean val) {
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    configuration.saveMapSetting(ui.sess.username, val, "track");
+                    MappingClient.getInstance(ui.sess.username).EnableTracking(val);
+                    a = val;
+                }
             }
 
-            public void set(boolean val) {
-                Utils.setprefb("enableNavigationTracking", val);
-                Config.enableNavigationTracking = val;
-                MappingClient.getInstance().EnableTracking(Config.enableNavigationTracking);
-                a = val;
+            public void tick(double dt) {
+                super.tick(dt);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    boolean b = configuration.loadMapSetting(ui.sess.username, "track");
+                    if (a != b) {
+                        a = b;
+                        MappingClient.getInstance(ui.sess.username).EnableTracking(a);
+                    }
+                }
             }
         });
         appender.add(new CheckBox("Upload custom GREEN markers to map") {
-            {
-                a = Config.sendCustomMarkers;
+            public void set(boolean val) {
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    configuration.saveMapSetting(ui.sess.username, val, "green");
+                    a = val;
+                }
             }
 
-            public void set(boolean val) {
-                Utils.setprefb("sendCustomMarkers", val);
-                Config.sendCustomMarkers = val;
-                a = val;
+            public void tick(double dt) {
+                super.tick(dt);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    boolean b = configuration.loadMapSetting(ui.sess.username, "green");
+                    if (a != b) {
+                        a = b;
+                    }
+                }
             }
         });
 

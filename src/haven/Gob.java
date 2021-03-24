@@ -839,7 +839,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             this.rc = c;
 
             if (isplayer()) {
-                if (Config.vendanMapv4) MappingClient.getInstance().CheckGridCoord(c);
+                if (glob.ui != null) {
+                    UI ui = glob.ui.get();
+                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                            MappingClient.getInstance(ui.sess.username).CheckGridCoord(c);
+                        }
+                    }
+                }
             }
             this.a = a;
             if (glob.ui != null) {

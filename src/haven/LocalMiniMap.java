@@ -685,24 +685,28 @@ public class LocalMiniMap extends Widget {
                         sgobs.add(gob.id);
                         Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
                         if (Config.discordplayeralert) {
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone("Player");
+                            if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                                if (Config.discorduser) {
+                                    PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                                } else if (Config.discordrole) {
+                                    PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                                } else {
+                                    PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                                }
                             }
                         }
                         enemy = true;
                     } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
                         sgobs.add(gob.id);
                         Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
-                        if (Config.discorduser) {
-                            PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                        } else if (Config.discordrole) {
-                            PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                        } else {
-                            PBotDiscord.mapAlertEveryone("Player");
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            if (Config.discorduser) {
+                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                            } else if (Config.discordrole) {
+                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                            } else {
+                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                            }
                         }
                         enemy = true;
                     }

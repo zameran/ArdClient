@@ -5,6 +5,7 @@ import haven.Audio;
 import haven.Config;
 import haven.Gob;
 import haven.Resource;
+import haven.UI;
 import haven.purus.pbot.PBotDiscord;
 import haven.sloth.io.Storage;
 import haven.sloth.util.ObservableCollection;
@@ -171,13 +172,18 @@ public class Alerted {
                             else
                                 Audio.play(Resource.local().load(getSound(name)), getVolume(name));
                             if (Config.discordalarmalert) {
-                                String s = g.name().substring(g.name().lastIndexOf("/") + 1);
-                                if (Config.discorduser) {
-                                    PBotDiscord.mapAlert(Config.discordalertstring, s);
-                                } else if (Config.discordrole) {
-                                    PBotDiscord.mapAlertRole(Config.discordalertstring, s);
-                                } else {
-                                    PBotDiscord.mapAlertEveryone(s);
+                                if (g.glob.ui != null) {
+                                    UI ui = g.glob.ui.get();
+                                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                                        String s = g.name().substring(g.name().lastIndexOf("/") + 1);
+                                        if (Config.discorduser) {
+                                            PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, s);
+                                        } else if (Config.discordrole) {
+                                            PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, s);
+                                        } else {
+                                            PBotDiscord.mapAlertEveryone(ui.sess.username, s);
+                                        }
+                                    }
                                 }
                             }
                             if (Config.alarmonce) {
