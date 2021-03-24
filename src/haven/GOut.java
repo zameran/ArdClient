@@ -270,6 +270,14 @@ public class GOut {
         tex.dispose();
     }
 
+    public void image(BufferedImage img, Coord c, Coord sz) {
+        if (img == null)
+            return;
+        Tex tex = new TexI(img);
+        image(tex, c, sz);
+        tex.dispose();
+    }
+
     public void image(Resource.Image img, Coord c) {
         if (img == null)
             return;

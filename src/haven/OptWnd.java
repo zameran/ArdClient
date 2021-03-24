@@ -3580,18 +3580,6 @@ public class OptWnd extends Window {
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
-        appender.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
-            configuration.pfcolor = val.hashCode();
-            Utils.setprefi("pfcolor", val.hashCode());
-        }));
-        appender.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
-            configuration.dowsecolor = val.hashCode();
-            Utils.setprefi("dowsecolor", val.hashCode());
-        }));
-        appender.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
-            configuration.questlinecolor = val.hashCode();
-            Utils.setprefi("questlinecolor", val.hashCode());
-        }));
         appender.add(new CheckBox("Player Status tooltip") {
             {
                 a = configuration.statustooltip;
@@ -4612,6 +4600,23 @@ public class OptWnd extends Window {
                 return Text.render("Draw cave tiles on large map. Outline nust be disable.").tex();
             }
         });
+
+        appender.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
+            configuration.distanceviewcolor = val.hashCode();
+            Utils.setprefi("distanceviewcolor", val.hashCode());
+        }));
+        appender.addRow(new Label("Pathfinding color"), new ColorPreview(new Coord(20, 20), new Color(configuration.pfcolor, true), val -> {
+            configuration.pfcolor = val.hashCode();
+            Utils.setprefi("pfcolor", val.hashCode());
+        }));
+        appender.addRow(new Label("Dowse color"), new ColorPreview(new Coord(20, 20), new Color(configuration.dowsecolor, true), val -> {
+            configuration.dowsecolor = val.hashCode();
+            Utils.setprefi("dowsecolor", val.hashCode());
+        }));
+        appender.addRow(new Label("Questline color"), new ColorPreview(new Coord(20, 20), new Color(configuration.questlinecolor, true), val -> {
+            configuration.questlinecolor = val.hashCode();
+            Utils.setprefi("questlinecolor", val.hashCode());
+        }));
 
         appender.add(new Label(""));
         appender.addRow(new CheckBox("Temporary marks") {

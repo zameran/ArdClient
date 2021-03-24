@@ -199,6 +199,7 @@ public class configuration {
     public static int pfcolor = Utils.getprefi("pfcolor", Color.MAGENTA.hashCode());
     public static int dowsecolor = Utils.getprefi("dowsecolor", Color.MAGENTA.hashCode());
     public static int questlinecolor = Utils.getprefi("questlinecolor", Color.MAGENTA.hashCode());
+    public static int distanceviewcolor = Utils.getprefi("distanceviewcolor", new Color(10, 200, 200).hashCode());
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);
     public static int crosterresid = Utils.getprefi("crosterresid", -1);

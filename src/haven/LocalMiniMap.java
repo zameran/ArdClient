@@ -900,7 +900,7 @@ public class LocalMiniMap extends Widget {
         Gob player = ui.gui.map.player();
         if (player != null) {
             Coord rc = p2c(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz)).add(delta);
-            g.chcolor(Color.BLUE);
+            g.chcolor(new Color(configuration.distanceviewcolor, true));
             g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
             g.chcolor();
         }
@@ -1147,7 +1147,7 @@ public class LocalMiniMap extends Widget {
 //                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
 //                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
 //                bi = op.filter(bi, null);
-                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta));
+                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), new Coord(bi.getWidth(), bi.getHeight()).mul(iconZoom));
             }
         }
         g.chcolor();

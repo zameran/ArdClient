@@ -705,7 +705,6 @@ public class MapWnd extends ResizableWnd {
             final Iterator<Coord2d> queue = mv.movequeue();
             Coord last;
             if (movingto != null) {
-                //Make the line first
                 g.chcolor(new Color(configuration.pfcolor, true));
                 Location loc = this.curloc;
                 if (loc != null) {
@@ -731,6 +730,7 @@ public class MapWnd extends ResizableWnd {
                         }
                     }
                 }
+                g.chcolor();
             }
         }
 
@@ -891,7 +891,7 @@ public class MapWnd extends ResizableWnd {
                     Coord hsz = sz.div(2);
                     Coord rcd = getRealCoord(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz).floor(tilesz));
                     Coord rc = hsz.sub(loc.tc).add(rcd.div(scalef()));
-                    g.chcolor(Color.BLUE);
+                    g.chcolor(new Color(configuration.distanceviewcolor, true));
                     g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).div(scalef()));
                     g.chcolor();
                 }
@@ -940,9 +940,15 @@ public class MapWnd extends ResizableWnd {
                     Optional<Resource> ores = gob.res();
                     if (ores.isPresent()) {
                         Resource res = ores.get();
+                        boolean check = false;
+                        if (icon != null && icon.res != null && icon.res.get() != null) {
+                            GobIcon.Setting conf = ui.gui.mmap.iconconf.get(icon.res.get());
+                            if (conf != null && conf.show)
+                                check = true;
+                        }
                         if (!Config.hideallicons && (icon != null || Config.additonalicons.containsKey(res.name))) {
                             CheckListboxItem itm = Config.icons.get(res.basename());
-                            if (configuration.tempmarksall || (itm != null && !itm.selected)) {
+                            if (configuration.tempmarksall || (itm != null && !itm.selected) || check) {
                                 if (icon != null)
                                     tex = cachedtex(gob);
                                 else
