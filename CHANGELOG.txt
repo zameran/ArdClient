@@ -1,4 +1,8 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+20210326
+-- Added Land Survey position saving
+~
+
 20210325
 -- Improved mapping (autoupload marks, individual options for each account)
 -- Fixed fightview draw
