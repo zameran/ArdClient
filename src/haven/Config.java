@@ -499,6 +499,8 @@ public class Config {
         put("stallion", new CheckListboxItem("Tamed Stallions"));
         put("boarspear", new CheckListboxItem("Boar Spear"));
         put("boostspeed", new CheckListboxItem("Speed Boost"));
+        put("frog", new CheckListboxItem("Frog"));
+        put("toad", new CheckListboxItem("Toad"));
     }};
     public final static HashMap<String, CheckListboxItem> oldicons = new HashMap<String, CheckListboxItem>() {{
         put("dandelion", new CheckListboxItem("Dandelion"));
@@ -511,12 +513,10 @@ public class Config {
         put("spindlytaproot", new CheckListboxItem("Spindly Taproot"));
         put("stingingnettle", new CheckListboxItem("Stinging Nettle"));
         put("dragonfly", new CheckListboxItem("Dragonfly"));
-        put("toad", new CheckListboxItem("Toad"));
         put("magpie", new CheckListboxItem("Magpie"));
         put("mistletoe", new CheckListboxItem("Mistletoe"));
         put("firefly", new CheckListboxItem("Firefly"));
         put("cavemoth", new CheckListboxItem("Cave Moth"));
-        put("frog", new CheckListboxItem("Frog"));
         put("windweed", new CheckListboxItem("Wild Windsown Weed"));
         put("mussels", new CheckListboxItem("Mussels"));
         put("mallard", new CheckListboxItem("Duck"));
