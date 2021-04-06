@@ -956,6 +956,7 @@ public class Config {
         put("htable", new CheckListboxItem("Herb Tables"));
         put("cupboard", new CheckListboxItem("Cupboards"));
         put("cauldron", new CheckListboxItem("Cauldrons"));
+        put("primsmelter", new CheckListboxItem("Primitiry Smeltery"));
     }};
 
     public final static HashMap<String, String> alarms = new HashMap<String, String>(37) {{
