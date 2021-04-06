@@ -83,22 +83,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
     public void add(String name) {
-        if (name != null && !name.isEmpty() && !customlist.containsKey(name)) {
-            synchronized (customlist) {
-                customlist.put(name, true);
-            }
-            Utils.saveCustomList(customlist, jsonname);
-            additem(new Item(name));
-            update();
-        }
-    }
-
-    @SuppressWarnings("SynchronizeOnNonFinalField")
-    public void add(String name, Boolean val) {
-        if (name != null && !name.isEmpty() && !customlist.containsKey(name)) {
-            synchronized (customlist) {
-                customlist.put(name, val);
-            }
+        if (name != null && !name.isEmpty()) {
             Utils.saveCustomList(customlist, jsonname);
             additem(new Item(name));
             update();
@@ -130,7 +115,7 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
                 item.update(val);
             }
         } else {
-            add(key, val);
+            add(key);
         }
     }
 
@@ -139,6 +124,12 @@ public class CustomWidgetList extends WidgetList<CustomWidgetList.Item> implemen
         Item item = getItem(key);
         if (item != null) {
             list.remove(item);
+            if (customlist.containsKey(key)) {
+                synchronized (customlist) {
+                    customlist.remove(key);
+                }
+                Utils.saveCustomList(customlist, jsonname);
+            }
         }
     }
 

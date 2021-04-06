@@ -3463,7 +3463,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         ui.gui.mapfile.markobj(g.id, g, configuration.getShortName(g.resname().get()));
                         break;
                     case 7: //Mark gob to custom marks
-                        resources.customMarks.put(g.resname().get(), true);
+                        resources.customMarks.put(g.getres().name, true);
                         break;
                 }
             }, "Mark for party",
