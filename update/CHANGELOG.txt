@@ -1,4 +1,8 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.08
+-- Fixed treestage crash
+~
+
 2021.04.07
 -- Thingwall map filter
 -- Trees

@@ -30,7 +30,8 @@ public class TreeStageSprite extends Sprite {
         Coord sc = proj.get2dCoord(c, wndsz);
         sc.x -= 8;
         sc.y -= 10;
-        g.image(tex, sc);
+        if (tex != null)
+            g.image(tex, sc);
     }
 
     public boolean setup(RenderList rl) {
@@ -45,7 +46,8 @@ public class TreeStageSprite extends Sprite {
 
     public void update(int val) {
         this.val = val;
-        tex = treestg[val];
+        if (val >= 0)
+            tex = treestg[val];
     }
 
     public Object staticp() {
