@@ -1,4 +1,11 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.07
+-- Thingwall map filter
+-- Trees
+-- Smallanimal for pickforageable
+-- Primitive smeltery (disable shift click)
+~
+
 2021.04.04
 -- Froggy icon
 -- Trees
