@@ -3327,7 +3327,7 @@ public class OptWnd extends Window {
                 wva.addRow(value, new Button(45, "Add") {
                     @Override
                     public void click() {
-                        list.add(value.text, false);
+                        list.put(value.text, false);
                         value.settext("");
                     }
                 }, new Button(45, "Load Default") {
@@ -3578,7 +3578,7 @@ public class OptWnd extends Window {
                     TextEntry addentry = new TextEntry(0, "") {
                         public void activate(String text) {
                             if (!text.equals("")) {
-                                cwl.add(text, false);
+                                cwl.put(text, false);
                                 settext("");
                             }
                         }
@@ -3586,7 +3586,7 @@ public class OptWnd extends Window {
                     Button addbtn = new Button(45, "Add") {
                         public void click() {
                             if (!addentry.text.equals("")) {
-                                cwl.add(addentry.text, false);
+                                cwl.put(addentry.text, false);
                                 addentry.settext("");
                             }
                         }
