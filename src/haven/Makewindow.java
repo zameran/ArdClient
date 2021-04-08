@@ -80,11 +80,15 @@ public class Makewindow extends Widget {
             this.rawinfo = info;
         }
 
+        public GSprite sprite() {
+            if (spr == null)
+                spr = GSprite.create(this, res.get(), sdt.clone());
+            return (spr);
+        }
+
         public void draw(GOut g) {
             try {
-                if (spr == null)
-                    spr = GSprite.create(this, res.get(), sdt.clone());
-                spr.draw(g);
+                sprite().draw(g);
             } catch (Loading e) {
             }
             if (num != null)
@@ -161,10 +165,6 @@ public class Makewindow extends Widget {
 
         public Resource resource() {
             return (res.get());
-        }
-
-        public GSprite sprite() {
-            return (spr);
         }
     }
 

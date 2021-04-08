@@ -508,6 +508,20 @@ public abstract class ItemInfo {
                 throw (new ClassCastException("Unexpected object type " + o.getClass() + " in item info array."));
             }
         }
+        String s;
+        try {
+            if (owner instanceof ResOwner)
+                s = ((ResOwner) owner).resource().name;
+            else if (owner instanceof MenuGrid.PagButton)
+                s = ((MenuGrid.PagButton) owner).res.name;
+            else if (owner instanceof MenuGrid.Pagina)
+                s = ((MenuGrid.Pagina) owner).res().name;
+            else
+                s = owner.toString();
+        } catch(Exception e) {
+            s = owner.toString();
+        }
+        ret.add(new AdHoc(owner, "\n" + s));
         return (ret);
     }
 
@@ -601,13 +615,15 @@ public abstract class ItemInfo {
     public static void parseAttrMods(Map<Resource, Integer> bonuses, List infos) {
         for (Object inf : infos) {
             List<Object> mods = (List<Object>) Reflect.getFieldValue(inf, "mods");
-            for (Object mod : mods) {
-                Resource attr = (Resource) Reflect.getFieldValue(mod, "attr");
-                int value = Reflect.getFieldValueInt(mod, "mod");
-                if (bonuses.containsKey(attr)) {
-                    bonuses.put(attr, bonuses.get(attr) + value);
-                } else {
-                    bonuses.put(attr, value);
+            if (mods != null) {
+                for (Object mod : mods) {
+                    Resource attr = (Resource) Reflect.getFieldValue(mod, "attr");
+                    int value = Reflect.getFieldValueInt(mod, "mod");
+                    if (bonuses.containsKey(attr)) {
+                        bonuses.put(attr, bonuses.get(attr) + value);
+                    } else {
+                        bonuses.put(attr, value);
+                    }
                 }
             }
         }

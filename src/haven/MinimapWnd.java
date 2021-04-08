@@ -2,6 +2,7 @@ package haven;
 
 import haven.sloth.gui.ResizableWnd;
 import integrations.mapv4.MappingClient;
+import modification.configuration;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -87,10 +88,12 @@ public class MinimapWnd extends ResizableWnd {
                 } else {
                     tooltip = Text.render("Unable to determine your current location.");
                 }
-                if (Config.vendanMapv4) {
-                    MappingClient.MapRef mr = MappingClient.getInstance().lastMapRef;
-                    if (mr != null) {
-                        tooltip = Text.render("Coordinates: " + mr);
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                        MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
+                        if (mr != null) {
+                            tooltip = Text.render("Coordinates: " + mr);
+                        }
                     }
                 }
                 return super.tooltip(c, prev);
@@ -98,12 +101,13 @@ public class MinimapWnd extends ResizableWnd {
 
             @Override
             public void click() {
-                System.out.println("Click 1");
-                if (Config.vendanMapv4) {
-                    MappingClient.MapRef mr = MappingClient.getInstance().GetMapRef(true);
-                    if (mr != null) {
-                        MappingClient.getInstance().OpenMap(mr);
-                        return;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                        MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).GetMapRef(true);
+                        if (mr != null) {
+                            MappingClient.getInstance(ui.sess.username).OpenMap(mr);
+                            return;
+                        }
                     }
                 }
             }
@@ -111,15 +115,17 @@ public class MinimapWnd extends ResizableWnd {
             @Override
             public void draw(GOut g) {
                 boolean redraw = false;
-                if (Config.vendanMapv4) {
-                    MappingClient.MapRef mr = MappingClient.getInstance().lastMapRef;
-                    if (state != 2 && mr != null) {
-                        state = 2;
-                        redraw = true;
-                    }
-                    if (state != 0 && mr == null) {
-                        state = 0;
-                        redraw = true;
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                        MappingClient.MapRef mr = MappingClient.getInstance(ui.sess.username).lastMapRef;
+                        if (state != 2 && mr != null) {
+                            state = 2;
+                            redraw = true;
+                        }
+                        if (state != 0 && mr == null) {
+                            state = 0;
+                            redraw = true;
+                        }
                     }
                 }
                 if (redraw) this.redraw();

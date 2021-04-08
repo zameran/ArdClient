@@ -33,7 +33,6 @@ import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.MapFile.Segment;
 import modification.configuration;
-import modification.dev;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -80,11 +79,12 @@ public class MapFileWidget extends Widget {
     private String biome, seginfo;
     public static int zoom = Utils.getprefi("zoomlmap", 0);
     public static int zoomlvls = 8;
-    private static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
 
     public static Map<String, Tex> cachedTextTex = new HashMap<>();
     public static Map<String, Tex> cachedImageTex = new HashMap<>();
+    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
 
     public static Tex getCachedTextTex(String text) {
         Tex tex = cachedTextTex.get(text);
@@ -286,14 +286,14 @@ public class MapFileWidget extends Widget {
                         }
                         cachedImageTex.put(img.getres().name, itex);
                     }
-                    g.aimage(itex, c.sub(cc), -0.25, -0.25);
+                    g.aimage(itex, c, 0.5, 0.5);
 
                     if (Config.mapdrawquests) {
                         if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
 //                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
                             Tex ttex = getCachedTextTex(sm.nm);
                             if (ttex != null) {
-                                g.aimage(ttex, c.sub(cc).add(itex.sz().x / 2, -20), 0.5, 0);
+                                g.aimage(ttex, c.add(0, -15), 0.5, 1);
                             }
                         }
                     }
@@ -472,6 +472,10 @@ public class MapFileWidget extends Widget {
         return (false);
     }
 
+    public boolean deletemarker(DisplayMarker mark, int button) {
+        return (false);
+    }
+
     private DisplayMarker markerat(Coord tc) {
         if (markers != null) {
             for (DisplayMarker mark : markers) {
@@ -482,8 +486,11 @@ public class MapFileWidget extends Widget {
         return (null);
     }
 
+    Coord lastmousedown = Coord.z;
+
     public boolean mousedown(Coord c, int button) {
         Coord tc = null;
+        lastmousedown = c;
         if (curloc != null)
             tc = c.sub(sz.div(2)).add(curloc.tc);
         if (tc != null) {
@@ -502,7 +509,6 @@ public class MapFileWidget extends Widget {
                         //Translate this to real map units and add to current map position
                         final Coord2d mc = plc.sub(offset.mul(MCache.tilesz).mul(scalef()));
                         if (ui.modmeta && !ui.modshift && !ui.modctrl) {
-                            // ui.gui.map.queuemove(mc);
                             ui.gui.map.queuemove(mc);
                         } else if (ui.modshift && !ui.modmeta && !ui.modctrl)
                             Defer.later(() -> ui.gui.map.pathto(mc));
@@ -552,10 +558,11 @@ public class MapFileWidget extends Widget {
                 Coord tc = null;
                 if (curloc != null)
                     tc = c.sub(sz.div(2)).add(curloc.tc);
-                if (tc != null) {
+                if (tc != null && lastmousedown.equals(c)) {
                     DisplayMarker mark = markerat(tc);
-                    if ((mark != null) && clickmarker(mark, button))
-                        return (true);
+                    if (mark != null)
+                        if ((ui.modflags() == (UI.MOD_CTRL | UI.MOD_META) && deletemarker(mark, button)) || clickmarker(mark, button))
+                            return (true);
                 }
             }
         }
@@ -587,8 +594,6 @@ public class MapFileWidget extends Widget {
         }
         return (true);
     }
-
-    //All Ardennes's code
 
     public Object tooltip(Coord c, Widget prev) {
         if (curloc != null) {

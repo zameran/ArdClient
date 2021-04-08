@@ -27,6 +27,7 @@
 package haven;
 
 import dolda.xiphutil.VorbisStream;
+import modification.configuration;
 import modification.dev;
 
 import javax.imageio.ImageIO;
@@ -495,7 +496,6 @@ public class Resource implements Serializable {
                 if (error != null)
                     if (dev.skipexceptions) {
                         System.out.println("Delayed error in resource " + name + " (v" + ver + "), from " + error.src + " => " + error);
-                        res = Resource.local().loadwait("gfx/invobjs/missing");
                     } else {
                         throw (new RuntimeException("Delayed error in resource " + name + " (v" + ver + "), from " + error.src, error));
                     }
@@ -595,7 +595,9 @@ public class Resource implements Serializable {
                          * properly handled. This could be the wrong
                          * way of going about it, however; I'm not
                          * sure. */
-                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
+//                        throw (new LoadException(String.format("Weird version number on %s (%d > %d), loaded from %s", cur.name, cur.ver, ver, cur.source), cur));
+                        System.out.println(String.format("Weird version number on %s (%d > %d), loaded from %s %s", cur.name, cur.ver, ver, cur.source, cur));
+                        return (cur.indir());
                     }
                 }
                 synchronized (queue) {
@@ -1085,7 +1087,7 @@ public class Resource implements Serializable {
             nooff = (fl & 2) != 0;
             id = buf.int16();
             o = cdec(buf);
-	        so = UI.scale(o);
+            so = UI.scale(o);
             Map<String, byte[]> kvdata = new HashMap<>();
             if ((fl & 4) != 0) {
                 while (true) {
@@ -1110,10 +1112,10 @@ public class Resource implements Serializable {
             try {
                 img = readimage(new MessageInputStream(buf));
                 rawimage = img;
+                configuration.decodeimage(rawimage, Resource.this, "image", "");
             } catch (IOException e) {
                 throw (new LoadException(e, Resource.this));
             }
-            if (dev.decodeCode) decode();
             /*if (img == null)
                 throw (new LoadException("Invalid image data in " + name, Resource.this));*/
             sz = Utils.imgsz(img);
@@ -1124,7 +1126,7 @@ public class Resource implements Serializable {
                 img = scaled();
                 sz = ssz;
             }
-            if(tsz != null) {
+            if (tsz != null) {
                 /* This seems kind of ugly, but I'm not sure how to
                  * otherwise handle upwards rounding of both offset
                  * and size getting the image out of the intended
@@ -1214,38 +1216,16 @@ public class Resource implements Serializable {
 
         public void init() {
         }
-
-        public void decode() {
-            File dir = new File("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
-            dir.mkdirs();
-            String filename = name.substring(name.lastIndexOf('/') + 1) + ".png";
-            if (filename.equals("con.png")) filename = "_" + filename;
-            File outputfile = new File(dir, filename);
-            if (!outputfile.exists()) {
-                if (img == null) {
-                    dev.resourceLog("image", outputfile.getPath(), "NULL");
-                    return;
-                }
-                new Thread("decode image " + outputfile.getPath()) {
-                    public void run() {
-                        try {
-                            ImageIO.write(img, "png", outputfile);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("image", outputfile.getPath(), "CREATED");
-                    }
-                }.start();
-            }
-        }
     }
 
     @LayerName("tooltip")
     public class Tooltip extends Layer {
         public final String t;
+        public final String origt;
 
         public Tooltip(Message buf) {
             String text = new String(buf.bytes(), Utils.utf8);
+            origt = text;
             Resource res = super.getres();
             String locText = getLocString(BUNDLE_TOOLTIP, res, text);
 
@@ -1523,19 +1503,18 @@ public class Resource implements Serializable {
             String filename = name.substring(name.lastIndexOf('.') + 1) + ".class";
             File f = new File(dir, filename);
             if (!f.exists()) {
-                new Thread("decode code " + f.getPath()) {
-                    public void run() {
-                        try {
-                            FileOutputStream fout = new FileOutputStream(f);
-                            fout.write(data);
-                            fout.flush();
-                            fout.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("code", f.getPath(), "CREATED");
+                Defer.later(() -> {
+                    try {
+                        FileOutputStream fout = new FileOutputStream(f);
+                        fout.write(data);
+                        fout.flush();
+                        fout.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }.start();
+                    dev.resourceLog("code", f.getPath(), "CREATED");
+                    return (null);
+                });
             }
         }
     }
@@ -1560,17 +1539,16 @@ public class Resource implements Serializable {
         public void decode() {
             Path path = Paths.get("decode" + File.separator + Resource.this.toString().replace("/", File.separator));
             if (!Files.exists(path.resolve(name))) {
-                new Thread("decode src " + path.resolve(name)) {
-                    public void run() {
-                        try {
-                            Files.createDirectories(path);
-                            Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("src", path.resolve(name), "CREATED");
+                Defer.later(() -> {
+                    try {
+                        Files.createDirectories(path);
+                        Files.write(path.resolve(name), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }.start();
+                    dev.resourceLog("src", path.resolve(name), "CREATED");
+                    return (null);
+                });
             }
         }
     }
@@ -1876,17 +1854,15 @@ public class Resource implements Serializable {
                     String filename = name.substring(name.lastIndexOf('/') + 1) + "_" + i + ".mid";
                     File outputfile = new File(dir, filename);
                     if (!outputfile.exists()) {
-
-                        new Thread("decode midi " + outputfile.getPath()) {
-                            public void run() {
-                                try {
-                                    MidiSystem.write(seq, i, outputfile);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                dev.resourceLog("midi", outputfile.getPath(), "CREATED");
+                        Defer.later(() -> {
+                            try {
+                                MidiSystem.write(seq, i, outputfile);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        }.start();
+                            dev.resourceLog("midi", outputfile.getPath(), "CREATED");
+                            return (null);
+                        });
                     }
                 }
             }
@@ -1982,6 +1958,7 @@ public class Resource implements Serializable {
             this.ver = ver;
         else if (ver != this.ver)
             throw (new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
+//            System.out.println("Wrong res version (" + ver + " != " + this.ver + ") " +  this);
         while (!in.eom()) {
             String title = in.string();
 //            dev.resourceLog("DECODING", this, title);

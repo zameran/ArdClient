@@ -28,10 +28,8 @@ public class Entry extends Widget {
     public static final Coord SIZE = new Coord(WIDTH, HEIGHT);
     public static final Color every = new Color(255, 255, 255, 16), other = new Color(255, 255, 255, 32);
     public static final Function<Integer, String> percent = v -> String.format("%d%%", v);
-    public static final Function<Number, String> quality = v -> Double.toString(v.doubleValue());
-    public static final Function<Entry, Tex> namerend = e -> {
-        return (CharWnd.attrf.render(e.name, BuddyWnd.gc[e.grp]).tex());
-    };
+    public static final Function<Number, String> quality = v -> String.format("%.1f", v.doubleValue());
+    public static final Function<Entry, Tex> namerend = e -> (CharWnd.attrf.render(e.name, BuddyWnd.gc[e.grp]).tex());
     public static final Tex male = Loading.waitfor(Resource.local().load("gfx/hud/rosters/male")::get).layer(Resource.imgc).tex();
     public static final Tex female = Loading.waitfor(Resource.local().load("gfx/hud/rosters/female")::get).layer(Resource.imgc).tex();
     public static final Function<Boolean, Tex> sex = v -> (v ? male : female);

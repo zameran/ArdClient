@@ -48,6 +48,11 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
         this.y = y;
     }
 
+    public Coord(int xy) {
+        this.x = xy;
+        this.y = xy;
+    }
+
     public Coord(float x, float y) {
         this((int) x, (int) y);
     }

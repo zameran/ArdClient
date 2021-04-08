@@ -193,8 +193,8 @@ public class Fightview extends MovableWidget {
                             preweights.put(type, defweights.get(type));
                             defweights.put(type, b.ameter() / 100.0);
                             notfound.remove(type);
-                        } else if (Cards.lookup.get(res.layer(Resource.tooltip).t) instanceof Maneuver) {
-                            maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).t);
+                        } else if (Cards.lookup.get(res.layer(Resource.tooltip).origt) instanceof Maneuver) {
+                            maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).origt);
                             maneuvermeter = b.ameter() / 100.0;
                         }
                     });
@@ -237,7 +237,7 @@ public class Fightview extends MovableWidget {
             //Now use pre/post to determine block weight based off what we did to them
             try {
                 if (Fightview.this.lastact != null) {
-                    final Card c = Cards.lookup.getOrDefault(Fightview.this.lastact.get().layer(Resource.tooltip).t, Cards.unknown);
+                    final Card c = Cards.lookup.getOrDefault(Fightview.this.lastact.get().layer(Resource.tooltip).origt, Cards.unknown);
                     final double blockweight;
                     if (c instanceof Attack || c == Cards.flex) {
                         final Attacks atk = (Attacks) c;
@@ -326,8 +326,8 @@ public class Fightview extends MovableWidget {
                     if (type != null) {
                         defweights.put(type, b.ameter() / 100.0);
                         notfound.remove(type);
-                    } else if (Cards.lookup.get(res.layer(Resource.tooltip).t) instanceof Maneuver) {
-                        maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).t);
+                    } else if (Cards.lookup.get(res.layer(Resource.tooltip).origt) instanceof Maneuver) {
+                        maneuver = (Maneuver) Cards.lookup.get(res.layer(Resource.tooltip).origt);
                         maneuvermeter = b.ameter() / 100.0;
                     }
                 });
@@ -390,11 +390,11 @@ public class Fightview extends MovableWidget {
 
     private Double checkcd(String cd, Resource.Tooltip tt) {
         double base;
-        if (tt.t.contains("Flex"))
+        if (tt.origt.contains("Flex"))
             base = 1.8;
-        else if (tt.t.contains("Knocks"))
+        else if (tt.origt.contains("Knocks"))
             base = 2.7;
-        else if (tt.t.contains("Teeth"))
+        else if (tt.origt.contains("Teeth"))
             base = 2.1;
         else
             return 0.0;
@@ -553,45 +553,49 @@ public class Fightview extends MovableWidget {
     }
 
     public void draw(GOut g) {
-        int y = 10;
+        try {
+            int y = 10;
 //        if (curava != null)
 //            y = curava.c.y + curava.sz.y + 10;
-        int x = width - bg.sz().x - 10;
-        for (Relation rel : lsrel) {
-            if (rel == current) {
-                g.chcolor(Color.YELLOW);
-                g.image(bg, new Coord(x, y));
-                g.chcolor();
-            } else {
-                g.image(bg, new Coord(x, y));
-            }
-
-            rel.ava.c = new Coord(x + 115, y + 3);
-            rel.give.c = new Coord(x + 125, y + 41);
-            rel.purs.c = new Coord(x + 43, y + 6);
-            rel.show(true);
-            g.chcolor(Color.GREEN);
-            FastText.printf(g, new Coord(12, y + 3), "IP %d", rel.ip);
-            g.chcolor(Color.RED);
-            FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
-            final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
-            if (gob != null) {
-                g.chcolor(new Color(200, 200, 200));
-                FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
-                FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
-            }
-            g.chcolor();
-            final Coord c = new Coord(13, y + 32);
-            for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
-                if (!(wdg instanceof Buff))
-                    continue;
-                final Buff buf = (Buff) wdg;
-                if (buf.ameter >= 0 && buf.isOpening()) {
-                    buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
-                    c.x += Buff.scframe.sz().x + 2;
+            int x = width - bg.sz().x - 10;
+            for (Relation rel : lsrel) {
+                if (rel == current) {
+                    g.chcolor(Color.YELLOW);
+                    g.image(bg, new Coord(x, y));
+                    g.chcolor();
+                } else {
+                    g.image(bg, new Coord(x, y));
                 }
+
+                rel.ava.c = new Coord(x + 115, y + 3);
+                rel.give.c = new Coord(x + 125, y + 41);
+                rel.purs.c = new Coord(x + 43, y + 6);
+                rel.show(true);
+                g.chcolor(Color.GREEN);
+                FastText.printf(g, new Coord(12, y + 3), "IP %d", rel.ip);
+                g.chcolor(Color.RED);
+                FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
+                final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                if (gob != null) {
+                    g.chcolor(new Color(200, 200, 200));
+                    FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
+                    FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
+                }
+                g.chcolor();
+                final Coord c = new Coord(13, y + 32);
+                for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
+                    if (!(wdg instanceof Buff))
+                        continue;
+                    final Buff buf = (Buff) wdg;
+                    if (buf.ameter >= 0 && buf.isOpening()) {
+                        buf.fightdraw(g.reclip(c.copy(), Buff.scframe.sz()));
+                        c.x += Buff.scframe.sz().x + 2;
+                    }
+                }
+                y += bg.sz().y + ymarg;
             }
-            y += bg.sz().y + ymarg;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         super.draw(g);
     }

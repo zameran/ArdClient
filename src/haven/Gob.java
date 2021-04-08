@@ -440,37 +440,43 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
                 if (name.endsWith("log"))
                     type = Type.LOG;
 
-                Defer.later(() -> {
-                    if (getattr(GobIcon.class) == null) {
-                        if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
-                            String fistname1 = name.substring(0, name.lastIndexOf('/'));
-                            String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
-                            String lastname = name.replace(fistname, "");
-                            if (lastname.endsWith("stump"))
-                                lastname = lastname.substring(0, lastname.length() - "stump".length());
-                            if (lastname.endsWith("log"))
-                                lastname = lastname.substring(0, lastname.length() - "log".length());
+                Defer.later(new Defer.Callable<Void>() {
+                    public Void call() {
+                        if (getattr(GobIcon.class) == null) {
+                            if (type == Type.TREE || type == Type.BUSH || type == Type.STUMP || type == Type.LOG) {
+                                String fistname1 = name.substring(0, name.lastIndexOf('/'));
+                                String fistname = fistname1.substring(0, fistname1.lastIndexOf('/'));
+                                String lastname = name.replace(fistname, "");
+                                if (lastname.endsWith("stump"))
+                                    lastname = lastname.substring(0, lastname.length() - "stump".length());
+                                if (lastname.endsWith("log"))
+                                    lastname = lastname.substring(0, lastname.length() - "log".length());
 
-                            String icon = fistname + "/mm" + lastname;
-                            try {
-                                resources.IndirResource res = resources.getCachedRes(icon);
-                                if (res.get() != null)
-                                    setattr(new GobIcon(this, res));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else if (type == Type.BOULDER) {
-                            String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
-                            try {
-                                resources.IndirResource res = resources.getCachedRes(icon);
-                                if (res.get() != null)
-                                    setattr(new GobIcon(this, res));
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                String icon = fistname + "/mm" + lastname;
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes(icon);
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else if (type == Type.BOULDER) {
+                                String icon = name.substring(0, name.length() - 1).replace("terobjs/bumlings", "invobjs");
+                                try {
+                                    resources.IndirResource res = resources.getCachedRes(icon);
+                                    if (res.get() != null)
+                                        setattr(new GobIcon(Gob.this, res));
+                                } catch (Loading loading) {
+                                    Defer.later(this);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
+                        return (null);
                     }
-                    return null;
                 });
 
                 //Check for any special attributes we should attach
@@ -833,7 +839,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             this.rc = c;
 
             if (isplayer()) {
-                if (Config.vendanMapv4) MappingClient.getInstance().CheckGridCoord(c);
+                if (glob.ui != null) {
+                    UI ui = glob.ui.get();
+                    if (ui != null && ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                        if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                            MappingClient.getInstance(ui.sess.username).CheckGridCoord(c);
+                        }
+                    }
+                }
             }
             this.a = a;
             if (glob.ui != null) {
@@ -1043,7 +1056,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (Config.showoverlay) {
                 hid.setup(rl);
             }
-        } else {
+        }
+        if (!(hid != null && Config.hideuniquegobs) || configuration.showhiddenoverlay) {
             synchronized (ols) {
                 for (Overlay ol : ols) {
                     if (ol.name().equals("gfx/terobjs/trees/yulestar-fir") || ol.name().equals("gfx/terobjs/trees/yulestar-spruce") || ol.name().equals("gfx/terobjs/trees/yulestar-silverfir")) {
@@ -1266,20 +1280,14 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             Drawable d = getattr(Drawable.class);
             try {
                 if (d != null) {
-                    if (Config.hidegobs && type == Type.TREE && Config.hideTrees) {
-                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
-                    } else if (Config.hidegobs && type == Type.BUSH && Config.hideBushes) { //bushes
-                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
-                    } else if (Config.hidegobs && type == Type.BOULDER && Config.hideboulders) {
-                        GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
-                        if (bbox != null && Config.showoverlay)
-                            rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
-                    } else {
-                        d.setup(rl);
+                    if (!(hid != null && Config.hideuniquegobs)) {
+                        if (Config.hidegobs && ((type == Type.TREE && Config.hideTrees) || (type == Type.BUSH && Config.hideBushes) || (type == Type.BOULDER && Config.hideboulders))) {
+                            GobHitbox.BBox[] bbox = GobHitbox.getBBox(this);
+                            if (bbox != null && Config.showoverlay)
+                                rl.add(new Overlay(new GobHitbox(this, bbox, true)), null);
+                        } else {
+                            d.setup(rl);
+                        }
                     }
                     if (Config.showarchvector && type == Type.HUMAN && d instanceof Composite) {
                         boolean targetting = false;
@@ -1405,14 +1413,18 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered, Skeleton.
             if (type == Type.TAMEDANIMAL) {
                 CattleId cattleId = getattr(CattleId.class);
                 if (cattleId != null) {
-                    if (findol(CattleIdSprite.id) == null) {
+                    Overlay co = findol(CattleIdSprite.id);
+                    if (co == null) {
                         CattleIdSprite sprite = new CattleIdSprite(cattleId);
                         addol(new Overlay(CattleIdSprite.id, sprite));
                         cattleId.sprite = sprite;
+                    } else if (cattleId.sprite == null) {
+                        cattleId.sprite = (CattleIdSprite) co.spr;
                     }
                 }
             }
         }
+
         return (false);
     }
 

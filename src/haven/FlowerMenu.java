@@ -194,7 +194,7 @@ public class FlowerMenu extends Widget {
                 int timeout = 0;
                 while (ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) == null) {
                     timeout++;
-                    if (timeout > 1000) {//if we timeout, break horsemounter
+                    if (timeout > 1000) {
                         return;
                     }
                     PBotUtils.sleep(10);
@@ -203,7 +203,7 @@ public class FlowerMenu extends Widget {
                     //player now null, exit.
                     return;
                 }
-                Speedget speedwdg = ui.gui.speedget.get();
+                Speedget speedwdg = ui.gui.speed;
                 if (speedwdg != null)
                     speedwdg.set(2);
             } catch (Exception e) {
@@ -484,7 +484,7 @@ public class FlowerMenu extends Widget {
 
                 wdgmsg("cl", option.num, ui.modflags());
                 lastSel = option.name;
-                ui.gui.map.pllastcc = null;
+//                ui.gui.map.pllastcc = null;
 
                 try {
                     if (option.name.contains("Giddy") && Config.horseautorun) {

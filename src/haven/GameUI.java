@@ -57,7 +57,6 @@ import modification.newQuickSlotsWdg;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.image.WritableRaster;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -124,7 +123,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public ChatWnd chatwnd;
     private int saferadius = 1;
     private int dangerradius = 1;
-    public WeakReference<Speedget> speedget;
     public ChatUI.Channel syslog;
     public ChatUI.Channel botlog;
     public Window hidden, deleted, alerted, highlighted, overlayed, gobspawner;
@@ -136,7 +134,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public Bufflist buffs;
     public LocalMiniMap mmap;
     private MinimapWnd mmapwnd;
-//    public haven.timers.TimersWnd timerswnd;
+    //    public haven.timers.TimersWnd timerswnd;
     public QuickSlotsWdg quickslots;
     public newQuickSlotsWdg newquickslots;
     public StatusWdg statuswindow;
@@ -607,6 +605,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         DefSettings.PAUSED.set(!DefSettings.PAUSED.get());
     }
 
+    public void fixClient() {
+        PBotUtils.sysMsg(ui, String.format("Before: %d keys. %d mouses. Game focused!", ui.keygrab.size(), ui.mousegrab.size()));
+        ui.keygrab.clear();
+        ui.mousegrab.clear();
+        setfocus(map);
+        PBotUtils.sysMsg(ui, String.format("After: %d keys. %d mouses. Game focused!", ui.keygrab.size(), ui.mousegrab.size()));
+    }
+
     public void toggleCharacter() {
         if ((chrwdg != null) && chrwdg.show(!chrwdg.visible)) {
             chrwdg.raise();
@@ -1034,11 +1040,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         return (opt);
     }
 
-    private void savewndpos() {
-        if (mapfile != null) {
-            Utils.setprefc("wndsz-map", mapfile.asz);
-        }
-    }
+//    private void savewndpos() {
+//        if (mapfile != null) {
+//            Utils.setprefc("wndsz-map", mapfile.asz);
+//        }
+//    }
 
     public void addchild(Widget child, Object... args) {
         String place = ((String) args[0]).intern();
@@ -1056,13 +1062,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             mmapwnd = adda(new MinimapWnd(mmap), new Coord(sz.x, 0), 1, 0);
             if (ResCache.global != null) {
                 MapFile file = MapFile.load(ResCache.global, mapfilename());
-                if (Config.vendanMapv4) {
-                    MappingClient.getInstance().ProcessMap(file, (m) -> {
-                        if (m instanceof MapFile.PMarker && Config.vendanGreenMarkers) {
-                            return ((MapFile.PMarker) m).color.equals(Color.GREEN);
-                        }
-                        return true;
-                    });
+                if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                    if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                        MappingClient.getInstance(ui.sess.username).ProcessMap(file, (m) -> {
+                            if (m instanceof MapFile.PMarker && configuration.loadMapSetting(ui.sess.username, "green")) {
+                                return ((MapFile.PMarker) m).color.equals(Color.GREEN);
+                            }
+                            return true;
+                        });
+                    }
                 }
                 mmap.save(file);
                 mapfile = new MapWnd(mmap.save, map, Utils.getprefc("wndsz-map", new Coord(700, 500)), "Map");
@@ -1329,7 +1337,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } catch (Exception e) {
         }//exceptions doing these two things aren't critical, ignore
         if (now - lastwndsave > 60) {
-            savewndpos();
+//            savewndpos();
             lastwndsave = now;
         }
         double idle = Utils.rtime() - ui.lastevent;

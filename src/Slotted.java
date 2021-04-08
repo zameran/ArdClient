@@ -54,7 +54,6 @@ public class Slotted extends Tip {
         if (head != null) {
             l.cmp.add(head, new Coord(10, l.cmp.sz.y));
         }
-
     }
 
     public int order() {

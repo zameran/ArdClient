@@ -1,6 +1,7 @@
 package haven.res.ui.croster;
 
 import haven.Button;
+import haven.CharWnd;
 import haven.CheckBox;
 import haven.Coord;
 import haven.GOut;
@@ -33,8 +34,8 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         dev.checkFileVersion("ui/croster", 68);
     }
 
-    public static final int WIDTH = UI.scale(900);
-    public static final Comparator<Entry> namecmp = (a, b) -> a.name.compareTo(b.name);
+    public static final int WIDTH = UI.scale(1050);
+    public static final Comparator<Entry> namecmp = Comparator.comparing(a -> a.name);
     public static final int HEADH = UI.scale(40);
     public final Map<Long, T> entries = new HashMap<>();
     public final Scrollbar sb;
@@ -42,9 +43,8 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public int entryseq = 0;
     public List<T> display = Collections.emptyList();
     public boolean dirty = true;
-    public Comparator<? super T> order = namecmp;
-    public Column mousecol, ordercol;
-    public boolean revorder;
+    public Comparator<? super T> order = namecmp, torder = namecmp;
+    public Column mousecol, ordercol, tordercol;
 
     public CattleRoster() {
         super(new Coord(WIDTH, UI.scale(400)));
@@ -112,6 +112,8 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
     public void tick(double dt) {
         if (dirty) {
             List<T> ndisp = new ArrayList<>(entries.values());
+            if (order != torder)
+                ndisp.sort(torder);
             ndisp.sort(order);
             redisplay(ndisp);
             dirty = false;
@@ -139,7 +141,15 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
                 g.frect2(new Coord(col.x, 0), new Coord(col.x + col.w, sz.y));
                 g.chcolor();
             }
+            if (ordercol != tordercol && col == tordercol) {
+                g.chcolor(255, 0, 255, 16);
+                g.frect2(new Coord(col.x, 0), new Coord(col.x + col.w, sz.y));
+                g.chcolor();
+            }
             Tex head = col.head();
+            if (col.equals(cols().get(0))) {
+                head = CharWnd.attrf.render("Name " + entries.size()).tex();
+            }
             g.aimage(head, new Coord(col.x + (col.w / 2), HEADH / 2), 0.5, 0.5);
             prev = col;
         }
@@ -170,11 +180,15 @@ public abstract class CattleRoster<T extends Entry> extends Widget {
         Column col = onhead(c);
         if (button == 1) {
             if ((col != null) && (col.order != null)) {
-                revorder = (col == ordercol) ? !revorder : false;
-                this.order = col.order;
-                if (revorder)
-                    this.order = this.order.reversed();
+                this.order = this.order == col.order ? col.order.reversed() : col.order;
                 ordercol = col;
+                dirty = true;
+                return (true);
+            }
+        } else if (button == 3) {
+            if ((col != null) && (col.order != null)) {
+                this.torder = this.torder == col.order ? col.order.reversed() : col.order;
+                tordercol = col;
                 dirty = true;
                 return (true);
             }

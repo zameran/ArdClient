@@ -56,7 +56,7 @@ public class LandSurvey extends Window {
     public Label zvalue, value;
 
     public LandSurvey(Coord ul, Coord br, int tz) {
-        super(Coord.z, "Land survey", true);
+        super(Coord.z, "Land survey", "Land survey", true);
         this.ul = ul;
         this.br = br;
         this.tz = tz;

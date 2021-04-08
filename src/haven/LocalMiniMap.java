@@ -685,24 +685,28 @@ public class LocalMiniMap extends Widget {
                         sgobs.add(gob.id);
                         Audio.play(Resource.local().loadwait(Config.alarmunknownplayer), Config.alarmunknownvol);
                         if (Config.discordplayeralert) {
-                            if (Config.discorduser) {
-                                PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                            } else if (Config.discordrole) {
-                                PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                            } else {
-                                PBotDiscord.mapAlertEveryone("Player");
+                            if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                                if (Config.discorduser) {
+                                    PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                                } else if (Config.discordrole) {
+                                    PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                                } else {
+                                    PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                                }
                             }
                         }
                         enemy = true;
                     } else if (!Config.alarmredplayer.equals("None") && kininfo != null && kininfo.group == 2) {
                         sgobs.add(gob.id);
                         Audio.play(Resource.local().loadwait(Config.alarmredplayer), Config.alarmredvol);
-                        if (Config.discorduser) {
-                            PBotDiscord.mapAlert(Config.discordalertstring, "Player");
-                        } else if (Config.discordrole) {
-                            PBotDiscord.mapAlertRole(Config.discordalertstring, "Player");
-                        } else {
-                            PBotDiscord.mapAlertEveryone("Player");
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            if (Config.discorduser) {
+                                PBotDiscord.mapAlert(ui.sess.username, Config.discordalertstring, "Player");
+                            } else if (Config.discordrole) {
+                                PBotDiscord.mapAlertRole(ui.sess.username, Config.discordalertstring, "Player");
+                            } else {
+                                PBotDiscord.mapAlertEveryone(ui.sess.username, "Player");
+                            }
                         }
                         enemy = true;
                     }
@@ -829,11 +833,8 @@ public class LocalMiniMap extends Widget {
 
             g.image(resize, sz.sub(resize.sz()));
 
-            if (Config.mapshowviewdist) {
-                Gob player = mv.player();
-                if (player != null)
-                    g.image(gridblue, p2c(player.rc).add(delta).sub((int) (44 * zoom), (int) (44 * zoom)), gridblue.dim.mul(zoom));
-            }
+            if (Config.mapshowviewdist)
+                drawview(g);
         }
         drawicons(g);
 
@@ -898,6 +899,17 @@ public class LocalMiniMap extends Widget {
         //Improve minimap player markers slightly commit skip
     }
 
+    public void drawview(GOut g) {
+        Coord2d sgridsz = new Coord2d(MCache.cmaps);
+        Gob player = ui.gui.map.player();
+        if (player != null) {
+            Coord rc = p2c(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz)).add(delta);
+            g.chcolor(new Color(configuration.distanceviewcolor, true));
+            g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
+            g.chcolor();
+        }
+    }
+
     private void drawTracking(GOut g) {
         final double dist = 90000.0D;
         synchronized (ui.gui.dowsewnds) {
@@ -956,23 +968,23 @@ public class LocalMiniMap extends Widget {
                 return false;
             Coord csd = c.sub(delta);
             Coord2d mc = c2p(csd);
-            if (button == clickBind)
-                mv.pllastcc = mc;
             Gob gob = findicongob(csd.add(delta));
             if (gob == null) { //click tile
                 if (ui.modmeta && button == clickBind) {
                     mv.queuemove(c2p(c.sub(delta)));
                 } else if (button == clickBind) {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), 1, ui.modflags());
+                    mv.pllastcc = mc;
                     mv.clearmovequeue();
                 }
                 return true;
             } else {
-                if (ui.modmeta) {
+                if (ui.modflags() == UI.MOD_META) {
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.showSpecialMenu(gob);
                 } else {
                     mv.wdgmsg("click", rootpos().add(csd), mc.floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+                    mv.pllastcc = mc;
                     if (gob.getres() != null) {
                         CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                         if (itm != null && itm.selected)
@@ -1139,7 +1151,7 @@ public class LocalMiniMap extends Widget {
 //                transform.rotate(angle, bi.getWidth() / 2f, bi.getHeight() / 2f);
 //                AffineTransformOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
 //                bi = op.filter(bi, null);
-                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta));
+                g.image(bi, disp.sc.sub(img.cc.mul(iconZoom)).add(delta), new Coord(bi.getWidth(), bi.getHeight()).mul(iconZoom));
             }
         }
         g.chcolor();

@@ -55,6 +55,7 @@ import static haven.sloth.gui.MovableWidget.VISIBLE_PER;
 public class Widget {
     public UI ui;
     public Coord c, sz, oldsz;
+    public int z;
     public Widget next, prev, child, lchild, parent;
     public boolean focustab = false, focusctl = false, hasfocus = false, visible = true;
     private boolean attached = false;
@@ -487,7 +488,7 @@ public class Widget {
     public void addchild(Widget child, Object... args) {
         if (args[0] instanceof Coord) {
             Coord c = (Coord) args[0];
-            String opt = (args.length > 1) ? (String) args[1] : "";
+            String opt = (args.length > 1) && args[1] instanceof String ? (String) args[1] : "";
             if (opt.indexOf('u') < 0)
                 c = UI.scale(c);
             add(child, c);
@@ -501,21 +502,39 @@ public class Widget {
     }
 
     public void link() {
-        if (parent.lchild != null)
-            parent.lchild.next = this;
-        if (parent.child == null)
+        Widget prev;
+        for(prev = parent.lchild; (prev != null) && (prev.z > this.z); prev = prev.prev);
+        if(prev != null) {
+            if((this.next = prev.next) != null)
+                this.next.prev = this;
+            else
+                parent.lchild = this;
+            (this.prev = prev).next = this;
+        } else {
+            if((this.next = parent.child) != null)
+                this.next.prev = this;
+            else
+                parent.lchild = this;
             parent.child = this;
-        this.prev = parent.lchild;
-        parent.lchild = this;
+        }
     }
 
     public void linkfirst() {
-        if (parent.child != null)
-            parent.child.prev = this;
-        if (parent.lchild == null)
+        Widget next;
+        for(next = parent.child; (next != null) && (next.z < this.z); next = next.next);
+        if(next != null) {
+            if((this.prev = next.prev) != null)
+                this.prev.next = this;
+            else
+                parent.child = this;
+            (this.next = next).prev = this;
+        } else {
+            if((this.prev = parent.lchild) != null)
+                this.prev.next = this;
+            else
+                parent.child = this;
             parent.lchild = this;
-        this.next = parent.child;
-        parent.child = this;
+        }
     }
 
     public void unlink() {
@@ -1033,6 +1052,16 @@ public class Widget {
             ch.presize();
         if (parent != null)
             parent.cresize(this);
+    }
+
+    public void z(int z) {
+        if(z != this.z) {
+            this.z = z;
+            if(parent != null) {
+                unlink();
+                link();
+            }
+        }
     }
 
     public void move(Area a) {

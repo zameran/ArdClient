@@ -15,27 +15,32 @@ public class HorseRoster extends CattleRoster<Horse> {
     }
 
     public static List<Column> cols = initcols(
-            new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+            new Column<>("Name", Comparator.comparing((Entry e) -> e.name), 200),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Horse e) -> e.stallion).reversed(), 20).runon(),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Horse e) -> e.foal).reversed(), 20).runon(),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Horse e) -> e.dead).reversed(), 20).runon(),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Horse e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Horse e) -> e.stallion).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Horse e) -> e.foal).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Horse e) -> e.dead).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Horse e) -> e.pregnant).reversed(), 20),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Horse e) -> e.q).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Horse e) -> e.q).reversed()),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/endurance"), Comparator.comparing((Horse e) -> e.end).reversed()),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/stamina"), Comparator.comparing((Horse e) -> e.stam).reversed()),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/metabolism"), Comparator.comparing((Horse e) -> e.mb).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/endurance"), Comparator.comparing((Horse e) -> e.end).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/stamina"), Comparator.comparing((Horse e) -> e.stam).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/metabolism"), Comparator.comparing((Horse e) -> e.mb).reversed()),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Horse e) -> e.meat).reversed()),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Horse e) -> e.milk).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Horse e) -> e.meat).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Horse e) -> e.milk).reversed()),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Horse e) -> e.meatq).reversed()),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Horse e) -> e.milkq).reversed()),
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Horse e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Horse e) -> e.meatq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Horse e) -> e.tmeatq).reversed()),
 
-            new Column<Horse>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Horse e) -> e.seedq).reversed())
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Horse e) -> e.milkq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Horse e) -> e.tmilkq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Horse e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Horse e) -> e.thideq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Horse e) -> e.seedq).reversed())
     );
 
     protected List<Column> cols() {
@@ -64,6 +69,9 @@ public class HorseRoster extends CattleRoster<Horse> {
         ret.milkq = (Integer) args[n++];
         ret.hideq = (Integer) args[n++];
         ret.seedq = (Integer) args[n++];
+        ret.tmeatq = ret.meatq * ret.q / 100;
+        ret.tmilkq = ret.milkq * ret.q / 100;
+        ret.thideq = ret.hideq * ret.q / 100;
         ret.end = (Integer) args[n++];
         ret.stam = (Integer) args[n++];
         ret.mb = (Integer) args[n++];

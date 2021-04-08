@@ -12,7 +12,7 @@ import java.util.LinkedList;
 
 public abstract class Mapping extends Gob.ResAttr {
     static {
-        dev.checkFileVersion("lib/vmat", 34);
+        dev.checkFileVersion("lib/vmat", 35);
     }
 
     public abstract Material mergemat(Material orig, int mid);

@@ -110,7 +110,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     private Collection<Delayed> delayed2 = new LinkedList<Delayed>();
     private Collection<Rendered> extradraw = new LinkedList<Rendered>();
     public Camera camera = restorecam();
-    private Plob placing = null;
+    public Plob placing = null;
     private Grabber grab;
     public Selector selection;
     private MCache.Overlay miningOverlay;
@@ -2544,7 +2544,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         protected void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-            if (clickb == 3 && ui.modmeta && ui.gui.vhand == null) {
+            if (clickb == 3 && ui.modflags() == UI.MOD_META && ui.gui.vhand == null) {
                 final Optional<Gob> clickgob = gobFromClick(inf);
                 if (clickgob.isPresent()) {
                     showSpecialMenu(clickgob.get());
@@ -2596,7 +2596,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             return;
                         }
                     }
-
                 } else if (Config.proximityaggropvp && !Config.proximityaggro && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
                     Gob target = null;
                     synchronized (glob.oc) {
@@ -2613,7 +2612,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             return;
                         }
                     }
-
                 } else if (Config.proximityaggro && !Config.proximityaggropvp && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk")) {
                     Gob target = null;
                     synchronized (glob.oc) {
@@ -2654,22 +2652,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     }
                 } else {
                     Gob gob = inf.gob;
-                    if (gob != null && !ui.modctrl && !ui.modshift && !ui.modmeta && clickb == 1 && curs.name.equals("gfx/hud/curs/study")) {
+                    if (gob != null && !ui.modctrl && !ui.modshift && !ui.modmeta && clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/study")) {
                         //we're inspecting an object, prepared to intercept the system message.
                         ui.gui.inspectedgobid = gob.id;
                     }
-                    if (ui.modctrl && clickb == 3 && gob != null && gob.type == Type.TAMEDANIMAL) {//only highlight on ctrl right clicks if we're clicking on an animal during milking
-                        if (!gob.getres().name.contains("horse")) {//cant milk horses, so dont mark, send a right click.
-                            if (markedGobs.contains(gob.id))
-                                markedGobs.remove(gob.id);
-                            else
-                                markedGobs.add(gob.id);
-                            glob.oc.changed(gob);
-                        } else {
-                            wdgmsg("click", args);
-                            pllastcc = mc;
-                        }
-                    } else if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modctrl && clickb == 1 && Config.shooanimals) {
+                     if (gob != null && gob.type == Type.TAMEDANIMAL && ui.modflags() == UI.MOD_CTRL && clickb == 1 && Config.shooanimals) {
                         Resource res = gob.getres();
                         if (res != null && (res.name.startsWith("gfx/kritter/horse") ||
                                 res.name.startsWith("gfx/kritter/sheep") ||
@@ -2679,13 +2666,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             shooanimal = gob;
                             new Thread(new ShooTargeted(ui.gui), "ShooTargeted").start();
                         }
-                    } else if (ui.modmeta && ui.modctrl && clickb == 1 && gob != null) {
+                    } else if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META) && clickb == 1 && gob != null) {
                         if (markedGobs.contains(gob.id))
                             markedGobs.remove(gob.id);
                         else
                             markedGobs.add(gob.id);
                         glob.oc.changed(gob);
-                    } else if (ui.modmeta && clickb == 1) {
+                    } else if (ui.modflags() == UI.MOD_META && clickb == 1) {
                         if (gobselcb != null)
                             gobselcb.gobselect(gob);
 
@@ -2720,19 +2707,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         }
                         wdgmsg("click", args);
                         pllastcc = mc;
-                        if (gob != null && gob.getres() != null) {
+                        if (gob.getres() != null) {
                             CheckListboxItem itm = Config.autoclusters.get(gob.getres().name);
                             if (itm != null && itm.selected)
                                 startMusselsPicker(gob);
                         }
-                     /*   if (Config.autopickmussels && gob.getres() != null && (gob.getres().basename().equals("mussels") || gob.getres().basename().equals("oyster")))
-                            startMusselsPicker(gob);
-                        if (Config.autopickclay && gob.getres() != null &&  gob.getres().basename().equals("clay-gray"))
-                            startMusselsPicker(gob);
-                        if (Config.autopickbarnacles && gob.getres() != null &&  gob.getres().basename().equals("goosebarnacle"))
-                            startMusselsPicker(gob);
-                        if (Config.autopickcattails && gob.getres() != null &&  gob.getres().basename().equals("cattail"))
-                            startMusselsPicker(gob);*/
                     }
                 }
             }
@@ -2936,23 +2915,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                                     return;
                                 }
                             }
-                        }
-                        tooltip = null;
-                    }
-
-                    protected void nohit(Coord pc) {
-                        tooltip = null;
-                    }
-                });
-            }
-        } else if (ui.modshift && ui.modctrl && Config.resinfo) {
-            long now = System.currentTimeMillis();
-            if (now - lastmmhittest > 500 || lasthittestc.dist(c) > tilesz.x) {
-                lastmmhittest = now;
-                lasthittestc = c;
-                delay(new Hittest(c, 0) {
-                    public void hit(Coord pc, Coord2d mc, ClickInfo inf) {
-                        if (inf == null) {
+                        } else {
                             MCache map = ui.sess.glob.map;
                             int t = map.gettile(mc.floor(tilesz));
                             Resource res = map.tilesetr(t);
@@ -2964,7 +2927,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         tooltip = null;
                     }
 
-                    public void nohit(Coord pc) {
+                    protected void nohit(Coord pc) {
                         tooltip = null;
                     }
                 });
@@ -3570,7 +3533,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         ui.gui.add(new OverlaySelector(name), ui.mc);
                         break;
                     case 6: //Mark gob on map
-                        ui.gui.mapfile.markobj(g.id, g, configuration.getDefaultTextName(g.resname().get()));
+                        ui.gui.mapfile.markobj(g.id, g, configuration.getShortName(g.resname().get()));
                         break;
                     case 7: //Mark gob to custom marks
                         resources.customMarks.put(g.resname().get(), true);

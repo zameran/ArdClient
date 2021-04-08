@@ -31,6 +31,7 @@ public class ItemDrag extends WItem {
 
     public ItemDrag(Coord dc, GItem item) {
         super(item);
+        z(100);
         this.doff = dc;
     }
 
@@ -56,6 +57,10 @@ public class ItemDrag extends WItem {
             if (((DTarget) w).drop(c, c.add(doff.inv())))
                 return (true);
         }
+        if (w instanceof DTarget2) {
+            if (((DTarget2) w).drop(this, c, c.add(doff.inv())))
+                return (true);
+        }
         for (Widget wdg = w.lchild; wdg != null; wdg = wdg.prev) {
             if ((wdg == this) || !wdg.visible)
                 continue;
@@ -71,6 +76,10 @@ public class ItemDrag extends WItem {
     public boolean interact(Widget w, Coord c) {
         if (w instanceof DTarget) {
             if (((DTarget) w).iteminteract(c, c.add(doff.inv())))
+                return (true);
+        }
+        if (w instanceof DTarget2) {
+            if (((DTarget2) w).iteminteract(this, c, c.add(doff.inv())))
                 return (true);
         }
         for (Widget wdg = w.lchild; wdg != null; wdg = wdg.prev) {

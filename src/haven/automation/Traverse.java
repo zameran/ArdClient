@@ -108,6 +108,7 @@ public class Traverse implements Runnable {
 
         try {
             gui.map.wdgmsg("click", targetDoor.s, targetDoor.c.floor(posres), 3, 0, 0, (int) targetDoor.g, targetDoor.c.floor(posres), 0, targetDoor.m);
+            gui.map.pllastcc = targetDoor.c;
         } catch (Exception e) {
             e.printStackTrace();
         }

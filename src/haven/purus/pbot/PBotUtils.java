@@ -195,6 +195,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, int x, int y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(x, y);
     }
 
 //    public static void mapClick(int x, int y, int btn, int mod) {
@@ -211,6 +212,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, double x, double y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord2d(x, y).floor(posres), btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(x, y);
     }
 
     /**
@@ -222,6 +224,7 @@ public class PBotUtils {
      */
     public static void mapClick(UI ui, Coord2d c, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c.floor(posres), btn, mod);
+        ui.gui.map.pllastcc = c;
     }
 
     /**
@@ -234,6 +237,7 @@ public class PBotUtils {
      */
     public static void mapFinalClick(UI ui, int x, int y, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), new Coord(x, y), btn, mod);
+        ui.gui.map.pllastcc = new Coord(x, y).mul(posres);
     }
 
     /**
@@ -245,6 +249,7 @@ public class PBotUtils {
      */
     public static void mapFinalClick(UI ui, Coord c, int btn, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), c, btn, mod);
+        ui.gui.map.pllastcc = new Coord2d(c).mul(posres);
     }
 
 //    public static void mapClick(double x, double y, int btn, int mod) {
@@ -494,7 +499,6 @@ public class PBotUtils {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                waitForHourglass(ui);
             }
         }
         return true;
@@ -864,6 +868,7 @@ public class PBotUtils {
     // Modifier 1 - shift; 2 - ctrl; 4 - alt;
     public static void doClick(UI ui, Gob gob, int button, int mod) {
         ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
 //    public static void doClick(Gob gob, int button, int mod) {
@@ -872,6 +877,7 @@ public class PBotUtils {
 
     public static void doClickCrop(UI ui, Gob gob) {
         ui.gui.map.wdgmsg("click", gob.sc, gob.rc.floor(posres), 3, 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
 //    public static void doClickCrop(Gob gob) {
@@ -1200,6 +1206,7 @@ public class PBotUtils {
 
     public static void mapInteractLeftClick(UI ui, int mod) {
         ui.gui.map.wdgmsg("click", getCenterScreenCoord(ui), player(ui).rc.floor(posres), 1, ui.modflags());
+        ui.gui.map.pllastcc = player(ui).rc;
     }
 
 //    public static void mapInteractLeftClick(int mod) {
@@ -1315,7 +1322,7 @@ public class PBotUtils {
 
     //Will set player speed to whatever int you send it.
     public static void setSpeed(UI ui, int speed) {
-        Speedget speedwdg = ui.gui.speedget.get();
+        Speedget speedwdg = ui.gui.speed;
         if (speedwdg != null)
             speedwdg.set(speed);
     }
@@ -1326,7 +1333,7 @@ public class PBotUtils {
 
     //should return current max move speed? maybe?
     public static int maxSpeed(UI ui) {
-        Speedget speedwdg = ui.gui.speedget.get();
+        Speedget speedwdg = ui.gui.speed;
         if (speedwdg != null)
             return speedwdg.max;
         else
@@ -1598,6 +1605,32 @@ public class PBotUtils {
         ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
     }
 
+    public static boolean placeThing(UI ui, double x, double y, int timeout) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.add(x, y).floor(posres), 0, 1, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
+    }
+
+    public static void unplaceThing(UI ui) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.floor(posres), 0, 3, 0);
+    }
+
+    public static boolean unplaceThing(UI ui, int timeout) {
+        ui.gui.map.wdgmsg("place", player(ui).rc.floor(posres), 0, 3, 0);
+        for (int i = 0, sleep = 10; ui.gui.map.placing != null; i += sleep) {
+            if (i >= timeout) {
+                return (false);
+            }
+            PBotUtils.sleep(sleep);
+        }
+        return(true);
+    }
+
 //    public static void placeThing(int x, int y) {
 //        placeThing(PBotAPI.modeui(), x, y);
 //    }
@@ -1647,6 +1680,17 @@ public class PBotUtils {
         while (ui.gui.getwnd(windowName) == null) {
             sleep(50);
         }
+    }
+
+    public static boolean waitForWindow(UI ui, String windowName, int timeout) {
+        int retries = 0;
+        while (ui.gui.getwnd(windowName) == null) {
+            if (retries > timeout / 50)
+                return false;
+            retries++;
+            sleep(50);
+        }
+        return true;
     }
 
 //    public static void waitForWindow(String windowName) {
@@ -1928,6 +1972,26 @@ public class PBotUtils {
      */
     public static void transferItem(WItem item) {
         item.item.wdgmsg("transfer", Coord.z);
+    }
+
+    /**
+     * @param item Item to transfer
+     * @param n    -1 = all; 1 = single
+     */
+    public static void transferItem(WItem item, int n) {
+        item.item.wdgmsg("transfer", Coord.z, n);
+    }
+
+    public void transfer_identical(WItem item) {
+        item.wdgmsg("transfer-identical", item.item);
+    }
+
+    public void transfer_identical_eq(WItem item) {
+        item.wdgmsg("transfer-identical-eq", item.item);
+    }
+
+    public void drop_identical(WItem item) {
+        item.wdgmsg("drop-identical", item.item);
     }
 
 

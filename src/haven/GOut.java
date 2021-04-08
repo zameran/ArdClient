@@ -270,6 +270,14 @@ public class GOut {
         tex.dispose();
     }
 
+    public void image(BufferedImage img, Coord c, Coord sz) {
+        if (img == null)
+            return;
+        Tex tex = new TexI(img);
+        image(tex, c, sz);
+        tex.dispose();
+    }
+
     public void image(Resource.Image img, Coord c) {
         if (img == null)
             return;
@@ -416,11 +424,10 @@ public class GOut {
         final float m = (float) (c2.y - c1.y) / (c2.x - c1.x);
         if (Float.isFinite(m) && m != 0) {
             final float b = c2.y - m * c2.x;
-            float x = Math.max(c1.x < c2.x ? c1.x : c2.x, 0);
+            float x = Math.max(Math.min(c1.x, c2.x), 0);
             float y;
-            float end = Math.min(c1.x < c2.x ? c2.x : c1.x, sz.x);
+            float end = Math.min(Math.max(c1.x, c2.x), sz.x);
             float step = Math.min(1f, (end - x) / Math.abs((m * x + b) - (m * end + b)));
-
 
             st.set(cur2d);
             apply();

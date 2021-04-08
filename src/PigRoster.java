@@ -15,25 +15,30 @@ public class PigRoster extends CattleRoster<Pig> {
     }
 
     public static List<Column> cols = initcols(
-            new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+            new Column<>("Name", Comparator.comparing((Entry e) -> e.name), 200),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Pig e) -> e.hog).reversed(), 20).runon(),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Pig e) -> e.piglet).reversed(), 20).runon(),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Pig e) -> e.dead).reversed(), 20).runon(),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Pig e) -> e.hog).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Pig e) -> e.piglet).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Pig e) -> e.dead).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Pig e) -> e.pregnant).reversed(), 20),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Pig e) -> e.q).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Pig e) -> e.q).reversed()),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/trufflesnout"), Comparator.comparing((Pig e) -> e.prc).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/trufflesnout"), Comparator.comparing((Pig e) -> e.prc).reversed()),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Pig e) -> e.meat).reversed()),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Pig e) -> e.milk).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Pig e) -> e.meat).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Pig e) -> e.milk).reversed()),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Pig e) -> e.meatq).reversed()),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Pig e) -> e.milkq).reversed()),
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Pig e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Pig e) -> e.meatq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Pig e) -> e.tmeatq).reversed()),
 
-            new Column<Pig>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Pig e) -> e.seedq).reversed())
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Pig e) -> e.milkq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Pig e) -> e.tmilkq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Pig e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Pig e) -> e.thideq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Pig e) -> e.seedq).reversed())
     );
 
     protected List<Column> cols() {
@@ -61,6 +66,9 @@ public class PigRoster extends CattleRoster<Pig> {
         ret.meatq = (Integer) args[n++];
         ret.milkq = (Integer) args[n++];
         ret.hideq = (Integer) args[n++];
+        ret.tmeatq = ret.meatq * ret.q / 100;
+        ret.tmilkq = ret.milkq * ret.q / 100;
+        ret.thideq = ret.hideq * ret.q / 100;
         ret.seedq = (Integer) args[n++];
         ret.prc = (Integer) args[n++];
         return (ret);

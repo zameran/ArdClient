@@ -67,7 +67,8 @@ public enum Action {
     CLOSEST_TARGET(GameUI::closestTarget, "Target Closest Target"),
     NEXT_SESS(GameUI::nextSess, "Goto Next Session"),
     PREV_SESS(GameUI::prevSess, "Goto Previous Session"),
-    PAUSE_SESS(GameUI::pauseSess, "Pause Sess");
+    PAUSE_SESS(GameUI::pauseSess, "Pause Sess"),
+    FIX_CLIENT(GameUI::fixClient, "Fix Client");
 
 
     public final String name;

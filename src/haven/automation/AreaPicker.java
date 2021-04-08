@@ -172,6 +172,12 @@ public class AreaPicker extends Window implements Runnable {
                         updateinfo("gob");
                     }
                 }
+                protected void drawitemname(GOut g, CheckListboxItem itm) {
+                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                    Tex T = t.tex();
+                    g.image(T, new Coord(2, 2), t.sz());
+                    T.dispose();
+                }
             };
             selectedgobsearch = new ResizableTextEntry(selectedgoblbox.sz.x, "") {
                 public void changed() {
@@ -213,12 +219,12 @@ public class AreaPicker extends Window implements Runnable {
         };
         selectedflowerwnd = new Window(Coord.z, "Selecting petals") {{
             WidgetVerticalAppender wva = new WidgetVerticalAppender(this);
-            flowermenulist.forEach(i -> selectedflowerlist.add(new CheckListboxItem(i)));
+            flowermenulist.forEach((i) -> selectedflowerlist.add(new CheckListboxItem(i)));
             ArrayList<String> temp = new ArrayList<>();
-            for (String s : flowermenulist) {
+            flowermenulist.forEach((s) -> {
                 String loc = Resource.language.equals("en") ? s : Resource.getLocString(Resource.BUNDLE_FLOWER, s);
                 temp.add(Resource.language.equals("en") ? s : loc.equals(s) ? s : s + " (" + Resource.getLocString(Resource.BUNDLE_FLOWER, s) + ")");
-            }
+            });
             selectedflowerlbox = new CheckListbox(calcWidthString(temp), 10) {
                 protected void itemclick(CheckListboxItem itm, int button) {
                     if (!isblocked()) {
@@ -349,6 +355,12 @@ public class AreaPicker extends Window implements Runnable {
                         updatelist("storage");
                         updateinfo("storage");
                     }
+                }
+                protected void drawitemname(GOut g, CheckListboxItem itm) {
+                    Text t = Text.render(configuration.getShortName(itm.name) + " (" + itm.name.substring(0, itm.name.lastIndexOf('/')) + ")");
+                    Tex T = t.tex();
+                    g.image(T, new Coord(2, 2), t.sz());
+                    T.dispose();
                 }
             };
             selectedstoragesearch = new ResizableTextEntry(selectedstoragelbox.sz.x, "") {
@@ -618,41 +630,51 @@ public class AreaPicker extends Window implements Runnable {
                     }
                     mark(pgob);
                     if (pfRightClick(pgob)) {
-                        waitForFlowerMenu();
-                        if (petalExists()) {
-                            if (choosePetal()) {
-                                if (!waitFlowermenuClose()) {
-                                    botLog("Can't close the flowermenu", Color.WHITE);
-                                    stop();
-                                }
-                                waitMoving();
-                                byte wr = waitForHourglass();
-                                if (wr == 1)
-                                    botLog("hourglass is finish", Color.WHITE);
-                                else if (wr == 0)
-                                    botLog("hourglass timeout", Color.WHITE);
-                                else if (wr == 2) {
-                                    botLog("hourglass stopped. folding", Color.WHITE);
-                                    storages = storaging(storages);
-                                }
-                            } else {
-                                if (!closeFlowermenu()) {
-                                    botLog("Can't close the flowermenu", Color.WHITE);
-                                    stop();
-                                } else {
-                                    objects.remove(pgob);
-                                    break;
-                                }
+                        if (checkflowers().size() == 0) {
+                            botLog("flowermenu not required", Color.WHITE);
+                            if (waitForPickUp(pgob.getGobId())) {
+                                objects.remove(pgob);
+                                break;
                             }
                         } else {
-                            objects.remove(pgob);
-                            break;
+                            waitForFlowerMenu();
+                            if (petalExists()) {
+                                if (choosePetal()) {
+                                    if (!waitFlowermenuClose()) {
+                                        botLog("Can't close the flowermenu", Color.WHITE);
+                                        stop();
+                                    }
+                                    waitMoving();
+                                    byte wr = waitForHourglass();
+                                    if (wr == 1)
+                                        botLog("hourglass is finish", Color.WHITE);
+                                    else if (wr == 0)
+                                        botLog("hourglass timeout", Color.WHITE);
+                                    else if (wr == 2) {
+                                        botLog("hourglass stopped. folding", Color.WHITE);
+                                        storages = storaging(storages);
+                                    }
+                                } else {
+                                    if (!closeFlowermenu()) {
+                                        botLog("Can't close the flowermenu", Color.WHITE);
+                                        stop();
+                                    } else {
+                                        objects.remove(pgob);
+                                        break;
+                                    }
+                                }
+                            } else {
+                                objects.remove(pgob);
+                                break;
+                            }
                         }
                     } else {
                         objects.remove(pgob);
                         break;
                     }
                     sleep(1);
+                    if (i + 1 == retry)
+                        objects.remove(pgob);
                 }
             }
 
@@ -799,9 +821,6 @@ public class AreaPicker extends Window implements Runnable {
                 botLog("sloth path", Color.WHITE);
                 yea = ui.gui.map.pathto(pgob.gob);
                 for (int t = 0, sleep = 10; !ui.gui.map.isclearmovequeue(); t += sleep) {
-                    String s = "sloth path " + t / 1000 + "s";
-                    if (!maininfolbl.texts.equals(s))
-                        maininfolbl.settext(s);
                     sleep(10);
                 }
 
@@ -862,17 +881,18 @@ public class AreaPicker extends Window implements Runnable {
                     }
                 }
             if (!hit) {
-                return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
+                return (pgob.getRcCoords().dist(player.getRcCoords()) <= 3);
             }
             return (false);
         } else
-            return (pgob.getRcCoords().dist(player.getRcCoords()) <= 5);
+            return (pgob.getRcCoords().dist(player.getRcCoords()) <= 3);
     }
 
     public void waitMoving() throws InterruptedException {
         botLog("moving...", Color.WHITE);
-        while (PBotGobAPI.player(ui).isMoving())
+        while (PBotGobAPI.player(ui).isMoving()) {
             sleep(10);
+        }
         botLog("move stop", Color.WHITE);
     }
 
@@ -948,12 +968,26 @@ public class AreaPicker extends Window implements Runnable {
         return (false);
     }
 
+    public boolean waitForPickUp(long id) throws InterruptedException {
+        botLog("pick up ground item waiting...", Color.WHITE);
+        boolean r = false;
+        for (int i = 0, sleep = 10; i < waitingtime; i += sleep) {
+            if (PBotGobAPI.findGobById(ui, id) == null) {
+                r = true;
+                break;
+            }
+            sleep(sleep);
+        }
+
+        if (r)
+            botLog("ground item picked", Color.WHITE);
+        else
+            botLog("ground item didn't pick", Color.WHITE);
+        return (r);
+    }
+
     public boolean waitForFlowerMenu() {
         botLog("flowermenu opening waiting...", Color.WHITE);
-        if (checkflowers().size() == 0) {
-            botLog("flowermenu not required", Color.WHITE);
-            return (false);
-        }
         boolean r = PBotUtils.waitForFlowerMenu(ui, waitingtime);
         if (r)
             botLog("flowermenu opened", Color.WHITE);
@@ -1121,7 +1155,7 @@ public class AreaPicker extends Window implements Runnable {
     public void botLog(String msg, Color clr) {
         try {
             maininfolbl.settext(msg, clr);
-            System.out.println(msg);
+            System.out.println("AreaPicker: " + msg);
             ui.gui.botlog.append(msg, clr);
         } catch (Exception ignore) {
         }
@@ -1155,9 +1189,13 @@ public class AreaPicker extends Window implements Runnable {
 
             selectedgoblist.clear();
             selectedgoblbox.items.clear();
-            areagoblist.forEach(i -> selectedgoblist.add(new CheckListboxItem(i)));
+            ArrayList<String> temp = new ArrayList<>();
+            areagoblist.forEach((i) -> {
+                selectedgoblist.add(new CheckListboxItem(i));
+                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+            });
             selectedgoblbox.items.addAll(selectedgoblist);
-            selectedgoblbox.resize(calcWidthCheckListbox(selectedgoblist), selectedgoblbox.sz.y);
+            selectedgoblbox.resize(calcWidthString(temp), selectedgoblbox.sz.y);
             selectedgobwnd.pack();
             selectedgobsearch.settext("");
             if (selectedgoblbox.items.size() > 0) selectedgobbtn.change(Color.GREEN);
@@ -1183,9 +1221,13 @@ public class AreaPicker extends Window implements Runnable {
 
             selectedstoragelist.clear();
             selectedstoragelbox.items.clear();
-            areastoragelist.forEach(i -> selectedstoragelist.add(new CheckListboxItem(i)));
+            ArrayList<String> temp = new ArrayList<>();
+            areastoragelist.forEach((i) -> {
+                selectedstoragelist.add(new CheckListboxItem(i));
+                temp.add(configuration.getShortName(i) + " (" + i.substring(0, i.lastIndexOf('/')) + ")");
+            });
             selectedstoragelbox.items.addAll(selectedstoragelist);
-            selectedstoragelbox.resize(calcWidthCheckListbox(selectedstoragelist), selectedstoragelbox.sz.y);
+            selectedstoragelbox.resize(calcWidthString(temp), selectedstoragelbox.sz.y);
             selectedstoragewnd.pack();
             selectedstoragesearch.settext("");
             if (selectedstoragelbox.items.size() > 0) selectedstoragebtn.change(Color.GREEN);
@@ -1456,7 +1498,7 @@ public class AreaPicker extends Window implements Runnable {
     public Comparator<CheckListboxItem> listboxsort() {
         return (o1, o2) -> {
             int b = Boolean.compare(o2.selected, o1.selected);
-            return b == 0 ? o1.name.compareTo(o2.name) : b;
+            return b == 0 ? configuration.getShortName(o1.name).compareTo(configuration.getShortName(o2.name)) : b;
         };
     }
 
@@ -1537,8 +1579,10 @@ public class AreaPicker extends Window implements Runnable {
 
     public void destroy() {
         super.destroy();
-        if (runthread != null && runthread.isAlive())
-            runthread.interrupt();
+        try {
+            stop();
+        } catch (InterruptedException ignore) {
+        }
     }
 
 

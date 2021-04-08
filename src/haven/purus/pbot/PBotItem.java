@@ -83,6 +83,25 @@ public class PBotItem {
         gitem.wdgmsg("transfer", Coord.z);
     }
 
+    /**
+     * @param n -1 = all; 1 = single
+     */
+    public void transferItem(int n) {
+        gitem.wdgmsg("transfer", Coord.z, n);
+    }
+
+    public void transfer_identical() {
+        witem.wdgmsg("transfer-identical", gitem);
+    }
+
+    public void transfer_identical_eq() {
+        witem.wdgmsg("transfer-identical-eq", gitem);
+    }
+
+    public void drop_identical() {
+        witem.wdgmsg("drop-identical", gitem);
+    }
+
 
     /**
      * Right clicks the item in the inventory

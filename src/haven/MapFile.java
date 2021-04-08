@@ -526,8 +526,11 @@ public class MapFile {
                 }
                 if (r != null) {
                     Resource.Image ir = r.layer(Resource.imgc);
+                    TexR tr = r.layer(TexR.class);
                     if (ir != null) {
                         texes[t] = ir.img;
+                    } else if (tr != null) {
+                        texes[t] = tr.tex.fill();
                     }
                 }
                 cached[t] = true;
@@ -601,7 +604,8 @@ public class MapFile {
                             BufferedImage tex;
                             if (configuration.cavetileonmap && isContains(t, "gfx/tiles/rocks/")) {
                                 final String tname = tileName(t);
-                                final String newtype = "gfx/tiles/paving/" + tname.substring(tname.lastIndexOf("/") + 1);
+//                                final String newtype = "gfx/tiles/paving/" + tname.substring(tname.lastIndexOf("/") + 1);
+                                final String newtype = "gfx/terobjs/bumlings/" + tname.substring(tname.lastIndexOf("/") + 1);
                                 tex = tiletex(t, texes, cached, newtype);
                             } else tex = tiletex(t, texes, cached);
                             int rgb = 0;

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static haven.CharWnd.iconfilter;
+import static haven.PUtils.convolve;
+
 public class GildingWnd extends Window {
     private final WItem target;
     private final WItem gild;
@@ -21,7 +24,7 @@ public class GildingWnd extends Window {
 
 
     public GildingWnd(WItem target, WItem gild) {
-        super(new Coord(200, 100), "Gilding");
+        super(new Coord(200, 100), "Gilding", "Gilding");
         justclose = true;
 
         this.target = target;
@@ -51,10 +54,11 @@ public class GildingWnd extends Window {
         igild = ItemInfo.longtip(gild_infos);
         islots = ItemInfo.longtip(target_infos);
 
-        int h = Math.max(igild.getHeight(), islots.getHeight());
+        int itemH = Math.max(target.sz.y, gild.sz.y);
+        int h = Math.max(igild.getHeight(), islots.getHeight()) + itemH;
         int w = igild.getWidth() + islots.getWidth();
 
-        resize(new Coord(w + 45, h + 125 + (matches != null ? matches.getHeight() : 0)));
+        resize(new Coord(w + 45, h + 100 + (matches != null ? matches.getHeight() : 0)));
 
         add(new FWItem(target.item), 10, 5);
         add(new FWItem(gild.item), asz.x - 5 - gild.sz.x, 5);
@@ -110,10 +114,11 @@ public class GildingWnd extends Window {
                         .reduce(0, Integer::sum)) / 100f);
 
                 return new Pair<>(k, ItemInfo.catimgsh(8, matches.stream()
-                        .map(res -> ItemInfo.catimgsh(1,
-                                res.layer(Resource.imgc).img,
-                                charWnd.findattr(res).compline().img)
-                        )
+                        .map(res -> {
+                            BufferedImage val = charWnd.findattr(res).compline().img;
+                            Coord tsz = new Coord(val.getHeight(), val.getHeight());
+                            return ItemInfo.catimgsh(1, convolve(res.layer(Resource.imgc).img, tsz, iconfilter), val);
+                        })
                         .toArray(BufferedImage[]::new)
                 ));
             }
@@ -136,8 +141,9 @@ public class GildingWnd extends Window {
 
     @Override
     public void cdraw(GOut g) {
-        g.image(islots, new Coord(5, 40));
-        g.image(igild, new Coord(asz.x - 5 - igild.getWidth(), 40));
+        int itemH = Math.max(target.sz.y, gild.sz.y);
+        g.image(islots, new Coord(5, 10).add(0, itemH));
+        g.image(igild, new Coord(asz.x - 5 - igild.getWidth(), 10).add(0, itemH));
         if (matches != null) {
             Coord c1 = new Coord(asz.x / 2, asz.y - matches.getHeight() - 70);
             g.atext("Matching skills:", c1, 0.5, 0.5);

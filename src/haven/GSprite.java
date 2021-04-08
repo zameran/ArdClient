@@ -26,11 +26,15 @@
 
 package haven;
 
+import org.json.JSONObject;
+
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public abstract class GSprite implements Drawn {

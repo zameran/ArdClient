@@ -60,8 +60,7 @@ public class IMeter extends MovableWidget {
                 if (bg != null)
                     try {
                         name = bg.get().basename();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception ignore) {
                     }
             }
             return (new IMeter(bg, meters, "meter-" + name));

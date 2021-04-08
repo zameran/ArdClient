@@ -48,7 +48,7 @@ public class PBotGob {
     /**
      * Itemact with gob, to fill trough with item in hand for example
      *
-     * @param mod 1 = shift, 2 = ctrl, 4 = alt
+     * @param mod 1 = shift, 2 = ctrl, 4 = alt, 3 = shift + ctrl (all)
      */
     public void itemClick(int mod) {
         ui.gui.map.wdgmsg("itemact", Coord.z, gob.rc.floor(posres), mod, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
@@ -85,8 +85,8 @@ public class PBotGob {
      * @param meshId can be a door, roasting spit etc.
      */
     public void doClick(int button, int mod, int meshId) {
-        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0,
-                meshId);
+        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, meshId);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
     /**
@@ -96,8 +96,8 @@ public class PBotGob {
      * @param mod    0 = no modifier, 1 = shift, 2 = ctrl, 4 = alt
      */
     public void doClick(int button, int mod) {
-        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0,
-                -1);
+        ui.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), button, 0, mod, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        ui.gui.map.pllastcc = gob.rc;
     }
 
     /**

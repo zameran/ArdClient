@@ -13,6 +13,7 @@ import haven.RenderList;
 import haven.Sprite;
 import haven.Tex;
 import haven.Text;
+import org.json.JSONObject;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -28,46 +29,28 @@ public class newPlantStageSprite extends Sprite {
     private Camera camp;
     private final boolean multistg, offsetmultisg;
 
-    public static Map<Kit, Tex> cachedTex = new HashMap<>();
-    public static Tex getCachedTex(String text, Color color, Color bgcol, Text.Foundry fnd) {
-        Kit kit = new Kit(text, color, bgcol, fnd);
-        Tex tex = null;
-        for (Map.Entry<Kit, Tex> entry : cachedTex.entrySet())
-            if (entry.getKey().equals(kit)) {
-                tex = entry.getValue();
-                break;
-            }
+    public static Map<String, Tex> cachedTex = new HashMap<>();
+
+    public static Tex getCachedTex(String text, Color color, Color bgcol) {
+        JSONObject jo = new JSONObject();
+        jo.put("name", text);
+        jo.put("col", color.hashCode());
+        jo.put("border", bgcol.hashCode());
+
+        Tex tex = cachedTex.get(jo.toString());
         if (tex == null) {
-            tex = Text.renderstroked(text, color, bgcol, fnd).tex();
-            cachedTex.put(kit, tex);
+            tex = Text.renderstroked(text, color, bgcol, Text.num12boldFnd).tex();
+            cachedTex.put(jo.toString(), tex);
         }
         return (tex);
     }
-    public static class Kit {
-        public String text;
-        public Color color;
-        public Color bgcol;
-        public Text.Foundry fnd;
-
-        public Kit(String text, Color color, Color bgcol, Text.Foundry fnd) {
-            this.text = text;
-            this.color = color;
-            this.bgcol = bgcol;
-            this.fnd = fnd;
-        }
-
-        public boolean equals(Kit kit) {
-            return text.equals(kit.text) && color.equals(kit.color) && bgcol.equals(kit.bgcol) && fnd.equals(kit.fnd);
-        }
-    }
 
     Tex stg(int stg, int stgmax, Color clr) {
-        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, Color.BLACK, Text.num12boldFnd);
+        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, Color.BLACK);
     }
 
     Tex stg(int stg, int stgmax, Color clr, Color border) {
-        Tex tex = Text.renderstroked(String.format("%d/%d", stg, stgmax), clr, border, Text.num12boldFnd).tex();
-        return tex;
+        return getCachedTex(String.format("%d/%d", stg, stgmax), clr, border);
     }
 
     public newPlantStageSprite(int stg, int stgmax, boolean multistg, boolean offsetmultisg) {
@@ -116,6 +99,7 @@ public class newPlantStageSprite extends Sprite {
             else
                 tex = stg(truestg, truestgmax, Color.red);
         }
+        tex.dispose();
     }
 
     public Object staticp() {

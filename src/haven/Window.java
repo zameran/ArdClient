@@ -160,7 +160,7 @@ public class Window extends MovableWidget implements DTarget {
             Coord sz = (Coord) args[0];
             String cap = (args.length > 1) ? (String) args[1] : null;
             boolean lg = (args.length > 2) && ((Integer) args[2] != 0);
-            if (!Config.stackwindows && cap != null && cap.equals((Resource.getLocString(Resource.BUNDLE_WINDOW, "Cupboard")))) {
+            if (!Config.stackwindows && cap != null && cap.equals("Cupboard")) {
                 return (new Window(sz, cap, lg, Coord.z, Coord.z));
             } else {
                 return (new Window(sz, cap, cap, lg, Coord.z, Coord.z));

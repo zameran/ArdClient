@@ -32,6 +32,7 @@ import haven.purus.pbot.PBotUtils;
 import haven.sloth.gob.HeldBy;
 import haven.sloth.gob.Hidden;
 import haven.sloth.gob.Holding;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -967,7 +968,16 @@ public class OCache implements Iterable<Gob> {
     }
 
     public synchronized void resattr(Gob g, Indir<Resource> resid, Message dat) {
-        if (resid.toString().contains("10370") || resid.toString().contains("ui/croster")) {
+        if (resid.toString().contains(configuration.crosterresid + "") || resid.toString().contains("ui/croster")) {
+            try {
+                if (resid.toString().contains("ui/croster")) {
+                    int id = getUI().sess.getresid(resid.get());
+                    if (configuration.crosterresid == -1 || configuration.crosterresid != id) {
+                        configuration.crosterresid = id;
+                        Utils.setprefi("crosterresid", id);
+                    }
+                }
+            } catch (Loading le) {}
             Defer.later(new Defer.Callable<Void>() {
                 public Void call() {
                     try {
@@ -977,7 +987,7 @@ public class OCache implements Iterable<Gob> {
                     } catch (Loading le) {
                         Defer.later(this);
                     }
-                    return null;
+                    return (null);
                 }
             });
         }

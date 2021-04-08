@@ -1,3 +1,143 @@
+Details in https://github.com/Cediner/ArdClient/commits/Unstable
+20210326
+-- Added Land Survey position saving
+~
+
+20210325
+-- Improved mapping (autoupload marks, individual options for each account)
+-- Fixed fightview draw
+~
+
+20210324
+-- Some graphic minimap fixes (color for view squad, scaling minimap icons, temporary marks)
+~ (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+
+20210321
+-- Added resource cleaner (Modification - Dev - RESOURCE CLEANER) - Delete only resources excluding other files
+-- Fixed farmer stockpiles
+-- Fixed image decoder
+-- Fixed map's view distance
+-- Added again gemstone cache
+-- Fixed horse speedget
+~ (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+
+20210319
+-- Map improved (can you see when used, should not be difficult)
+-- Added quail to table
+-- Fixed item filter (added UNICODE). Fixed missing combat tip. Fixed stuck for purus pathfinder (loop). Fixed cupboard stacking for localization
+~(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+
+20210316
+-- Fixed old bug with PBot drink (deleted waitForHourglass and move it to drink thread)
+-- Added [Shift] tooltip to gildable items
+-- Fixed food service and food satiation info
+-- Small fix of farmer
+~
+
+20210315
+-- Small farmer fix. Added trough folding
+~
+
+20210313
+-- Fixed a bug with terrible lags in the rubble of the archer tower
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210308.
+-- Added F12 key to fix client when button is sticky
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210308
+-- Fixed Cattle Roster highlight
+-- Fixed Gilding window matching
+-- Remove CTRL+RMB highlight (CTRL+ALT+LRM alternative)
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210307
+-- Out of memory possible fix
+-- Gilding window switch option (Modification - New gilding window)
+-- Updated wound list
+-- Fixed resource name tooltip
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210306 - Some fixes
+-- Fixed shift tooltip, slow fillcheesetray, temporary marks, special menu
+-- Gilding window (it was already but did not work)
+-- Some additions for PBot
+-- In general -  there is nothing to see here
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210305 - Minor fixes and features
+-- Compact interface for displaying tooltip for gilding (overcome by shift). Now your item with 1000 gilding will fit in the screen
+-- Fixed bugs with names and marks and highlighting for animals (occurred for example when deleting an animal from the table)
+-- Fixed wrong coordinates for tracking lines
+-- Fixed incorrect SD quality image decoder (now in 4K)
+-- Rockdove added as a smallanimal type
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210304 - Default cattle roster upgrade
+-- Now you can sort animals by two types (for example, sex and quality - left mouse button (main) and right mouse button (side))
+-- Marked animals are now highlighted like in the old livestock manager
+-- Added columns with final quality next to their percentages
+(Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210302 - There's nothing here
+-- Fixed hidden boulders
+-- Now more boulders are boulders
+⣯⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⡿⠉⠈⠛⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⡿⠿⠟⠛⠋⠛⡿⣿⣿⣿⣿
+⠇⠀⢀⣀⣀⠀⠀⠀ ⠈⣿⣿⣿⣿⣿⣾⣇⠀⡀⠀⢀⣀⣀⣀⣀⠻⣿⣿⣿⣿⣿
+⠀⠀⠙⠛⠻⣽⠻⢦⣄⠘⢿⣿⣿⣿⣿⣿⠿⠿⠿⠛⠻⣿⣿⣿⣿⣌⡉⠉⢿⣿
+⣶⠀⠐⠆⠀⠀⡾⢦⣬⠓⢼⣿⣿⣿⣿⣿⣶⣦⡀⠄⠀⢀⠠⡤⠁⢀⣀⣿⣿⣿
+⣿⣷⡀⠀⠈⣶⣶⣾⣿⡀⣿⣿⣿⣿⣿⣿⣿⣿⣄⡐⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣶⣶⣿⣿⣿⠋⢁⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⡟⢰⣿⣿⣿⣿⣿⣩⣿⡍⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⡷⠚⠻⢿⡿⠿⠛⠻⢿⠇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⢻⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠐⠀⠀ ⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠈⢿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⠈⠙⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⠸⣿⡇⠀⠀⠀⠀⠀⠒⠺⠷⠶⠤⠤⢤⣤⣀⠀⠀⠀ ⠈⢿⣿⣿⣿⣿⣿⣿⣿
+⠀⠀⢹⣇⠀⠀⣠⣤⣴⣶⣤⣤⣤⣤⣤⣤⣄⣉⣙⣠⣤⣄⣸⣿⣿⣿⣿⣿⣿⣿
+⠀⠀⠀⢿⡆⠰⣿⣿⣿⣯⣭⣉⣙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⠀⠀⠘⣧⣀⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣸
+~
+
+20210301. - Fix of fixes
+-- Fixes that are not even worth describing (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210301 - Random Keyboard Pokes
+-- Changed MarkerList in the map window to modern
+-- Added option to show overlays while object is hidden (Options - Hidden)
+-- Updated 4k character statusbar meters, and the speedometer
+-- Added Eagle Owl to Dander Animal list
+-- Some fixes AreaPicker, Farmer, Resource wrong version, plant sprite, map temp marks (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210226 - Hot Fixes
+-- Fixed a bug when the script tries to get information from a not loaded item (FillCheeseTray script)
+~
+
+20210225.
+Hot Fixes
+-- Fixed IllegalMonitorStateException of move queue
+-- In parallel, the display of tracking on the map was fixed (rustroot, dowse)
+-- The farmer now checks the growth stage before harvesting (it happened that the plant grew at the most inopportune moment)
+-- Some fixes AreaPicker (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
+20210225
+Some Fixes
+-- Quality transfer for stockpiles
+-- Fixed problems with coordinates on a large map (triangulation, temp marks, and more)
+-- Some fixes AreaPicker, animal hitboxex (goat, lamb), pregant info, out of memory, miner alert, combat actions info. (Details in https://github.com/Cediner/ArdClient/commits/Unstable)
+~
+
 20210221
 Temporary marks (Modification - Map). Fixes.
 ~

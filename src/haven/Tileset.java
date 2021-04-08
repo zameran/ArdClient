@@ -26,12 +26,10 @@
 
 package haven;
 
-import modification.dev;
+import modification.configuration;
 
-import javax.imageio.ImageIO;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +62,7 @@ public class Tileset extends Resource.Layer {
             w = buf.uint16();
             try {
                 img = Resource.readimage(new MessageInputStream(buf));
-                if (dev.decodeCode) decode(img);
+                configuration.decodeimage(img, getres(), "tile", "");
             } catch (IOException e) {
                 throw (new Resource.LoadException(e, res));
             }
@@ -79,30 +77,6 @@ public class Tileset extends Resource.Layer {
         }
 
         public void init() {
-        }
-
-        public void decode(BufferedImage img) {
-            String name = getres().name;
-            File dir = new File("decode" + File.separator + name.replace("/", File.separator) + "(v" + id + ")");
-            dir.mkdirs();
-            String filename = "tileset_" + name.substring(name.lastIndexOf('/') + 1) + ".png";
-            File outputfile = new File(dir, filename);
-            if (!outputfile.exists()) {
-                new Thread("decode tileset " + outputfile.getPath()) {
-                    public void run() {
-                        try {
-                            if (img == null) {
-                                dev.resourceLog("tileset", outputfile.getPath(), "NULL");
-                                return;
-                            }
-                            ImageIO.write(img, "png", outputfile);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        dev.resourceLog("tileset", outputfile.getPath(), "CREATED");
-                    }
-                }.start();
-            }
         }
     }
 
@@ -197,6 +171,7 @@ public class Tileset extends Resource.Layer {
                 for (int i = 0; i < nt; i++)
                     g.drawImage(order[i].img, place[i].x, place[i].y, null);
                 g.dispose();
+                configuration.decodeimage(buf, getres(), "tileset", "");
                 return (buf);
             }
 

@@ -36,6 +36,7 @@ public class TransferToObject implements Runnable {
             return;
         String wndName = PBotGobAPI.gobWindowMap.get(gob.getres().name);
         gui.map.wdgmsg("click", Coord.z, gob.rc.floor(posres), 3, 0, 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+        gui.map.pllastcc = gob.rc;
         int retries = 0;
         while (retries < 50) {
             if (shouldStop) {

@@ -30,6 +30,7 @@ import static haven.Action.CRAWL_SPEED;
 import static haven.Action.CYCLE_SPEED;
 import static haven.Action.DRINK;
 import static haven.Action.FILTER;
+import static haven.Action.FIX_CLIENT;
 import static haven.Action.HARVEST_FORAGEABLE;
 import static haven.Action.LOCAL_SCREENSHOT;
 import static haven.Action.LOGOUT;
@@ -183,6 +184,7 @@ public class KeyBinder {
         add(KeyEvent.VK_ADD, 0, NEXT_SESS);
         add(KeyEvent.VK_SUBTRACT, 0, PREV_SESS);
         add(KeyEvent.VK_F12, CTRL, PAUSE_SESS);
+        add(KeyEvent.VK_F12, 0, FIX_CLIENT);
     }
 
     private static synchronized void store() {

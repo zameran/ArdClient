@@ -44,7 +44,7 @@ import java.util.TreeMap;
 public class UI {
     public RootWidget root;
     public static int MOD_SHIFT = 1, MOD_CTRL = 2, MOD_META = 4, MOD_SUPER = 8;
-    final private LinkedList<Grab> keygrab = new LinkedList<Grab>(), mousegrab = new LinkedList<Grab>();
+    final protected LinkedList<Grab> keygrab = new LinkedList<Grab>(), mousegrab = new LinkedList<Grab>();
     public Map<Integer, Widget> widgets = new TreeMap<Integer, Widget>();
     public Map<Widget, Integer> rwidgets = new HashMap<Widget, Integer>();
     Receiver rcvr;
@@ -225,6 +225,10 @@ public class UI {
                     dev.resourceLog("Null parent widget newwidget", parent, id, type, pargs, cargs);
 //                        throw (new UIException("Null parent widget " + parent + " for " + id, type, cargs));
                     return;
+                }
+                //fix for calf info
+                if (pargs.length > 0 && pargs[0].equals("!w_px^oy5S+c") && cargs.length > 0 && cargs[0].toString().contains("-- With")) {
+                    pargs[0] = new Coord(0, 72);
                 }
                 pwdg.addchild(wdg, pargs);
 

@@ -27,6 +27,7 @@
 package haven;
 
 import haven.sloth.script.SessionDetails;
+import integrations.mapv4.MappingClient;
 
 import java.io.IOException;
 import java.lang.ref.Reference;
@@ -708,6 +709,12 @@ public class Session implements Resource.Resolver {
     }
 
     public void close() {
+        if (this.alive() && this.username != null) {
+            MappingClient.getInstance(username).SetEndpoint("");
+            MappingClient.getInstance(username).EnableGridUploads(false);
+            MappingClient.getInstance(username).EnableTracking(false);
+            MappingClient.removeInstance(username);
+        }
         if (glob != null && glob.ui != null && glob.ui.get() != null && glob.ui.get().gui != null) {
             glob.ui.get().gui.reqdestroy();
         }

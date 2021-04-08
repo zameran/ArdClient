@@ -27,6 +27,7 @@
 package haven;
 
 import integrations.mapv4.MappingClient;
+import modification.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,13 @@ public class Charlist extends Widget {
     }
 
     protected void added() {
+        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                MappingClient.getInstance(ui.sess.username).SetEndpoint(Utils.getpref("vendan-mapv4-endpoint", ""));
+                MappingClient.getInstance(ui.sess.username).EnableGridUploads(configuration.loadMapSetting(ui.sess.username, "mapper"));
+//                MappingClient.getInstance(ui.sess.username).EnableTracking(configuration.loadMapSetting(ui.sess.username, "track"));
+            }
+        }
         parent.setfocus(this);
         ui.charlist = this;
         Button btn = new Button(90, "Log out") {
@@ -144,8 +152,11 @@ public class Charlist extends Widget {
                 for (Char c : chars) {
                     if (sender == c.plb) {
                         wdgmsg("play", c.name);
-                        if (Config.vendanMapv4)
-                            MappingClient.getInstance().SetPlayerName(c.name);
+                        if (ui.sess != null && ui.sess.alive() && ui.sess.username != null) {
+                            if (configuration.loadMapSetting(ui.sess.username, "mapper")) {
+                                MappingClient.getInstance(ui.sess.username).SetPlayerName(c.name);
+                            }
+                        }
                     }
                 }
             }

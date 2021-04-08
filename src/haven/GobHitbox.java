@@ -3,7 +3,6 @@ package haven;
 import haven.sloth.gob.Type;
 
 import javax.media.opengl.GL2;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,8 +87,8 @@ public class GobHitbox extends Sprite {
     }
 
     private static final BBox[] bboxCalf = new BBox[]{new BBox(new Coord(-9, -3), new Coord(9, 3))};
-    private static final BBox[] bboxLamb = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
-    private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-6, -2), new Coord(6, 2))};
+    private static final BBox[] bboxLamb = new BBox[]{new BBox(new Coord(-4, -2), new Coord(5, 2))};
+    private static final BBox[] bboxGoat = new BBox[]{new BBox(new Coord(-3, -2), new Coord(4, 2))};
     private static final BBox[] bboxPig = new BBox[]{new BBox(new Coord(-6, -3), new Coord(6, 3))};
 //    private static final BBox[] bboxCattle = new BBox[]{new BBox(new Coord(-12, -4), new Coord(12, 4))};
     private static final BBox[] bboxHorse = new BBox[]{new BBox(new Coord(-8, -4), new Coord(8, 4))};
@@ -150,10 +149,10 @@ public class GobHitbox extends Sprite {
 //            return bboxWallseg;
 //        else if (name.endsWith("/hwall"))
 //            return bboxHwall;
-        
+
         if (name.endsWith("/consobj")) {
             ResDrawable rd = gob.getattr(ResDrawable.class);
-            if (rd != null && rd.sdt.rbuf.length >=4) {
+            if (rd != null && rd.sdt.rbuf.length >= 4) {
                 MessageBuf buf = rd.sdt.clone();
                 return new BBox[]{new BBox(new Coord(buf.rbuf[0], buf.rbuf[1]), new Coord(buf.rbuf[2], buf.rbuf[3]))};
             }
@@ -293,45 +292,23 @@ public class GobHitbox extends Sprite {
             }
         }
 
+        List<BBox> bBoxes = new ArrayList<>();
         if (obsts.size() > 0) {
-//            Resource.Obst obst = null;
-//            for (Resource.Obst hb : obsts) {
-//                ResDrawable rd = gob.getattr(ResDrawable.class);
-//                if (rd != null) {
-//                    if (hb.vc == rd.sdt.peekrbuf(0)) {
-//                        obst = hb;
-//                        break;
-//                    }
-//                }
-//            }
-//            if (obst == null) obst = obsts.get(0);
-//
-//            BBox[] bbox = new BBox[obst.ep.length];
-//            for (int i = 0; i < obst.ep.length; i++) {
-//                bbox[i] = new BBox(obst.ep[i]);
-//            }
+            for (int o = 0; o < obsts.size(); o++)
+                for (int i = 0; i < obsts.get(o).ep.length; i++)
+                    bBoxes.add(new BBox(obsts.get(o).ep[i]));
+        }
+        if (neg != null) {
+            bBoxes.add(new BBox(neg.bs, neg.bc));
+        }
 
-            int obs = 0;
-            for (Resource.Obst o : obsts) {
-                for (int i = 0; i < o.ep.length; i++) {
-                    obs++;
-                }
-            }
-
-            final BBox[] bbox = new BBox[obs];
-            obs = 0;
-            for (int o = 0; o < obsts.size(); o++) {
-                for (int i = 0; i < obsts.get(o).ep.length; i++) {
-                    bbox[obs] = new BBox(obsts.get(o).ep[i]);
-                    obs++;
-                }
-            }
-            return bbox;
-        } else if (neg != null) {
-            BBox[] bbox = new BBox[]{new BBox(neg.bs, neg.bc)};
-            return bbox;
+        if (bBoxes.isEmpty()) {
+            return (null);
         } else {
-            return null;
+            BBox[] boxes = new BBox[bBoxes.size()];
+            for (int i = 0; i < bBoxes.size(); i++)
+                boxes[i] = bBoxes.get(i);
+            return (boxes);
         }
     }
 }

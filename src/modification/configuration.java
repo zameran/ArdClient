@@ -5,24 +5,16 @@ import haven.Config;
 import haven.Coord;
 import haven.Coord2d;
 import haven.Gob;
-import haven.Light;
 import haven.MainFrame;
-import haven.Material;
 import haven.OCache;
 import haven.PUtils;
-import haven.RenderList;
-import haven.Rendered;
+import haven.Resource;
 import haven.Session;
-import haven.States;
 import haven.Tex;
 import haven.TexI;
 import haven.Utils;
-import haven.resutil.WaterTile;
 import haven.sloth.gfx.SnowFall;
-import haven.sloth.util.ObservableMap;
-import org.apache.commons.collections4.list.TreeList;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
@@ -35,11 +27,16 @@ import java.awt.geom.Line2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,29 +49,6 @@ public class configuration {
     public static String picturePath = modificationPath + "/picture";
     public static String errorPath = "errors";
     public static String pbotErrorPath = "pboterrors";
-    public static List<String> hatslist = new ArrayList<>(Arrays.asList("gfx/terobjs/items/hats/mooncap", "gfx/terobjs/items/hats/evileyehat"));
-    public static List<String> normalhatslist = new TreeList<>(Arrays.asList(
-            "gfx/terobjs/items/linkhat",
-            "gfx/terobjs/items/hats/jesterscap",
-            "gfx/terobjs/items/hats/blackguardsmanscap",
-            "gfx/terobjs/items/hats/deputyshat",
-            "gfx/terobjs/items/hats/redcorsairshat",
-            "gfx/terobjs/items/hats/inquisitorshat",
-            "gfx/terobjs/items/hats/yulebell",
-            "gfx/terobjs/items/hats/christmusketeershat",
-            "gfx/terobjs/items/hats/magicrown",
-            "gfx/terobjs/items/hats/evileyehat",
-            "gfx/terobjs/items/hats/highwaymanhat",
-            "gfx/terobjs/items/hats/exotichat",
-            "gfx/terobjs/items/hats/spiderfarmershat",
-            "gfx/terobjs/items/hats/flagshipcaptain",
-            "gfx/terobjs/items/hats/merrygreenhat",
-            "gfx/terobjs/items/sprucecap",
-            "gfx/terobjs/largechest"
-    ));
-    public static ObservableMap<String, Boolean> customHats = Utils.loadCustomList(normalhatslist, "CustomHats");
-    public static String defaultbrokenhat = "gfx/terobjs/items/sprucecap";
-    public static String hatreplace = Utils.getpref("hatreplace", defaultbrokenhat);
 
     public static boolean customTitleBoolean = Utils.getprefb("custom-title-bol", false);
 
@@ -111,6 +85,7 @@ public class configuration {
     public static boolean newCropStageOverlay = Utils.getprefb("newCropStageOverlay", false);
 
     public static boolean newQuickSlotWdg = Utils.getprefb("newQuickSlotWdg", false);
+    public static boolean newgildingwindow = Utils.getprefb("newgildingwindow", true);
 
     public static boolean scaletree = Utils.getprefb("scaletree", false);
     public static int scaletreeint = Utils.getprefi("scaletreeint", 25);
@@ -199,9 +174,11 @@ public class configuration {
     public static boolean showactioninfo = Utils.getprefb("showactioninfo", false);
     public static boolean showinvnumber = Utils.getprefb("showinvnumber", false);
     public static boolean moredetails = Utils.getprefb("moredetails", false);
+    public static boolean showhiddenoverlay = Utils.getprefb("showhiddenoverlay", true);
 
     public static boolean scalingmarks = Utils.getprefb("scalingmarks", false);
     public static boolean bigmapshowgrid = Utils.getprefb("bigmapshowgrid", false);
+    public static boolean bigmapshowviewdist = Utils.getprefb("bigmapshowviewdist", false);
     public static boolean bigmaphidemarks = Utils.getprefb("bigmapshowmarks", false);
     public static boolean allowtexturemap = Utils.getprefb("allowtexturemap", true);
     public static boolean allowoutlinemap = Utils.getprefb("allowoutlinemap", true);
@@ -222,8 +199,10 @@ public class configuration {
     public static int pfcolor = Utils.getprefi("pfcolor", Color.MAGENTA.hashCode());
     public static int dowsecolor = Utils.getprefi("dowsecolor", Color.MAGENTA.hashCode());
     public static int questlinecolor = Utils.getprefi("questlinecolor", Color.MAGENTA.hashCode());
+    public static int distanceviewcolor = Utils.getprefi("distanceviewcolor", new Color(10, 200, 200).hashCode());
 
     public static boolean nocursor = Utils.getprefb("nocursor", false);
+    public static int crosterresid = Utils.getprefi("crosterresid", -1);
 
     public static String[] customMenuGrid = new String[]{Utils.getpref("customMenuGrid0", "6"), Utils.getpref("customMenuGrid1", "4")};
 
@@ -515,13 +494,13 @@ public class configuration {
         }
     }
 
-    public static String getDefaultTextName(String gobname) {
-        if (gobname.contains("/")) {
-            int p = gobname.lastIndexOf('/');
-            if (p < 0) return (gobname);
-            return gobname.substring(p + 1, p + 2).toUpperCase() + gobname.substring(p + 2);
-        } else return gobname;
-
+    public static String getShortName(String name) {
+        if (name.contains("/")) {
+            int p = name.lastIndexOf('/');
+            if (p < 0) return (name);
+            return (name.substring(p + 1, p + 2).toUpperCase() + name.substring(p + 2));
+        } else
+            return (name.substring(0, 1).toUpperCase());
     }
 
 
@@ -694,12 +673,6 @@ public class configuration {
         return (c2);
     }
 
-
-    public static boolean paintcloth = Utils.getprefb("paintcloth", false);
-    public static ObservableMap<String, Boolean> painedcloth = Utils.loadCustomList(new ArrayList<>(), "PaintedClothList");
-    public static String[] clothfilters = new String[]{"Rendered.eyesort", "Rendered.deflt", "Rendered.first", "Rendered.last", "Rendered.postfx", "Rendered.postpfx", "States.vertexcolor", "WaterTile.surfmat", "Light.vlights", "WaterTile.wfog"};
-    public static String clothcol = "Material.Colors";
-
     public static JSONObject loadjson(String filename) {
         String result = "";
         BufferedReader br = null;
@@ -747,114 +720,220 @@ public class configuration {
         return (new JSONObject(result));
     }
 
-    public static JSONObject painedclothjson = loadjson("PaintedCloth.json");
+    public static void savejson(String filename, JSONObject jsonObject) {
+        FileWriter jsonWriter = null;
+        try {
+            jsonWriter = new FileWriter(filename);
+            jsonWriter.write(jsonObject.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (jsonWriter != null) {
+                    jsonWriter.flush();
+                    jsonWriter.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-    public static void paintcloth(String res, RenderList r) {
-        for (String ps : configuration.painedcloth.keySet()) {
-            if (res.contains(ps)) {
-                boolean check = configuration.painedcloth.get(ps);
-                if (check) {
-                    JSONObject o = new JSONObject();
+    public static byte[] createBytes(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(bos);
+            out.writeObject(object);
+            out.flush();
+            return (bos.toByteArray());
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
+            }
+        }
+    }
+
+    public static Object readBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        ObjectInput in = null;
+        try {
+            in = new ObjectInputStream(bis);
+            return (in.readObject());
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
+            }
+        }
+    }
+
+    public static byte[] imageToBytes(BufferedImage img) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        return baos.toByteArray();
+    }
+
+    public static BufferedImage bytesToImage(byte[] bytes) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        return ImageIO.read(bais);
+    }
+
+    public static byte[] JSONArrayToBytes(JSONArray jsonArray) {
+        byte[] bytes = new byte[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); i++) {
+            bytes[i] = (byte) (((int) jsonArray.get(i)) & 0xFF);
+        }
+        return (bytes);
+    }
+
+    public static void decodeimage(BufferedImage bi, Resource res, String type, String n) {
+        if (dev.decodeCode) {
+            String hash = "";
+            try {
+                hash = Arrays.hashCode(configuration.imageToBytes(bi)) + "";
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            File dir = new File("decode" + File.separator + res.toString().replace("/", File.separator));
+            dir.mkdirs();
+            String filename = res.name.substring(res.name.lastIndexOf('/') + 1) + "_" + n + hash + ".png";
+            File outputfile = new File(dir, filename);
+            if (!outputfile.exists()) {
+                new Thread(() -> {
+                    if (bi == null) {
+                        dev.resourceLog(type, outputfile.getPath(), "NULL");
+                        return;
+                    }
                     try {
-                        o = configuration.painedclothjson.getJSONObject(ps);
-                    } catch (JSONException ignored) {
+                        ImageIO.write(bi, "png", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    if (o.length() > 0) {
-                        for (String n : o.keySet()) {
-                            if (n.equals(configuration.clothcol)) {
-                                JSONArray ar = new JSONArray();
-                                try {
-                                    ar = o.getJSONArray(configuration.clothcol);
-                                } catch (JSONException ignored) {
-                                }
-                                if (ar.length() > 0) {
-                                    boolean f = false;
-                                    int ac = -1, dc = -1, sc = -1, ec = -1, shine = 0;
-                                    try {
-                                        f = ar.getBoolean(0);
-                                    } catch (JSONException ignored) {
-                                    }
-                                    JSONObject colorj = new JSONObject();
-                                    try {
-                                        colorj = ar.getJSONObject(1);
-                                    } catch (JSONException ignored) {
-                                    }
-                                    if (colorj.length() > 0) {
-                                        try {
-                                            ac = colorj.getInt("Ambient");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            dc = colorj.getInt("Diffuse");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            sc = colorj.getInt("Specular");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            ec = colorj.getInt("Emission");
-                                        } catch (JSONException ignored) {
-                                        }
-                                        try {
-                                            shine = colorj.getInt("Shine");
-                                        } catch (JSONException ignored) {
-                                        }
-                                    }
+                    dev.resourceLog(type, outputfile.getPath(), "CREATED");
+                }, "decode " + type + " " + outputfile.getPath()).start();
+            }
+        }
+    }
 
-                                    if (f)
-                                        r.prepc(new Material.Colors(
-                                                new Color(ac, true),
-                                                new Color(dc, true),
-                                                new Color(sc, true),
-                                                new Color(ec, true),
-                                                shine / 100f
-                                        ));
-                                }
-                            } else {
-                                boolean f = false;
-                                try {
-                                    f = o.getBoolean(n);
-                                } catch (JSONException ignored) {
-                                }
-                                if (f)
-                                    switch (n) {
-                                        case "Rendered.eyesort":
-                                            r.prepc(Rendered.eyesort);
-                                            break;
-                                        case "Rendered.deflt":
-                                            r.prepc(Rendered.deflt);
-                                            break;
-                                        case "Rendered.first":
-                                            r.prepc(Rendered.first);
-                                            break;
-                                        case "Rendered.last":
-                                            r.prepc(Rendered.last);
-                                            break;
-                                        case "Rendered.postfx":
-                                            r.prepc(Rendered.postfx);
-                                            break;
-                                        case "Rendered.postpfx":
-                                            r.prepc(Rendered.postpfx);
-                                            break;
-                                        case "States.vertexcolor":
-                                            r.prepc(States.vertexcolor);
-                                            break;
-                                        case "WaterTile.surfmat":
-                                            r.prepc(WaterTile.surfmat);
-                                            break;
-                                        case "Light.vlights":
-                                            r.prepc(Light.vlights);
-                                            break;
-                                        case "WaterTile.wfog":
-                                            r.prepc(WaterTile.wfog);
-                                            break;
-                                    }
-                            }
-                        }
+//    public static String loadToken(String username) {
+//        try {
+//            String loginsjson = Utils.getpref("maptokens", null);
+//            if (loginsjson == null)
+//                return (null);
+//            JSONArray ja = new JSONArray(loginsjson);
+//            for (int i = 0; i < ja.length(); i++) {
+//                JSONObject jo = ja.getJSONObject(i);
+//                if (jo.getString("name").equals(username)) {
+//                    return (jo.getString("token"));
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return (null);
+//    }
+//
+//    public static void saveToken(String username, String token) {
+//        try {
+//            String loginsjson = Utils.getpref("maptokens", null);
+//            JSONArray ja;
+//            if (loginsjson == null) {
+//                ja = new JSONArray();
+//                JSONObject jo = new JSONObject();
+//                jo.put("name", username);
+//                jo.put("token", token);
+//                ja.put(jo);
+//            } else {
+//                boolean isExist = false;
+//                ja = new JSONArray(loginsjson);
+//                for (int i = 0; i < ja.length(); i++) {
+//                    JSONObject jo = ja.getJSONObject(i);
+//                    if (jo.getString("name").equals(username)) {
+//                        jo.put("token", token);
+//                        isExist = true;
+//                        break;
+//                    }
+//                }
+//                if (!isExist) {
+//                    JSONObject jo = new JSONObject();
+//                    jo.put("name", username);
+//                    jo.put("token", token);
+//                    ja.put(jo);
+//                }
+//            }
+//            Utils.setpref("maptokens", ja.toString());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public static boolean loadMapSetting(String username, String type) {
+        try {
+            String loginsjson = Utils.getpref("json-vendan-mapv4", null);
+            if (loginsjson == null) {
+                JSONArray ja = new JSONArray();
+                JSONObject jo = new JSONObject();
+                jo.put("name", username);
+                jo.put(type, true);
+                ja.put(jo);
+                Utils.setpref("json-vendan-mapv4", ja.toString());
+                return (true);
+            }
+            JSONArray ja = new JSONArray(loginsjson);
+            for (int i = 0; i < ja.length(); i++) {
+                JSONObject jo = ja.getJSONObject(i);
+                if (jo.getString("name").equals(username)) {
+                    boolean bol = true;
+                    try {
+                        bol = jo.getBoolean(type);
+                    } catch (Exception ignored) {
                     }
+                    return (bol);
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (true);
+    }
+
+    public static void saveMapSetting(String username, boolean bol, String type) {
+        try {
+            String loginsjson = Utils.getpref("json-vendan-mapv4", null);
+            JSONArray ja;
+            if (loginsjson == null) {
+                ja = new JSONArray();
+                JSONObject jo = new JSONObject();
+                jo.put("name", username);
+                jo.put(type, bol);
+                ja.put(jo);
+            } else {
+                boolean isExist = false;
+                ja = new JSONArray(loginsjson);
+                for (int i = 0; i < ja.length(); i++) {
+                    JSONObject jo = ja.getJSONObject(i);
+                    if (jo.getString("name").equals(username)) {
+                        jo.put(type, bol);
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    JSONObject jo = new JSONObject();
+                    jo.put("name", username);
+                    jo.put(type, bol);
+                    ja.put(jo);
+                }
+            }
+            Utils.setpref("json-vendan-mapv4", ja.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

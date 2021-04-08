@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 public class DowseWnd extends Window {
     //Arc is a1 to a2, a1 < a2
     public final Coord2d startc;
+    public Coord mapc;
     public final double a1;
     public final double a2;
     private final Runnable onClose;

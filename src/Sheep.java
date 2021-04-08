@@ -10,6 +10,7 @@ public class Sheep extends Entry {
 
     public int meat, milk, wool;
     public int meatq, milkq, woolq, hideq;
+    public double tmeatq, tmilkq, twoolq, thideq;
     public int seedq;
     public boolean ram, lamb, dead, pregnant;
 
@@ -30,9 +31,13 @@ public class Sheep extends Entry {
         drawcol(g, SheepRoster.cols.get(i), 1, milk, null, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, wool, null, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, meatq, percent, i++);
+        drawcol(g, SheepRoster.cols.get(i), 1, tmeatq, quality, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, milkq, percent, i++);
+        drawcol(g, SheepRoster.cols.get(i), 1, tmilkq, quality, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, woolq, percent, i++);
+        drawcol(g, SheepRoster.cols.get(i), 1, twoolq, quality, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, hideq, percent, i++);
+        drawcol(g, SheepRoster.cols.get(i), 1, thideq, quality, i++);
         drawcol(g, SheepRoster.cols.get(i), 1, seedq, null, i++);
         super.draw(g);
     }

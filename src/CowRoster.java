@@ -15,23 +15,28 @@ public class CowRoster extends CattleRoster<Ochs> {
     }
 
     public static List<Column> cols = initcols(
-            new Column<Entry>("Name", Comparator.comparing((Entry e) -> e.name), 200),
+            new Column<>("Name", Comparator.comparing((Entry e) -> e.name), 200),
 
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Ochs e) -> e.bull).reversed(), 20).runon(),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Ochs e) -> e.calf).reversed(), 20).runon(),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Ochs e) -> e.dead).reversed(), 20).runon(),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Ochs e) -> e.pregnant).reversed(), 20),
+            new Column<>(Resource.local().load("gfx/hud/rosters/sex"), Comparator.comparing((Ochs e) -> e.bull).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/growth"), Comparator.comparing((Ochs e) -> e.calf).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/deadp"), Comparator.comparing((Ochs e) -> e.dead).reversed(), 20).runon(),
+            new Column<>(Resource.local().load("gfx/hud/rosters/pregnant"), Comparator.comparing((Ochs e) -> e.pregnant).reversed(), 20),
 
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Ochs e) -> e.q).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/quality"), Comparator.comparing((Ochs e) -> e.q).reversed()),
 
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Ochs e) -> e.meat).reversed()),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Ochs e) -> e.milk).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquantity"), Comparator.comparing((Ochs e) -> e.meat).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquantity"), Comparator.comparing((Ochs e) -> e.milk).reversed()),
 
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Ochs e) -> e.meatq).reversed()),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Ochs e) -> e.milkq).reversed()),
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Ochs e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Ochs e) -> e.meatq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/meatquality"), Comparator.comparing((Ochs e) -> e.tmeatq).reversed()),
 
-            new Column<Ochs>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Ochs e) -> e.seedq).reversed())
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Ochs e) -> e.milkq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/milkquality"), Comparator.comparing((Ochs e) -> e.tmilkq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Ochs e) -> e.hideq).reversed()),
+            new Column<>(Resource.local().load("gfx/hud/rosters/hidequality"), Comparator.comparing((Ochs e) -> e.thideq).reversed()),
+
+            new Column<>(Resource.local().load("gfx/hud/rosters/breedingquality"), Comparator.comparing((Ochs e) -> e.seedq).reversed())
     );
 
     protected List<Column> cols() {
@@ -59,6 +64,9 @@ public class CowRoster extends CattleRoster<Ochs> {
         ret.meatq = (Integer) args[n++];
         ret.milkq = (Integer) args[n++];
         ret.hideq = (Integer) args[n++];
+        ret.tmeatq = ret.meatq * ret.q / 100;
+        ret.tmilkq = ret.milkq * ret.q / 100;
+        ret.thideq = ret.hideq * ret.q / 100;
         ret.seedq = (Integer) args[n++];
         return (ret);
     }
