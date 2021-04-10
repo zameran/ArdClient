@@ -7,7 +7,7 @@ import org.armedbear.lisp.Load;
 @SuppressWarnings("unused")
 public class LispScript extends Script {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    private static final Interpreter engine = Interpreter.createInstance();
+    //private static final Interpreter engine = Interpreter.createInstance();
 
     public static void reloadConfig() {
         Load.load("data/scripts/lib/_config.lisp");
