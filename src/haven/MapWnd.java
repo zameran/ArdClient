@@ -149,6 +149,7 @@ public class MapWnd extends ResizableWnd {
         recenter();
         toolbar2 = add(new ToolBar());
         toolbar = add(new Widget(Coord.z));
+        /*
         toolbar.add(new Img(Resource.loadtex("gfx/hud/mmap/fgwdg")), Coord.z);
         toolbar.add(new IButton("gfx/hud/mmap/home", "", "-d", "-h") {
             {
@@ -178,6 +179,7 @@ public class MapWnd extends ResizableWnd {
             compact(a);
             Utils.setprefb("compact-map", a);
         });
+        */
         toolbar.pack();
         zoombar = add(new ZoomBar());
         tool = add(new Toolbox());
