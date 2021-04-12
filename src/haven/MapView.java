@@ -2583,7 +2583,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     synchronized (glob.oc) {
                         for (Gob gob : glob.oc) {
                             if (!gob.isplayer()) {
-                                if (gob.type == Type.HUMAN || gob.type == Type.ANIMAL || gob.type == Type.DANGANIMAL) {
+                                if (gob.type == Type.HUMAN || gob.type == Type.ANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) {
                                     double dist = gob.rc.dist(mc);
                                     if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
                                         target = gob;
@@ -2617,7 +2617,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     synchronized (glob.oc) {
                         for (Gob gob : glob.oc) {
                             if (!gob.isplayer()) {
-                                if (gob.type == Type.ANIMAL || gob.type == Type.DANGANIMAL) {
+                                if (gob.type == Type.ANIMAL || gob.type == Type.TAMEDANIMAL || gob.type == Type.DANGANIMAL) {
                                     double dist = gob.rc.dist(mc);
                                     if ((target == null || dist < target.rc.dist(mc)) && dist <= 5 * tilesz.x)
                                         target = gob;
@@ -3536,7 +3536,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                         ui.gui.mapfile.markobj(g.id, g, configuration.getShortName(g.resname().get()));
                         break;
                     case 7: //Mark gob to custom marks
-                        resources.customMarks.put(g.resname().get(), true);
+                        resources.customMarks.put(g.getres().name, true);
                         break;
                 }
             }, "Mark for party",

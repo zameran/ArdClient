@@ -17,7 +17,8 @@ import static haven.OCache.posres;
 
 public class PickForageable implements Runnable {
     private GameUI gui;
-    private static final HashSet<String> gates = new HashSet(Arrays.asList("brickwallgate", "brickbiggate", "drystonewallgate", "drystonewallbiggate", "palisadegate", "palisadebiggate", "polegate", "polebiggate"));
+    
+    public static final HashSet<String> gates = new HashSet(Arrays.asList("brickwallgate", "brickgate", "brickbiggate", "drystonewallgate", "drystonewallbiggate", "palisadegate", "palisadebiggate", "polegate", "polebiggate"));
 
     public PickForageable(GameUI gui) {
         this.gui = gui;
@@ -69,6 +70,11 @@ public class PickForageable implements Runnable {
                     }
 
                     if (hidden == null && res.name.startsWith("gfx/terobjs/herbs") || (hidden == Boolean.FALSE && !res.name.startsWith("gfx/terobjs/vehicle") && !cart) || gate || cart) {
+                        double distFromPlayer = gob.rc.dist(gui.map.player().rc);
+                        if (distFromPlayer <= 20 * 11 && (herb == null || distFromPlayer < herb.rc.dist(gui.map.player().rc)))
+                            herb = gob;
+                    }
+                    if (gob.type == Type.SMALLANIMAL) {
                         double distFromPlayer = gob.rc.dist(gui.map.player().rc);
                         if (distFromPlayer <= 20 * 11 && (herb == null || distFromPlayer < herb.rc.dist(gui.map.player().rc)))
                             herb = gob;

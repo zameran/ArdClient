@@ -481,27 +481,19 @@ public class WaterTile extends Tiler {
         super(id);
         this.bottom = bottom;
         this.depth = depth;
-        /*if (id == 188) {
-            this.mat = GLState.compose(deepfog, boff);
-            this.fog = obfog;
-        } else {
-            this.mat = GLState.compose(waterfog, boff);
-            this.fog = obfog;
-        }*/
-
-        if (id == 185) {
+        if (id == 203) {
             this.mat = GLState.compose(wfog, boff);
             this.fog = obfog;
-        } else if (id == 187) {
+        } else if (id == 205) {
             this.mat = GLState.compose(oceanfog, boff);
             this.fog = obfog;
-        } else if (id == 188) {
+        } else if (id == 206) {
             this.mat = GLState.compose(deepfog, boff);
             this.fog = obfog;
-        } else if (id == 189) {
+        } else if (id == 207) {
             this.mat = GLState.compose(shallowoceanfog, boff);
             this.fog = obfog;
-        } else if (id == 191) {
+        } else if (id == 209) {
             this.mat = GLState.compose(shallowfog, boff);
             this.fog = obfog;
         } else {

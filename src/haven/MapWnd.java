@@ -1190,6 +1190,7 @@ public class MapWnd extends ResizableWnd {
             new Pair<>("Salt Basin", "saltbasin"),
             new Pair<>("Swirling Vortex", "watervortex"),
             new Pair<>("Tarpit", "tarpit"),
+            new Pair<>("Thingwall", "thingwall"),
             new Pair<>("Cave", "cave")
     };
 
