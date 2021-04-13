@@ -386,7 +386,7 @@ public class Config {
         put("breccia", new CheckListboxItem("Breccia"));
     }};
 
-    public final static HashMap<String, CheckListboxItem> bushes = new HashMap<String, CheckListboxItem>(24) {{
+    public final static HashMap<String, CheckListboxItem> bushes = new HashMap<String, CheckListboxItem>() {{
         put("arrowwood", new CheckListboxItem("Arrowwood"));
         put("crampbark", new CheckListboxItem("Crampbark"));
         put("sandthorn", new CheckListboxItem("Sandthorn"));
@@ -411,9 +411,14 @@ public class Config {
         put("redcurrant", new CheckListboxItem("Redcurrant"));
         put("gorse", new CheckListboxItem("Gorse"));
         put("witherstand", new CheckListboxItem("Witherstand"));
+        put("cavefern", new CheckListboxItem("Cave Fern"));
+        put("mastic", new CheckListboxItem("Mastic"));
+        put("poppycaps", new CheckListboxItem("Poppycaps"));
+        put("ghostpipe", new CheckListboxItem("Ghostpipe"));
+        put("hoarwithy", new CheckListboxItem("Hoarwithy"));
     }};
 
-    public final static HashMap<String, CheckListboxItem> trees = new HashMap<String, CheckListboxItem>(57) {{
+    public final static HashMap<String, CheckListboxItem> trees = new HashMap<String, CheckListboxItem>() {{
         put("chastetree", new CheckListboxItem("Chaste Tree"));
         put("dogwood", new CheckListboxItem("Dogwood"));
         put("strawberrytree", new CheckListboxItem("Strawberry Tree"));
@@ -472,10 +477,17 @@ public class Config {
         put("quincetree", new CheckListboxItem("Quince"));
         put("almondtree", new CheckListboxItem("Almond"));
         put("persimmontree", new CheckListboxItem("Persimmon"));
-        put("mayflower", new CheckListboxItem("Mayflower"));
-        put("towercap", new CheckListboxItem("Towercaps"));
-        put("medlar", new CheckListboxItem("Medlar"));
-        put("gnomeshat", new CheckListboxItem("Gnomes Hat"));
+        put("medlartree", new CheckListboxItem("Medlar"));
+        put("gnomeshat", new CheckListboxItem("Gnome's Hat"));
+        put("carobtree", new CheckListboxItem("Carob Tree"));
+        put("gloomcap", new CheckListboxItem("Gloomcap"));
+        put("trombonechantrelle", new CheckListboxItem("Trombone Chantrelle"));
+        put("osier", new CheckListboxItem("Osier"));
+        put("tamarisk", new CheckListboxItem("Tamarisk"));
+        put("checkertree", new CheckListboxItem("Checker Tree"));
+        put("wartybirch", new CheckListboxItem("Warty Birch"));
+        put("figtree", new CheckListboxItem("Fig Tree"));
+        put("dwarfpine", new CheckListboxItem("Dwarf Pine"));
     }};
 
     public final static HashMap<String, CheckListboxItem> icons = new HashMap<String, CheckListboxItem>() {{
@@ -902,7 +914,14 @@ public class Config {
             "breccia",
             "diabase",
             "slate",
-            "arkose"
+            "arkose",
+            "eclogite",
+            "jasper",
+            "greenschist",
+            "pegmatite",
+            "ilmenite",
+            "rhyolite",
+            "pumice"
     ));
 
     public final static Set<String> mineablesOre = new HashSet<String>(Arrays.asList(
@@ -913,6 +932,7 @@ public class Config {
             "limonite",
             "hematite",
             "magnetite",
+            "leadglance",
             "peacockore"
     ));
 
@@ -923,12 +943,14 @@ public class Config {
             "petzite",
             "sylvanite",
             "nagyagite"
+
     ));
 
     public final static Set<String> mineablesCurios = new HashSet<String>(Arrays.asList(
             "catgold",
             "petrifiedshell",
-            "strangecrystal"
+            "strangecrystal",
+            "quarryquartz"
     ));
 
     public final static HashMap<String, CheckListboxItem> disableanim = new HashMap<String, CheckListboxItem>(13) {{
