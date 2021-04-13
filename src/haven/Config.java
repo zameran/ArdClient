@@ -220,6 +220,7 @@ public class Config {
     public static boolean dropMinedCatGold = Utils.getprefb("dropMinedCatGold", false);
     public static boolean dropMinedSeaShells = Utils.getprefb("dropMinedSeaShells", false);
     public static boolean dropMinedCrystals = Utils.getprefb("dropMinedCrystals", false);
+    public static boolean dropMinedQuarryquartz  = Utils.getprefb("dropMinedQuarryquartz", false);
     public static boolean dropsmelterstones = Utils.getprefb("dropsmelterstones", true);
     public static boolean showdframestatus = Utils.getprefb("showdframestatus", true);
     public static boolean showcoopstatus = Utils.getprefb("showcoopstatus", true);

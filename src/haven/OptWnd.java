@@ -5234,6 +5234,17 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, new Coord(list.sz.x + 10, y));
+        autodropsettings.add(new CheckBox("Drop mined Quarryquartz.") {
+            {
+                a = Config.dropMinedQuarryquartz;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("dropMinedQuarryquartz", val);
+                Config.dropMinedQuarryquartz = val;
+                a = val;
+            }
+        }, new Coord(list.sz.x + 10, y));
         autodropsettings.add(new PButton(200, "Back", 27, main), new Coord(210, 360));
         autodropsettings.pack();
     }
