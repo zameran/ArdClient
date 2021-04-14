@@ -480,7 +480,9 @@ public class Widget {
                 }
             }
         } catch (RuntimeException e) {
-            throw (new RelposError(e, spec, i, st));
+//            throw (new RelposError(e, spec, i, st));
+            System.out.println(e + " " + spec + " " + i + " " + st);
+            return (Coord.z);
         }
         return ((Coord) st.pop());
     }

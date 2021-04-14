@@ -615,9 +615,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private float tfield = field;
         private boolean isometric = false;
         private final float pi2 = (float) (Math.PI * 2);
+        private double tf = 1.0;
 
         public SOrthoCam(String... args) {
-            PosixArgs opt = PosixArgs.getopt(args, "enif");
+            PosixArgs opt = PosixArgs.getopt(args, "enift:");
             for (char c : opt.parsed()) {
                 switch (c) {
                     case 'e':
@@ -632,11 +633,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     case 'f':
                         isometric = false;
                         break;
+                    case 't':
+                        tf = Double.parseDouble(opt.arg);
+                        break;
                 }
             }
         }
 
         public void tick2(double dt) {
+            dt *= tf;
+            float cf = 1f - (float)Math.pow(500, -dt);
             Coord3f mc = getcc();
             mc.y = -mc.y;
             if (Config.disableelev)
@@ -644,9 +650,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if ((cc == null) || (Math.hypot(mc.x - cc.x, mc.y - cc.y) > 250))
                 cc = mc;
             else if (!exact || (mc.dist(cc) > 2))
-                cc = cc.add(mc.sub(cc).mul(1f - (float) Math.pow(500, -dt)));
+                cc = cc.add(mc.sub(cc).mul(cf));
 
-            angl = angl + ((tangl - angl) * (1f - (float) Math.pow(500, -dt)));
+            angl = angl + ((tangl - angl) * (cf));
             while (angl > pi2) {
                 angl -= pi2;
                 tangl -= pi2;
@@ -662,7 +668,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             else
                 jc = cc;
 
-            field = field + ((tfield - field) * (1f - (float) Math.pow(500, -dt)));
+            field = field + ((tfield - field) * (cf));
             if (Math.abs(tfield - field) < 0.1)
                 field = tfield;
             else
