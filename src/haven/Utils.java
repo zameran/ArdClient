@@ -92,7 +92,103 @@ public class Utils {
     public static final java.nio.charset.Charset utf8 = java.nio.charset.Charset.forName("UTF-8");
     public static final java.nio.charset.Charset ascii = java.nio.charset.Charset.forName("US-ASCII");
     public static final java.awt.image.ColorModel rgbm = java.awt.image.ColorModel.getRGBdefault();
+    public static final Comparator<Object> idcmp = new Comparator<Object>() {
+        final Map<Ref, Long> emerg = new HashMap<Ref, Long>();
+        final ReferenceQueue<Object> cleanq = new ReferenceQueue<Object>();
+        int eid = 0;
+
+        private void clean() {
+            Reference<? extends Object> ref;
+            while ((ref = cleanq.poll()) != null)
+                emerg.remove(ref);
+        }
+
+        public int compare(Object a, Object b) {
+            if (a == b)
+                return (0);
+            if (a == null)
+                return (1);
+            if (b == null)
+                return (-1);
+            int ah = System.identityHashCode(a);
+            int bh = System.identityHashCode(b);
+            if (ah < bh)
+                return (-1);
+            else if (ah > bh)
+                return (1);
+
+            synchronized (emerg) {
+                if (eid == 0)
+                    Warning.warn("could not impose ordering in idcmp, using slow-path");
+                clean();
+                Ref ar = new Ref(a, cleanq), br = new Ref(b, cleanq);
+                Long ai, bi;
+                if ((ai = emerg.get(ar)) == null)
+                    emerg.put(ar, ai = ((long) ah << 32) | (((long) eid++) & 0xffffffffl));
+                if ((bi = emerg.get(br)) == null)
+                    emerg.put(br, bi = ((long) ah << 32) | (((long) eid++) & 0xffffffffl));
+                if (ai < bi)
+                    return (-1);
+                else if (ai > bi)
+                    return (1);
+                throw (new RuntimeException("Comparison identity crisis"));
+            }
+        }
+
+        class Ref extends WeakReference<Object> {
+            final int h;
+
+            Ref(Object o, ReferenceQueue<Object> queue) {
+                super(o, queue);
+                this.h = System.identityHashCode(o);
+            }
+
+            public int hashCode() {
+                return (h);
+            }
+
+            public boolean equals(Object o) {
+                if (o == this)
+                    return (true);
+                if (!(o instanceof Ref))
+                    return (false);
+                Object or = ((Ref) o).get();
+                Object sr = get();
+                return ((or != null) && (sr != null) && (or == sr));
+            }
+        }
+    };
+    private final static String base64set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    private final static int[] base64rev;
+    private final static Map<Character, Character> az2qwmap = new HashMap<Character, Character>(12) {{
+        put('&', '1');
+        put('é', '2');
+        put('"', '3');
+        put('\'', '4');
+        put('(', '5');
+        put('-', '6');
+        put('è', '7');
+        put('_', '8');
+        put('ç', '9');
+        put('à', '0');
+        put('a', 'q');
+        put('z', 'w');
+    }};
+    private static final long rtimeoff = System.nanoTime();
     private static Preferences prefs = null;
+
+    static {
+        int[] rev = new int[128];
+        for (int i = 0; i < 128; rev[i++] = -1) ;
+        for (int i = 0; i < base64set.length(); i++)
+            rev[base64set.charAt(i)] = i;
+        base64rev = rev;
+    }
+
+    static {
+        Console.setscmd("threads", (cons, args) -> Utils.dumptg(null, cons.out));
+        Console.setscmd("gc", (cons, args) -> System.gc());
+    }
 
     public static Coord imgsz(BufferedImage img) {
         return (new Coord(img.getWidth(), img.getHeight()));
@@ -924,17 +1020,6 @@ public class Utils {
         return (ret);
     }
 
-    private final static String base64set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    private final static int[] base64rev;
-
-    static {
-        int[] rev = new int[128];
-        for (int i = 0; i < 128; rev[i++] = -1) ;
-        for (int i = 0; i < base64set.length(); i++)
-            rev[base64set.charAt(i)] = i;
-        base64rev = rev;
-    }
-
     public static String base64enc(byte[] in) {
         StringBuilder buf = new StringBuilder();
         int p = 0;
@@ -1192,6 +1277,15 @@ public class Utils {
             for (int o = 0; (o < width) && (i + o < arr.length); o++) {
                 if (o > 0) out.print(' ');
                 out.printf("%02x", arr[i + o]);
+            }
+            for (int o = (Math.min(width, arr.length - i) * 3) - 1, w = (width * 3) - 1 + 8; o < w; o++)
+                out.print(' ');
+            for (int o = 0; (o < width) && (i + o < arr.length); o++) {
+                int b = arr[i + o] & 0xff;
+                if ((b < 32) || (b >= 127))
+                    out.print('.');
+                else
+                    out.print((char) b);
             }
             out.print('\n');
         }
@@ -1946,21 +2040,6 @@ public class Utils {
         return (null);
     }
 
-    private final static Map<Character, Character> az2qwmap = new HashMap<Character, Character>(12) {{
-        put('&', '1');
-        put('é', '2');
-        put('"', '3');
-        put('\'', '4');
-        put('(', '5');
-        put('-', '6');
-        put('è', '7');
-        put('_', '8');
-        put('ç', '9');
-        put('à', '0');
-        put('a', 'q');
-        put('z', 'w');
-    }};
-
     public static char azerty2qwerty(char az) {
         return az2qwmap.containsKey(az) ? az2qwmap.get(az) : az;
     }
@@ -1980,27 +2059,8 @@ public class Utils {
         return (System.currentTimeMillis() / 1e3);
     }
 
-    private static final long rtimeoff = System.nanoTime();
-
     public static double rtime() {
         return ((System.nanoTime() - rtimeoff) / 1e9);
-    }
-
-    public static class MapBuilder<K, V> {
-        private final Map<K, V> bk;
-
-        public MapBuilder(Map<K, V> bk) {
-            this.bk = bk;
-        }
-
-        public MapBuilder<K, V> put(K k, V v) {
-            bk.put(k, v);
-            return (this);
-        }
-
-        public Map<K, V> map() {
-            return (Collections.unmodifiableMap(bk));
-        }
     }
 
     public static <T> Indir<T> cache(Indir<T> src) {
@@ -2136,78 +2196,6 @@ public class Utils {
         return (0);
     }
 
-    public static final Comparator<Object> idcmp = new Comparator<Object>() {
-        int eid = 0;
-        final Map<Ref, Long> emerg = new HashMap<Ref, Long>();
-        final ReferenceQueue<Object> cleanq = new ReferenceQueue<Object>();
-
-        class Ref extends WeakReference<Object> {
-            final int h;
-
-            Ref(Object o, ReferenceQueue<Object> queue) {
-                super(o, queue);
-                this.h = System.identityHashCode(o);
-            }
-
-            public int hashCode() {
-                return (h);
-            }
-
-            public boolean equals(Object o) {
-                if (o == this)
-                    return (true);
-                if (!(o instanceof Ref))
-                    return (false);
-                Object or = ((Ref) o).get();
-                Object sr = get();
-                return ((or != null) && (sr != null) && (or == sr));
-            }
-        }
-
-        private void clean() {
-            Reference<? extends Object> ref;
-            while ((ref = cleanq.poll()) != null)
-                emerg.remove(ref);
-        }
-
-        public int compare(Object a, Object b) {
-            if (a == b)
-                return (0);
-            if (a == null)
-                return (1);
-            if (b == null)
-                return (-1);
-            int ah = System.identityHashCode(a);
-            int bh = System.identityHashCode(b);
-            if (ah < bh)
-                return (-1);
-            else if (ah > bh)
-                return (1);
-
-            synchronized (emerg) {
-                if (eid == 0)
-                    Warning.warn("could not impose ordering in idcmp, using slow-path");
-                clean();
-                Ref ar = new Ref(a, cleanq), br = new Ref(b, cleanq);
-                Long ai, bi;
-                if ((ai = emerg.get(ar)) == null)
-                    emerg.put(ar, ai = ((long) ah << 32) | (((long) eid++) & 0xffffffffl));
-                if ((bi = emerg.get(br)) == null)
-                    emerg.put(br, bi = ((long) ah << 32) | (((long) eid++) & 0xffffffffl));
-                if (ai < bi)
-                    return (-1);
-                else if (ai > bi)
-                    return (1);
-                throw (new RuntimeException("Comparison identity crisis"));
-            }
-        }
-    };
-
-    static {
-        Console.setscmd("threads", (cons, args) -> Utils.dumptg(null, cons.out));
-        Console.setscmd("gc", (cons, args) -> System.gc());
-    }
-
     // NOTE: will not work with values having large integer part
     public static String fmt1DecPlace(double value) {
         double rvalue = (double) Math.round(value * 10) / 10;
@@ -2238,5 +2226,22 @@ public class Utils {
         long mins = t / 60000 % 60;
         long seconds = t / 1000 % 60;
         return String.format("%02d:%02d:%02d", hours, mins, seconds);
+    }
+
+    public static class MapBuilder<K, V> {
+        private final Map<K, V> bk;
+
+        public MapBuilder(Map<K, V> bk) {
+            this.bk = bk;
+        }
+
+        public MapBuilder<K, V> put(K k, V v) {
+            bk.put(k, v);
+            return (this);
+        }
+
+        public Map<K, V> map() {
+            return (Collections.unmodifiableMap(bk));
+        }
     }
 }

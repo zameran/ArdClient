@@ -158,7 +158,12 @@ public class TextEntry extends SIWidget { //TODO make highlighting copy paste
         super.draw(g);
         g.chcolor();
         if (hasfocus) {
-            int cx = tcache.advance(buf.point);
+            int cx;
+            try {
+                cx = tcache.advance(buf.point);
+            } catch (Exception e) {
+                cx = 0;
+            }
             int lx = cx - sx + 1;
             if (cx < sx) {
                 sx = cx;

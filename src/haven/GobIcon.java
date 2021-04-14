@@ -292,7 +292,7 @@ public class GobIcon extends GAttrib {
                             try {
                                 Resource.Tooltip name = icon.conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
                                 icon.name = elf.render((name == null) ? "???" : name.t);
-                            } catch (Loading l) {
+                            } catch (Exception l) {
                                 reorder = true;
                             }
                         }
