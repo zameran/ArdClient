@@ -1,4 +1,8 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.14.
+-- ~(0_o)~
+~
+
 2021.04.14
 -- Buddy feature: all kins from txt
 ~
