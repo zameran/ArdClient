@@ -4455,7 +4455,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
-        appender.add(new CheckBox("Simple Large Map") {
+        appender.addRow(new CheckBox("Simple Large Map") {
             {
                 a = configuration.simplelmap;
             }
@@ -4469,6 +4469,16 @@ public class OptWnd extends Window {
             @Override
             public Object tooltip(Coord c0, Widget prev) {
                 return Text.render("Draw the map easier").tex();
+            }
+        }, new HSlider(100, 0, 99, configuration.mapcolor) {
+            public void changed() {
+                configuration.mapcolor = val;
+                Utils.setprefi("mapcolor", val);
+            }
+
+            @Override
+            public Object tooltip(Coord c0, Widget prev) {
+                return Text.render("Simple map color: " + val + "").tex();
             }
         });
 

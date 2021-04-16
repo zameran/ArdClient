@@ -614,13 +614,13 @@ public class MapFile {
                                         Utils.floormod(c.y + off.y, tex.getHeight()));
 
                                 if (configuration.simplelmap) {
-                                    int mixrgb = tex.getRGB(20, 45);
+                                    int mixrgb = tex.getRGB(tex.getWidth() * configuration.mapcolor / 100, tex.getHeight() * configuration.mapcolor / 100);
 
                                     //color post-processing
                                     Color mixtempColor = new Color(mixrgb, true);
                                     Color tempColor = new Color(rgb, true);
 
-                                    tempColor = Utils.blendcol(tempColor, mixtempColor, 0.75f);
+                                    tempColor = Utils.blendcol(tempColor, mixtempColor, 1f);
                                     rgb = tempColor.getRGB();
                                 }
                             }

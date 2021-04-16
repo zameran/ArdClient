@@ -185,6 +185,7 @@ public class configuration {
     public static boolean allowridgesmap = Utils.getprefb("allowridgesmap", true);
     public static int mapoutlinetransparency = Utils.getprefi("mapoutlinetransparency", 255);
     public static boolean simplelmap = Utils.getprefb("simplelmap", false);
+    public static int mapcolor = Utils.getprefi("mapcolor", 20);
     public static boolean cavetileonmap = Utils.getprefb("cavetileonmap", false);
     public static boolean tempmarks = Utils.getprefb("tempmarks", false);
     public static boolean tempmarksall = Utils.getprefb("tempmarksall", false);
