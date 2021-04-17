@@ -1,4 +1,8 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.17
+-- F = fix
+~
+
 2021.04.14.
 -- ~(0_o)~
 ~
