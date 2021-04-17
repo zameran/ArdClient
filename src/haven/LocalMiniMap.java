@@ -194,21 +194,23 @@ public class LocalMiniMap extends Widget {
             }
         }
 
-        for (c.x = 1; c.x < sz.x - 1; c.x++) {
-            try {
-                int t = m.gettile(ul.add(c));
-                Tiler tl = m.tiler(t);
-                if (tl instanceof Ridges.RidgeTile) {
-                    if (Ridges.brokenp(m, ul.add(c))) {
-                        for (int y = c.y - 1; y <= c.y + 1; y++) {
-                            for (int x = c.x - 1; x <= c.x + 1; x++) {
-                                Color cc = new Color(buf.getRGB(x, y));
-                                buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
+        for (c.y = 1; c.y < sz.y - 1; c.y++) {
+            for (c.x = 1; c.x < sz.x - 1; c.x++) {
+                try {
+                    int t = m.gettile(ul.add(c));
+                    Tiler tl = m.tiler(t);
+                    if (tl instanceof Ridges.RidgeTile) {
+                        if (Ridges.brokenp(m, ul.add(c))) {
+                            for (int y = c.y - 1; y <= c.y + 1; y++) {
+                                for (int x = c.x - 1; x <= c.x + 1; x++) {
+                                    Color cc = new Color(buf.getRGB(x, y));
+                                    buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
+                                }
                             }
                         }
                     }
+                } catch (Exception e) {
                 }
-            } catch (Exception e) {
             }
         }
 
