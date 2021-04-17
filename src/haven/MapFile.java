@@ -49,137 +49,25 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
+import static haven.DefSettings.MAPTYPE;
 import static haven.MCache.cmaps;
 
 public class MapFile {
-    public static boolean debug = false;
     private static final int NOZ = Integer.MIN_VALUE;
+    private static final byte[] EXPORT_SIG = "Haven Mapfile 1".getBytes(Utils.ascii);
+    private static final Coord[] inout = new Coord[]{
+            new Coord(0, 0),
+            new Coord(0, -1), new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0),
+            new Coord(1, -1), new Coord(1, 1), new Coord(-1, 1), new Coord(-1, -1),
+    };
+    public static boolean debug = false;
     private static MapFile instance = null;
     public final ResCache store;
     public final String filename;
     public final Collection<Long> knownsegs = new HashSet<>();
     public final Collection<Marker> markers = new ArrayList<>();
     public final Map<Long, SMarker> smarkers = new HashMap<>(); //safety check for ensuring no duplicates based off oid
-    public int markerseq = 0;
     public final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
-    public MapFile(ResCache store, String filename) {
-        this.store = store;
-        this.filename = filename;
-    }
-
-    private void checklock() {
-        if ((lock.getReadHoldCount() == 0) && !lock.isWriteLockedByCurrentThread())
-            throw (new IllegalMonitorStateException());
-    }
-
-    private String mangle(String datum) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("map/");
-        if (!filename.equals("")) {
-            buf.append(filename);
-            buf.append('/');
-        }
-        buf.append(datum);
-        return (buf.toString());
-    }
-
-    private InputStream sfetch(String ctl, Object... args) throws IOException {
-        return (store.fetch(mangle(String.format(ctl, args))));
-    }
-
-    private OutputStream sstore(String ctl, Object... args) throws IOException {
-        return (store.store(mangle(String.format(ctl, args))));
-    }
-
-    public static MapFile load(ResCache store, String filename) {
-        if (instance != null)
-            return instance;
-        else {
-            final MapFile file = new MapFile(store, filename);
-            InputStream fp;
-            try {
-                fp = file.sfetch("index");
-            } catch (FileNotFoundException e) {
-                return (file);
-            } catch (IOException e) {
-                return (null);
-            }
-            try (StreamMessage data = new StreamMessage(fp)) {
-                int ver = data.uint8();
-                if (ver == 1) {
-                    for (int i = 0, no = data.int32(); i < no; i++)
-                        file.knownsegs.add(data.int64());
-                    for (int i = 0, no = data.int32(); i < no; i++) {
-                        try {
-                            Marker mark = loadmarker(data);
-                            file.markers.add(mark);
-                            if (mark instanceof SMarker)
-                                file.smarkers.put(((SMarker) mark).oid, (SMarker) mark);
-                        } catch (Message.BinError e) {
-                            Debug.log.printf("mapfile warning: error when loading marker, data may be missing: %s\n", e);
-                        }
-                    }
-                } else {
-                    Debug.log.printf("mapfile warning: unknown mapfile index version: %d\n", ver);
-                    return (null);
-                }
-            } catch (Message.BinError e) {
-                Debug.log.printf("mapfile warning: error when loading index: %s\n", e);
-                return (null);
-            }
-            instance = file;
-            return (file);
-        }
-    }
-
-    private void save() {
-        checklock();
-        OutputStream fp = null;
-        do {
-            try {
-                fp = sstore("index");
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception ex) {
-                        return;
-                    }
-                } else {
-                    throw (new StreamMessage.IOError(e));
-                }
-            }
-        } while (fp == null);
-        try (StreamMessage out = new StreamMessage(fp)) {
-            out.adduint8(1);
-            out.addint32(knownsegs.size());
-            for (Long seg : knownsegs)
-                out.addint64(seg);
-            out.addint32(markers.size());
-            for (Marker mark : markers)
-                savemarker(out, mark);
-        }
-    }
-
-    public void defersave() {
-        synchronized (procmon) {
-            gdirty = true;
-            process();
-        }
-    }
-
-    public static class GridInfo {
-        public final long id, seg;
-        public final Coord sc;
-
-        public GridInfo(long id, long seg, Coord sc) {
-            this.id = id;
-            this.seg = seg;
-            this.sc = sc;
-        }
-    }
-
     public final BackCache<Long, GridInfo> gridinfo = new BackCache<>(100, id -> {
         checklock();
         InputStream fp;
@@ -224,6 +112,119 @@ public class MapFile {
             out.addcoord(info.sc);
         }
     });
+    private final Object procmon = new Object();
+    private final Collection<Pair<MCache, Collection<MCache.Grid>>> updqueue = new HashSet<>();
+    private final Collection<Segment> dirty = new HashSet<>();
+    private final Collection<Pair<Long, GridInfo>> gidirty = new HashSet<>();
+    public int markerseq = 0;
+    private Thread processor = null;
+    private boolean gdirty = false;
+    public final BackCache<Long, Segment> segments = new BackCache<>(5, id -> {
+        checklock();
+        InputStream fp;
+        try {
+            fp = sfetch("seg-%x", id);
+        } catch (IOException e) {
+            return (null);
+        }
+        try (StreamMessage data = new StreamMessage(fp)) {
+            int ver = data.uint8();
+            if (ver == 1) {
+                Segment seg = new Segment(id);
+                ZMessage z = new ZMessage(data);
+                long storedid = z.int64();
+                if (storedid != id)
+                    throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
+                for (int i = 0, no = z.int32(); i < no; i++) {
+                    final Coord sc = z.coord();
+                    final long gid = z.int64();
+                    seg.map.put(sc, gid);
+                }
+                return (seg);
+            } else {
+                throw (new Message.FormatError("Unknown segment data version: " + ver));
+            }
+        } catch (Message.BinError e) {
+            Debug.log.printf("mapfile warning: error when loading segment %x: %s\n", id, e);
+            return (null);
+        }
+    }, (id, seg) -> {
+        checklock();
+        OutputStream fp = null;
+        do {
+            try {
+                fp = sstore("seg-%x", seg.id);
+            } catch (IOException e) {
+                if (e.getMessage().contains("another process")) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception ex) {
+                        return;
+                    }
+                } else {
+                    throw (new StreamMessage.IOError(e));
+                }
+            }
+        } while (fp == null);
+        try (StreamMessage out = new StreamMessage(fp)) {
+            out.adduint8(1);
+            ZMessage z = new ZMessage(out);
+            z.addint64(seg.id);
+            z.addint32(seg.map.size());
+            for (Map.Entry<Coord, Long> e : seg.map.entrySet()) {
+                z.addcoord(e.getKey()).addint64(e.getValue());
+            }
+            z.finish();
+        }
+        if (knownsegs.add(id))
+            defersave();
+    });
+
+    public MapFile(ResCache store, String filename) {
+        this.store = store;
+        this.filename = filename;
+    }
+
+    public static MapFile load(ResCache store, String filename) {
+        if (instance != null)
+            return instance;
+        else {
+            final MapFile file = new MapFile(store, filename);
+            InputStream fp;
+            try {
+                fp = file.sfetch("index");
+            } catch (FileNotFoundException e) {
+                return (file);
+            } catch (IOException e) {
+                return (null);
+            }
+            try (StreamMessage data = new StreamMessage(fp)) {
+                int ver = data.uint8();
+                if (ver == 1) {
+                    for (int i = 0, no = data.int32(); i < no; i++)
+                        file.knownsegs.add(data.int64());
+                    for (int i = 0, no = data.int32(); i < no; i++) {
+                        try {
+                            Marker mark = loadmarker(data);
+                            file.markers.add(mark);
+                            if (mark instanceof SMarker)
+                                file.smarkers.put(((SMarker) mark).oid, (SMarker) mark);
+                        } catch (Message.BinError e) {
+                            Debug.log.printf("mapfile warning: error when loading marker, data may be missing: %s\n", e);
+                        }
+                    }
+                } else {
+                    Debug.log.printf("mapfile warning: unknown mapfile index version: %d\n", ver);
+                    return (null);
+                }
+            } catch (Message.BinError e) {
+                Debug.log.printf("mapfile warning: error when loading index: %s\n", e);
+                return (null);
+            }
+            instance = file;
+            return (file);
+        }
+    }
 
     private static Runnable locked(Runnable r, Lock lock) {
         return (() -> {
@@ -247,69 +248,6 @@ public class MapFile {
         });
     }
 
-    private final Object procmon = new Object();
-    private Thread processor = null;
-    private final Collection<Pair<MCache, Collection<MCache.Grid>>> updqueue = new HashSet<>();
-    private final Collection<Segment> dirty = new HashSet<>();
-    private final Collection<Pair<Long, GridInfo>> gidirty = new HashSet<>();
-    private boolean gdirty = false;
-
-    private class Processor extends HackThread {
-        Processor() {
-            super("Mapfile processor");
-        }
-
-        public void run() {
-            try {
-                long last = System.currentTimeMillis();
-                while (true) {
-                    Runnable task;
-                    long now = System.currentTimeMillis();
-                    synchronized (procmon) {
-                        if (!updqueue.isEmpty()) {
-                            Pair<MCache, Collection<MCache.Grid>> el = Utils.take(updqueue);
-                            task = () -> MapFile.this.update(el.a, el.b);
-                        } else if (!dirty.isEmpty()) {
-                            Segment seg = Utils.take(dirty);
-                            task = locked(() -> segments.put(seg.id, seg), lock.writeLock());
-                        } else if (!gidirty.isEmpty()) {
-                            Pair<Long, GridInfo> pair = Utils.take(gidirty);
-                            task = locked(() -> gridinfo.put(pair.a, pair.b), lock.writeLock());
-                        } else if (gdirty) {
-                            task = locked(MapFile.this::save, lock.readLock());
-                            gdirty = false;
-                        } else {
-                            if (now - last > 10000) {
-                                processor = null;
-                                return;
-                            }
-                            procmon.wait(5000);
-                            continue;
-                        }
-                    }
-                    task.run();
-                    last = now;
-                }
-            } catch (InterruptedException e) {
-            } finally {
-                synchronized (procmon) {
-                    processor = null;
-                }
-            }
-        }
-    }
-
-    private void process() {
-        synchronized (procmon) {
-            if (processor == null) {
-                Thread np = new Processor();
-                np.start();
-                processor = np;
-            }
-            procmon.notifyAll();
-        }
-    }
-
     public static Resource loadsaved(Resource.Pool pool, Resource.Spec spec) {
         try {
             return (spec.get());
@@ -317,46 +255,6 @@ public class MapFile {
             throw (l);
         } catch (Exception e) {
             return (pool.load(spec.name).get());
-        }
-    }
-
-    public abstract static class Marker {
-        public long seg;
-        public Coord tc;
-        public String nm;
-
-        public Marker(long seg, Coord tc, String nm) {
-            this.seg = seg;
-            this.tc = tc;
-            this.nm = nm;
-        }
-
-        public String name() {
-            return nm;
-        }
-
-        public String tip() {
-            return nm;
-        }
-    }
-
-    public static class PMarker extends Marker {
-        public Color color;
-
-        public PMarker(long seg, Coord tc, String nm, Color color) {
-            super(seg, tc, nm);
-            this.color = color;
-        }
-    }
-
-    public static class SMarker extends Marker {
-        public long oid;
-        public Resource.Spec res;
-
-        public SMarker(long seg, Coord tc, String nm, long oid, Resource.Spec res) {
-            super(seg, tc, nm);
-            this.oid = oid;
-            this.res = res;
         }
     }
 
@@ -402,6 +300,77 @@ public class MapFile {
         }
     }
 
+    private void checklock() {
+        if ((lock.getReadHoldCount() == 0) && !lock.isWriteLockedByCurrentThread())
+            throw (new IllegalMonitorStateException());
+    }
+
+    private String mangle(String datum) {
+        StringBuilder buf = new StringBuilder();
+        buf.append("map/");
+        if (!filename.equals("")) {
+            buf.append(filename);
+            buf.append('/');
+        }
+        buf.append(datum);
+        return (buf.toString());
+    }
+
+    private InputStream sfetch(String ctl, Object... args) throws IOException {
+        return (store.fetch(mangle(String.format(ctl, args))));
+    }
+
+    private OutputStream sstore(String ctl, Object... args) throws IOException {
+        return (store.store(mangle(String.format(ctl, args))));
+    }
+
+    private void save() {
+        checklock();
+        OutputStream fp = null;
+        do {
+            try {
+                fp = sstore("index");
+            } catch (IOException e) {
+                if (e.getMessage().contains("another process")) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception ex) {
+                        return;
+                    }
+                } else {
+                    throw (new StreamMessage.IOError(e));
+                }
+            }
+        } while (fp == null);
+        try (StreamMessage out = new StreamMessage(fp)) {
+            out.adduint8(1);
+            out.addint32(knownsegs.size());
+            for (Long seg : knownsegs)
+                out.addint64(seg);
+            out.addint32(markers.size());
+            for (Marker mark : markers)
+                savemarker(out, mark);
+        }
+    }
+
+    public void defersave() {
+        synchronized (procmon) {
+            gdirty = true;
+            process();
+        }
+    }
+
+    private void process() {
+        synchronized (procmon) {
+            if (processor == null) {
+                Thread np = new Processor();
+                np.start();
+                processor = np;
+            }
+            procmon.notifyAll();
+        }
+    }
+
     public void add(Marker mark) {
         lock.writeLock().lock();
         try {
@@ -442,6 +411,382 @@ public class MapFile {
         }
     }
 
+    private void merge(Segment dst, Segment src, Coord soff) {
+        checklock();
+        for (Map.Entry<Coord, Long> gi : src.map.entrySet()) {
+            long id = gi.getValue();
+            Coord sc = gi.getKey();
+            Coord dc = sc.sub(soff);
+            dst.include(id, dc);
+            gridinfo.put(id, new GridInfo(id, dst.id, dc));
+        }
+        boolean mf = false;
+        for (Marker mark : markers) {
+            if (mark.seg == src.id) {
+                mark.seg = dst.id;
+                mark.tc = mark.tc.sub(soff.mul(cmaps));
+                mf = true;
+            }
+        }
+        if (mf)
+            markerseq++;
+        knownsegs.remove(src.id);
+        defersave();
+        synchronized (procmon) {
+            dirty.add(dst);
+            process();
+        }
+    }
+
+    public void update(MCache map, Collection<MCache.Grid> grids) {
+        lock.writeLock().lock(); //write lock, why? Some of these need it, not all
+        try {
+            long mseg = -1;
+            Coord moff = null;
+            Collection<MCache.Grid> missing = new ArrayList<>(grids.size());
+            Collection<Pair<Long, Coord>> merge = null;
+            for (MCache.Grid g : grids) {
+                GridInfo info = gridinfo.get(g.id);
+                if (info == null) {
+                    missing.add(g);
+                    continue;
+                }
+                Segment seg = segments.get(info.seg);
+                if (seg == null) {
+                    missing.add(g);
+                    continue;
+                }
+                if (moff == null) {
+                    Coord psc = seg.map.reverse().get(g.id);
+                    if (psc == null) {
+                        if (debug)
+                            Debug.log.printf("mapfile warning: grid %x is oddly gone from segment %x; was at %s\n", g.id, seg.id, info.sc);
+                        missing.add(g);
+                        continue;
+                    } else if (!psc.equals(info.sc)) {
+                        Debug.log.printf("mapfile warning: segment-offset mismatch for grid %x in segment %x: segment has %s, gridinfo has %s\n", g.id, seg.id, psc, info.sc);
+                        missing.add(g);
+                        continue;
+                    }
+                    mseg = seg.id;
+                    moff = info.sc.sub(g.gc);
+                }
+                Grid cur = seg.loaded(g.id);
+                //I want to force update on anything still sporting NOZ or day old grids..
+                if (cur == null || cur.useq != g.seq || g.z[0] == NOZ) {
+                    Grid sg = Grid.from(map, g);
+                    Grid prev = cur;
+                    if (prev == null)
+                        prev = Grid.load(MapFile.this, sg.id);
+                    if (prev != null)
+                        sg = sg.mergeprev(prev);
+                    sg.save(MapFile.this);
+                    seg.include(sg, g.gc.add(moff)); //XXX: Write lock required
+                    //seg.updateGrid(sg.id, sg);
+                }
+                if (seg.id != mseg) {
+                    if (merge == null)
+                        merge = new HashSet<>();
+                    Coord soff = info.sc.sub(g.gc.add(moff));
+                    merge.add(new Pair<>(seg.id, soff));
+                }
+            }
+            if (!missing.isEmpty()) {
+                Segment seg;
+                if (mseg == -1) {
+                    seg = new Segment(Utils.el(missing).id);
+                    moff = Coord.z;
+                    if (debug) Debug.log.printf("mapfile: creating new segment %x\n", seg.id);
+                } else {
+                    seg = segments.get(mseg);
+                }
+                synchronized (procmon) {
+                    dirty.add(seg);
+                    process();
+                }
+                for (MCache.Grid g : missing) {
+                    Grid sg = Grid.from(map, g);
+                    Coord sc = g.gc.add(moff);
+                    sg.save(MapFile.this);
+                    seg.include(sg, sc);
+                    gridinfo.put(g.id, new GridInfo(g.id, seg.id, sc));
+                }
+            }
+            if (merge != null) {
+                for (Pair<Long, Coord> mel : merge) {
+                    Segment a = segments.get(mseg);
+                    Segment b = segments.get(mel.a);
+                    Coord ab = mel.b;
+                    Segment src, dst;
+                    Coord soff;
+                    if (a.map.size() > b.map.size()) {
+                        src = b;
+                        dst = a;
+                        soff = ab;
+                    } else {
+                        src = a;
+                        dst = b;
+                        soff = ab.inv();
+                    }
+                    if (debug)
+                        Debug.log.printf("mapfile: merging segment %x (%d) into %x (%d) at %s\n", src.id, src.map.size(), dst.id, dst.map.size(), soff);
+                    merge(dst, src, soff);
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+        if (debug) Debug.log.printf("mapfile: update completed\n");
+    }
+
+    // You need multiple grids around one otherwise it can merge!
+    public void updategrids(MCache map, Collection<MCache.Grid> grids) {
+        if (!grids.isEmpty()) {
+            synchronized (procmon) {
+                updqueue.add(new Pair<>(map, grids));
+                process();
+            }
+        }
+    }
+
+    public void export(Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+        if (prog == null) prog = new ExportStatus() {
+        };
+        out.addbytes(EXPORT_SIG);
+        ZMessage zout = new ZMessage(out);
+        Collection<Long> segbuf = locked((Collection<Long> c) -> new ArrayList<>(c), lock.readLock()).apply(knownsegs);
+        int nseg = 0;
+        for (Long sid : segbuf) {
+            if (!filter.includeseg(sid))
+                continue;
+            Segment seg;
+            Collection<Pair<Coord, Long>> gridbuf = new ArrayList<>();
+            lock.readLock().lock();
+            try {
+                seg = segments.get(sid);
+                for (Map.Entry<Coord, Long> gd : seg.map.entrySet()) {
+                    if (filter.includegrid(seg, gd.getKey(), gd.getValue()))
+                        gridbuf.add(new Pair<>(gd.getKey(), gd.getValue()));
+                }
+            } finally {
+                lock.readLock().unlock();
+            }
+            int ngrid = 0;
+            for (Pair<Coord, Long> gd : gridbuf) {
+                prog.grid(nseg, segbuf.size(), ngrid++, gridbuf.size());
+                Grid grid = Grid.load(this, gd.b);
+                MessageBuf buf = new MessageBuf();
+                buf.adduint8(1);
+                buf.addint64(gd.b);
+                buf.addint64(seg.id);
+                buf.addint64(grid.mtime);
+                buf.addcoord(gd.a);
+                buf.adduint8(grid.tilesets.length);
+                for (TileInfo tinf : grid.tilesets) {
+                    buf.addstring(tinf.res.name);
+                    buf.adduint16(tinf.res.ver);
+                    buf.adduint8(tinf.prio);
+                }
+                buf.addbytes(grid.tiles);
+                byte[] od = buf.fin();
+                zout.addstring("grid");
+                zout.addint32(od.length);
+                zout.addbytes(od);
+                Utils.checkirq();
+            }
+            nseg++;
+        }
+        Collection<Marker> markbuf = locked((Collection<Marker> c) -> new ArrayList<>(c), lock.readLock()).apply(markers);
+        int nmark = 0;
+        for (Marker mark : markbuf) {
+            prog.mark(nmark++, markbuf.size());
+            if (!filter.includemark(mark))
+                continue;
+            MessageBuf buf = new MessageBuf();
+            savemarker(buf, mark);
+            byte[] od = buf.fin();
+            zout.addstring("mark");
+            zout.addint32(od.length);
+            zout.addbytes(od);
+            Utils.checkirq();
+        }
+        zout.finish();
+    }
+
+    public void export(OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+        StreamMessage msg = new StreamMessage(null, out);
+        export(msg, filter, prog);
+        msg.flush();
+    }
+
+    public void reimport(Message data, ImportFilter filter) throws InterruptedException {
+        new Importer(filter).reimport(data);
+    }
+
+    public void reimport(InputStream fp, ImportFilter filter) throws InterruptedException {
+        reimport(new StreamMessage(fp, null), filter);
+    }
+
+    public void update(MCache map, Coord cgc) {
+        Collection<MCache.Grid> grids = new ArrayList<>();
+        for (Coord off : inout) {
+            Coord gc = cgc.add(off);
+            try {
+                grids.add(map.getgrid(gc));
+            } catch (Loading l) {
+                continue;
+            }
+        }
+        if (!grids.isEmpty()) {
+            synchronized (procmon) {
+                updqueue.add(new Pair<>(map, grids));
+                process();
+            }
+        }
+    }
+
+    public static interface ExportFilter {
+        public static final ExportFilter all = new ExportFilter() {
+            public boolean includeseg(long id) {
+                return (true);
+            }
+
+            public boolean includegrid(Segment seg, Coord sc, long id) {
+                return (true);
+            }
+
+            public boolean includemark(Marker mark) {
+                return (true);
+            }
+        };
+
+        public static ExportFilter segment(long sid) {
+            return (new ExportFilter() {
+                public boolean includeseg(long id) {
+                    return (id == sid);
+                }
+
+                public boolean includegrid(Segment seg, Coord sc, long id) {
+                    return (seg.id == sid);
+                }
+
+                public boolean includemark(Marker mark) {
+                    return (mark.seg == sid);
+                }
+            });
+        }
+
+        public static ExportFilter around(Marker mark, double rad) {
+            return (new ExportFilter() {
+                public boolean includeseg(long id) {
+                    return (id == mark.seg);
+                }
+
+                public boolean includegrid(Segment seg, Coord sc, long id) {
+                    return ((seg.id == mark.seg) && (sc.mul(cmaps).add(cmaps.div(2)).dist(mark.tc) <= rad));
+                }
+
+                public boolean includemark(Marker cmark) {
+                    return (cmark == mark);
+                }
+            });
+        }
+
+        public boolean includeseg(long id);
+
+        public boolean includegrid(Segment seg, Coord sc, long id);
+
+        public boolean includemark(Marker mark);
+    }
+
+    public static interface ExportStatus {
+        public default void grid(int cs, int ns, int cg, int ng) {
+        }
+
+        public default void mark(int cm, int nm) {
+        }
+    }
+
+    public static interface ImportFilter {
+        public static ImportFilter all = new ImportFilter() {
+            public boolean includegrid(ImportedGrid grid, boolean hasprev) {
+                return (true);
+            }
+
+            public boolean includemark(Marker mark, Marker prev) {
+                return (prev == null);
+            }
+        };
+        public static ImportFilter readonly = new ImportFilter() {
+            public boolean includegrid(ImportedGrid grid, boolean hasprev) {
+                return (false);
+            }
+
+            public boolean includemark(Marker mark, Marker prev) {
+                return (false);
+            }
+        };
+
+        public boolean includegrid(ImportedGrid grid, boolean hasprev);
+
+        public boolean includemark(Marker mark, Marker prev);
+
+        public default void handleerror(RuntimeException exc, String ctx) {
+            throw (exc);
+        }
+    }
+
+    public static class GridInfo {
+        public final long id, seg;
+        public final Coord sc;
+
+        public GridInfo(long id, long seg, Coord sc) {
+            this.id = id;
+            this.seg = seg;
+            this.sc = sc;
+        }
+    }
+
+    public abstract static class Marker {
+        public long seg;
+        public Coord tc;
+        public String nm;
+
+        public Marker(long seg, Coord tc, String nm) {
+            this.seg = seg;
+            this.tc = tc;
+            this.nm = nm;
+        }
+
+        public String name() {
+            return nm;
+        }
+
+        public String tip() {
+            return nm;
+        }
+    }
+
+    public static class PMarker extends Marker {
+        public Color color;
+
+        public PMarker(long seg, Coord tc, String nm, Color color) {
+            super(seg, tc, nm);
+            this.color = color;
+        }
+    }
+
+    public static class SMarker extends Marker {
+        public long oid;
+        public Resource.Spec res;
+
+        public SMarker(long seg, Coord tc, String nm, long oid, Resource.Spec res) {
+            super(seg, tc, nm);
+            this.oid = oid;
+            this.res = res;
+        }
+    }
+
     public static class TileInfo {
         public final Resource.Spec res;
         public final int prio;
@@ -453,16 +798,104 @@ public class MapFile {
     }
 
     public static class DataGrid {
+        public static final Resource.Spec notile = new Resource.Spec(Resource.remote(), "gfx/tiles/notile", -1);
+        public static final DataGrid nogrid;
+        private static final Coord[] tecs = {
+                new Coord(0, -1),
+                new Coord(1, 0),
+                new Coord(0, 1),
+                new Coord(-1, 0)
+        };
+        private static final Coord[] tccs = {
+                new Coord(0, 0),
+                new Coord(1, 0),
+                new Coord(1, 1),
+                new Coord(0, 1)
+        };
+
+        static {
+            nogrid = new DataGrid(new TileInfo[]{new TileInfo(notile, 0)}, new byte[cmaps.x * cmaps.y], new int[cmaps.x * cmaps.y], 0);
+        }
+
         public final TileInfo[] tilesets;
         public final byte[] tiles;
         public final int[] z;
         public final long mtime;
+        private HashMap<BufferedImage, Color> simple_textures = new HashMap<>();
 
         public DataGrid(TileInfo[] tilesets, byte[] tiles, int[] z, long mtime) {
             this.tilesets = tilesets;
             this.tiles = tiles;
             this.z = z;
             this.mtime = mtime;
+        }
+
+        public static void savez(Message fp, int[] zmap) {
+            int min = zmap[0], max = zmap[0];
+            for (int z : zmap) {
+                min = Math.min(z, min);
+                max = Math.max(z, max);
+            }
+            if (min == max) {
+                fp.adduint8(0);
+                fp.addint32(min);
+                return;
+            }
+            quantize:
+            {
+                float q = 0, E = 0.01f;
+                for (int z : zmap) {
+                    if (z > (min + E)) {
+                        if (q == 0)
+                            q = z - min;
+                        else
+                            q = Utils.gcd(q, z - min, E);
+                    }
+                }
+                float iq = 1.0f / q;
+                for (int z : zmap) {
+                    if (Math.abs((Math.round((z - min) * iq) * q) + min - z) > E)
+                        break quantize;
+                }
+                if (Math.round((max - min) * iq) > 0xffff) {
+                    break quantize;
+                } else if (Math.round((max - min) * iq) > 0xff) {
+                    fp.adduint8(2).addfloat32(min).addfloat32(q);
+                    for (int z : zmap)
+                        fp.adduint16(Math.round((z - min) * iq));
+                } else {
+                    fp.adduint8(1).addfloat32(min).addfloat32(q);
+                    for (int z : zmap)
+                        fp.adduint8(Math.round((z - min) * iq));
+                }
+                return;
+            }
+            fp.adduint8(3);
+            for (int z : zmap)
+                fp.addint32(z);
+        }
+
+        public static int[] loadz(Message fp, String nm) {
+            int[] ret = new int[cmaps.x * cmaps.y];
+            int fmt = fp.uint8();
+            if (fmt == 0) {
+                int z = fp.int32();
+                Arrays.fill(ret, z);
+            } else if (fmt == 1) {
+                int min = fp.int32(), q = fp.int32();
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = min + (fp.uint8() * q);
+            } else if (fmt == 2) {
+                int min = fp.int32(), q = fp.int32();
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = min + (fp.uint16() * q);
+            } else if (fmt == 3) {
+                for (int i = 0; i < ret.length; i++)
+                    ret[i] = fp.int32();
+            } else {
+                throw (new Message.FormatError(String.format("Unknown grid z-map format for %s: %d", nm, fmt)));
+            }
+            return (ret);
         }
 
         public int gettile(Coord c) {
@@ -554,19 +987,6 @@ public class MapFile {
             }
         }
 
-        private static final Coord[] tecs = {
-                new Coord(0, -1),
-                new Coord(1, 0),
-                new Coord(0, 1),
-                new Coord(-1, 0)
-        };
-        private static final Coord[] tccs = {
-                new Coord(0, 0),
-                new Coord(1, 0),
-                new Coord(1, 1),
-                new Coord(0, 1)
-        };
-
         private boolean brokenp(Tiler t, Coord tc, final Tiler[] tilers, final boolean[] tlcache) {
             int bz = ((Ridges.RidgeTile) t).breakz();  //The distance at which a ridge is formed
             //Look at the four tiles around us to get the minimum break distance
@@ -610,32 +1030,33 @@ public class MapFile {
                             } else tex = tiletex(t, texes, cached);
                             int rgb = 0;
                             if (tex != null) {
-                                rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()),
-                                        Utils.floormod(c.y + off.y, tex.getHeight()));
+                                switch (MAPTYPE.get()) {
+                                    case 1:
+                                        rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
 
-                                if (configuration.simplelmap) {
-                                    int mixrgb = tex.getRGB(tex.getWidth() * configuration.mapcolor / 100, tex.getHeight() * configuration.mapcolor / 100);
+                                        int mixrgb = tex.getRGB(20, 45);
 
-                                    //color post-processing
-                                    Color mixtempColor = new Color(mixrgb, true);
-                                    Color tempColor = new Color(rgb, true);
+                                        Color mixtempColor = new Color(mixrgb, true);
+                                        Color tempColor = new Color(rgb, true);
 
-                                    tempColor = Utils.blendcol(tempColor, mixtempColor, 1f);
-                                    rgb = tempColor.getRGB();
+                                        tempColor = Utils.blendcol(tempColor, mixtempColor, configuration.simplelmapintens);
+                                        rgb = tempColor.getRGB();
+                                        break;
+                                    case 2:
+                                        Color simple_color = simple_tile_img(tex);
+                                        if (simple_color != null)
+                                            rgb = simple_color.getRGB();
+                                        break;
+                                    default:
+                                        rgb = tex.getRGB(Utils.floormod(c.x + off.x, tex.getWidth()), Utils.floormod(c.y + off.y, tex.getHeight()));
+                                        break;
                                 }
                             }
 
-                            if (configuration.simplelmap) {
-                                buf.setSample(c.x, c.y, 0, new Color(rgb, true).getRed());
-                                buf.setSample(c.x, c.y, 1, new Color(rgb, true).getGreen());
-                                buf.setSample(c.x, c.y, 2, new Color(rgb, true).getBlue());
-                                buf.setSample(c.x, c.y, 3, new Color(rgb, true).getAlpha());
-                            } else {
-                                buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
-                                buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
-                                buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
-                                buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
-                            }
+                            buf.setSample(c.x, c.y, 0, (rgb & 0x00ff0000) >>> 16);
+                            buf.setSample(c.x, c.y, 1, (rgb & 0x0000ff00) >>> 8);
+                            buf.setSample(c.x, c.y, 2, (rgb & 0x000000ff) >>> 0);
+                            buf.setSample(c.x, c.y, 3, (rgb & 0xff000000) >>> 24);
                         }
                     }
                 }
@@ -684,79 +1105,32 @@ public class MapFile {
             return (PUtils.rasterimg(buf));
         }
 
-        public static void savez(Message fp, int[] zmap) {
-            int min = zmap[0], max = zmap[0];
-            for (int z : zmap) {
-                min = Math.min(z, min);
-                max = Math.max(z, max);
-            }
-            if (min == max) {
-                fp.adduint8(0);
-                fp.addint32(min);
-                return;
-            }
-            quantize:
-            {
-                float q = 0, E = 0.01f;
-                for (int z : zmap) {
-                    if (z > (min + E)) {
-                        if (q == 0)
-                            q = z - min;
-                        else
-                            q = Utils.gcd(q, z - min, E);
+        @SuppressWarnings("Duplicates")
+        private Color simple_tile_img(BufferedImage img) {
+            int sumr = 0, sumg = 0, sumb = 0;
+
+            Color color = simple_textures.get(img);
+
+            if (color == null) {
+                for (int x = 0; x < img.getWidth(); x++) {
+                    for (int y = 0; y < img.getHeight(); y++) {
+                        int rgb = img.getRGB(x, y);
+
+                        int red = (rgb >> 16) & 0xFF;
+                        int green = (rgb >> 8) & 0xFF;
+                        int blue = rgb & 0xFF;
+
+                        sumr += red;
+                        sumg += green;
+                        sumb += blue;
                     }
                 }
-                float iq = 1.0f / q;
-                for (int z : zmap) {
-                    if (Math.abs((Math.round((z - min) * iq) * q) + min - z) > E)
-                        break quantize;
-                }
-                if (Math.round((max - min) * iq) > 0xffff) {
-                    break quantize;
-                } else if (Math.round((max - min) * iq) > 0xff) {
-                    fp.adduint8(2).addfloat32(min).addfloat32(q);
-                    for (int z : zmap)
-                        fp.adduint16(Math.round((z - min) * iq));
-                } else {
-                    fp.adduint8(1).addfloat32(min).addfloat32(q);
-                    for (int z : zmap)
-                        fp.adduint8(Math.round((z - min) * iq));
-                }
-                return;
+
+                int num = img.getWidth() * img.getHeight();
+                simple_textures.put(img, new Color(sumr / num, sumg / num, sumb / num));
             }
-            fp.adduint8(3);
-            for (int z : zmap)
-                fp.addint32(z);
-        }
 
-        public static int[] loadz(Message fp, String nm) {
-            int[] ret = new int[cmaps.x * cmaps.y];
-            int fmt = fp.uint8();
-            if (fmt == 0) {
-                int z = fp.int32();
-                Arrays.fill(ret, z);
-            } else if (fmt == 1) {
-                int min = fp.int32(), q = fp.int32();
-                for (int i = 0; i < ret.length; i++)
-                    ret[i] = min + (fp.uint8() * q);
-            } else if (fmt == 2) {
-                int min = fp.int32(), q = fp.int32();
-                for (int i = 0; i < ret.length; i++)
-                    ret[i] = min + (fp.uint16() * q);
-            } else if (fmt == 3) {
-                for (int i = 0; i < ret.length; i++)
-                    ret[i] = fp.int32();
-            } else {
-                throw (new Message.FormatError(String.format("Unknown grid z-map format for %s: %d", nm, fmt)));
-            }
-            return (ret);
-        }
-
-        public static final Resource.Spec notile = new Resource.Spec(Resource.remote(), "gfx/tiles/notile", -1);
-        public static final DataGrid nogrid;
-
-        static {
-            nogrid = new DataGrid(new TileInfo[]{new TileInfo(notile, 0)}, new byte[cmaps.x * cmaps.y], new int[cmaps.x * cmaps.y], 0);
+            return color;
         }
     }
 
@@ -812,6 +1186,54 @@ public class MapFile {
             g.norepl = norepl;
             g.useq = oseq;
             return (g);
+        }
+
+        public static Grid load(MapFile file, long id) {
+            InputStream fp;
+            try {
+                fp = file.sfetch("grid-%x", id);
+            } catch (IOException e) {
+                Debug.log.printf("mapfile warning: error when locating grid %x: %s\n", id, e);
+                return (null);
+            }
+            try (StreamMessage data = new StreamMessage(fp)) {
+                int ver = data.uint8();
+                if ((ver >= 1) && (ver <= 2)) {
+                    ZMessage z = new ZMessage(data);
+                    long storedid = z.int64();
+                    if (storedid != id)
+                        throw (new Message.FormatError(String.format("Grid ID mismatch: expected %s, got %s", id, storedid)));
+                    long mtime = (ver >= 2) ? z.int64() : System.currentTimeMillis();
+                    List<TileInfo> tilesets = new ArrayList<>();
+                    for (int i = 0, no = z.uint8(); i < no; i++)
+                        tilesets.add(new TileInfo(new Resource.Spec(Resource.remote(), z.string(), z.uint16()), z.uint8()));
+                    byte[] tiles = z.bytes(cmaps.x * cmaps.y);
+                    int[] zmap = new int[cmaps.x * cmaps.y];
+                    for (int i = 0; i < zmap.length; ++i)
+                        zmap[i] = NOZ;
+                    return (new Grid(id, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime));
+                } else if (ver == 3) {
+                    ZMessage z = new ZMessage(data);
+                    long storedid = z.int64();
+                    if (storedid != id)
+                        throw (new Message.FormatError(String.format("Grid ID mismatch: expected %s, got %s", id, storedid)));
+                    long mtime = z.int64();
+                    List<TileInfo> tilesets = new ArrayList<>();
+                    for (int i = 0, no = z.uint8(); i < no; i++)
+                        tilesets.add(new TileInfo(new Resource.Spec(Resource.remote(), z.string(), z.uint16()), z.uint8()));
+                    byte[] tiles = z.bytes(cmaps.x * cmaps.y);
+                    int[] zmap = new int[cmaps.x * cmaps.y];
+                    for (int i = 0; i < zmap.length; ++i) {
+                        zmap[i] = z.int32();
+                    }
+                    return (new Grid(id, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime));
+                } else {
+                    throw (new Message.FormatError(String.format("Unknown grid data version for %x: %d", id, ver)));
+                }
+            } catch (Message.BinError e) {
+                Debug.log.printf("mapfile warning: error when loading grid %x: %s\n", id, e);
+                return (null);
+            }
         }
 
         public Grid mergeprev(Grid prev) {
@@ -900,54 +1322,6 @@ public class MapFile {
 
         public void remove() {
             useq = -2;
-        }
-
-        public static Grid load(MapFile file, long id) {
-            InputStream fp;
-            try {
-                fp = file.sfetch("grid-%x", id);
-            } catch (IOException e) {
-                Debug.log.printf("mapfile warning: error when locating grid %x: %s\n", id, e);
-                return (null);
-            }
-            try (StreamMessage data = new StreamMessage(fp)) {
-                int ver = data.uint8();
-                if ((ver >= 1) && (ver <= 2)) {
-                    ZMessage z = new ZMessage(data);
-                    long storedid = z.int64();
-                    if (storedid != id)
-                        throw (new Message.FormatError(String.format("Grid ID mismatch: expected %s, got %s", id, storedid)));
-                    long mtime = (ver >= 2) ? z.int64() : System.currentTimeMillis();
-                    List<TileInfo> tilesets = new ArrayList<>();
-                    for (int i = 0, no = z.uint8(); i < no; i++)
-                        tilesets.add(new TileInfo(new Resource.Spec(Resource.remote(), z.string(), z.uint16()), z.uint8()));
-                    byte[] tiles = z.bytes(cmaps.x * cmaps.y);
-                    int[] zmap = new int[cmaps.x * cmaps.y];
-                    for (int i = 0; i < zmap.length; ++i)
-                        zmap[i] = NOZ;
-                    return (new Grid(id, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime));
-                } else if (ver == 3) {
-                    ZMessage z = new ZMessage(data);
-                    long storedid = z.int64();
-                    if (storedid != id)
-                        throw (new Message.FormatError(String.format("Grid ID mismatch: expected %s, got %s", id, storedid)));
-                    long mtime = z.int64();
-                    List<TileInfo> tilesets = new ArrayList<>();
-                    for (int i = 0, no = z.uint8(); i < no; i++)
-                        tilesets.add(new TileInfo(new Resource.Spec(Resource.remote(), z.string(), z.uint16()), z.uint8()));
-                    byte[] tiles = z.bytes(cmaps.x * cmaps.y);
-                    int[] zmap = new int[cmaps.x * cmaps.y];
-                    for (int i = 0; i < zmap.length; ++i) {
-                        zmap[i] = z.int32();
-                    }
-                    return (new Grid(id, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime));
-                } else {
-                    throw (new Message.FormatError(String.format("Unknown grid data version for %x: %d", id, ver)));
-                }
-            } catch (Message.BinError e) {
-                Debug.log.printf("mapfile warning: error when loading grid %x: %s\n", id, e);
-                return (null);
-            }
         }
     }
 
@@ -1110,50 +1484,6 @@ public class MapFile {
             return (ret);
         }
 
-        //v1 = no z levels
-        //v2 = z levels
-        public void save(Message fp) {
-            fp.adduint8(2);
-            ZMessage z = new ZMessage(fp);
-            z.addint64(seg);
-            z.addint32(lvl);
-            z.addcoord(sc);
-            z.addint64(mtime);
-            z.adduint8(tilesets.length);
-            for (int i = 0; i < tilesets.length; i++) {
-                z.addstring(tilesets[i].res.name);
-                z.adduint16(tilesets[i].res.ver);
-                z.adduint8(tilesets[i].prio);
-            }
-            z.addbytes(tiles);
-            for (int i = 0; i < this.z.length; ++i) {
-                z.addint32(this.z[i]);
-            }
-            z.finish();
-        }
-
-        public void save(MapFile file) {
-            OutputStream fp = null;
-            do {
-                try {
-                    fp = file.sstore("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y);
-                } catch (IOException e) {
-                    if (e.getMessage().contains("another process")) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (Exception ex) {
-                            return;
-                        }
-                    } else {
-                        throw (new StreamMessage.IOError(e));
-                    }
-                }
-            } while (fp == null);
-            try (StreamMessage out = new StreamMessage(fp)) {
-                save(out);
-            }
-        }
-
         public static ZoomGrid load(MapFile file, long seg, int lvl, Coord sc) {
             InputStream fp = null;
             do {
@@ -1245,6 +1575,50 @@ public class MapFile {
                 }
             }
         }
+
+        //v1 = no z levels
+        //v2 = z levels
+        public void save(Message fp) {
+            fp.adduint8(2);
+            ZMessage z = new ZMessage(fp);
+            z.addint64(seg);
+            z.addint32(lvl);
+            z.addcoord(sc);
+            z.addint64(mtime);
+            z.adduint8(tilesets.length);
+            for (int i = 0; i < tilesets.length; i++) {
+                z.addstring(tilesets[i].res.name);
+                z.adduint16(tilesets[i].res.ver);
+                z.adduint8(tilesets[i].prio);
+            }
+            z.addbytes(tiles);
+            for (int i = 0; i < this.z.length; ++i) {
+                z.addint32(this.z[i]);
+            }
+            z.finish();
+        }
+
+        public void save(MapFile file) {
+            OutputStream fp = null;
+            do {
+                try {
+                    fp = file.sstore("zgrid-%x-%d-%d-%d", seg, lvl, sc.x, sc.y);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("another process")) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception ex) {
+                            return;
+                        }
+                    } else {
+                        throw (new StreamMessage.IOError(e));
+                    }
+                }
+            } while (fp == null);
+            try (StreamMessage out = new StreamMessage(fp)) {
+                save(out);
+            }
+        }
     }
 
     public static class ZoomCoord {
@@ -1268,6 +1642,92 @@ public class MapFile {
         }
     }
 
+    public static class ImportedGrid {
+        public long gid, segid, mtime;
+        public Coord sc;
+        public TileInfo[] tilesets;
+        public byte[] tiles;
+        public int[] zmap;
+
+        ImportedGrid(Message data) {
+            int ver = data.uint8();
+            if ((ver < 1) || (ver > 2))
+                throw (new Message.FormatError("Unknown grid data version: " + ver));
+            gid = data.int64();
+            segid = data.int64();
+            mtime = data.int64();
+            sc = data.coord();
+            tilesets = new TileInfo[data.uint8()];
+            for (int i = 0; i < tilesets.length; i++)
+                tilesets[i] = new TileInfo(new Resource.Spec(Resource.remote(), data.string(), data.uint16()), data.uint8());
+            if (ver >= 2) {
+                int len = data.int32();
+                if (len != (cmaps.x * cmaps.y))
+                    throw (new Message.FormatError("Bad grid data dimensions: " + len));
+                tiles = data.bytes(len);
+                zmap = DataGrid.loadz(data, String.format("%x", gid));
+            } else {
+                tiles = data.bytes();
+                if (tiles.length != (cmaps.x * cmaps.y))
+                    throw (new Message.FormatError("Bad grid data dimensions: " + tiles.length));
+                zmap = new int[cmaps.x * cmaps.y];
+            }
+            for (byte td : tiles) {
+                if ((td & 0xff) >= tiles.length)
+                    throw (new Message.FormatError(String.format("Bad grid data contents: Tileset ID %d does not exist among 0-%d", (td & 0xff), tiles.length - 1)));
+            }
+        }
+
+        Grid togrid() {
+            return (new Grid(gid, tilesets, tiles, zmap, mtime));
+        }
+    }
+
+    private class Processor extends HackThread {
+        Processor() {
+            super("Mapfile processor");
+        }
+
+        public void run() {
+            try {
+                long last = System.currentTimeMillis();
+                while (true) {
+                    Runnable task;
+                    long now = System.currentTimeMillis();
+                    synchronized (procmon) {
+                        if (!updqueue.isEmpty()) {
+                            Pair<MCache, Collection<MCache.Grid>> el = Utils.take(updqueue);
+                            task = () -> MapFile.this.update(el.a, el.b);
+                        } else if (!dirty.isEmpty()) {
+                            Segment seg = Utils.take(dirty);
+                            task = locked(() -> segments.put(seg.id, seg), lock.writeLock());
+                        } else if (!gidirty.isEmpty()) {
+                            Pair<Long, GridInfo> pair = Utils.take(gidirty);
+                            task = locked(() -> gridinfo.put(pair.a, pair.b), lock.writeLock());
+                        } else if (gdirty) {
+                            task = locked(MapFile.this::save, lock.readLock());
+                            gdirty = false;
+                        } else {
+                            if (now - last > 10000) {
+                                processor = null;
+                                return;
+                            }
+                            procmon.wait(5000);
+                            continue;
+                        }
+                    }
+                    task.run();
+                    last = now;
+                }
+            } catch (InterruptedException e) {
+            } finally {
+                synchronized (procmon) {
+                    processor = null;
+                }
+            }
+        }
+    }
+
     public class Segment {
         public final long id;
         public final BMap<Coord, Long> map = new HashBMap<>();
@@ -1277,21 +1737,6 @@ public class MapFile {
 
         public Segment(long id) {
             this.id = id;
-        }
-
-        private class Cached implements Indir<Grid> {
-            Grid loaded;
-            Future<Grid> loading;
-
-            Cached(Future<Grid> loading) {
-                this.loading = loading;
-            }
-
-            public Grid get() {
-                if (loaded == null)
-                    loaded = loading.get(0);
-                return (loaded);
-            }
         }
 
         private Grid loaded(long id) {
@@ -1356,42 +1801,8 @@ public class MapFile {
             }
         }
 
-        private class ByCoord implements Indir<Grid> {
-            final Coord sc;
-            Cached cur;
-
-            ByCoord(Coord sc, Cached cur) {
-                this.sc = sc;
-                this.cur = cur;
-            }
-
-            public Grid get() {
-                Cached cur = this.cur;
-                if (cur == null)
-                    return (null);
-                return (cur.get());
-            }
-        }
-
         private Future<ZoomGrid> loadzgrid(ZoomCoord zc) {
             return (Defer.later(() -> ZoomGrid.fetch(MapFile.this, Segment.this, zc.lvl, zc.c)));
-        }
-
-        private class ByZCoord implements Indir<ZoomGrid> {
-            final ZoomCoord zc;
-            ZoomGrid loaded;
-            Future<ZoomGrid> loading;
-
-            ByZCoord(ZoomCoord zc, Future<ZoomGrid> loading) {
-                this.zc = zc;
-                this.loading = loading;
-            }
-
-            public ZoomGrid get() {
-                if (loaded == null)
-                    loaded = loading.get(0);
-                return (loaded);
-            }
         }
 
         public Indir<Grid> grid(Coord gc) {
@@ -1446,422 +1857,61 @@ public class MapFile {
                     cur.loaded = grid;
             }
         }
-    }
 
-    public final BackCache<Long, Segment> segments = new BackCache<>(5, id -> {
-        checklock();
-        InputStream fp;
-        try {
-            fp = sfetch("seg-%x", id);
-        } catch (IOException e) {
-            return (null);
-        }
-        try (StreamMessage data = new StreamMessage(fp)) {
-            int ver = data.uint8();
-            if (ver == 1) {
-                Segment seg = new Segment(id);
-                ZMessage z = new ZMessage(data);
-                long storedid = z.int64();
-                if (storedid != id)
-                    throw (new Message.FormatError(String.format("Segment ID mismatch: expected %x, got %x", id, storedid)));
-                for (int i = 0, no = z.int32(); i < no; i++) {
-                    final Coord sc = z.coord();
-                    final long gid = z.int64();
-                    seg.map.put(sc, gid);
-                }
-                return (seg);
-            } else {
-                throw (new Message.FormatError("Unknown segment data version: " + ver));
-            }
-        } catch (Message.BinError e) {
-            Debug.log.printf("mapfile warning: error when loading segment %x: %s\n", id, e);
-            return (null);
-        }
-    }, (id, seg) -> {
-        checklock();
-        OutputStream fp = null;
-        do {
-            try {
-                fp = sstore("seg-%x", seg.id);
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception ex) {
-                        return;
-                    }
-                } else {
-                    throw (new StreamMessage.IOError(e));
-                }
-            }
-        } while (fp == null);
-        try (StreamMessage out = new StreamMessage(fp)) {
-            out.adduint8(1);
-            ZMessage z = new ZMessage(out);
-            z.addint64(seg.id);
-            z.addint32(seg.map.size());
-            for (Map.Entry<Coord, Long> e : seg.map.entrySet()) {
-                z.addcoord(e.getKey()).addint64(e.getValue());
-            }
-            z.finish();
-        }
-        if (knownsegs.add(id))
-            defersave();
-    });
+        private class Cached implements Indir<Grid> {
+            Grid loaded;
+            Future<Grid> loading;
 
-    private void merge(Segment dst, Segment src, Coord soff) {
-        checklock();
-        for (Map.Entry<Coord, Long> gi : src.map.entrySet()) {
-            long id = gi.getValue();
-            Coord sc = gi.getKey();
-            Coord dc = sc.sub(soff);
-            dst.include(id, dc);
-            gridinfo.put(id, new GridInfo(id, dst.id, dc));
-        }
-        boolean mf = false;
-        for (Marker mark : markers) {
-            if (mark.seg == src.id) {
-                mark.seg = dst.id;
-                mark.tc = mark.tc.sub(soff.mul(cmaps));
-                mf = true;
-            }
-        }
-        if (mf)
-            markerseq++;
-        knownsegs.remove(src.id);
-        defersave();
-        synchronized (procmon) {
-            dirty.add(dst);
-            process();
-        }
-    }
-
-    public void update(MCache map, Collection<MCache.Grid> grids) {
-        lock.writeLock().lock(); //write lock, why? Some of these need it, not all
-        try {
-            long mseg = -1;
-            Coord moff = null;
-            Collection<MCache.Grid> missing = new ArrayList<>(grids.size());
-            Collection<Pair<Long, Coord>> merge = null;
-            for (MCache.Grid g : grids) {
-                GridInfo info = gridinfo.get(g.id);
-                if (info == null) {
-                    missing.add(g);
-                    continue;
-                }
-                Segment seg = segments.get(info.seg);
-                if (seg == null) {
-                    missing.add(g);
-                    continue;
-                }
-                if (moff == null) {
-                    Coord psc = seg.map.reverse().get(g.id);
-                    if (psc == null) {
-                        if (debug)
-                            Debug.log.printf("mapfile warning: grid %x is oddly gone from segment %x; was at %s\n", g.id, seg.id, info.sc);
-                        missing.add(g);
-                        continue;
-                    } else if (!psc.equals(info.sc)) {
-                        Debug.log.printf("mapfile warning: segment-offset mismatch for grid %x in segment %x: segment has %s, gridinfo has %s\n", g.id, seg.id, psc, info.sc);
-                        missing.add(g);
-                        continue;
-                    }
-                    mseg = seg.id;
-                    moff = info.sc.sub(g.gc);
-                }
-                Grid cur = seg.loaded(g.id);
-                //I want to force update on anything still sporting NOZ or day old grids..
-                if (cur == null || cur.useq != g.seq || g.z[0] == NOZ) {
-                    Grid sg = Grid.from(map, g);
-                    Grid prev = cur;
-                    if (prev == null)
-                        prev = Grid.load(MapFile.this, sg.id);
-                    if (prev != null)
-                        sg = sg.mergeprev(prev);
-                    sg.save(MapFile.this);
-                    seg.include(sg, g.gc.add(moff)); //XXX: Write lock required
-                    //seg.updateGrid(sg.id, sg);
-                }
-                if (seg.id != mseg) {
-                    if (merge == null)
-                        merge = new HashSet<>();
-                    Coord soff = info.sc.sub(g.gc.add(moff));
-                    merge.add(new Pair<>(seg.id, soff));
-                }
-            }
-            if (!missing.isEmpty()) {
-                Segment seg;
-                if (mseg == -1) {
-                    seg = new Segment(Utils.el(missing).id);
-                    moff = Coord.z;
-                    if (debug) Debug.log.printf("mapfile: creating new segment %x\n", seg.id);
-                } else {
-                    seg = segments.get(mseg);
-                }
-                synchronized (procmon) {
-                    dirty.add(seg);
-                    process();
-                }
-                for (MCache.Grid g : missing) {
-                    Grid sg = Grid.from(map, g);
-                    Coord sc = g.gc.add(moff);
-                    sg.save(MapFile.this);
-                    seg.include(sg, sc);
-                    gridinfo.put(g.id, new GridInfo(g.id, seg.id, sc));
-                }
-            }
-            if (merge != null) {
-                for (Pair<Long, Coord> mel : merge) {
-                    Segment a = segments.get(mseg);
-                    Segment b = segments.get(mel.a);
-                    Coord ab = mel.b;
-                    Segment src, dst;
-                    Coord soff;
-                    if (a.map.size() > b.map.size()) {
-                        src = b;
-                        dst = a;
-                        soff = ab;
-                    } else {
-                        src = a;
-                        dst = b;
-                        soff = ab.inv();
-                    }
-                    if (debug)
-                        Debug.log.printf("mapfile: merging segment %x (%d) into %x (%d) at %s\n", src.id, src.map.size(), dst.id, dst.map.size(), soff);
-                    merge(dst, src, soff);
-                }
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-        if (debug) Debug.log.printf("mapfile: update completed\n");
-    }
-
-    // You need multiple grids around one otherwise it can merge!
-    public void updategrids(MCache map, Collection<MCache.Grid> grids) {
-        if (!grids.isEmpty()) {
-            synchronized (procmon) {
-                updqueue.add(new Pair<>(map, grids));
-                process();
-            }
-        }
-    }
-
-    public static interface ExportFilter {
-        public boolean includeseg(long id);
-
-        public boolean includegrid(Segment seg, Coord sc, long id);
-
-        public boolean includemark(Marker mark);
-
-        public static final ExportFilter all = new ExportFilter() {
-            public boolean includeseg(long id) {
-                return (true);
+            Cached(Future<Grid> loading) {
+                this.loading = loading;
             }
 
-            public boolean includegrid(Segment seg, Coord sc, long id) {
-                return (true);
-            }
-
-            public boolean includemark(Marker mark) {
-                return (true);
-            }
-        };
-
-        public static ExportFilter segment(long sid) {
-            return (new ExportFilter() {
-                public boolean includeseg(long id) {
-                    return (id == sid);
-                }
-
-                public boolean includegrid(Segment seg, Coord sc, long id) {
-                    return (seg.id == sid);
-                }
-
-                public boolean includemark(Marker mark) {
-                    return (mark.seg == sid);
-                }
-            });
-        }
-
-        public static ExportFilter around(Marker mark, double rad) {
-            return (new ExportFilter() {
-                public boolean includeseg(long id) {
-                    return (id == mark.seg);
-                }
-
-                public boolean includegrid(Segment seg, Coord sc, long id) {
-                    return ((seg.id == mark.seg) && (sc.mul(cmaps).add(cmaps.div(2)).dist(mark.tc) <= rad));
-                }
-
-                public boolean includemark(Marker cmark) {
-                    return (cmark == mark);
-                }
-            });
-        }
-    }
-
-    public static interface ExportStatus {
-        public default void grid(int cs, int ns, int cg, int ng) {
-        }
-
-        public default void mark(int cm, int nm) {
-        }
-    }
-
-    private static final byte[] EXPORT_SIG = "Haven Mapfile 1".getBytes(Utils.ascii);
-
-    public void export(Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
-        if (prog == null) prog = new ExportStatus() {
-        };
-        out.addbytes(EXPORT_SIG);
-        ZMessage zout = new ZMessage(out);
-        Collection<Long> segbuf = locked((Collection<Long> c) -> new ArrayList<>(c), lock.readLock()).apply(knownsegs);
-        int nseg = 0;
-        for (Long sid : segbuf) {
-            if (!filter.includeseg(sid))
-                continue;
-            Segment seg;
-            Collection<Pair<Coord, Long>> gridbuf = new ArrayList<>();
-            lock.readLock().lock();
-            try {
-                seg = segments.get(sid);
-                for (Map.Entry<Coord, Long> gd : seg.map.entrySet()) {
-                    if (filter.includegrid(seg, gd.getKey(), gd.getValue()))
-                        gridbuf.add(new Pair<>(gd.getKey(), gd.getValue()));
-                }
-            } finally {
-                lock.readLock().unlock();
-            }
-            int ngrid = 0;
-            for (Pair<Coord, Long> gd : gridbuf) {
-                prog.grid(nseg, segbuf.size(), ngrid++, gridbuf.size());
-                Grid grid = Grid.load(this, gd.b);
-                MessageBuf buf = new MessageBuf();
-                buf.adduint8(1);
-                buf.addint64(gd.b);
-                buf.addint64(seg.id);
-                buf.addint64(grid.mtime);
-                buf.addcoord(gd.a);
-                buf.adduint8(grid.tilesets.length);
-                for (TileInfo tinf : grid.tilesets) {
-                    buf.addstring(tinf.res.name);
-                    buf.adduint16(tinf.res.ver);
-                    buf.adduint8(tinf.prio);
-                }
-                buf.addbytes(grid.tiles);
-                byte[] od = buf.fin();
-                zout.addstring("grid");
-                zout.addint32(od.length);
-                zout.addbytes(od);
-                Utils.checkirq();
-            }
-            nseg++;
-        }
-        Collection<Marker> markbuf = locked((Collection<Marker> c) -> new ArrayList<>(c), lock.readLock()).apply(markers);
-        int nmark = 0;
-        for (Marker mark : markbuf) {
-            prog.mark(nmark++, markbuf.size());
-            if (!filter.includemark(mark))
-                continue;
-            MessageBuf buf = new MessageBuf();
-            savemarker(buf, mark);
-            byte[] od = buf.fin();
-            zout.addstring("mark");
-            zout.addint32(od.length);
-            zout.addbytes(od);
-            Utils.checkirq();
-        }
-        zout.finish();
-    }
-
-    public void export(OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
-        StreamMessage msg = new StreamMessage(null, out);
-        export(msg, filter, prog);
-        msg.flush();
-    }
-
-    public static class ImportedGrid {
-        public long gid, segid, mtime;
-        public Coord sc;
-        public TileInfo[] tilesets;
-        public byte[] tiles;
-        public int[] zmap;
-
-        ImportedGrid(Message data) {
-            int ver = data.uint8();
-            if ((ver < 1) || (ver > 2))
-                throw (new Message.FormatError("Unknown grid data version: " + ver));
-            gid = data.int64();
-            segid = data.int64();
-            mtime = data.int64();
-            sc = data.coord();
-            tilesets = new TileInfo[data.uint8()];
-            for (int i = 0; i < tilesets.length; i++)
-                tilesets[i] = new TileInfo(new Resource.Spec(Resource.remote(), data.string(), data.uint16()), data.uint8());
-            if (ver >= 2) {
-                int len = data.int32();
-                if (len != (cmaps.x * cmaps.y))
-                    throw (new Message.FormatError("Bad grid data dimensions: " + len));
-                tiles = data.bytes(len);
-                zmap = DataGrid.loadz(data, String.format("%x", gid));
-            } else {
-                tiles = data.bytes();
-                if (tiles.length != (cmaps.x * cmaps.y))
-                    throw (new Message.FormatError("Bad grid data dimensions: " + tiles.length));
-                zmap = new int[cmaps.x * cmaps.y];
-            }
-            for (byte td : tiles) {
-                if ((td & 0xff) >= tiles.length)
-                    throw (new Message.FormatError(String.format("Bad grid data contents: Tileset ID %d does not exist among 0-%d", (td & 0xff), tiles.length - 1)));
+            public Grid get() {
+                if (loaded == null)
+                    loaded = loading.get(0);
+                return (loaded);
             }
         }
 
-        Grid togrid() {
-            return (new Grid(gid, tilesets, tiles, zmap, mtime));
+        private class ByCoord implements Indir<Grid> {
+            final Coord sc;
+            Cached cur;
+
+            ByCoord(Coord sc, Cached cur) {
+                this.sc = sc;
+                this.cur = cur;
+            }
+
+            public Grid get() {
+                Cached cur = this.cur;
+                if (cur == null)
+                    return (null);
+                return (cur.get());
+            }
         }
-    }
 
-    public static interface ImportFilter {
-        public boolean includegrid(ImportedGrid grid, boolean hasprev);
+        private class ByZCoord implements Indir<ZoomGrid> {
+            final ZoomCoord zc;
+            ZoomGrid loaded;
+            Future<ZoomGrid> loading;
 
-        public boolean includemark(Marker mark, Marker prev);
+            ByZCoord(ZoomCoord zc, Future<ZoomGrid> loading) {
+                this.zc = zc;
+                this.loading = loading;
+            }
 
-        public default void handleerror(RuntimeException exc, String ctx) {
-            throw (exc);
+            public ZoomGrid get() {
+                if (loaded == null)
+                    loaded = loading.get(0);
+                return (loaded);
+            }
         }
-
-        public static ImportFilter all = new ImportFilter() {
-            public boolean includegrid(ImportedGrid grid, boolean hasprev) {
-                return (true);
-            }
-
-            public boolean includemark(Marker mark, Marker prev) {
-                return (prev == null);
-            }
-        };
-
-        public static ImportFilter readonly = new ImportFilter() {
-            public boolean includegrid(ImportedGrid grid, boolean hasprev) {
-                return (false);
-            }
-
-            public boolean includemark(Marker mark, Marker prev) {
-                return (false);
-            }
-        };
     }
 
     private class Importer {
         final Map<Long, ImportedSegment> segs = new HashMap<>();
         final ImportFilter filter;
         Segment curseg;
-
-        class ImportedSegment {
-            final Map<Long, Coord> offs = new HashMap<>();
-            long nseg;
-            Coord noff = null;
-        }
 
         Importer(ImportFilter filter) {
             this.filter = filter;
@@ -2020,37 +2070,11 @@ public class MapFile {
             }
             flush();
         }
-    }
 
-    public void reimport(Message data, ImportFilter filter) throws InterruptedException {
-        new Importer(filter).reimport(data);
-    }
-
-    public void reimport(InputStream fp, ImportFilter filter) throws InterruptedException {
-        reimport(new StreamMessage(fp, null), filter);
-    }
-
-    private static final Coord[] inout = new Coord[]{
-            new Coord(0, 0),
-            new Coord(0, -1), new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0),
-            new Coord(1, -1), new Coord(1, 1), new Coord(-1, 1), new Coord(-1, -1),
-    };
-
-    public void update(MCache map, Coord cgc) {
-        Collection<MCache.Grid> grids = new ArrayList<>();
-        for (Coord off : inout) {
-            Coord gc = cgc.add(off);
-            try {
-                grids.add(map.getgrid(gc));
-            } catch (Loading l) {
-                continue;
-            }
-        }
-        if (!grids.isEmpty()) {
-            synchronized (procmon) {
-                updqueue.add(new Pair<>(map, grids));
-                process();
-            }
+        class ImportedSegment {
+            final Map<Long, Coord> offs = new HashMap<>();
+            long nseg;
+            Coord noff = null;
         }
     }
 }
