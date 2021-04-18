@@ -195,6 +195,7 @@ public class configuration {
     public static float badcamdistminimaldefault = Utils.getpreff("badcamdistminimaldefault", 5.0f);
     public static float badcamelevdefault = Utils.getpreff("badcamelevdefault", (float) Math.PI / 4.0f);
     public static float badcamangldefault = Utils.getpreff("badcamangldefault", 0.0f);
+    public static boolean badcamelevlock = Utils.getprefb("badcamelevlock", false);
 
     public static int pfcolor = Utils.getprefi("pfcolor", Color.MAGENTA.hashCode());
     public static int dowsecolor = Utils.getprefi("dowsecolor", Color.MAGENTA.hashCode());

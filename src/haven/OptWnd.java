@@ -1896,7 +1896,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        appender.addRow(new Label("Bad camera scrolling sensitivity"),
+        appender.addRow(new Label("Bad/Top camera scrolling sensitivity"),
                 new HSlider(200, 0, 50, Config.badcamsensitivity) {
                     protected void added() {
                         super.added();
@@ -1911,6 +1911,22 @@ public class OptWnd extends Window {
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Bad camera scrolling sensitivity : " + val).tex();
+                    }
+                });
+        appender.addRow(new CheckBox("Lock bad camera elevator") {
+                    {
+                        a = configuration.badcamelevlock;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("badcamelevlock", val);
+                        configuration.badcamelevlock = val;
+                        a = val;
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Override with shift").tex();
                     }
                 });
         appender.add(new CheckBox("Use French (AZERTY) keyboard layout") {
