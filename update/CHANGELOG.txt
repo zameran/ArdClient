@@ -1,4 +1,9 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.20
+-- Provinces overlays and mapv4 (Export and Import)
+-- Export kins
+~
+
 2021.04.18
 -- C = camera
 ~
