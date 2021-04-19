@@ -95,6 +95,8 @@ import static haven.DefSettings.HUDTHEME;
 import static haven.DefSettings.KEEPGOBS;
 import static haven.DefSettings.KEEPGRIDS;
 import static haven.DefSettings.LIMITPATHFINDING;
+import static haven.DefSettings.MAPTYPE;
+import static haven.DefSettings.MINIMAPTYPE;
 import static haven.DefSettings.NVAMBIENTCOL;
 import static haven.DefSettings.NVDIFFUSECOL;
 import static haven.DefSettings.NVSPECCOC;
@@ -121,472 +123,25 @@ import static haven.DefSettings.WNDCOL;
 public class OptWnd extends Window {
     public static final int VERTICAL_MARGIN = 10;
     public static final int HORIZONTAL_MARGIN = 5;
-    private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
     public static final int VERTICAL_AUDIO_MARGIN = 5;
+    private static final Text.Foundry fonttest = new Text.Foundry(Text.sans, 10).aa(true);
+    private static final List<Integer> caveindust = Arrays.asList(1, 2, 5, 10, 15, 30, 45, 60, 120);
+    private static final Pair[] combatkeys = new Pair[]{
+            new Pair<>("[1-5] and [shift + 1-5]", 0),
+            new Pair<>("[1-5] and [F1-F5]", 1),
+            new Pair<>("[F1-F10]", 2)
+    };
+    private static final List<Integer> fontSize = Arrays.asList(10, 11, 12, 13, 14, 15, 16);
+    private static final List<String> statSize = Arrays.asList("1", "2", "5", "10", "25", "50", "100", "200", "500", "1000");
+    private static final List<String> afkTime = Arrays.asList("0", "5", "10", "15", "20", "25", "30", "45", "60");
+    private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
+    private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
+    private static List<String> pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
     public final Panel main, video, audio, display, map, general, combat, control, uis, uip, quality, mapping, flowermenus, soundalarms, hidesettings, studydesksettings, autodropsettings, keybindsettings, chatsettings, clearboulders, clearbushes, cleartrees, clearhides, discord, additions, modification;
     public Panel waterPanel, qualityPanel, mapPanel, devPanel;
     public Panel current;
     public CheckBox discordcheckbox, menugridcheckbox;
     CheckBox sm = null, rm = null, lt = null, bt = null, ltl, discordrole, discorduser;
-
-    public void chpanel(Panel p) {
-        if (current != null)
-            current.hide();
-        (current = p).show();
-    }
-
-    public class PButton extends Button {
-        public final Panel tgt;
-        public final int key;
-
-        public PButton(int w, String title, int key, Panel tgt) {
-            super(w, title);
-            this.tgt = tgt;
-            this.key = key;
-        }
-
-        public void click() {
-            if (tgt == clearboulders) {
-                final String charname = ui.gui.chrid;
-                for (CheckListboxItem itm : Config.boulders.values())
-                    itm.selected = false;
-                Utils.setprefchklst("boulderssel_" + charname, Config.boulders);
-            } else if (tgt == clearbushes) {
-                final String charname = ui.gui.chrid;
-                for (CheckListboxItem itm : Config.bushes.values())
-                    itm.selected = false;
-                Utils.setprefchklst("bushessel_" + charname, Config.bushes);
-            } else if (tgt == cleartrees) {
-                final String charname = ui.gui.chrid;
-                for (CheckListboxItem itm : Config.trees.values())
-                    itm.selected = false;
-                Utils.setprefchklst("treessel_" + charname, Config.trees);
-            } else if (tgt == clearhides) {
-                final String charname = ui.gui.chrid;
-                for (CheckListboxItem itm : Config.icons.values())
-                    itm.selected = false;
-                Utils.setprefchklst("iconssel_" + charname, Config.icons);
-            } else
-                chpanel(tgt);
-        }
-
-        public boolean type(char key, java.awt.event.KeyEvent ev) {
-            if ((this.key != -1) && (key == this.key)) {
-                click();
-                return (true);
-            }
-            return (false);
-        }
-    }
-
-    public class Panel extends Widget {
-        public Panel() {
-            visible = false;
-            c = Coord.z;
-        }
-    }
-
-    public class VideoPanel extends Panel {
-        public VideoPanel(Panel back) {
-            super();
-            add(new PButton(200, "Back", 27, back), new Coord(210, 360));
-            resize(new Coord(620, 400));
-        }
-
-        public class CPanel extends Widget {
-            public final GLSettings cf;
-
-            public CPanel(GLSettings gcf) {
-                this.cf = gcf;
-                final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
-                appender.setVerticalMargin(VERTICAL_MARGIN);
-                appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-                appender.add(new CheckBox("Per-fragment lighting") {
-                    {
-                        a = cf.flight.val;
-                    }
-
-                    public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.flight.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                if (ui.gui != null)
-                                    ui.gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.flight.set(false);
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-                appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
-                    {
-                        a = Config.DivertPolityMessages;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("DivertPolityMessages", val);
-                        Config.DivertPolityMessages = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Render shadows") {
-                    {
-                        a = cf.lshadow.val;
-                    }
-
-                    public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.lshadow.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                if (ui.gui != null)
-                                    ui.gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.lshadow.set(false);
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-                appender.add(new CheckBox("Antialiasing") {
-                    {
-                        a = cf.fsaa.val;
-                    }
-
-                    public void set(boolean val) {
-                        try {
-                            cf.fsaa.set(val);
-                        } catch (GLSettings.SettingException e) {
-                            if (ui.gui != null)
-                                ui.gui.error(e.getMessage());
-                            return;
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-
-                Label fpsBackgroundLimitLbl = new Label("Background FPS limit: " + (Config.fpsBackgroundLimit == -1 ? "unlimited" : Config.fpsBackgroundLimit));
-                appender.add(fpsBackgroundLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void added() {
-                        super.added();
-                        if (Config.fpsBackgroundLimit == -1) {
-                            val = 49;
-                        } else {
-                            val = Config.fpsBackgroundLimit / 5;
-                        }
-                    }
-
-                    public void changed() {
-                        if (val == 0) {
-                            Config.fpsBackgroundLimit = 1;
-                        } else if (val == 49) {
-                            Config.fpsBackgroundLimit = -1; // Unlimited
-                        } else {
-                            Config.fpsBackgroundLimit = val * 5;
-                        }
-                        Utils.setprefi("fpsBackgroundLimit", Config.fpsBackgroundLimit);
-                        HavenPanel.bgfd = 1000 / Config.fpsBackgroundLimit;
-                        if (Config.fpsBackgroundLimit == -1) {
-                            fpsBackgroundLimitLbl.settext("Background FPS limit: unlimited");
-                        } else {
-                            fpsBackgroundLimitLbl.settext("Background FPS limit: " + Config.fpsBackgroundLimit);
-                        }
-                    }
-                });
-
-                Label fpsLimitLbl = new Label("FPS limit: " + (Config.fpsLimit == -1 ? "unlimited" : Config.fpsLimit));
-                appender.add(fpsLimitLbl);
-                appender.add(new HSlider(200, 0, 49, 0) {
-                    protected void added() {
-                        super.added();
-                        if (Config.fpsLimit == -1) {
-                            val = 49;
-                        } else {
-                            val = Config.fpsLimit / 5;
-                        }
-                    }
-
-                    public void changed() {
-                        if (val == 0) {
-                            Config.fpsLimit = 1;
-                        } else if (val == 49) {
-                            Config.fpsLimit = -1; // Unlimited
-                        } else {
-                            Config.fpsLimit = val * 5;
-                        }
-                        Utils.setprefi("fpsLimit", Config.fpsLimit);
-                        HavenPanel.fd = 1000 / Config.fpsLimit;
-                        if (Config.fpsLimit == -1) {
-                            fpsLimitLbl.settext("FPS limit: unlimited");
-                        } else {
-                            fpsLimitLbl.settext("FPS limit: " + Config.fpsLimit);
-                        }
-                    }
-                });
-                appender.add(new Label("Anisotropic filtering"));
-                if (cf.anisotex.max() <= 1) {
-                    appender.add(new Label("(Not supported)"));
-                } else {
-                    final Label dpy = new Label("");
-                    appender.addRow(
-                            new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
-                                protected void added() {
-                                    dpy();
-                                }
-
-                                void dpy() {
-                                    if (val < 2)
-                                        dpy.settext("Off");
-                                    else
-                                        dpy.settext(String.format("%.1f\u00d7", (val / 2.0)));
-                                }
-
-                                public void changed() {
-                                    try {
-                                        cf.anisotex.set(val / 2.0f);
-                                    } catch (GLSettings.SettingException e) {
-                                        getparent(GameUI.class).error(e.getMessage());
-                                        return;
-                                    }
-                                    dpy();
-                                    cf.dirty = true;
-                                }
-                            },
-                            dpy);
-                }
-                appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious") {
-                    {
-                        a = Config.obviousridges;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("obviousridges", val);
-                        Config.obviousridges = val;
-                        a = val;
-                        if (ui.sess != null) {
-                            ui.sess.glob.map.invalidateAll();
-                        }
-                    }
-                });
-                appender.add(new CheckBox("Disable Animations (Big Performance Boost, makes some animations look weird.)") {
-                    {
-                        a = Config.disableAllAnimations;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("disableAllAnimations", val);
-                        Config.disableAllAnimations = val;
-                        a = val;
-                    }
-                });
-//                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
-//                    {
-//                        a = Config.lowerterraindistance;
-//                    }
-//
-//                    public void set(boolean val) {
-//                        Config.lowerterraindistance = val;
-//                        Utils.setprefb("lowerterraindistance", val);
-//                        a = val;
-//                    }
-//                });
-                appender.addRow(new IndirLabel(() -> String.format("Map View Distance: %d",
-                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 5, DRAWGRIDRADIUS, val -> {
-                    if (ui.gui != null && ui.gui.map != null) {
-                        ui.gui.map.view = val;
-                    }
-                }));
-                appender.add(new CheckBox("Disable biome tile transitions") {
-                    {
-                        a = Config.disabletiletrans;
-                    }
-
-                    public void set(boolean val) {
-                        Config.disabletiletrans = val;
-                        Utils.setprefb("disabletiletrans", val);
-                        a = val;
-                        if (ui.sess != null) {
-                            ui.sess.glob.map.invalidateAll();
-                        }
-                    }
-                });
-                appender.add(new CheckBox("Disable terrain smoothing") {
-                    {
-                        a = Config.disableterrainsmooth;
-                    }
-
-                    public void set(boolean val) {
-                        Config.disableterrainsmooth = val;
-                        Utils.setprefb("disableterrainsmooth", val);
-                        a = val;
-                        if (ui.sess != null) {
-                            ui.sess.glob.map.invalidateAll();
-                        }
-                    }
-                });
-                appender.add(new CheckBox("Disable terrain elevation") {
-                    {
-                        a = Config.disableelev;
-                    }
-
-                    public void set(boolean val) {
-                        Config.disableelev = val;
-                        Utils.setprefb("disableelev", val);
-                        a = val;
-                        if (ui.sess != null) {
-                            ui.sess.glob.map.invalidateAll();
-                        }
-                    }
-                });
-                appender.add(new CheckBox("Disable flavor objects including ambient sounds") {
-                    {
-                        a = Config.hideflocomplete;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("hideflocomplete", val);
-                        Config.hideflocomplete = val;
-                        a = val;
-                    }
-                });
-                appender.add(new IndirCheckBox("Wireframe mode", WIREFRAMEMODE));
-                appender.add(new IndirCheckBox("Render water surface", cf.WATERSURFACE));
-                appender.add(new CheckBox("Hide flavor objects but keep sounds (requires logout)") {
-                    {
-                        a = Config.hideflovisual;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("hideflovisual", val);
-                        Config.hideflovisual = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Show weather - This will also enable/disable Weed/Opium effects") {
-                    {
-                        a = Config.showweather;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("showweather", val);
-                        Config.showweather = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Simple crops (req. logout)") {
-                    {
-                        a = Config.simplecrops;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("simplecrops", val);
-                        Config.simplecrops = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Show skybox (Potential Performance Impact)") {
-                    {
-                        a = Config.skybox;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("skybox", val);
-                        Config.skybox = val;
-                        a = val;
-                    }
-                });
-
-                appender.add(new CheckBox("Simple foragables (req. logout)") {
-                    {
-                        a = Config.simpleforage;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("simpleforage", val);
-                        Config.simpleforage = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Show FPS") {
-                    {
-                        a = Config.showfps;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("showfps", val);
-                        Config.showfps = val;
-                        a = val;
-                    }
-                });
-                appender.add(new CheckBox("Disable black load screens. - Can cause issues loading the map, setting not for everyone.") {
-                    {
-                        a = Config.noloadscreen;
-                    }
-
-                    public void set(boolean val) {
-                        Utils.setprefb("noloadscreen", val);
-                        Config.noloadscreen = val;
-                        a = val;
-                    }
-                });
-
-                appender.add(new Label("Disable animations:"));
-                CheckListbox disanimlist = new CheckListbox(320, Config.disableanim.values().size(), 18 + Config.fontadd) {
-                    @Override
-                    protected void itemclick(CheckListboxItem itm, int button) {
-                        super.itemclick(itm, button);
-                        Utils.setprefchklst("disableanim", Config.disableanim);
-                    }
-                };
-                disanimlist.items.addAll(Config.disableanim.values());
-                appender.add(disanimlist);
-
-                pack();
-            }
-        }
-
-        private CPanel curcf = null;
-
-        public void draw(GOut g) {
-            if ((curcf == null) || (g.gc.pref != curcf.cf)) {
-                if (curcf != null)
-                    curcf.destroy();
-                curcf = add(new CPanel(g.gc.pref), Coord.z);
-            }
-            super.draw(g);
-        }
-    }
-
-    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
-        final Widget container = new Widget();
-        final Label lbl = new Label(text);
-        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl);
-        final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
-        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
-        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
-        container.pack();
-        return container;
-    }
-
-    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl, final Consumer<Color> cb) {
-        final Widget container = new Widget();
-        final Label lbl = new Label(text);
-        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl, cb);
-        final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
-        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
-        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
-        container.pack();
-        return container;
-    }
-
 
     public OptWnd(boolean gopts) {
         super(new Coord(620, 400), "Options", true);
@@ -649,6 +204,44 @@ public class OptWnd extends Window {
         initDevPanel();
 
         chpanel(main);
+    }
+
+    public OptWnd() {
+        this(true);
+    }
+
+    static private Scrollport.Scrollcont withScrollport(Widget widget, Coord sz) {
+        final Scrollport scroll = new Scrollport(sz);
+        widget.add(scroll, new Coord(0, 0));
+        return scroll.cont;
+    }
+
+    public void chpanel(Panel p) {
+        if (current != null)
+            current.hide();
+        (current = p).show();
+    }
+
+    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl) {
+        final Widget container = new Widget();
+        final Label lbl = new Label(text);
+        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl);
+        final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
+        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
+        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
+        container.pack();
+        return container;
+    }
+
+    private Widget ColorPreWithLabel(final String text, final IndirSetting<Color> cl, final Consumer<Color> cb) {
+        final Widget container = new Widget();
+        final Label lbl = new Label(text);
+        final IndirColorPreview pre = new IndirColorPreview(new Coord(16, 16), cl, cb);
+        final int height = Math.max(lbl.sz.y, pre.sz.y) / 2;
+        container.add(lbl, new Coord(0, height - lbl.sz.y / 2));
+        container.add(pre, new Coord(lbl.sz.x, height - pre.sz.y / 2));
+        container.pack();
+        return container;
     }
 
     private void initMapping() {
@@ -2303,7 +1896,7 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
 
-        appender.addRow(new Label("Bad camera scrolling sensitivity"),
+        appender.addRow(new Label("Bad/Top camera scrolling sensitivity"),
                 new HSlider(200, 0, 50, Config.badcamsensitivity) {
                     protected void added() {
                         super.added();
@@ -2318,6 +1911,22 @@ public class OptWnd extends Window {
                     @Override
                     public Object tooltip(Coord c0, Widget prev) {
                         return Text.render("Bad camera scrolling sensitivity : " + val).tex();
+                    }
+                });
+        appender.addRow(new CheckBox("Lock bad camera elevator") {
+                    {
+                        a = configuration.badcamelevlock;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("badcamelevlock", val);
+                        configuration.badcamelevlock = val;
+                        a = val;
+                    }
+
+                    @Override
+                    public Object tooltip(Coord c0, Widget prev) {
+                        return Text.render("Override with shift").tex();
                     }
                 });
         appender.add(new CheckBox("Use French (AZERTY) keyboard layout") {
@@ -3035,76 +2644,6 @@ public class OptWnd extends Window {
                 if (ui.sess != null) {
                     ui.sess.glob.map.invalidateAll();
                 }
-            }
-        });
-
-        appender.add(new Label(""));
-        appender.add(new Label("One map at a time."));
-
-        rm = new CheckBox("Rawrz Simple Map") {
-            {
-                a = Config.rawrzmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("rawrzmap", val);
-                Config.rawrzmap = val;
-                a = val;
-                Config.simplemap = false;
-                sm.a = false;
-            }
-        };
-
-        sm = new CheckBox("Simple Map") {
-            {
-                a = Config.simplemap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("simplemap", val);
-                Config.simplemap = val;
-                a = val;
-                Config.rawrzmap = false;
-                rm.a = false;
-            }
-        };
-        appender.add(rm);
-
-        appender.add(new CheckBox("Rawrz Simple Map disable black lines") {
-            {
-                a = Config.disableBlackOutLinesOnMap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("disableBlackOutLinesOnMap", val);
-                Config.disableBlackOutLinesOnMap = val;
-                a = val;
-            }
-        });
-
-        appender.add(sm);
-
-        appender.add(new CheckBox("Map Scale") {
-            {
-                a = Config.mapscale;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("mapscale", val);
-                Config.mapscale = val;
-                a = val;
-            }
-        });
-
-        appender.add(new CheckBox("Trollex Map Binds") {
-            {
-                a = Config.trollexmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("trollexmap", val);
-                Config.trollexmap = val;
-                a = val;
             }
         });
 
@@ -4455,23 +3994,60 @@ public class OptWnd extends Window {
         appender.setVerticalMargin(5);
         appender.setHorizontalMargin(5);
 
-        appender.add(new CheckBox("Simple Large Map") {
-            {
-                a = configuration.simplelmap;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("simplelmap", val);
-                configuration.simplelmap = val;
-                a = val;
+        appender.add(new Label("Both"));
+        appender.addRow(new Label("Simple map color"), new HSlider(100, 0, 100, (int) (configuration.simplelmapintens * 100)) {
+            public void changed() {
+                configuration.simplelmapintens = val / 100f;
+                Utils.setpreff("simplelmapintens", val / 100f);
             }
 
             @Override
             public Object tooltip(Coord c0, Widget prev) {
-                return Text.render("Draw the map easier").tex();
+                return Text.render("Simple map blend: " + val / 100f).tex();
             }
         });
 
+        appender.add(new Label(""));
+        appender.add(new Label("Minimap"));
+        final String[] tiers = {"Default", "Blend", "Simple"};
+        appender.addRow(new IndirLabel(() -> String.format("Minimap type: %s", tiers[MINIMAPTYPE.get()])), new IndirHSlider(100, 0, 2, MINIMAPTYPE));
+        appender.add(new CheckBox("Disable black lines on minimap") {
+            {
+                a = Config.disableBlackOutLinesOnMap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("disableBlackOutLinesOnMap", val);
+                Config.disableBlackOutLinesOnMap = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Map Scale") {
+            {
+                a = Config.mapscale;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("mapscale", val);
+                Config.mapscale = val;
+                a = val;
+            }
+        });
+        appender.add(new CheckBox("Trollex Map Binds") {
+            {
+                a = Config.trollexmap;
+            }
+
+            public void set(boolean val) {
+                Utils.setprefb("trollexmap", val);
+                Config.trollexmap = val;
+                a = val;
+            }
+        });
+
+        appender.add(new Label(""));
+        appender.add(new Label("Map"));
+        appender.addRow(new IndirLabel(() -> String.format("Map type: %s", tiers[MAPTYPE.get()])), new IndirHSlider(100, 0, 2, MAPTYPE));
         appender.addRow(new CheckBox("Additional marks on the map") {
             {
                 a = resources.customMarkObj;
@@ -4527,7 +4103,6 @@ public class OptWnd extends Window {
                 ui.root.adda(w, ui.root.sz.div(2), 0.5, 0.5);
             }
         });
-
         appender.add(new CheckBox("Scaling marks from zoom") {
             {
                 a = configuration.scalingmarks;
@@ -4544,7 +4119,6 @@ public class OptWnd extends Window {
                 return Text.render("On a large map the marks will look small").tex();
             }
         });
-
         appender.add(new CheckBox("Allow texture map") {
             {
                 a = configuration.allowtexturemap;
@@ -4561,7 +4135,6 @@ public class OptWnd extends Window {
                 return Text.render("Draw textures on large map").tex();
             }
         });
-
         appender.addRow(new CheckBox("Allow outline map") {
             {
                 a = configuration.allowoutlinemap;
@@ -4588,7 +4161,6 @@ public class OptWnd extends Window {
                 return Text.render(val + "").tex();
             }
         });
-
         appender.add(new CheckBox("Allow ridges map") {
             {
                 a = configuration.allowridgesmap;
@@ -4605,7 +4177,6 @@ public class OptWnd extends Window {
                 return Text.render("Draw ridges on large map").tex();
             }
         });
-
         appender.add(new CheckBox("Draw cave tiles on map") {
             {
                 a = configuration.cavetileonmap;
@@ -4623,6 +4194,8 @@ public class OptWnd extends Window {
             }
         });
 
+        appender.add(new Label(""));
+        appender.add(new Label("Other"));
         appender.addRow(new Label("Distance view color"), new ColorPreview(new Coord(20, 20), new Color(configuration.distanceviewcolor, true), val -> {
             configuration.distanceviewcolor = val.hashCode();
             Utils.setprefi("distanceviewcolor", val.hashCode());
@@ -5234,7 +4807,8 @@ public class OptWnd extends Window {
                 a = val;
             }
         }, new Coord(list.sz.x + 10, y));
-        autodropsettings.add(new CheckBox("Drop mined Quarryquartz.") {
+        y += 20;
+        autodropsettings.add(new CheckBox("Drop mined Quarryartz.") {
             {
                 a = Config.dropMinedQuarryquartz;
             }
@@ -5705,8 +5279,6 @@ public class OptWnd extends Window {
         soundalarms.pack();
     }
 
-    private static final List<Integer> caveindust = Arrays.asList(1, 2, 5, 10, 15, 30, 45, 60, 120);
-
     private Dropbox<Integer> makeCaveInDropdown() {
         List<String> values = new ArrayList<>();
         for (Integer x : caveindust) {
@@ -5741,7 +5313,6 @@ public class OptWnd extends Window {
             }
         };
     }
-
 
     private Dropbox<Locale> langDropdown() {
         List<Locale> languages = enumerateLanguages();
@@ -5833,12 +5404,6 @@ public class OptWnd extends Window {
         return new ArrayList<>(languages);
     }
 
-    private static final Pair[] combatkeys = new Pair[]{
-            new Pair<>("[1-5] and [shift + 1-5]", 0),
-            new Pair<>("[1-5] and [F1-F5]", 1),
-            new Pair<>("[F1-F10]", 2)
-    };
-
     @SuppressWarnings("unchecked")
     private Dropbox<Pair<String, Integer>> combatkeysDropdown() {
         List<String> values = Arrays.stream(combatkeys).map(x -> x.a.toString()).collect(Collectors.toList());
@@ -5868,8 +5433,6 @@ public class OptWnd extends Window {
         modes.change(combatkeys[Config.combatkeys]);
         return modes;
     }
-
-    private static final List<Integer> fontSize = Arrays.asList(10, 11, 12, 13, 14, 15, 16);
 
     private Dropbox<Integer> makeFontSizeChatDropdown() {
         List<String> values = fontSize.stream().map(Object::toString).collect(Collectors.toList());
@@ -5902,8 +5465,6 @@ public class OptWnd extends Window {
         };
     }
 
-    private static final List<String> statSize = Arrays.asList("1", "2", "5", "10", "25", "50", "100", "200", "500", "1000");
-
     private Dropbox<String> makeStatGainDropdown() {
         return new Dropbox<String>(statSize.size(), statSize) {
             {
@@ -5934,8 +5495,6 @@ public class OptWnd extends Window {
         };
     }
 
-    private static final List<String> afkTime = Arrays.asList("0", "5", "10", "15", "20", "25", "30", "45", "60");
-
     private Dropbox<String> makeafkTimeDropdown() {
         return new Dropbox<String>(afkTime.size(), afkTime) {
             {
@@ -5965,8 +5524,6 @@ public class OptWnd extends Window {
             }
         };
     }
-
-    private static final List<String> AutoDrinkTime = Arrays.asList("1", "3", "5", "10", "15", "20", "25", "30", "45", "60");
 
     private Dropbox<String> makeAutoDrinkTimeDropdown() {
         return new Dropbox<String>(AutoDrinkTime.size(), AutoDrinkTime) {
@@ -6026,16 +5583,6 @@ public class OptWnd extends Window {
                 Utils.setpref("autoDrinkLiquid", item);
             }
         };
-    }
-
-    static private Scrollport.Scrollcont withScrollport(Widget widget, Coord sz) {
-        final Scrollport scroll = new Scrollport(sz);
-        widget.add(scroll, new Coord(0, 0));
-        return scroll.cont;
-    }
-
-    public OptWnd() {
-        this(true);
     }
 
     public void setMapSettings() {
@@ -6338,9 +5885,6 @@ public class OptWnd extends Window {
         };
     }
 
-
-    private static List<String> pictureList = configuration.findFiles(configuration.picturePath, Arrays.asList(".png", ".jpg", ".gif"));
-
     private Dropbox<String> makePictureChoiseDropdown() {
         return new Dropbox<String>(pictureList.size(), pictureList) {
             {
@@ -6389,8 +5933,6 @@ public class OptWnd extends Window {
         };
     }
 
-    private static final List<String> menuSize = Arrays.asList("4", "5", "6", "7", "8", "9", "10");
-
     private Dropbox<String> makeCustomMenuGrid(int n) {
         return new Dropbox<String>(menuSize.size(), menuSize) {
             {
@@ -6429,5 +5971,435 @@ public class OptWnd extends Window {
                 }
             }
         };
+    }
+
+    public class PButton extends Button {
+        public final Panel tgt;
+        public final int key;
+
+        public PButton(int w, String title, int key, Panel tgt) {
+            super(w, title);
+            this.tgt = tgt;
+            this.key = key;
+        }
+
+        public void click() {
+            if (tgt == clearboulders) {
+                final String charname = ui.gui.chrid;
+                for (CheckListboxItem itm : Config.boulders.values())
+                    itm.selected = false;
+                Utils.setprefchklst("boulderssel_" + charname, Config.boulders);
+            } else if (tgt == clearbushes) {
+                final String charname = ui.gui.chrid;
+                for (CheckListboxItem itm : Config.bushes.values())
+                    itm.selected = false;
+                Utils.setprefchklst("bushessel_" + charname, Config.bushes);
+            } else if (tgt == cleartrees) {
+                final String charname = ui.gui.chrid;
+                for (CheckListboxItem itm : Config.trees.values())
+                    itm.selected = false;
+                Utils.setprefchklst("treessel_" + charname, Config.trees);
+            } else if (tgt == clearhides) {
+                final String charname = ui.gui.chrid;
+                for (CheckListboxItem itm : Config.icons.values())
+                    itm.selected = false;
+                Utils.setprefchklst("iconssel_" + charname, Config.icons);
+            } else
+                chpanel(tgt);
+        }
+
+        public boolean type(char key, java.awt.event.KeyEvent ev) {
+            if ((this.key != -1) && (key == this.key)) {
+                click();
+                return (true);
+            }
+            return (false);
+        }
+    }
+
+    public class Panel extends Widget {
+        public Panel() {
+            visible = false;
+            c = Coord.z;
+        }
+    }
+
+    public class VideoPanel extends Panel {
+        private CPanel curcf = null;
+
+        public VideoPanel(Panel back) {
+            super();
+            add(new PButton(200, "Back", 27, back), new Coord(210, 360));
+            resize(new Coord(620, 400));
+        }
+
+        public void draw(GOut g) {
+            if ((curcf == null) || (g.gc.pref != curcf.cf)) {
+                if (curcf != null)
+                    curcf.destroy();
+                curcf = add(new CPanel(g.gc.pref), Coord.z);
+            }
+            super.draw(g);
+        }
+
+        public class CPanel extends Widget {
+            public final GLSettings cf;
+
+            public CPanel(GLSettings gcf) {
+                this.cf = gcf;
+                final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
+                appender.setVerticalMargin(VERTICAL_MARGIN);
+                appender.setHorizontalMargin(HORIZONTAL_MARGIN);
+                appender.add(new CheckBox("Per-fragment lighting") {
+                    {
+                        a = cf.flight.val;
+                    }
+
+                    public void set(boolean val) {
+                        if (val) {
+                            try {
+                                cf.flight.set(true);
+                            } catch (GLSettings.SettingException e) {
+                                if (ui.gui != null)
+                                    ui.gui.error(e.getMessage());
+                                return;
+                            }
+                        } else {
+                            cf.flight.set(false);
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+                appender.add(new CheckBox("Show Entering/Leaving Messages in Sys Log instead of large Popup - FPS increase?") {
+                    {
+                        a = Config.DivertPolityMessages;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("DivertPolityMessages", val);
+                        Config.DivertPolityMessages = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Render shadows") {
+                    {
+                        a = cf.lshadow.val;
+                    }
+
+                    public void set(boolean val) {
+                        if (val) {
+                            try {
+                                cf.lshadow.set(true);
+                            } catch (GLSettings.SettingException e) {
+                                if (ui.gui != null)
+                                    ui.gui.error(e.getMessage());
+                                return;
+                            }
+                        } else {
+                            cf.lshadow.set(false);
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+                appender.add(new CheckBox("Antialiasing") {
+                    {
+                        a = cf.fsaa.val;
+                    }
+
+                    public void set(boolean val) {
+                        try {
+                            cf.fsaa.set(val);
+                        } catch (GLSettings.SettingException e) {
+                            if (ui.gui != null)
+                                ui.gui.error(e.getMessage());
+                            return;
+                        }
+                        a = val;
+                        cf.dirty = true;
+                    }
+                });
+
+                Label fpsBackgroundLimitLbl = new Label("Background FPS limit: " + (Config.fpsBackgroundLimit == -1 ? "unlimited" : Config.fpsBackgroundLimit));
+                appender.add(fpsBackgroundLimitLbl);
+                appender.add(new HSlider(200, 0, 49, 0) {
+                    protected void added() {
+                        super.added();
+                        if (Config.fpsBackgroundLimit == -1) {
+                            val = 49;
+                        } else {
+                            val = Config.fpsBackgroundLimit / 5;
+                        }
+                    }
+
+                    public void changed() {
+                        if (val == 0) {
+                            Config.fpsBackgroundLimit = 1;
+                        } else if (val == 49) {
+                            Config.fpsBackgroundLimit = -1; // Unlimited
+                        } else {
+                            Config.fpsBackgroundLimit = val * 5;
+                        }
+                        Utils.setprefi("fpsBackgroundLimit", Config.fpsBackgroundLimit);
+                        HavenPanel.bgfd = 1000 / Config.fpsBackgroundLimit;
+                        if (Config.fpsBackgroundLimit == -1) {
+                            fpsBackgroundLimitLbl.settext("Background FPS limit: unlimited");
+                        } else {
+                            fpsBackgroundLimitLbl.settext("Background FPS limit: " + Config.fpsBackgroundLimit);
+                        }
+                    }
+                });
+
+                Label fpsLimitLbl = new Label("FPS limit: " + (Config.fpsLimit == -1 ? "unlimited" : Config.fpsLimit));
+                appender.add(fpsLimitLbl);
+                appender.add(new HSlider(200, 0, 49, 0) {
+                    protected void added() {
+                        super.added();
+                        if (Config.fpsLimit == -1) {
+                            val = 49;
+                        } else {
+                            val = Config.fpsLimit / 5;
+                        }
+                    }
+
+                    public void changed() {
+                        if (val == 0) {
+                            Config.fpsLimit = 1;
+                        } else if (val == 49) {
+                            Config.fpsLimit = -1; // Unlimited
+                        } else {
+                            Config.fpsLimit = val * 5;
+                        }
+                        Utils.setprefi("fpsLimit", Config.fpsLimit);
+                        HavenPanel.fd = 1000 / Config.fpsLimit;
+                        if (Config.fpsLimit == -1) {
+                            fpsLimitLbl.settext("FPS limit: unlimited");
+                        } else {
+                            fpsLimitLbl.settext("FPS limit: " + Config.fpsLimit);
+                        }
+                    }
+                });
+                appender.add(new Label("Anisotropic filtering"));
+                if (cf.anisotex.max() <= 1) {
+                    appender.add(new Label("(Not supported)"));
+                } else {
+                    final Label dpy = new Label("");
+                    appender.addRow(
+                            new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
+                                protected void added() {
+                                    dpy();
+                                }
+
+                                void dpy() {
+                                    if (val < 2)
+                                        dpy.settext("Off");
+                                    else
+                                        dpy.settext(String.format("%.1f\u00d7", (val / 2.0)));
+                                }
+
+                                public void changed() {
+                                    try {
+                                        cf.anisotex.set(val / 2.0f);
+                                    } catch (GLSettings.SettingException e) {
+                                        getparent(GameUI.class).error(e.getMessage());
+                                        return;
+                                    }
+                                    dpy();
+                                    cf.dirty = true;
+                                }
+                            },
+                            dpy);
+                }
+                appender.add(new CheckBox("Add flared lip to top of ridges to make them obvious") {
+                    {
+                        a = Config.obviousridges;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("obviousridges", val);
+                        Config.obviousridges = val;
+                        a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
+                    }
+                });
+                appender.add(new CheckBox("Disable Animations (Big Performance Boost, makes some animations look weird.)") {
+                    {
+                        a = Config.disableAllAnimations;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("disableAllAnimations", val);
+                        Config.disableAllAnimations = val;
+                        a = val;
+                    }
+                });
+//                appender.add(new CheckBox("Lower terrain draw distance - Will increase performance, but look like shit. (requires logout)") {
+//                    {
+//                        a = Config.lowerterraindistance;
+//                    }
+//
+//                    public void set(boolean val) {
+//                        Config.lowerterraindistance = val;
+//                        Utils.setprefb("lowerterraindistance", val);
+//                        a = val;
+//                    }
+//                });
+                appender.addRow(new IndirLabel(() -> String.format("Map View Distance: %d",
+                        DRAWGRIDRADIUS.get())), new IndirHSlider(200, 1, 5, DRAWGRIDRADIUS, val -> {
+                    if (ui.gui != null && ui.gui.map != null) {
+                        ui.gui.map.view = val;
+                    }
+                }));
+                appender.add(new CheckBox("Disable biome tile transitions") {
+                    {
+                        a = Config.disabletiletrans;
+                    }
+
+                    public void set(boolean val) {
+                        Config.disabletiletrans = val;
+                        Utils.setprefb("disabletiletrans", val);
+                        a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
+                    }
+                });
+                appender.add(new CheckBox("Disable terrain smoothing") {
+                    {
+                        a = Config.disableterrainsmooth;
+                    }
+
+                    public void set(boolean val) {
+                        Config.disableterrainsmooth = val;
+                        Utils.setprefb("disableterrainsmooth", val);
+                        a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
+                    }
+                });
+                appender.add(new CheckBox("Disable terrain elevation") {
+                    {
+                        a = Config.disableelev;
+                    }
+
+                    public void set(boolean val) {
+                        Config.disableelev = val;
+                        Utils.setprefb("disableelev", val);
+                        a = val;
+                        if (ui.sess != null) {
+                            ui.sess.glob.map.invalidateAll();
+                        }
+                    }
+                });
+                appender.add(new CheckBox("Disable flavor objects including ambient sounds") {
+                    {
+                        a = Config.hideflocomplete;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("hideflocomplete", val);
+                        Config.hideflocomplete = val;
+                        a = val;
+                    }
+                });
+                appender.add(new IndirCheckBox("Wireframe mode", WIREFRAMEMODE));
+                appender.add(new IndirCheckBox("Render water surface", cf.WATERSURFACE));
+                appender.add(new CheckBox("Hide flavor objects but keep sounds (requires logout)") {
+                    {
+                        a = Config.hideflovisual;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("hideflovisual", val);
+                        Config.hideflovisual = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Show weather - This will also enable/disable Weed/Opium effects") {
+                    {
+                        a = Config.showweather;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("showweather", val);
+                        Config.showweather = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Simple crops (req. logout)") {
+                    {
+                        a = Config.simplecrops;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("simplecrops", val);
+                        Config.simplecrops = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Show skybox (Potential Performance Impact)") {
+                    {
+                        a = Config.skybox;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("skybox", val);
+                        Config.skybox = val;
+                        a = val;
+                    }
+                });
+
+                appender.add(new CheckBox("Simple foragables (req. logout)") {
+                    {
+                        a = Config.simpleforage;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("simpleforage", val);
+                        Config.simpleforage = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Show FPS") {
+                    {
+                        a = Config.showfps;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("showfps", val);
+                        Config.showfps = val;
+                        a = val;
+                    }
+                });
+                appender.add(new CheckBox("Disable black load screens. - Can cause issues loading the map, setting not for everyone.") {
+                    {
+                        a = Config.noloadscreen;
+                    }
+
+                    public void set(boolean val) {
+                        Utils.setprefb("noloadscreen", val);
+                        Config.noloadscreen = val;
+                        a = val;
+                    }
+                });
+
+                appender.add(new Label("Disable animations:"));
+                CheckListbox disanimlist = new CheckListbox(320, Config.disableanim.values().size(), 18 + Config.fontadd) {
+                    @Override
+                    protected void itemclick(CheckListboxItem itm, int button) {
+                        super.itemclick(itm, button);
+                        Utils.setprefchklst("disableanim", Config.disableanim);
+                    }
+                };
+                disanimlist.items.addAll(Config.disableanim.values());
+                appender.add(disanimlist);
+
+                pack();
+            }
+        }
     }
 }

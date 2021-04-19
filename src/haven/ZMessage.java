@@ -33,7 +33,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class ZMessage extends Message implements Closeable, Flushable {
+public class ZMessage extends Message implements Cloneable, Closeable, Flushable {
     private Inflater zi = null;
     private Deflater zo = null;
     private boolean eof;
@@ -41,6 +41,15 @@ public class ZMessage extends Message implements Closeable, Flushable {
 
     public ZMessage(Message from) {
         this.bk = from;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            return new ZMessage(bk);
+        }
     }
 
     public boolean underflow(int hint) {

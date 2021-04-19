@@ -385,8 +385,10 @@ public class OCache implements Iterable<Gob> {
 
     public synchronized void cmppose(Gob g, int pseq, List<ResData> poses, List<ResData> tposes, boolean interp, float ttime) {
         Composite cmp = (Composite) g.getattr(Drawable.class);
-        if (cmp == null)
-            throw (new RuntimeException(String.format("cmppose on non-composed object: %s %s %s %s", poses, tposes, interp, ttime)));
+        if (cmp == null) {
+            System.out.println(String.format("cmppose on non-composed object: %s %s %s %s", poses, tposes, interp, ttime));
+            return;
+        }
         if (cmp != null) {
             if (cmp.pseq != pseq) {
                 cmp.pseq = pseq;

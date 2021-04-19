@@ -47,39 +47,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static haven.DefSettings.MINIMAPTYPE;
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
 
 public class LocalMiniMap extends Widget {
+    public final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
+    public final static Tex dooricn = Resource.loadtex("gfx/icons/door");
     private static final Tex resize = Resource.loadtex("gfx/hud/wndmap/lg/resize");
     private static final Tex gridblue = Resource.loadtex("gfx/hud/mmap/gridblue");
     private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
-    private HashMap<BufferedImage, Color> simple_textures = new HashMap<>();
-    private String biome;
-    // public Tex biometex;
-    public final MapView mv;
-    public MapFile save;
-    private Coord cc = null;
-    public MapTile cur = null;
-    private UI.Grab dragging;
-    private Coord doff = Coord.z;
-    private Coord delta = Coord.z;
+    private final static Tex bushicn = Text.renderstroked("\u22C6", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
+    private final static Tex treeicn = Text.renderstroked("\u25B2", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
+    private final static Tex bldricn = Text.renderstroked("\u25AA", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
+    public static Coord plcrel = null;
     private static float[] zArray = {.5f, .75f, 1f, 2f, 3f, 4f};
     private static float[] ziArray = {.8f, .9f, 1f, 1f, 1f, 1f};
-    private int zIndex = 2;
-    private boolean showGrid = DefSettings.MMSHOWGRID.get();
-    private boolean showView = DefSettings.MMSHOWVIEW.get();
-
-    public List<DisplayIcon> icons = Collections.emptyList();
-    public GobIcon.Settings iconconf;
-
-
+    // public Tex biometex;
+    public final MapView mv;
     private final HashSet<Long> sgobs = new HashSet<Long>();
-
-    private float zoom = 1f; //zoom multiplier
-    private float iconZoom = 1f; //zoom multiplier for minimap icons
-
     private final Map<Coord, Tex> maptiles = new LinkedHashMap<Coord, Tex>(100, 0.75f, false) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Coord, Tex> eldest) {
@@ -104,26 +91,43 @@ public class LocalMiniMap extends Widget {
             return size() > 7;
         }
     };
-    private final static Tex bushicn = Text.renderstroked("\u22C6", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
-    private final static Tex treeicn = Text.renderstroked("\u25B2", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
-    private final static Tex bldricn = Text.renderstroked("\u25AA", Color.CYAN, Color.BLACK, Text.num12boldFnd).tex();
-    public final static Tex roadicn = Resource.loadtex("gfx/icons/milestone");
-    public final static Tex dooricn = Resource.loadtex("gfx/icons/door");
-    private Map<Color, Tex> xmap = new HashMap<Color, Tex>(6);
-    public static Coord plcrel = null;
+    public MapFile save;
+    public MapTile cur = null;
+    public List<DisplayIcon> icons = Collections.emptyList();
+    public GobIcon.Settings iconconf;
     public long lastnewgid;
+    private HashMap<BufferedImage, Color> simple_textures = new HashMap<>();
+    private String biome;
+    private Coord cc = null;
+    private UI.Grab dragging;
+    private Coord doff = Coord.z;
+    private Coord delta = Coord.z;
+    private int zIndex = 2;
+    private boolean showGrid = DefSettings.MMSHOWGRID.get();
+    private boolean showView = DefSettings.MMSHOWVIEW.get();
+    private float zoom = 1f; //zoom multiplier
+    private float iconZoom = 1f; //zoom multiplier for minimap icons
+    private Map<Color, Tex> xmap = new HashMap<Color, Tex>(6);
 
 
-    public static class MapTile {
-        public MCache.Grid grid;
-        public int seq;
-
-        public MapTile(MCache.Grid grid, int seq) {
-            this.grid = grid;
-            this.seq = seq;
-        }
+    public LocalMiniMap(Coord sz, MapView mv) {
+        super(sz);
+        this.mv = mv;
     }
 
+    private static String pretty(String name) {
+        int k = name.lastIndexOf("/");
+        name = name.substring(k + 1);
+        name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        return name;
+    }
+
+    private static String prettybiome(String biome) {
+        int k = biome.lastIndexOf("/");
+        biome = biome.substring(k + 1);
+        biome = biome.substring(0, 1).toUpperCase() + biome.substring(1);
+        return biome;
+    }
 
     private BufferedImage tileimg(int t, BufferedImage[] texes) {
         BufferedImage img = texes[t];
@@ -145,155 +149,69 @@ public class LocalMiniMap extends Widget {
         MCache m = ui.sess.glob.map;
         BufferedImage buf = TexI.mkbuf(sz);
         Coord c = new Coord();
-        if (Config.simplemap) {
-            for (c.y = 0; c.y < sz.y; c.y++) {
-                for (c.x = 0; c.x < sz.x; c.x++) {
-                    int t = m.gettile(ul.add(c));
-                    BufferedImage tex = tileimg(t, texes);
-                    int rgb = 0xFF000000;
-                    if (tex != null) {
-                        rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()),
-                                Utils.floormod(c.y + ul.y, tex.getHeight()));
-                        int mixrgb = tex.getRGB(20, 45);
 
-                        //color post-processing
-                        Color mixtempColor = new Color(mixrgb, true);
-                        Color tempColor = new Color(rgb, true);
+        for (c.y = 0; c.y < sz.y; c.y++) {
+            for (c.x = 0; c.x < sz.x; c.x++) {
+                int t = m.gettile(ul.add(c));
+                BufferedImage tex = tileimg(t, texes);
+                int rgb = 0;
+                if (tex != null) {
+                    switch (MINIMAPTYPE.get()) {
+                        case 1:
+                            rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()), Utils.floormod(c.y + ul.y, tex.getHeight()));
 
-                        tempColor = Utils.blendcol(tempColor, mixtempColor, 0.75f);
-                        try {
-                            if ((m.gettile(ul.add(c).add(-1, 0)) > t) ||
-                                    (m.gettile(ul.add(c).add(1, 0)) > t) ||
-                                    (m.gettile(ul.add(c).add(0, -1)) > t) ||
-                                    (m.gettile(ul.add(c).add(0, 1)) > t)) {
-                                tempColor = Utils.blendcol(tempColor, Color.BLACK, 0.25f);
-                            } else if ((m.gettile(ul.add(c).add(-1, -1)) > t) ||
-                                    (m.gettile(ul.add(c).add(-1, 1)) > t) ||
-                                    (m.gettile(ul.add(c).add(1, -1)) > t) ||
-                                    (m.gettile(ul.add(c).add(1, 1)) > t)) {
-                                tempColor = Utils.blendcol(tempColor, Color.BLACK, 0.12f);
-                            }
-                        } catch (Exception e) {
-                        }
-                        rgb = tempColor.getRGB();
-                    }
-                    buf.setRGB(c.x, c.y, rgb);
-                }
-            }
+                            int mixrgb = tex.getRGB(20, 45);
 
-            for (c.y = 1; c.y < sz.y - 1; c.y++) {
-                for (c.x = 1; c.x < sz.x - 1; c.x++) {
-                    try {
-                        int t = m.gettile(ul.add(c));
-                        Tiler tl = m.tiler(t);
-                        if (tl instanceof Ridges.RidgeTile) {
-                            if (Ridges.brokenp(m, ul.add(c))) {
-                                for (int y = c.y - 1; y <= c.y + 1; y++) {
-                                    for (int x = c.x - 1; x <= c.x + 1; x++) {
-                                        Color cc = new Color(buf.getRGB(x, y));
-                                        buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 0.85f : 0.2f).getRGB());
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
+                            Color mixtempColor = new Color(mixrgb, true);
+                            Color tempColor = new Color(rgb, true);
+
+                            tempColor = Utils.blendcol(tempColor, mixtempColor, configuration.simplelmapintens);
+                            rgb = tempColor.getRGB();
+                            break;
+                        case 2:
+                            Color simple_color = simple_tile_img(t, texes);
+
+                            if (simple_color != null)
+                                rgb = simple_color.getRGB();
+                            break;
+                        default:
+                            rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()), Utils.floormod(c.y + ul.y, tex.getHeight()));
+                            break;
                     }
                 }
-            }
-        } else if (Config.rawrzmap) {
-            for (c.y = 0; c.y < sz.y; c.y++) {
-                for (c.x = 0; c.x < sz.x; c.x++) {
-                    int t = m.gettile(ul.add(c));
-                    if (Config.rawrzmap) {
-                        Color simple_color = simple_tile_img(t, texes);
+                buf.setRGB(c.x, c.y, rgb);
 
-                        if (simple_color != null)
-                            buf.setRGB(c.x, c.y, simple_color.getRGB());
-                        else
-                            buf.setRGB(c.x, c.y, 0);
-                    } else {
-                        BufferedImage tex = tileimg(t, texes);
-                        int rgb = 0;
-                        if (tex != null)
-                            rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()),
-                                    Utils.floormod(c.y + ul.y, tex.getHeight()));
-                        buf.setRGB(c.x, c.y, rgb);
-                    }
-
-                    try {
-                        if (!Config.disableBlackOutLinesOnMap) {
-                            if ((m.gettile(ul.add(c).add(-1, 0)) > t) ||
-                                    (m.gettile(ul.add(c).add(1, 0)) > t) ||
-                                    (m.gettile(ul.add(c).add(0, -1)) > t) ||
-                                    (m.gettile(ul.add(c).add(0, 1)) > t))
-                                buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-            }
-
-            for (c.y = 1; c.y < sz.y - 1; c.y++) {
-                for (c.x = 1; c.x < sz.x - 1; c.x++) {
-                    try {
-                        int t = m.gettile(ul.add(c));
-                        Tiler tl = m.tiler(t);
-                        if (tl instanceof Ridges.RidgeTile) {
-                            if (Ridges.brokenp(m, ul.add(c))) {
-                                for (int y = c.y - 1; y <= c.y + 1; y++) {
-                                    for (int x = c.x - 1; x <= c.x + 1; x++) {
-                                        Color cc = new Color(buf.getRGB(x, y));
-                                        buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        } else {
-
-            for (c.y = 0; c.y < sz.y; c.y++) {
-                for (c.x = 0; c.x < sz.x; c.x++) {
-                    int t = m.gettile(ul.add(c));
-                    BufferedImage tex = tileimg(t, texes);
-                    int rgb = 0;
-                    if (tex != null)
-                        rgb = tex.getRGB(Utils.floormod(c.x + ul.x, tex.getWidth()),
-                                Utils.floormod(c.y + ul.y, tex.getHeight()));
-                    buf.setRGB(c.x, c.y, rgb);
-
-                    try {
+                try {
+                    if (!Config.disableBlackOutLinesOnMap) {
                         if ((m.gettile(ul.add(c).add(-1, 0)) > t) ||
                                 (m.gettile(ul.add(c).add(1, 0)) > t) ||
                                 (m.gettile(ul.add(c).add(0, -1)) > t) ||
                                 (m.gettile(ul.add(c).add(0, 1)) > t))
                             buf.setRGB(c.x, c.y, Color.BLACK.getRGB());
-                    } catch (Exception e) {
                     }
+                } catch (Exception e) {
                 }
             }
+        }
 
-            for (c.y = 1; c.y < sz.y - 1; c.y++) {
-                for (c.x = 1; c.x < sz.x - 1; c.x++) {
-                    try {
-                        int t = m.gettile(ul.add(c));
-                        Tiler tl = m.tiler(t);
-                        if (tl instanceof Ridges.RidgeTile) {
-                            if (Ridges.brokenp(m, ul.add(c))) {
-                                for (int y = c.y - 1; y <= c.y + 1; y++) {
-                                    for (int x = c.x - 1; x <= c.x + 1; x++) {
-                                        Color cc = new Color(buf.getRGB(x, y));
-                                        buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
-                                    }
+        for (c.y = 1; c.y < sz.y - 1; c.y++) {
+            for (c.x = 1; c.x < sz.x - 1; c.x++) {
+                try {
+                    int t = m.gettile(ul.add(c));
+                    Tiler tl = m.tiler(t);
+                    if (tl instanceof Ridges.RidgeTile) {
+                        if (Ridges.brokenp(m, ul.add(c))) {
+                            for (int y = c.y - 1; y <= c.y + 1; y++) {
+                                for (int x = c.x - 1; x <= c.x + 1; x++) {
+                                    Color cc = new Color(buf.getRGB(x, y));
+                                    buf.setRGB(x, y, Utils.blendcol(cc, Color.BLACK, ((x == c.x) && (y == c.y)) ? 1 : 0.1).getRGB());
                                 }
                             }
                         }
-                    } catch (Exception e) {
                     }
+                } catch (Exception e) {
                 }
-            } //Laziest implementation Ardennes would be proud
+            }
         }
 
         return new TexI(buf);
@@ -343,12 +261,6 @@ public class LocalMiniMap extends Widget {
 //        buf.setRGB(c.x, c.y, rgb);
 
         return simple_textures.get(img);
-    }
-
-
-    public LocalMiniMap(Coord sz, MapView mv) {
-        super(sz);
-        this.mv = mv;
     }
 
     public void save(MapFile file) {
@@ -594,7 +506,6 @@ public class LocalMiniMap extends Widget {
         return (null);
     }
 
-
     @Override
     public Object tooltip(Coord c, Widget prev) {
         Gob gob = findicongob(c);
@@ -620,13 +531,6 @@ public class LocalMiniMap extends Widget {
             }
         }
         return super.tooltip(c, prev);
-    }
-
-    private static String pretty(String name) {
-        int k = name.lastIndexOf("/");
-        name = name.substring(k + 1);
-        name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        return name;
     }
 
     public void tick(double dt) {
@@ -740,13 +644,6 @@ public class LocalMiniMap extends Widget {
             }
         } catch (Loading ignored) {
         }
-    }
-
-    private static String prettybiome(String biome) {
-        int k = biome.lastIndexOf("/");
-        biome = biome.substring(k + 1);
-        biome = biome.substring(0, 1).toUpperCase() + biome.substring(1);
-        return biome;
     }
 
     public void draw(GOut g) {
@@ -1101,36 +998,6 @@ public class LocalMiniMap extends Widget {
         return true;
     }
 
-    public class DisplayIcon {
-        public final GobIcon icon;
-        public final Gob gob;
-        public final GobIcon.Image img;
-        public Coord2d rc = null;
-        public Coord sc = null;
-        public double ang = 0.0;
-        public Color col = Color.WHITE;
-        public int z;
-        public double stime;
-
-        public DisplayIcon(GobIcon icon) {
-            this.icon = icon;
-            this.gob = icon.gob;
-            this.img = icon.img();
-            this.ang = ang;
-            this.z = this.img.z;
-            this.stime = Utils.rtime();
-        }
-
-        public void update(Coord2d rc, double ang) {
-            this.rc = rc;
-            this.ang = ang;
-            if ((this.rc == null))
-                this.sc = null;
-            else
-                this.sc = p2c(this.rc);
-        }
-    }
-
     public void drawnewicons(GOut g) {
         for (DisplayIcon disp : icons) {
             if (disp.sc == null)
@@ -1201,5 +1068,45 @@ public class LocalMiniMap extends Widget {
                 iconconf = ui.gui.iconconf;
         }
         super.attached();
+    }
+
+    public static class MapTile {
+        public MCache.Grid grid;
+        public int seq;
+
+        public MapTile(MCache.Grid grid, int seq) {
+            this.grid = grid;
+            this.seq = seq;
+        }
+    }
+
+    public class DisplayIcon {
+        public final GobIcon icon;
+        public final Gob gob;
+        public final GobIcon.Image img;
+        public Coord2d rc = null;
+        public Coord sc = null;
+        public double ang = 0.0;
+        public Color col = Color.WHITE;
+        public int z;
+        public double stime;
+
+        public DisplayIcon(GobIcon icon) {
+            this.icon = icon;
+            this.gob = icon.gob;
+            this.img = icon.img();
+            this.ang = ang;
+            this.z = this.img.z;
+            this.stime = Utils.rtime();
+        }
+
+        public void update(Coord2d rc, double ang) {
+            this.rc = rc;
+            this.ang = ang;
+            if ((this.rc == null))
+                this.sc = null;
+            else
+                this.sc = p2c(this.rc);
+        }
     }
 }

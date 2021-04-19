@@ -369,9 +369,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 c = new Coord(c.x + (dragorig.x - c.x) * 2, c.y);
             if (Config.reversebadcamy)
                 c = new Coord(c.x, c.y + (dragorig.y - c.y) * 2);
-            elev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
-            if (elev < 0.0f) elev = 0.0f;
-            if (elev > (Math.PI / 2.0)) elev = (float) Math.PI / 2.0f;
+            if (ui.modshift || !configuration.badcamelevlock) {
+                elev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
+                if (elev < 0.0f) elev = 0.0f;
+                if (elev > (Math.PI / 2.0)) elev = (float) Math.PI / 2.0f;
+            }
             angl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
             angl = angl % ((float) Math.PI * 2.0f);
             configuration.badcamelevdefault = elev;
@@ -445,9 +447,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public void drag(Coord c) {
-            telev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
-            if (telev < 0.0f) telev = 0.0f;
-            if (telev > (Math.PI / 2.0)) telev = (float) Math.PI / 2.0f;
+            if (ui.modshift || !configuration.badcamelevlock) {
+                telev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
+                if (telev < 0.0f) telev = 0.0f;
+                if (telev > (Math.PI / 2.0)) telev = (float) Math.PI / 2.0f;
+            }
             tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
         }
 
@@ -539,7 +543,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean wheel(Coord c, int amount) {
-            chfield(tfield + amount * 10);
+            chfield(tfield + amount * Config.badcamsensitivity);
             return (true);
         }
 
@@ -3412,6 +3416,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void startMusselsPicker(Gob gob) {
+        if (musselPicker != null) {
+            if (musselPicker.isAlive() && !musselPicker.isInterrupted())
+                musselPicker.interrupt();
+            musselPicker.setName("oldMusselPicker");
+            musselPicker = null;
+        }
         musselPicker = new Thread(new MusselPicker(ui.gui, gob), "MusselPicker");
         musselPicker.start();
     }

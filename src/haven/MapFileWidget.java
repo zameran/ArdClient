@@ -64,10 +64,18 @@ import static haven.MCache.cmaps;
 import static haven.Text.latin;
 
 public class MapFileWidget extends Widget {
+    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
+    private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
+    public static int zoom = Utils.getprefi("zoomlmap", 0);
+    public static int zoomlvls = 8;
+    public static Map<String, Tex> cachedTextTex = new HashMap<>();
+    public static Map<String, Tex> cachedImageTex = new HashMap<>();
+    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
     public final MapFile file;
     public Location curloc;
-    private Locator setloc;
     public boolean follow;
+    Coord lastmousedown = Coord.z;
+    private Locator setloc;
     private Area dext;
     private Segment dseg;
     private DisplayGrid[] display;
@@ -77,14 +85,27 @@ public class MapFileWidget extends Widget {
     private boolean dragging;
     private Coord dsc, dmc;
     private String biome, seginfo;
-    public static int zoom = Utils.getprefi("zoomlmap", 0);
-    public static int zoomlvls = 8;
-    public static final double[] scaleFactors = new double[]{1 / 8.0, 1 / 4.0, 1 / 2.0, 1, 100 / 75.0, 100 / 50.0, 100 / 25.0, 100 / 15.0, 100 / 8.0}; //FIXME that his add more scale
-    private static final Tex gridred = Resource.loadtex("gfx/hud/mmap/gridred");
+    private Map<String, Console.Command> cmdmap = new TreeMap<>();
 
-    public static Map<String, Tex> cachedTextTex = new HashMap<>();
-    public static Map<String, Tex> cachedImageTex = new HashMap<>();
-    public static Map<String, Tex> cachedZoomImageTex = new HashMap<>();
+    {
+        cmdmap.put("exportmap", (cons, args) -> {
+            if (args.length > 1)
+                exportmap(new File(args[1]));
+            else
+                exportmap();
+        });
+        cmdmap.put("importmap", (cons, args) -> {
+            if (args.length > 1)
+                importmap(new File(args[1]));
+            else
+                importmap();
+        });
+    }
+
+    public MapFileWidget(MapFile file, Coord sz) {
+        super();
+        this.file = file;
+    }
 
     public static Tex getCachedTextTex(String text) {
         Tex tex = cachedTextTex.get(text);
@@ -96,69 +117,15 @@ public class MapFileWidget extends Widget {
         return (tex);
     }
 
-
-    public MapFileWidget(MapFile file, Coord sz) {
-        super();
-        this.file = file;
+    public static double scalef() {
+        return scaleFactors[zoom];
     }
 
-    public static class Location {
-        public final Segment seg;
-        public final Coord tc;
-
-        public Location(Segment seg, Coord tc) {
-            Objects.requireNonNull(seg);
-            Objects.requireNonNull(tc);
-            this.seg = seg;
-            this.tc = tc;
-        }
-
-        public String toString() {
-            return "[" + seg + "[" + seg.id + "], " + tc + "]";
-        }
-    }
-
-    public interface Locator {
-        Location locate(MapFile file) throws Loading;
-    }
-
-    public static class MapLocator implements Locator {
-        public final MapView mv;
-
-        public MapLocator(MapView mv) {
-            this.mv = mv;
-        }
-
-        public Location locate(MapFile file) {
-            Coord mc = new Coord2d(mv.getcc()).floor(MCache.tilesz);
-            if (mc == null)
-                throw (new Loading("Waiting for initial location"));
-            MCache.Grid plg = mv.ui.sess.glob.map.getgrid(mc.div(cmaps));
-            GridInfo info = file.gridinfo.get(plg.id);
-            if (info == null)
-                throw (new Loading("No grid info, probably coming soon"));
-            Segment seg = file.segments.get(info.seg);
-            if (seg == null)
-                throw (new Loading("No segment info, probably coming soon"));
-            return (new Location(seg, info.sc.mul(cmaps.div(scalef())).add(mc.sub(plg.ul).div(scalef()))));
-        }
-    }
-
-    public static class SpecLocator implements Locator {
-        public final long seg;
-        public final Coord tc;
-
-        public SpecLocator(long seg, Coord tc) {
-            this.seg = seg;
-            this.tc = tc;
-        }
-
-        public Location locate(MapFile file) {
-            Segment seg = file.segments.get(this.seg);
-            if (seg == null)
-                return (null);
-            return (new Location(seg, tc.div(scalef())));
-        }
+    private static String prettybiome(String biome) {
+        int k = biome.lastIndexOf("/");
+        biome = biome.substring(k + 1);
+        biome = biome.substring(0, 1).toUpperCase() + biome.substring(1);
+        return biome;
     }
 
     public void center(Location loc) {
@@ -187,121 +154,6 @@ public class MapFileWidget extends Widget {
         }
     }
 
-    public static class DisplayGrid {
-        public final Segment seg;
-        public final Coord sc;
-        public final Indir<Grid> gref;
-        private Grid cgrid = null;
-        private Defer.Future<Tex> img = null;
-        private Tex tex = null;
-
-        public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
-            this.seg = seg;
-            this.sc = sc;
-            this.gref = gref;
-        }
-
-        public Tex img() {
-            Grid grid = gref.get();
-            if (grid != cgrid) {
-                if (img != null)
-                    img.cancel();
-                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
-                cgrid = grid;
-            }
-
-            if (img != null) {
-                try {
-                    tex = img.get();
-                } catch (Exception e) {
-//                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
-                }
-            }
-            return tex;
-        }
-    }
-
-    public static class DisplayMarker {
-        public static final Resource.Image flagbg, flagfg;
-        public static final Coord flagcc;
-        public final Marker m;
-        public final Text tip;
-        public Area hit;
-        private Resource.Image img;
-        private Coord cc;
-
-        static {
-            Resource flag = Resource.local().loadwait("gfx/hud/mmap/flag");
-            flagbg = flag.layer(Resource.imgc, 1);
-            flagfg = flag.layer(Resource.imgc, 0);
-            flagcc = flag.layer(Resource.negc).cc;
-        }
-
-        public DisplayMarker(Marker marker) {
-            this.m = marker;
-            this.tip = Text.render(m.nm);
-            if (marker instanceof PMarker)
-                this.hit = Area.sized(flagcc.inv(), flagbg.sz);
-        }
-
-        public void draw(GOut g, Coord c) {
-            if (m instanceof PMarker) {
-                Coord ul = c.sub(flagcc);
-                g.chcolor(((PMarker) m).color);
-                g.image(flagfg, ul);
-                g.chcolor();
-                g.image(flagbg, ul);
-                if (Config.mapdrawflags) {
-//                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, fnd).tex();
-                    Tex tex = getCachedTextTex(m.nm);
-                    if (tex != null) {
-                        g.aimage(tex, ul.add(flagfg.sz.x / 2, -20), 0.5, 0);
-                    }
-                }
-            } else if (m instanceof SMarker) {
-                SMarker sm = (SMarker) m;
-                try {
-                    if (cc == null) {
-                        Resource res = MapFile.loadsaved(Resource.remote(), sm.res);
-                        img = res.layer(Resource.imgc);
-                        Resource.Neg neg = res.layer(Resource.negc);
-                        cc = (neg != null) ? neg.cc : img.sz.div(2);
-                        if (hit == null)
-                            hit = Area.sized(cc.inv(), img.sz);
-                    }
-                } catch (Loading l) {
-                } catch (Exception e) {
-                    cc = Coord.z;
-                }
-                if (img != null) {
-                    //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
-                    int size = 20;
-                    Tex itex = cachedImageTex.get(img.getres().name);
-                    if (itex == null) {
-                        itex = new TexI(img.img);
-                        if ((itex.sz().x > size) || (itex.sz().y > size)) {
-                            BufferedImage buf = img.img;
-                            buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
-                            itex = new TexI(buf);
-                        }
-                        cachedImageTex.put(img.getres().name, itex);
-                    }
-                    g.aimage(itex, c, 0.5, 0.5);
-
-                    if (Config.mapdrawquests) {
-                        if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
-//                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
-                            Tex ttex = getCachedTextTex(sm.nm);
-                            if (ttex != null) {
-                                g.aimage(ttex, c.add(0, -15), 0.5, 1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private void remark(Location loc, Area ext) {
         if (file.lock.readLock().tryLock()) {
             try {
@@ -324,17 +176,20 @@ public class MapFileWidget extends Widget {
         Area next = Area.sized(loc.tc.sub(hsz).div(cmaps.div(scalef())),
                 sz.add(cmaps.div(scalef())).sub(1, 1).div(cmaps.div(scalef())).add(1, 1));
         if ((display == null) || (loc.seg != dseg) || !next.equals(dext)) {
-            DisplayGrid[] nd = new DisplayGrid[next.rsz()];
-            if ((display != null) && (loc.seg == dseg)) {
-                for (Coord c : dext) {
-                    if (next.contains(c))
-                        nd[next.ri(c)] = display[dext.ri(c)];
+            try {
+                DisplayGrid[] nd = new DisplayGrid[next.rsz()];
+                if ((display != null) && (loc.seg == dseg)) {
+                    for (Coord c : dext) {
+                        if (next.contains(c))
+                            nd[next.ri(c)] = display[dext.ri(c)];
+                    }
                 }
+                display = nd;
+                dseg = loc.seg;
+                dext = next;
+                markers = null;
+            } catch (Exception e) {
             }
-            display = nd;
-            dseg = loc.seg;
-            dext = next;
-            markers = null;
         }
     }
 
@@ -343,6 +198,15 @@ public class MapFileWidget extends Widget {
         if ((curloc == null) || (curloc.seg != loc.seg))
             return (null);
         return (loc.tc.add(sz.div(2)).sub(curloc.tc));
+    }
+
+    public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
+        try {
+            Tex img = disp.img();
+            if (img != null)
+                g.image(img, ul, cmaps.div(scalef()));
+        } catch (Loading l) {
+        }
     }
 
     public void draw(GOut g) {
@@ -363,15 +227,16 @@ public class MapFileWidget extends Widget {
         }
         for (Coord c : dext) {
             Tex img;
+            Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
             try {
                 DisplayGrid disp = display[dext.ri(c)];
                 if ((disp == null) || ((img = disp.img()) == null))
                     continue;
+                drawgrid(g, ul, disp);
             } catch (Loading l) {
                 continue;
             }
-            Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
-            g.image(img, ul, cmaps.div(scalef()));
+//            g.image(img, ul, cmaps.div(scalef()));
             if (configuration.bigmapshowgrid)
                 g.image(gridred, ul, cmaps.div(scalef()));
         }
@@ -485,8 +350,6 @@ public class MapFileWidget extends Widget {
         }
         return (null);
     }
-
-    Coord lastmousedown = Coord.z;
 
     public boolean mousedown(Coord c, int button) {
         Coord tc = null;
@@ -610,11 +473,6 @@ public class MapFileWidget extends Widget {
         return (super.tooltip(c, prev));
     }
 
-    public static double scalef() {
-        return scaleFactors[zoom];
-    }
-
-
     private Object biomeat(Coord c) {
         final Coord tc = c.sub(sz.div(2)).mul(scalef()).add(curloc.tc.mul(scalef()));
         final Coord gc = tc.div(cmaps);
@@ -645,90 +503,6 @@ public class MapFileWidget extends Widget {
             return Text.render(newsegment);
         }
         return Text.render(seginfo);
-    }
-
-    private static String prettybiome(String biome) {
-        int k = biome.lastIndexOf("/");
-        biome = biome.substring(k + 1);
-        biome = biome.substring(0, 1).toUpperCase() + biome.substring(1);
-        return biome;
-    }
-
-    public static class ExportWindow extends Window implements MapFile.ExportStatus {
-        private Thread th;
-        private volatile String prog = "Exporting map...";
-
-        public ExportWindow() {
-            super(new Coord(300, 65), "Exporting map...", true);
-            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
-        }
-
-        public void run(Thread th) {
-            (this.th = th).start();
-        }
-
-        public void cdraw(GOut g) {
-            g.text(prog, new Coord(10, 10));
-        }
-
-        public void cancel() {
-            th.interrupt();
-        }
-
-        public void tick(double dt) {
-            if (!th.isAlive())
-                destroy();
-        }
-
-        public void grid(int cs, int ns, int cg, int ng) {
-            this.prog = String.format("Exporting map cut %,d/%,d in segment %,d/%,d", cg, ng, cs, ns);
-        }
-
-        public void mark(int cm, int nm) {
-            this.prog = String.format("Exporting marker", cm, nm);
-        }
-    }
-
-    public static class ImportWindow extends Window {
-        private Thread th;
-        private volatile String prog = "Initializing";
-        private double sprog = -1;
-
-        public ImportWindow() {
-            super(new Coord(300, 65), "Importing map...", true);
-            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
-        }
-
-        public void run(Thread th) {
-            (this.th = th).start();
-        }
-
-        public void cdraw(GOut g) {
-            String prog = this.prog;
-            if (sprog >= 0)
-                prog = String.format("%s: %d%%", prog, (int) Math.floor(sprog * 100));
-            else
-                prog = prog + "...";
-            g.text(prog, new Coord(10, 10));
-        }
-
-        public void cancel() {
-            th.interrupt();
-        }
-
-        public void tick(double dt) {
-            if (!th.isAlive())
-                destroy();
-        }
-
-        public void prog(String prog) {
-            this.prog = prog;
-            this.sprog = -1;
-        }
-
-        public void sprog(double sprog) {
-            this.sprog = sprog;
-        }
     }
 
     public void exportmap(File path) {
@@ -807,28 +581,277 @@ public class MapFileWidget extends Widget {
         });
     }
 
-    private Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
-
-    {
-        cmdmap.put("exportmap", new Console.Command() {
-            public void run(Console cons, String[] args) {
-                if (args.length > 1)
-                    exportmap(new File(args[1]));
-                else
-                    exportmap();
-            }
-        });
-        cmdmap.put("importmap", new Console.Command() {
-            public void run(Console cons, String[] args) {
-                if (args.length > 1)
-                    importmap(new File(args[1]));
-                else
-                    importmap();
-            }
-        });
-    }
-
     public Map<String, Console.Command> findcmds() {
         return (cmdmap);
+    }
+
+    public interface Locator {
+        Location locate(MapFile file) throws Loading;
+    }
+
+    public static class Location {
+        public final Segment seg;
+        public final Coord tc;
+
+        public Location(Segment seg, Coord tc) {
+            Objects.requireNonNull(seg);
+            Objects.requireNonNull(tc);
+            this.seg = seg;
+            this.tc = tc;
+        }
+
+        public String toString() {
+            return "[" + seg + "[" + seg.id + "], " + tc + "]";
+        }
+    }
+
+    public static class MapLocator implements Locator {
+        public final MapView mv;
+
+        public MapLocator(MapView mv) {
+            this.mv = mv;
+        }
+
+        public Location locate(MapFile file) {
+            Coord mc = new Coord2d(mv.getcc()).floor(MCache.tilesz);
+            if (mc == null)
+                throw (new Loading("Waiting for initial location"));
+            MCache.Grid plg = mv.ui.sess.glob.map.getgrid(mc.div(cmaps));
+            GridInfo info = file.gridinfo.get(plg.id);
+            if (info == null)
+                throw (new Loading("No grid info, probably coming soon"));
+            Segment seg = file.segments.get(info.seg);
+            if (seg == null)
+                throw (new Loading("No segment info, probably coming soon"));
+            return (new Location(seg, info.sc.mul(cmaps.div(scalef())).add(mc.sub(plg.ul).div(scalef()))));
+        }
+    }
+
+    public static class SpecLocator implements Locator {
+        public final long seg;
+        public final Coord tc;
+
+        public SpecLocator(long seg, Coord tc) {
+            this.seg = seg;
+            this.tc = tc;
+        }
+
+        public Location locate(MapFile file) {
+            Segment seg = file.segments.get(this.seg);
+            if (seg == null)
+                return (null);
+            return (new Location(seg, tc.div(scalef())));
+        }
+    }
+
+    public static class DisplayGrid {
+        public final Segment seg;
+        public final Coord sc;
+        public final Indir<Grid> gref;
+        private Grid cgrid = null;
+        private Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
+        private Defer.Future<Tex> img = null;
+        private Tex tex = null;
+
+        public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
+            this.seg = seg;
+            this.sc = sc;
+            this.gref = gref;
+        }
+
+        public Tex img() {
+            try {
+                Grid grid = gref.get();
+                if (grid != cgrid) {
+                    if (img != null)
+                        img.cancel();
+                    img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
+                    cgrid = grid;
+                }
+
+                if (img != null)
+                    tex = img.get();
+            } catch (Exception e) {
+            }
+            return tex;
+        }
+
+        public Tex olimg(String tag) {
+            Tex tret = null;
+            try {
+                Defer.Future<Tex> ret;
+                synchronized (olimg_c) {
+                    ret = olimg_c.get(tag);
+                    if (ret == null) {
+                        ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
+                        olimg_c.put(tag, ret);
+                    }
+                }
+
+                if (ret != null)
+                    tret = ret.get();
+            } catch (Exception e) {
+            }
+            return tret;
+        }
+    }
+
+    public static class DisplayMarker {
+        public static final Resource.Image flagbg, flagfg;
+        public static final Coord flagcc;
+
+        static {
+            Resource flag = Resource.local().loadwait("gfx/hud/mmap/flag");
+            flagbg = flag.layer(Resource.imgc, 1);
+            flagfg = flag.layer(Resource.imgc, 0);
+            flagcc = flag.layer(Resource.negc).cc;
+        }
+
+        public final Marker m;
+        public final Text tip;
+        public Area hit;
+        private Resource.Image img;
+        private Coord cc;
+
+        public DisplayMarker(Marker marker) {
+            this.m = marker;
+            this.tip = Text.render(m.nm);
+            if (marker instanceof PMarker)
+                this.hit = Area.sized(flagcc.inv(), flagbg.sz);
+        }
+
+        public void draw(GOut g, Coord c) {
+            if (m instanceof PMarker) {
+                Coord ul = c.sub(flagcc);
+                g.chcolor(((PMarker) m).color);
+                g.image(flagfg, ul);
+                g.chcolor();
+                g.image(flagbg, ul);
+                if (Config.mapdrawflags) {
+//                    Tex tex = Text.renderstroked(m.nm, Color.white, Color.BLACK, fnd).tex();
+                    Tex tex = getCachedTextTex(m.nm);
+                    if (tex != null) {
+                        g.aimage(tex, ul.add(flagfg.sz.x / 2, -20), 0.5, 0);
+                    }
+                }
+            } else if (m instanceof SMarker) {
+                SMarker sm = (SMarker) m;
+                try {
+                    if (cc == null) {
+                        Resource res = MapFile.loadsaved(Resource.remote(), sm.res);
+                        img = res.layer(Resource.imgc);
+                        Resource.Neg neg = res.layer(Resource.negc);
+                        cc = (neg != null) ? neg.cc : img.sz.div(2);
+                        if (hit == null)
+                            hit = Area.sized(cc.inv(), img.sz);
+                    }
+                } catch (Loading l) {
+                } catch (Exception e) {
+                    cc = Coord.z;
+                }
+                if (img != null) {
+                    //((SMarker)m).res.name.startsWith("gfx/invobjs/small"));
+                    int size = 20;
+                    Tex itex = cachedImageTex.get(img.getres().name);
+                    if (itex == null) {
+                        itex = new TexI(img.img);
+                        if ((itex.sz().x > size) || (itex.sz().y > size)) {
+                            BufferedImage buf = img.img;
+                            buf = PUtils.convolve(buf, new Coord(size, size), new PUtils.Hanning(1));
+                            itex = new TexI(buf);
+                        }
+                        cachedImageTex.put(img.getres().name, itex);
+                    }
+                    g.aimage(itex, c, 0.5, 0.5);
+
+                    if (Config.mapdrawquests) {
+                        if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
+//                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
+                            Tex ttex = getCachedTextTex(sm.nm);
+                            if (ttex != null) {
+                                g.aimage(ttex, c.add(0, -15), 0.5, 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static class ExportWindow extends Window implements MapFile.ExportStatus {
+        private Thread th;
+        private volatile String prog = "Exporting map...";
+
+        public ExportWindow() {
+            super(new Coord(300, 65), "Exporting map...", true);
+            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
+        }
+
+        public void run(Thread th) {
+            (this.th = th).start();
+        }
+
+        public void cdraw(GOut g) {
+            g.text(prog, new Coord(10, 10));
+        }
+
+        public void cancel() {
+            th.interrupt();
+        }
+
+        public void tick(double dt) {
+            if (!th.isAlive())
+                destroy();
+        }
+
+        public void grid(int cs, int ns, int cg, int ng) {
+            this.prog = String.format("Exporting map cut %,d/%,d in segment %,d/%,d", cg, ng, cs, ns);
+        }
+
+        public void mark(int cm, int nm) {
+            this.prog = String.format("Exporting marker", cm, nm);
+        }
+    }
+
+    public static class ImportWindow extends Window {
+        private Thread th;
+        private volatile String prog = "Initializing";
+        private double sprog = -1;
+
+        public ImportWindow() {
+            super(new Coord(300, 65), "Importing map...", true);
+            adda(new Button(100, "Cancel", false, this::cancel), asz.x / 2, 40, 0.5, 0.0);
+        }
+
+        public void run(Thread th) {
+            (this.th = th).start();
+        }
+
+        public void cdraw(GOut g) {
+            String prog = this.prog;
+            if (sprog >= 0)
+                prog = String.format("%s: %d%%", prog, (int) Math.floor(sprog * 100));
+            else
+                prog = prog + "...";
+            g.text(prog, new Coord(10, 10));
+        }
+
+        public void cancel() {
+            th.interrupt();
+        }
+
+        public void tick(double dt) {
+            if (!th.isAlive())
+                destroy();
+        }
+
+        public void prog(String prog) {
+            this.prog = prog;
+            this.sprog = -1;
+        }
+
+        public void sprog(double sprog) {
+            this.sprog = sprog;
+        }
     }
 }

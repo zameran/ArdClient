@@ -33,8 +33,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -121,6 +123,46 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
 
         bl = add(new BuddyList(width - Window.wbox.bisz().x, 7), new Coord(Window.wbox.btloff().x, y));
         Frame.around(this, Collections.singletonList(bl));
+        add(new Button(75, "Export kins") {
+            public void click() {
+                try {
+                    String cname = getCharName();
+                    File file = new File("Kins-" + (cname != null ? cname : "") + ".txt");
+                    FileWriter fw = new FileWriter(file);
+                    BufferedWriter writer = new BufferedWriter(fw);
+                    List<Buddy> sortedBuddies = new ArrayList<>(buddies);
+                    sortedBuddies.sort(Comparator.comparing(o -> o.name));
+                    sortedBuddies.sort(Comparator.comparing(o -> o.group));
+                    int maxword = sortedBuddies.stream().mapToInt(b -> b.name.length()).max().orElse(0);
+                    int maxid = sortedBuddies.stream().mapToInt(b -> Integer.toString(b.id).length()).max().orElse(0);
+                    int lastg = 0;
+                    for (Buddy buddy : sortedBuddies) {
+                        if (buddy.group != lastg) {
+                            writer.write(System.getProperty("line.separator"));
+                            lastg = buddy.group;
+                        }
+                        StringBuilder name = new StringBuilder();
+                        name.append(buddy.name);
+                        for (int i = 0; i < maxword - buddy.name.length(); i++)
+                            name.append(" ");
+                        StringBuilder id = new StringBuilder();
+                        id.append(buddy.id);
+                        for (int i = 0; i < maxid - Integer.toString(buddy.id).length(); i++)
+                            id.append(" ");
+                        writer.write(String.format("%s %s %s", name.toString(), id.toString(), gc[buddy.group]) + System.getProperty("line.separator"));
+                    }
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public Object tooltip(Coord c, Widget prev) {
+                return Text.render("Save to Kins.txt").tex();
+            }
+        }, new Coord(0, y + bl.sz.y));
         y += 195;
 
         add(new Label("Sort by:"), new Coord(0, y));
