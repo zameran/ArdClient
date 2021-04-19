@@ -1327,8 +1327,12 @@ public class MapFile {
                         try {
                             zmap = loadz(z, String.format("%x", id));
                         } catch (Message.FormatError | Message.EOF e) {
-                            for (int i = 0; i < zmap.length; ++i) {
-                                zmap[i] = oldz.int32();
+                            try {
+                                for (int i = 0; i < zmap.length; ++i) {
+                                    zmap[i] = oldz.int32();
+                                }
+                            } catch (Exception ze) {
+
                             }
                         }
                     }
