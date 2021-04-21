@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class Fightsess extends Widget {
     public static final Tex cdframe = Resource.loadtex("gfx/hud/combat/cool");
@@ -59,6 +60,8 @@ public class Fightsess extends Widget {
     public static final Tex useframe = Resource.loadtex("gfx/hud/combat/lastframe");
     public static final Coord useframeo = (useframe.sz().sub(32, 32)).div(2);
     public static final int actpitch = 75;
+    public static final int smallactpitch = 40;
+    public float actionscale = Utils.getpreff("combatscale", 1);
     public static int blue = 0, red = 0, myblue = 0, myred = 0, oldblue = 0, oldred = 0, unarmedcombat;
     public static Double delta, expected, lastactopened;
     public final Action[] actions;
@@ -80,7 +83,7 @@ public class Fightsess extends Widget {
     private Coord simpleOpeningSz = new Coord(32, 32);
     private Coord smallerOpeningSz = new Coord(24, 24);
 
-    private Coord actionAnchor;
+//    private Coord actionAnchor;
     private Coord enemyBuffAnchor;
     private Coord enemyIPAnchor;
     private Coord enemyLastMoveAnchor;
@@ -173,7 +176,9 @@ public class Fightsess extends Widget {
         fv = parent.getparent(GameUI.class).fv;
         presize();
 
-        actionWdg = new MovableWidget(new Coord(400, 175), "FightSessActions") {
+        Coord awc = new Coord(400, 175);
+        Coord awsz = awc.mul(actionscale);
+        actionWdg = new MovableWidget(awsz, "FightSessActions") {
             @Override
             public void draw(GOut g) {
                 //My cards
@@ -192,14 +197,15 @@ public class Fightsess extends Widget {
 
                 for (int i = 0; i < actions.length; i++) {
 //                    Coord ca = Config.altfightui ? actionAnchor.add(actc(i)) : pcc.add(actc(i));
-                    Coord ca = actionAnchor.sub(0, 50).add(actc(i));
+                    float pitch = (configuration.showactioninfo ? actpitch : smallactpitch) * actionscale;
+                    Coord ca = actionAnchor.get().add(actc(actionscale, i));
                     Action act = actions[i];
                     try {
                         if (act != null) {
                             Resource res = act.res.get();
                             Tex img = res.layer(Resource.imgc).tex();
-                            Coord ic = ca.sub(img.sz().div(2));
-                            g.image(img, ic);
+                            Coord ic = ca.add((int) ((pitch - img.sz().mul(actionscale).x) / 2), (int) ((pitch - img.sz().mul(actionscale).y) / 2));
+                            g.image(img, ic, img.sz().mul(actionscale));
                             if (now < act.ct) {
                                 //This is from an era when moves had their own cooldown
                                 double a = (now - act.cs) / (act.ct - act.cs);
@@ -208,38 +214,35 @@ public class Fightsess extends Widget {
                                 g.chcolor();
                             }
                             if (i == use) {
-                                g.image(indframe, ic.sub(indframeo));
+                                g.image(indframe, ic.sub(indframeo.mul(actionscale)), indframe.sz().mul(actionscale));
                             } else if (i == useb) {
-                                g.image(indbframe, ic.sub(indbframeo));
+                                g.image(indbframe, ic.sub(indbframeo.mul(actionscale)), indbframe.sz().mul(actionscale));
                             } else {
-                                g.image(actframe, ic.sub(actframeo));
+                                g.image(actframe, ic.sub(actframeo.mul(actionscale)), actframe.sz().mul(actionscale));
                             }
 
                             if (configuration.showactioninfo) {
                                 if (fv.current != null) {
                                     if (act.card instanceof Attack) {
                                         final Attack atk = (Attack) act.card;
-                                        final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen,
-                                                str(), fv.current.defweights);
+                                        final Pair<Double, Double> dmg = atk.calculateDamage(weapdmg, weapq, weappen, str(), fv.current.defweights);
 //                                    Tex tex = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(dmg.a) + "} / $col" + colyellow + "{" + Math.round(dmg.b) + "}}}}", -1).tex();
                                         Tex tex = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(dmg.a), colyellow, Math.round(dmg.b)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                        g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+                                        g.aimage(tex, ic.add(img.sz().mul(actionscale).x / 2, img.sz().mul(actionscale).y), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 35), "%d/%d", Math.round(dmg.a), Math.round(dmg.b));
                                         final int ua = ui.sess.glob.cattr.get("unarmed").comp;
                                         final int mc = ui.sess.glob.cattr.get("melee").comp;
 
-                                        final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                                ua, mc, act.cards,
-                                                fv.current.defweights, fv.current.estimatedBlockWeight);
+                                        final Map<DefenseType, Double> newWeights = atk.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter, ua, mc, act.cards, fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                    Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(newWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(newWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(newWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(newWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
                                         Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(newWeights.get(DefenseType.RED) * 100), colgreen, Math.round(newWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(newWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(newWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                        g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+                                        g.aimage(texa, ic.add(img.sz().mul(actionscale).x / 2, img.sz().mul(actionscale).y + tex.sz().y), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
 //                                    Math.round(newWeights.get(DefenseType.RED) * 100),
 //                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
@@ -253,7 +256,7 @@ public class Fightsess extends Widget {
 //                                    g.chcolor(grey);
 //                                    g.frect(ic.add(0, 35).sub(2, 2), tex.sz().add(2, 2));
 //                                    g.chcolor();
-                                        g.aimage(tex, ca.add(0, img.sz().y / 2), 0.5, 0);
+                                        g.aimage(tex, ic.add(img.sz().mul(actionscale).x / 2, img.sz().mul(actionscale).y), 0.5, 0);
 //                            FastText.printsf(g, ic.add(0, 35), "%d/%d/%d/%d",
 //                                    Math.round(newWeights.get(DefenseType.RED) * 100),
 //                                    Math.round(newWeights.get(DefenseType.GREEN) * 100),
@@ -263,15 +266,13 @@ public class Fightsess extends Widget {
                                             final int ua = ui.sess.glob.cattr.get("unarmed").comp;
                                             final int mc = ui.sess.glob.cattr.get("melee").comp;
 
-                                            final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter,
-                                                    ua, mc, act.cards,
-                                                    fv.current.defweights, fv.current.estimatedBlockWeight);
+                                            final Map<DefenseType, Double> enemyWeights = restro.calculateEnemyDefWeights(fv.maneuver, fv.maneuvermeter, ua, mc, act.cards, fv.current.defweights, fv.current.estimatedBlockWeight);
 //                                        Tex texa = RichText.render("$b{$font" + ffont + "{$bg" + colgrey + "{$col" + colred + "{" + Math.round(enemyWeights.get(DefenseType.RED) * 100) + "} / $col" + colgreen + "{" + Math.round(enemyWeights.get(DefenseType.GREEN) * 100) + "} / $col" + colblue + "{" + Math.round(enemyWeights.get(DefenseType.BLUE) * 100) + "} / $col" + colyellow + "{" + Math.round(enemyWeights.get(DefenseType.YELLOW) * 100) + "}}}}", -1).tex();
                                             Tex texa = RichText.render(String.format("$bg%s{$b{$size[14]{$font%s{$col%s{%d}/$col%s{%d}/$col%s{%d}/$col%s{%d}}}}}", colgrey, ffont, colred, Math.round(enemyWeights.get(DefenseType.RED) * 100), colgreen, Math.round(enemyWeights.get(DefenseType.GREEN) * 100), colblue, Math.round(enemyWeights.get(DefenseType.BLUE) * 100), colyellow, Math.round(enemyWeights.get(DefenseType.YELLOW) * 100)), -1).tex();
 //                                        g.chcolor(grey);
 //                                        g.frect(ic.add(0, 45).sub(2, 2), tex.sz().add(2, 2));
 //                                        g.chcolor();
-                                            g.aimage(texa, ca.add(0, img.sz().y / 2 + tex.sz().y), 0.5, 0);
+                                            g.aimage(texa, ic.add(img.sz().mul(actionscale).x / 2, img.sz().mul(actionscale).y + tex.sz().y), 0.5, 0);
 //                                FastText.printsf(g, ic.add(0, 45), "%d/%d/%d/%d",
 //                                        Math.round(enemyWeights.get(DefenseType.RED) * 100),
 //                                        Math.round(enemyWeights.get(DefenseType.GREEN) * 100),
@@ -291,7 +292,7 @@ public class Fightsess extends Widget {
                                 } else {
                                     key = keysfftex[i];
                                 }
-                                g.image(key, ic.sub(indframeo).add(indframe.sz().x / 2 - key.sz().x / 2, indframe.sz().y / 2 - key.sz().y / 2));
+                                g.aimage(key, ca.add((int) (pitch / 2), (int) (pitch / 2)), 0.5, 0.5);
                             }
                         }
                     } catch (Loading l) {
@@ -306,17 +307,35 @@ public class Fightsess extends Widget {
                 super.draw(g);
             }
 
+            public boolean mousewheel(Coord coord, int amount) {
+                if (ui.modflags() == (UI.MOD_CTRL | UI.MOD_META)) {
+                    float scale = actionscale - (0.1f * amount);
+                    float lastscale = actionscale;
+                    if (scale > 3)
+                        actionscale = 3;
+                    else if (scale < 0.5)
+                        actionscale = 0.5f;
+                    else
+                        actionscale = scale;
+
+                    resize(new Coord(Math.round(awc.x * actionscale), Math.round(awc.y * actionscale)));
+                    move(new Coord(Math.round(c.x - (sz.x - (awc.x * lastscale)) / 2), Math.round(c.y - (sz.y - (awc.y * lastscale)) / 2)));
+                    return (true);
+                }
+                return (super.mousewheel(c, amount));
+            }
+
             public Object tooltip(Coord c, Widget prev) {
                 for (int i = 0; i < actions.length; i++) {
 //                    Coord ca = Config.altfightui ? new Coord(cx - 18, ui.gui.sz.y - 250).add(actc(i)).add(16, 16) : pcc.add(actc(i));
 //                    Coord ca = new Coord(cx - 18, sz.y - 250).add(actc(i)).add(16, 16);
-                    Coord ca = actionAnchor.sub(0, 50).add(actc(i));
+                    float pitch = (configuration.showactioninfo ? actpitch : smallactpitch) * actionscale;
+                    Coord ca = actionAnchor.get().add(actc(actionscale, i));
                     Indir<Resource> act = (actions[i] == null) ? null : actions[i].res;
                     try {
                         if (act != null) {
-                            Tex img = act.get().layer(Resource.imgc).tex();
-                            ca = ca.sub(img.sz().div(2));
-                            if (c.isect(ca, img.sz())) {
+//                            Tex img = act.get().layer(Resource.imgc).tex();
+                            if (c.isect(ca, new Coord(pitch, pitch))) {
                                 String tip = act.get().layer(Resource.tooltip).t + " ($bg[60,60,60,168]{$b{$font" + ffont + "{$col[255,128,0]{" + keytips[i] + "}}}})";
                                 if ((acttip == null) || !acttip.text.equals(tip))
                                     acttip = RichText.render(tip, -1);
@@ -582,13 +601,14 @@ public class Fightsess extends Widget {
             cooldownWdg.move(new Coord(sz.x * (cooldownWdg.c.x + cooldownWdg.sz.x / 2) / oldsz.x, sz.y * (cooldownWdg.c.y + cooldownWdg.sz.y / 2) / oldsz.y), 0.5, 0.5);
     }
 
+    Supplier<Coord> actionAnchor = () -> actionWdg.sz.div(2);
     public void anchors() {
         final Coord center = sz.div(2);
         final Coord acenter = actionWdg.sz.div(2);
         final Coord ccenter = cooldownWdg.sz.div(2);
 //        actionAnchor = center.add(0, center.y / 4);
 //        cooldownAnchor = center.sub(0, (int) (center.y / 1.5f));
-        actionAnchor = acenter;
+//        actionAnchor = acenter;
         cooldownAnchor = ccenter;
         enemyBuffAnchor = cooldownAnchor.add(50, 0);
         enemyIPAnchor = cooldownAnchor.add(75, 15);
@@ -667,8 +687,20 @@ public class Fightsess extends Widget {
         int row = i / rl;
         if (Config.combatkeys == 1)
             row ^= 1;
+        int pitch = configuration.showactioninfo ? actpitch : smallactpitch;
 
-        return (new Coord((actpitch * (i % rl)) - (((rl - 1) * actpitch) / 2), (row * actpitch)));
+        return (new Coord((pitch * (i % rl)) - (((rl - 1) * pitch) / 2), (row * pitch)));
+    }
+
+    private static Coord actc(float scale, int i) {
+        int rl = 5;
+
+        int row = i / rl;
+        if (Config.combatkeys == 1)
+            row ^= 1;
+        float pitch = (configuration.showactioninfo ? actpitch : smallactpitch) * scale;
+
+        return (new Coord((pitch * (i % rl)) - (((rl - 1) * pitch) / 2), (row * pitch)).sub(pitch / 2, pitch));
     }
 
     private static final Coord cmc = new Coord(0, 67);
