@@ -61,6 +61,7 @@ import modification.dev;
 import modification.resources;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.lang.ref.Reference;
@@ -82,6 +83,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DRAWGRIDRADIUS;
@@ -375,9 +377,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 c = new Coord(c.x + (dragorig.x - c.x) * 2, c.y);
             if (Config.reversebadcamy)
                 c = new Coord(c.x, c.y + (dragorig.y - c.y) * 2);
-            elev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
-            if (elev < 0.0f) elev = 0.0f;
-            if (elev > (Math.PI / 2.0)) elev = (float) Math.PI / 2.0f;
+            if (ui.modshift || !configuration.badcamelevlock) {
+                elev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
+                if (elev < 0.0f) elev = 0.0f;
+                if (elev > (Math.PI / 2.0)) elev = (float) Math.PI / 2.0f;
+            }
             angl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
             angl = angl % ((float) Math.PI * 2.0f);
             configuration.badcamelevdefault = elev;
@@ -451,9 +455,11 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public void drag(Coord c) {
-            telev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
-            if (telev < 0.0f) telev = 0.0f;
-            if (telev > (Math.PI / 2.0)) telev = (float) Math.PI / 2.0f;
+            if (ui.modshift || !configuration.badcamelevlock) {
+                telev = elevorig - ((float) (c.y - dragorig.y) / 100.0f);
+                if (telev < 0.0f) telev = 0.0f;
+                if (telev > (Math.PI / 2.0)) telev = (float) Math.PI / 2.0f;
+            }
             tangl = anglorig + ((float) (c.x - dragorig.x) / 100.0f);
         }
 
@@ -545,7 +551,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean wheel(Coord c, int amount) {
-            chfield(tfield + amount * 10);
+            chfield(tfield + amount * Config.badcamsensitivity);
             return (true);
         }
 
@@ -675,9 +681,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private float tfield = field;
         private boolean isometric = false;
         private final float pi2 = (float) (Math.PI * 2);
+        private double tf = 1.0;
 
         public SOrthoCam(String... args) {
-            PosixArgs opt = PosixArgs.getopt(args, "enif");
+            PosixArgs opt = PosixArgs.getopt(args, "enift:");
             for (char c : opt.parsed()) {
                 switch (c) {
                     case 'e':
@@ -692,11 +699,16 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     case 'f':
                         isometric = false;
                         break;
+                    case 't':
+                        tf = Double.parseDouble(opt.arg);
+                        break;
                 }
             }
         }
 
         public void tick2(double dt) {
+            dt *= tf;
+            float cf = 1f - (float)Math.pow(500, -dt);
             Coord3f mc = getcc();
             mc.y = -mc.y;
             if (Config.disableelev)
@@ -704,9 +716,9 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if ((cc == null) || (Math.hypot(mc.x - cc.x, mc.y - cc.y) > 250))
                 cc = mc;
             else if (!exact || (mc.dist(cc) > 2))
-                cc = cc.add(mc.sub(cc).mul(1f - (float) Math.pow(500, -dt)));
+                cc = cc.add(mc.sub(cc).mul(cf));
 
-            angl = angl + ((tangl - angl) * (1f - (float) Math.pow(500, -dt)));
+            angl = angl + ((tangl - angl) * (cf));
             while (angl > pi2) {
                 angl -= pi2;
                 tangl -= pi2;
@@ -722,7 +734,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             else
                 jc = cc;
 
-            field = field + ((tfield - field) * (1f - (float) Math.pow(500, -dt)));
+            field = field + ((tfield - field) * (cf));
             if (Math.abs(tfield - field) < 0.1)
                 field = tfield;
             else
@@ -1875,6 +1887,23 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     private void drawarrow(GOut g, double a) {
+//        Coord hsz = sz.div(2);
+//        double ca = -Coord.z.angle(hsz);
+//        Coord ac;
+//        if ((a > ca) && (a < -ca)) {
+//            ac = new Coord(sz.x, hsz.y - (int) (Math.tan(a) * hsz.x));
+//        } else if ((a > -ca) && (a < Math.PI + ca)) {
+//            ac = new Coord(hsz.x - (int) (Math.tan(a - Math.PI / 2) * hsz.y), 0);
+//        } else if ((a > -Math.PI - ca) && (a < ca)) {
+//            ac = new Coord(hsz.x + (int) (Math.tan(a + Math.PI / 2) * hsz.y), sz.y);
+//        } else {
+//            ac = new Coord(0, hsz.y + (int) (Math.tan(a) * hsz.x));
+//        }
+//        Coord bc = ac.add(Coord.sc(a, -10));
+//        g.line(bc, bc.add(Coord.sc(a, -40)), 2);
+//        g.line(bc, bc.add(Coord.sc(a + Math.PI / 4, -10)), 2);
+//        g.line(bc, bc.add(Coord.sc(a - Math.PI / 4, -10)), 2);
+
         Coord hsz = sz.div(2);
         double ca = -Coord.z.angle(hsz);
         Coord ac;
@@ -1887,10 +1916,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else {
             ac = new Coord(0, hsz.y + (int) (Math.tan(a) * hsz.x));
         }
-        Coord bc = ac.add(Coord.sc(a, -10));
-        g.line(bc, bc.add(Coord.sc(a, -40)), 2);
-        g.line(bc, bc.add(Coord.sc(a + Math.PI / 4, -10)), 2);
-        g.line(bc, bc.add(Coord.sc(a - Math.PI / 4, -10)), 2);
+        Coord bc = ac.add(Coord.sc(a, 0));
+
+        g.state2d();
+        g.apply();
+        g.gl.glEnable(GL2.GL_POLYGON_SMOOTH);
+        g.gl.glBegin(GL.GL_TRIANGLES);
+        g.vertex(bc);
+        g.vertex(bc.add(Coord.sc(a + Math.PI / 12, -35)));
+        g.vertex(bc.add(Coord.sc(a - Math.PI / 12, -35)));
+        g.gl.glEnd();
+        g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
     }
 
     public Coord3f screenxf(Coord3f mc) {
@@ -3479,6 +3515,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void startMusselsPicker(Gob gob) {
+        if (musselPicker != null) {
+            if (musselPicker.isAlive() && !musselPicker.isInterrupted())
+                musselPicker.interrupt();
+            musselPicker.setName("oldMusselPicker");
+            musselPicker = null;
+        }
         musselPicker = new Thread(new MusselPicker(ui.gui, gob), "MusselPicker");
         musselPicker.start();
     }

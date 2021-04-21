@@ -12,7 +12,7 @@ import haven.sloth.io.ForagableData;
 import haven.sloth.io.HiddenWndData;
 import haven.sloth.io.HighlightData;
 import haven.sloth.io.Storage;
-import haven.sloth.script.LispScript;
+//import haven.sloth.script.LispScript;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -200,6 +200,9 @@ public class DefSettings {
     public static final IndirSetting<Boolean> PAUSED = new IndirSetting<>(session, "session.paused");
     public static final IndirSetting<Boolean> SHOWGRID = new IndirSetting<>(session, "session.show-grid");
 
+    public static final IndirSetting<Integer> MINIMAPTYPE = new IndirSetting<>(global, "graphics.minimap-type");        //[Int] 0, 1, 2 = { default, blend, blend }
+    public static final IndirSetting<Integer> MAPTYPE = new IndirSetting<>(global, "graphics.map-type");                //[Int] 0, 1, 2 = { default, blend, blend }
+
     /**
      * Checks out settings nad saves them if they are dirty
      */
@@ -330,6 +333,8 @@ public class DefSettings {
         //Minimap
         MMSHOWGRID.ensure(false);
         MMSHOWVIEW.ensure(false);
+        MINIMAPTYPE.ensure(0);
+        MAPTYPE.ensure(0);
         //Cameras
         CAMERA.ensure("sortho");
         FREECAMREXAXIS.ensure(false);
@@ -339,7 +344,7 @@ public class DefSettings {
         HUDTHEME.ensure("ardclient");
         MENUTHEME.ensure("default");
 
-        new Thread(LispScript::reloadConfig).start();
+//        new Thread(LispScript::reloadConfig).start();
 
         {
             final Color slothc = new Color(85, 144, 87, 228);

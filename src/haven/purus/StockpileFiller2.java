@@ -2,6 +2,7 @@ package haven.purus;
 
 import haven.Button;
 import haven.Coord;
+import haven.GameUI;
 import haven.Gob;
 import haven.Label;
 import haven.Loading;
@@ -264,11 +265,14 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
         if (t != null)
             t.interrupt();
         stop = true;
-        synchronized (ItemClickCallback.class) {
-            ui.gui.unregisterItemCallback();
-        }
-        synchronized (ItemClickCallback.class) {
-            ui.gui.unregisterItemCallback();
+        GameUI gui = getparent(GameUI.class);
+        if (gui != null) {
+            synchronized (ItemClickCallback.class) {
+                gui.unregisterItemCallback();
+            }
+            synchronized (ItemClickCallback.class) {
+                gui.unregisterItemCallback();
+            }
         }
         startBtn.show();
 //        reqdestroy();

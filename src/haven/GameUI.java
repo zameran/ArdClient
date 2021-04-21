@@ -1255,19 +1255,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         super.draw(g);
         if (prog >= 0)
             drawprog(g, prog);
+        int bx = blpw;
         int by = sz.y;
-        if (chatwnd.visible)
+        if (chatwnd.visible) {
+            bx = Math.max(bx, chatwnd.c.x);
             by = Math.min(by, chatwnd.c.y);
+        }
         if (cmdline != null) {
-            drawcmd(g, new Coord(blpw + 10, by -= 20));
+            drawcmd(g, new Coord(bx + 10, by -= 20));
         } else if (lastmsg != null) {
             if ((Utils.rtime() - msgtime) > 3.0) {
                 lastmsg = null;
             } else {
                 g.chcolor(0, 0, 0, 192);
-                g.frect(new Coord(blpw + 8, by - 22), lastmsg.sz().add(4, 4));
+                g.frect(new Coord(bx + 8, by - 22), lastmsg.sz().add(4, 4));
                 g.chcolor();
-                g.image(lastmsg.tex(), new Coord(blpw + 10, by -= 20));
+                g.image(lastmsg.tex(), new Coord(bx + 10, by -= 20));
             }
         }
     }

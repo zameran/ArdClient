@@ -1,4 +1,40 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.21
+-- Fixed export and import (CTRL with errors)
+-- Added Map Cleaner
+-- Added Caching grid
+-- Added Party Color Arrow
+~
+
+2021.04.20
+-- Provinces overlays and mapv4 (Export and Import)
+-- Export kins
+~
+
+2021.04.18
+-- C = camera
+~
+
+2021.04.17.
+-- M = map
+~
+
+2021.04.17
+-- F = fix
+~
+
+2021.04.14.
+-- ~(0_o)~
+~
+
+2021.04.14
+-- Buddy feature: all kins from txt
+~
+
+2021.04.13
+-- Moose, Stones, Trees
+~
+
 2021.04.08
 -- Fixed treestage crash
 ~
