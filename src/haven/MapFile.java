@@ -185,7 +185,7 @@ public class MapFile {
         if (instance != null)
             return instance;
         else {
-            MapFile file = new MapFile(store, filename);
+            final MapFile file = new MapFile(store, filename);
             InputStream fp;
             try {
                 fp = file.sfetch("index");
@@ -590,13 +590,15 @@ public class MapFile {
         }
     }
 
-    public void export(Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+    public void export(boolean errors, Message out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
         if (prog == null) prog = new ExportStatus() {
         };
         out.addbytes(EXPORT_SIG);
         ZMessage zout = new ZMessage(out);
         Collection<Long> segbuf = locked((Collection<Long> c) -> new ArrayList<>(c), lock.readLock()).apply(knownsegs);
         int nseg = 0;
+        List<Long> ids = new ArrayList<>();
+        List<Long> dids = new ArrayList<>();
         for (Long sid : segbuf) {
             if (!filter.includeseg(sid))
                 continue;
@@ -613,6 +615,13 @@ public class MapFile {
                 lock.readLock().unlock();
             }
             int ngrid = 0;
+            for (Pair<Coord, Long> gd : gridbuf) { //check for bugs
+                if (ids.contains(gd.b)) {
+                    if (!dids.contains(gd.b))
+                        dids.add(gd.b);
+                } else
+                    ids.add(gd.b);
+            }
             for (Pair<Coord, Long> gd : gridbuf) {
                 prog.grid(nseg, segbuf.size(), ngrid++, gridbuf.size());
                 Grid grid = Grid.load(this, gd.b);
@@ -624,6 +633,8 @@ public class MapFile {
                      * just ignore them here. */
                     continue;
                 }
+                if (!errors && dids.contains(gd.b))
+                    continue;
                 MessageBuf buf = new MessageBuf();
                 buf.adduint8(2);
                 buf.addint64(gd.b);
@@ -664,18 +675,18 @@ public class MapFile {
         zout.finish();
     }
 
-    public void export(OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
+    public void export(boolean errors, OutputStream out, ExportFilter filter, ExportStatus prog) throws InterruptedException {
         StreamMessage msg = new StreamMessage(null, out);
-        export(msg, filter, prog);
+        export(errors, msg, filter, prog);
         msg.flush();
     }
 
-    public void reimport(Message data, ImportFilter filter) throws InterruptedException {
-        new Importer(filter).reimport(data);
+    public void reimport(boolean errors, Message data, ImportFilter filter) throws InterruptedException {
+        new Importer(filter).reimport(errors, data);
     }
 
-    public void reimport(InputStream fp, ImportFilter filter) throws InterruptedException {
-        reimport(new StreamMessage(fp, null), filter);
+    public void reimport(boolean errors, InputStream fp, ImportFilter filter) throws InterruptedException {
+        reimport(errors, new StreamMessage(fp, null), filter);
     }
 
     public void update(MCache map, Coord cgc) {
@@ -1327,14 +1338,21 @@ public class MapFile {
                         try {
                             zmap = loadz(z, String.format("%x", id));
                         } catch (Message.FormatError | Message.EOF e) {
-                            for (int i = 0; i < zmap.length; ++i) {
-                                zmap[i] = oldz.int32();
+                            try {
+                                for (int i = 0; i < zmap.length; ++i) {
+                                    zmap[i] = oldz.int32();
+                                }
+                            } catch (Exception ze) {
                             }
                         }
                     }
                     Grid g = new Grid(id, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime);
-                    if (ver >= 4)
-                        loadols(g.ols, z, String.format("%x", id));
+                    try {
+                        if (ver >= 4)
+                            loadols(g.ols, z, String.format("%x", id));
+                    } catch (Message.EOF e) {
+                    }
+
                     return (g);
                 } else {
                     throw (new Message.FormatError(String.format("Unknown grid data version for %x: %d", id, ver)));
@@ -2068,7 +2086,7 @@ public class MapFile {
             return (chseg(ret));
         }
 
-        void importgrid(Message data) {
+        void importgrid(boolean errors, Message data) {
             ImportedGrid grid = new ImportedGrid(data);
             ImportedSegment seg = segs.get(grid.segid);
             if (seg == null) {
@@ -2085,7 +2103,7 @@ public class MapFile {
                 Coord off = seg.offs.get(info.seg);
                 if (off == null) {
                     seg.offs.put(info.seg, info.sc.sub(grid.sc));
-                } else {
+                } else if (!errors) {
                     if (!off.equals(info.sc.sub(grid.sc)))
                         throw (new RuntimeException("Inconsistent grid locations detected"));
                 }
@@ -2163,7 +2181,7 @@ public class MapFile {
             }
         }
 
-        void reimport(Message data) throws InterruptedException {
+        void reimport(boolean errors, Message data) throws InterruptedException {
             if (!Arrays.equals(EXPORT_SIG, data.bytes(EXPORT_SIG.length)))
                 throw (new Message.FormatError("Invalid map file format"));
             data = new ZMessage(data);
@@ -2174,7 +2192,7 @@ public class MapFile {
                     Message lay = new LimitMessage(data, len);
                     if (type.equals("grid")) {
                         try {
-                            importgrid(lay);
+                            importgrid(errors, lay);
                         } catch (RuntimeException exc) {
                             filter.handleerror(exc, "grid");
                         }

@@ -544,12 +544,24 @@ public class MapWnd extends ResizableWnd {
 
             mebtn = add(new Button(95, "Export...", false) {
                 public void click() {
-                    view.exportmap();
+                    boolean errors = ui.modflags() == UI.MOD_CTRL;
+                    view.exportmap(errors);
+                }
+
+                @Override
+                public Object tooltip(Coord c, Widget prev) {
+                    return Text.render("Ctrl for Export with errors").tex();
                 }
             });
             mibtn = add(new Button(95, "Import...", false) {
                 public void click() {
-                    view.importmap();
+                    boolean errors = ui.modflags() == UI.MOD_CTRL;
+                    view.importmap(errors);
+                }
+
+                @Override
+                public Object tooltip(Coord c, Widget prev) {
+                    return Text.render("Ctrl for Import with errors").tex();
                 }
             });
         }
