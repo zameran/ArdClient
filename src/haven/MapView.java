@@ -61,6 +61,7 @@ import modification.dev;
 import modification.resources;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.lang.ref.Reference;
@@ -82,6 +83,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 
 import static haven.DefSettings.DARKMODE;
 import static haven.DefSettings.DRAWGRIDRADIUS;
@@ -1812,6 +1814,23 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     private void drawarrow(GOut g, double a) {
+//        Coord hsz = sz.div(2);
+//        double ca = -Coord.z.angle(hsz);
+//        Coord ac;
+//        if ((a > ca) && (a < -ca)) {
+//            ac = new Coord(sz.x, hsz.y - (int) (Math.tan(a) * hsz.x));
+//        } else if ((a > -ca) && (a < Math.PI + ca)) {
+//            ac = new Coord(hsz.x - (int) (Math.tan(a - Math.PI / 2) * hsz.y), 0);
+//        } else if ((a > -Math.PI - ca) && (a < ca)) {
+//            ac = new Coord(hsz.x + (int) (Math.tan(a + Math.PI / 2) * hsz.y), sz.y);
+//        } else {
+//            ac = new Coord(0, hsz.y + (int) (Math.tan(a) * hsz.x));
+//        }
+//        Coord bc = ac.add(Coord.sc(a, -10));
+//        g.line(bc, bc.add(Coord.sc(a, -40)), 2);
+//        g.line(bc, bc.add(Coord.sc(a + Math.PI / 4, -10)), 2);
+//        g.line(bc, bc.add(Coord.sc(a - Math.PI / 4, -10)), 2);
+
         Coord hsz = sz.div(2);
         double ca = -Coord.z.angle(hsz);
         Coord ac;
@@ -1824,10 +1843,17 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         } else {
             ac = new Coord(0, hsz.y + (int) (Math.tan(a) * hsz.x));
         }
-        Coord bc = ac.add(Coord.sc(a, -10));
-        g.line(bc, bc.add(Coord.sc(a, -40)), 2);
-        g.line(bc, bc.add(Coord.sc(a + Math.PI / 4, -10)), 2);
-        g.line(bc, bc.add(Coord.sc(a - Math.PI / 4, -10)), 2);
+        Coord bc = ac.add(Coord.sc(a, 0));
+
+        g.state2d();
+        g.apply();
+        g.gl.glEnable(GL2.GL_POLYGON_SMOOTH);
+        g.gl.glBegin(GL.GL_TRIANGLES);
+        g.vertex(bc);
+        g.vertex(bc.add(Coord.sc(a + Math.PI / 12, -35)));
+        g.vertex(bc.add(Coord.sc(a - Math.PI / 12, -35)));
+        g.gl.glEnd();
+        g.gl.glDisable(GL2.GL_POLYGON_SMOOTH);
     }
 
     public Coord3f screenxf(Coord3f mc) {

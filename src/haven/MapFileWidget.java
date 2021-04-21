@@ -85,20 +85,20 @@ public class MapFileWidget extends Widget {
     private boolean dragging;
     private Coord dsc, dmc;
     private String biome, seginfo;
-    private Map<String, Console.Command> cmdmap = new TreeMap<>();
+    private final Map<String, Console.Command> cmdmap = new TreeMap<>();
 
     {
         cmdmap.put("exportmap", (cons, args) -> {
             if (args.length > 1)
-                exportmap(new File(args[1]));
+                exportmap(false, new File(args[1]));
             else
-                exportmap();
+                exportmap(false);
         });
         cmdmap.put("importmap", (cons, args) -> {
             if (args.length > 1)
-                importmap(new File(args[1]));
+                importmap(false, new File(args[1]));
             else
-                importmap();
+                importmap(false);
         });
     }
 
@@ -173,8 +173,7 @@ public class MapFileWidget extends Widget {
 
     private void redisplay(Location loc) {
         Coord hsz = sz.div(2);
-        Area next = Area.sized(loc.tc.sub(hsz).div(cmaps.div(scalef())),
-                sz.add(cmaps.div(scalef())).sub(1, 1).div(cmaps.div(scalef())).add(1, 1));
+        Area next = Area.sized(loc.tc.sub(hsz).div(cmaps.div(scalef())), sz.add(cmaps.div(scalef())).sub(1, 1).div(cmaps.div(scalef())).add(1, 1));
         if ((display == null) || (loc.seg != dseg) || !next.equals(dext)) {
             try {
                 DisplayGrid[] nd = new DisplayGrid[next.rsz()];
@@ -226,17 +225,15 @@ public class MapFileWidget extends Widget {
             }
         }
         for (Coord c : dext) {
-            Tex img;
             Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
             try {
                 DisplayGrid disp = display[dext.ri(c)];
-                if ((disp == null) || ((img = disp.img()) == null))
+                if (disp == null)
                     continue;
                 drawgrid(g, ul, disp);
             } catch (Loading l) {
                 continue;
             }
-//            g.image(img, ul, cmaps.div(scalef()));
             if (configuration.bigmapshowgrid)
                 g.image(gridred, ul, cmaps.div(scalef()));
         }
@@ -505,13 +502,13 @@ public class MapFileWidget extends Widget {
         return Text.render(seginfo);
     }
 
-    public void exportmap(File path) {
+    public void exportmap(boolean errors, File path) {
         GameUI gui = getparent(GameUI.class);
         ExportWindow prog = new ExportWindow();
         Thread th = new HackThread(() -> {
             try {
                 try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path))) {
-                    file.export(out, MapFile.ExportFilter.all, prog);
+                    file.export(errors, out, MapFile.ExportFilter.all, prog);
                 }
             } catch (IOException e) {
                 e.printStackTrace(Debug.log);
@@ -523,7 +520,7 @@ public class MapFileWidget extends Widget {
         gui.adda(prog, gui.sz.div(2), 0.5, 1.0);
     }
 
-    public void importmap(File path) {
+    public void importmap(boolean errors, File path) {
         GameUI gui = getparent(GameUI.class);
         ImportWindow prog = new ImportWindow();
         Thread th = new HackThread(() -> {
@@ -541,11 +538,11 @@ public class MapFileWidget extends Widget {
             try {
                 prog.prog("Validating map data");
                 try (InputStream in = new Updater(new FileInputStream(path))) {
-                    file.reimport(in, MapFile.ImportFilter.readonly);
+                    file.reimport(errors, in, MapFile.ImportFilter.readonly);
                 }
                 prog.prog("Importing map data");
                 try (InputStream in = new Updater(new FileInputStream(path))) {
-                    file.reimport(in, MapFile.ImportFilter.all);
+                    file.reimport(errors, in, MapFile.ImportFilter.all);
                 }
             } catch (InterruptedException e) {
             } catch (Exception e) {
@@ -558,7 +555,7 @@ public class MapFileWidget extends Widget {
         gui.adda(prog, gui.sz.div(2), 0.5, 1.0);
     }
 
-    public void exportmap() {
+    public void exportmap(boolean errors) {
         java.awt.EventQueue.invokeLater(() -> {
             JFileChooser fc = new JFileChooser();
             fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
@@ -567,17 +564,17 @@ public class MapFileWidget extends Widget {
             File path = fc.getSelectedFile();
             if (path.getName().indexOf('.') < 0)
                 path = new File(path.toString() + ".hmap");
-            exportmap(path);
+            exportmap(errors, path);
         });
     }
 
-    public void importmap() {
+    public void importmap(boolean errors) {
         java.awt.EventQueue.invokeLater(() -> {
             JFileChooser fc = new JFileChooser();
             fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
             if (fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
                 return;
-            importmap(fc.getSelectedFile());
+            importmap(errors, fc.getSelectedFile());
         });
     }
 
@@ -649,7 +646,8 @@ public class MapFileWidget extends Widget {
         public final Coord sc;
         public final Indir<Grid> gref;
         private Grid cgrid = null;
-        private Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
+        private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
+        private final Map<String, Tex> olimg_t = new HashMap<>();
         private Defer.Future<Tex> img = null;
         private Tex tex = null;
 
@@ -666,10 +664,11 @@ public class MapFileWidget extends Widget {
                     if (img != null)
                         img.cancel();
                     img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
+                    tex = null;
                     cgrid = grid;
                 }
 
-                if (img != null)
+                if (tex == null && img != null)
                     tex = img.get();
             } catch (Exception e) {
             }
@@ -679,17 +678,24 @@ public class MapFileWidget extends Widget {
         public Tex olimg(String tag) {
             Tex tret = null;
             try {
-                Defer.Future<Tex> ret;
-                synchronized (olimg_c) {
-                    ret = olimg_c.get(tag);
-                    if (ret == null) {
-                        ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
-                        olimg_c.put(tag, ret);
+                synchronized (olimg_t) {
+                    tret = olimg_t.get(tag);
+                    if (tret == null) {
+                        Defer.Future<Tex> ret;
+                        synchronized (olimg_c) {
+                            ret = olimg_c.get(tag);
+                            if (ret == null) {
+                                ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
+                                olimg_c.put(tag, ret);
+                            }
+                        }
+
+                        if (ret != null) {
+                            tret = ret.get();
+                            olimg_t.put(tag, tret);
+                        }
                     }
                 }
-
-                if (ret != null)
-                    tret = ret.get();
             } catch (Exception e) {
             }
             return tret;
@@ -765,7 +771,7 @@ public class MapFileWidget extends Widget {
                     g.aimage(itex, c, 0.5, 0.5);
 
                     if (Config.mapdrawquests) {
-                        if (sm.res != null && sm.res.name.startsWith("gfx/invobjs/small")) {
+                        if (sm.res != null && (sm.res.name.startsWith("gfx/invobjs/small") || sm.res.name.contains("thingwall"))) {
 //                            Tex tex = Text.renderstroked(sm.nm, Color.white, Color.BLACK, fnd).tex();
                             Tex ttex = getCachedTextTex(sm.nm);
                             if (ttex != null) {
