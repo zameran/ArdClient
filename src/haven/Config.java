@@ -489,6 +489,7 @@ public class Config {
         put("wartybirch", new CheckListboxItem("Warty Birch"));
         put("figtree", new CheckListboxItem("Fig Tree"));
         put("dwarfpine", new CheckListboxItem("Dwarf Pine"));
+        put("mayflower", new CheckListboxItem("Mayflower"));
     }};
 
     public final static HashMap<String, CheckListboxItem> icons = new HashMap<String, CheckListboxItem>() {{
@@ -514,8 +515,7 @@ public class Config {
         put("boostspeed", new CheckListboxItem("Speed Boost"));
         put("frog", new CheckListboxItem("Frog"));
         put("toad", new CheckListboxItem("Toad"));
-    }};
-    public final static HashMap<String, CheckListboxItem> oldicons = new HashMap<String, CheckListboxItem>() {{
+//old icons
         put("dandelion", new CheckListboxItem("Dandelion"));
         put("chantrelle", new CheckListboxItem("Chantrelle"));
         put("blueberry", new CheckListboxItem("Blueberry"));
@@ -568,6 +568,7 @@ public class Config {
         put("frogscrown", new CheckListboxItem("Frog's Crown"));
         put("lampstalk", new CheckListboxItem("Lamp Stalks"));
     }};
+    public final static HashMap<String, CheckListboxItem> oldicons = new HashMap<String, CheckListboxItem>();
 
     public static CheckListbox flowerlist = null;
     public static TextEntry petalsearch = null;

@@ -182,9 +182,7 @@ public class MapFile {
     }
 
     public static MapFile load(ResCache store, String filename) {
-        if (instance != null)
-            return instance;
-        else {
+        if (instance == null) {
             final MapFile file = new MapFile(store, filename);
             InputStream fp;
             try {
@@ -218,8 +216,8 @@ public class MapFile {
                 return (null);
             }
             instance = file;
-            return (file);
         }
+        return instance;
     }
 
     private static Runnable locked(Runnable r, Lock lock) {

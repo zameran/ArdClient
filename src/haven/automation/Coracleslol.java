@@ -5,12 +5,15 @@ import haven.Coord;
 import haven.GameUI;
 import haven.Gob;
 import haven.MCache;
+import haven.Resource;
 import haven.Tiler;
 import haven.WItem;
 import haven.purus.pbot.PBotUtils;
 import haven.resutil.WaterTile;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Coracleslol implements Runnable {
@@ -19,6 +22,7 @@ public class Coracleslol implements Runnable {
     public WItem coracle;
     public Gob coraclegob;
     public Boolean invcoracle = false, equipcoracle = false;
+    public List<String> bogtype = new ArrayList<>(Arrays.asList("gfx/tiles/bog", "gfx/tiles/bogwater", "gfx/tiles/fen", "gfx/tiles/fenwater", "gfx/tiles/swamp", "gfx/tiles/swampwater", "", ""));
 
     public Coracleslol(GameUI gui) {
         this.gui = gui;
@@ -64,9 +68,11 @@ public class Coracleslol implements Runnable {
                 }
             } else {
                 Tiler tl = gui.ui.sess.glob.map.tiler(gui.ui.sess.glob.map.gettile_safe(gui.map.player().rc.floor(MCache.tilesz)));
+                int id = gui.ui.sess.glob.map.gettile_safe(gui.map.player().rc.floor(MCache.tilesz));
                 int timeout = 0;
-                while (tl != null && !(tl instanceof WaterTile)) {
-                    tl = gui.ui.sess.glob.map.tiler(gui.ui.sess.glob.map.gettile_safe(gui.map.player().rc.floor(MCache.tilesz)));
+                Resource res = gui.ui.sess.glob.map.tilesetr(id);
+                while (tl != null && !(tl instanceof WaterTile || bogtype.contains(res.name))) {
+                    tl = gui.ui.sess.glob.map.tiler(id);
                     timeout++;
                     if (timeout > 250) {
                         PBotUtils.sysMsg(gui.ui, "Timed out waiting for water tile to drop coracle on.", Color.white);
