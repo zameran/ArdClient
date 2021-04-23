@@ -177,18 +177,18 @@ public abstract class Script extends Thread {
             final UI ui = session.getUI();
             if (ui != null && ui.gui != null) {
                 if (intp) {
-                    ui.gui.msg("Script Interrupted -> scripts/sloth/" + name() + " [" + sid + "]");
+                    ui.gui.msg("Script Interrupted -> data/scripts/" + name() + " [" + sid + "]");
                 } else {
-                    ui.gui.msg("Finished Script -> scripts/sloth/" + name() + " [" + sid + "]");
+                    ui.gui.msg("Finished Script -> data/scripts/" + name() + " [" + sid + "]");
                 }
             }
         } catch (Throwable t) {
             final UI ui = session.getUI();
             if (ui != null && ui.gui != null) {
                 if (intp) {
-                    ui.gui.msg("Script Interrupted -> scripts/sloth/" + name() + " [" + sid + "]");
+                    ui.gui.msg("Script Interrupted -> data/scripts/" + name() + " [" + sid + "]");
                 } else {
-                    ui.gui.msg("Script died -> scripts/sloth/" + name() + " [" + sid + "]");
+                    ui.gui.msg("Script died -> data/scripts/" + name() + " [" + sid + "]");
                     try {
                         logger.atSevere().withCause(t).log("Script died [%s] [sid %d] [start %d]", name(), sid, start);
                     } catch (Exception e) {

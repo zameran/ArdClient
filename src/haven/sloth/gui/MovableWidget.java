@@ -184,6 +184,22 @@ public abstract class MovableWidget extends Widget {
     }
 
     @Override
+    public void move(Coord c) {
+        super.move(c);
+        if ((c.x + (sz.x * (1 - VISIBLE_PER))) > parent.sz.x) {
+            c.x = (int) Math.round(parent.sz.x - sz.x * (1 - VISIBLE_PER));
+        } else if ((c.x + (sz.x * VISIBLE_PER)) < 0) {
+            c.x = -(int) Math.round(sz.x * VISIBLE_PER);
+        }
+        if ((c.y + (sz.y * (1 - VISIBLE_PER))) > parent.sz.y) {
+            c.y = (int) Math.round(parent.sz.y - sz.y * (1 - VISIBLE_PER));
+        } else if ((c.y + (sz.y * VISIBLE_PER)) < 0) {
+            c.y = -(int) Math.round(sz.y * VISIBLE_PER);
+        }
+        savePosition();
+    }
+
+    @Override
     public void mousemove(final Coord mc) {
         if (dm != null) {
             //Preference to this if we're in the middle of moving the widget

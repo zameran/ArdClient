@@ -302,6 +302,10 @@ public class GOut {
         image(tex, c.add((int) ((double) sz.x * -ax), (int) ((double) sz.y * -ay)));
     }
 
+    public void aimage(Tex tex, Coord c, Coord sz, double ax, double ay) {
+        image(tex, c.add((int) ((double) sz.x * -ax), (int) ((double) sz.y * -ay)), sz);
+    }
+
     /* Draw texture at c, scaling it to sz. */
     public void image(Tex tex, Coord c, Coord sz) {
         if (tex == null)

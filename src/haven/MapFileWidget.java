@@ -431,25 +431,27 @@ public class MapFileWidget extends Widget {
     }
 
     public boolean mousewheel(Coord c, int amount) {
-        if (amount > 0) {
-            if (MapFileWidget.zoom < zoomlvls - 1) {
-                ui.gui.mapfile.zoomtex = null;
-                Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                MapFileWidget.zoom++;
-                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                tc = tc.div(MapFileWidget.scalef());
-                curloc.tc.x = tc.x;
-                curloc.tc.y = tc.y;
-            }
-        } else {
-            if (MapFileWidget.zoom > 0) {
-                ui.gui.mapfile.zoomtex = null;
-                Coord tc = curloc.tc.mul(MapFileWidget.scalef());
-                MapFileWidget.zoom--;
-                Utils.setprefi("zoomlmap", MapFileWidget.zoom);
-                tc = tc.div(MapFileWidget.scalef());
-                curloc.tc.x = tc.x;
-                curloc.tc.y = tc.y;
+        if (curloc != null) {
+            if (amount > 0) {
+                if (MapFileWidget.zoom < zoomlvls - 1) {
+                    ui.gui.mapfile.zoomtex = null;
+                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
+                    MapFileWidget.zoom++;
+                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
+                    tc = tc.div(MapFileWidget.scalef());
+                    curloc.tc.x = tc.x;
+                    curloc.tc.y = tc.y;
+                }
+            } else {
+                if (MapFileWidget.zoom > 0) {
+                    ui.gui.mapfile.zoomtex = null;
+                    Coord tc = curloc.tc.mul(MapFileWidget.scalef());
+                    MapFileWidget.zoom--;
+                    Utils.setprefi("zoomlmap", MapFileWidget.zoom);
+                    tc = tc.div(MapFileWidget.scalef());
+                    curloc.tc.x = tc.x;
+                    curloc.tc.y = tc.y;
+                }
             }
         }
         return (true);

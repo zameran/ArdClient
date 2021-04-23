@@ -1,4 +1,12 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.22.
+-- Coracles swamp fix
+~
+
+2021.04.22
+-- Compact fightview and scalable with CTRL+ALT+WHEEL
+~
+
 2021.04.21
 -- Fixed export and import (CTRL with errors)
 -- Added Map Cleaner
