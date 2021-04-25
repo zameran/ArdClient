@@ -892,8 +892,9 @@ public class configuration {
                 if (jo.getString("name").equals(username)) {
                     boolean bol = true;
                     try {
-                        bol = jo.getBoolean(type);
+                        bol = jo.get(type).toString().equals("true");
                     } catch (Exception ignored) {
+                        configuration.saveMapSetting(username, bol, type);
                     }
                     return (bol);
                 }

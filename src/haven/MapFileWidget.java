@@ -195,7 +195,6 @@ public class MapFileWidget extends Widget {
         private Defer.Future<Tex> img = null;
         private Tex tex = null;
         private final Map<String, Defer.Future<Tex>> olimg_c = new HashMap<>();
-        private final Map<String, Tex> olimg_t = new HashMap<>();
 
         public DisplayGrid(Segment seg, Coord sc, Indir<Grid> gref) {
             this.seg = seg;
@@ -208,6 +207,12 @@ public class MapFileWidget extends Widget {
             if (grid != cgrid) {
                 if (img != null)
                     img.cancel();
+                synchronized (olimg_c) {
+                    if (!olimg_c.isEmpty()) {
+                        olimg_c.forEach((s, d) -> d.cancel());
+                        olimg_c.clear();
+                    }
+                }
                 img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 cgrid = grid;
             }
@@ -225,26 +230,21 @@ public class MapFileWidget extends Widget {
         public Tex olimg(String tag) {
             Tex tret = null;
             if (tex != null) {
-                try {
-                    synchronized (olimg_t) {
-                        tret = olimg_t.get(tag);
-                        if (tret == null) {
-                            Defer.Future<Tex> ret;
-                            synchronized (olimg_c) {
-                                ret = olimg_c.get(tag);
-                                if (ret == null) {
-                                    ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
-                                    olimg_c.put(tag, ret);
-                                }
-                            }
-
-                            if (ret != null) {
-                                tret = ret.get();
-                                olimg_t.put(tag, tret);
-                            }
-                        }
+                Defer.Future<Tex> ret;
+                synchronized (olimg_c) {
+                    ret = olimg_c.get(tag);
+                    if (ret == null) {
+                        ret = Defer.later(() -> new TexI(cgrid.olrender(sc.mul(cmaps.div(scalef())), tag)));
+                        olimg_c.put(tag, ret);
                     }
-                } catch (Exception e) {
+                }
+
+                if (ret != null) {
+                    try {
+                        tret = ret.get();
+                    } catch (Exception e) {
+//                    dev.resourceLog("DisplayGrid: " + e + " " + seg.id);
+                    }
                 }
             }
             return tret;
@@ -370,7 +370,7 @@ public class MapFileWidget extends Widget {
 
     public Coord xlate(Location loc) {
         Location curloc = this.curloc;
-        if ((curloc == null) || (curloc.seg != loc.seg))
+        if (curloc == null || loc == null || curloc.seg.id != loc.seg.id/* || (curloc.seg != loc.seg)*/)
             return (null);
         return (loc.tc.add(sz.div(2)).sub(curloc.tc));
     }
@@ -381,6 +381,22 @@ public class MapFileWidget extends Widget {
             if (img != null)
                 g.image(img, ul, cmaps.div(scalef()));
         } catch (Loading l) {
+        }
+    }
+
+    public void refreshDisplayGrid() {
+        Location loc = this.curloc;
+        if (loc == null)
+            return;
+        redisplay(loc);
+        if (file.lock.readLock().tryLock()) {
+            try {
+                for (Coord c : dext) {
+                    display[dext.ri(c)] = null;
+                }
+            } finally {
+                file.lock.readLock().unlock();
+            }
         }
     }
 
@@ -401,11 +417,10 @@ public class MapFileWidget extends Widget {
             }
         }
         for (Coord c : dext) {
-            Tex img;
             Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
             try {
                 DisplayGrid disp = display[dext.ri(c)];
-                if ((disp == null) || ((img = disp.img()) == null))
+                if (disp == null)
                     continue;
                 drawgrid(g, ul, disp);
             } catch (Loading l) {
@@ -831,7 +846,7 @@ public class MapFileWidget extends Widget {
                 return;
             File path = fc.getSelectedFile();
             if (path.getName().indexOf('.') < 0)
-                path = new File(path.toString() + ".hmap");
+                path = new File(path + ".hmap");
             exportmap(errors, path);
         });
     }
@@ -846,7 +861,7 @@ public class MapFileWidget extends Widget {
         });
     }
 
-    private Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
+    private final Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
 
     {
         cmdmap.put("exportmap", (cons, args) -> {

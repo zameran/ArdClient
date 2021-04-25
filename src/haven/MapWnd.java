@@ -153,12 +153,16 @@ public class MapWnd extends ResizableWnd {
         toolbar.add(new Img(Resource.loadtex("gfx/hud/mmap/fgwdg")), Coord.z);
         toolbar.add(new IButton("gfx/hud/mmap/home", "", "-d", "-h") {
             {
-                tooltip = RichText.render("Follow ($col[255,255,0]{Home})", 0);
+                tooltip = RichText.render("Follow ($col[255,255,0]{Home})\nUpdate grids with CTRL", 0);
             }
 
             public void click() {
                 questlinemap.clear();
                 recenter();
+                if (ui.modflags() == UI.MOD_CTRL) {
+                    view.file.updategrids(ui.sess.glob.map, ui.sess.glob.map.grids.values());
+                    view.refreshDisplayGrid();
+                }
             }
         }, Coord.z);
         toolbar.add(new ICheckBox("gfx/hud/mmap/mark", "", "-d", "-h", "-dh") {
@@ -784,7 +788,7 @@ public class MapWnd extends ResizableWnd {
             try {
                 if (questQueue.size() > 0) {
                     for (Coord2d coord : questQueue) {
-                        ui.gui.mapfile.view.follow = false;
+//                        ui.gui.mapfile.view.follow = false;
                         final Gob player = mv.player();
                         double angle = player.rc.angle(coord);
                         final Coord mc = getRealCoord(player.rc.floor(tilesz));

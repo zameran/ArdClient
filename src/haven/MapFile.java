@@ -210,7 +210,7 @@ public class MapFile {
                             if (mark instanceof SMarker)
                                 file.smarkers.put(((SMarker) mark).oid, (SMarker) mark);
                         } catch (Message.BinError e) {
-                            Debug.log.printf("mapfile warning: error when loading marker, data may be missing: %s\n", e);
+                            warn("mapfile warning: error when loading marker, data may be missing: %s", e);
                         }
                     }
                 } else {
@@ -529,7 +529,7 @@ public class MapFile {
                 if (mseg == -1) {
                     seg = new Segment(Utils.el(missing).id);
                     moff = Coord.z;
-                    if (debug) Debug.log.printf("mapfile: creating new segment %x\n", seg.id);
+                    warn("mapfile: creating new segment %x", seg.id);
                 } else {
                     seg = segments.get(mseg);
                 }
@@ -561,15 +561,14 @@ public class MapFile {
                         dst = b;
                         soff = ab.inv();
                     }
-                    if (debug)
-                        Debug.log.printf("mapfile: merging segment %x (%d) into %x (%d) at %s\n", src.id, src.map.size(), dst.id, dst.map.size(), soff);
+                    warn("mapfile: merging segment %x (%d) into %x (%d) at %s", src.id, src.map.size(), dst.id, dst.map.size(), soff);
                     merge(dst, src, soff);
                 }
             }
         } finally {
             lock.writeLock().unlock();
         }
-        if (debug) Debug.log.printf("mapfile: update completed\n");
+        warn("mapfile: update completed");
     }
 
     // You need multiple grids around one otherwise it can merge!
@@ -1019,7 +1018,7 @@ public class MapFile {
                 } catch (Loading l) {
                     throw (l);
                 } catch (Exception e) {
-                    Debug.log.printf("mapfile warning: could not load tileset resource %s(v%d): %s\n", tilesets[t].res.name, tilesets[t].res.ver, e);
+                    warn("mapfile warning: could not load tileset resource %s(v%d): %s", tilesets[t].res.name, tilesets[t].res.ver, e);
                 }
                 if (r != null) {
                     Resource.Image ir = r.layer(Resource.imgc);
@@ -1042,7 +1041,7 @@ public class MapFile {
                 } catch (Loading l) {
                     throw (l);
                 } catch (Exception e) {
-                    Debug.log.printf("mapfile warning: could not load tileset resource %s(v%d): %s\n", r.name, r.ver, e);
+                    warn("mapfile warning: could not load tileset resource %s(v%d): %s", r.name, r.ver, e);
                 }
                 if (r != null) {
                     Resource.Image ir = r.layer(Resource.imgc);
@@ -1331,11 +1330,13 @@ public class MapFile {
                         try {
                             zmap = loadz(z, String.format("%x", id));
                         } catch (Message.FormatError | Message.EOF e) {
+                            e.printStackTrace();
                             try {
                                 for (int i = 0; i < zmap.length; ++i) {
                                     zmap[i] = oldz.int32();
                                 }
                             } catch (Exception ze) {
+                                ze.printStackTrace();
                             }
                         }
                     }
@@ -1344,8 +1345,8 @@ public class MapFile {
                         if (ver >= 4)
                             loadols(g.ols, z, String.format("%x", id));
                     } catch (Message.EOF e) {
+                        e.printStackTrace();
                     }
-
                     return (g);
                 } else {
                     throw (new Message.FormatError(String.format("Unknown grid data version for %x: %d", id, ver)));
@@ -1685,11 +1686,13 @@ public class MapFile {
                         try {
                             zmap = loadz(z, String.format("(%d, %d) in %x@d", sc.x, sc.y, seg, lvl));
                         } catch (Message.FormatError | Message.EOF e) {
+                            e.printStackTrace();
                             try {
                                 for (int i = 0; i < zmap.length; ++i) {
                                     zmap[i] = oldz.int32();
                                 }
                             } catch (Exception ze) {
+                                ze.printStackTrace();
                             }
                         }
                     ZoomGrid g = new ZoomGrid(seg, lvl, sc, tilesets.toArray(new TileInfo[0]), tiles, zmap, mtime);
@@ -1697,6 +1700,7 @@ public class MapFile {
                         try {
                             loadols(g.ols, z, String.format("(%d, %d) in %x@d", sc.x, sc.y, seg, lvl));
                         } catch (Message.EOF e) {
+                            e.printStackTrace();
                         }
                     return (g);
                 } else {
