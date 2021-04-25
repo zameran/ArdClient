@@ -568,7 +568,10 @@ public class SeedCropFarmer extends Window implements Runnable {
                         if (PBotUtils.waitForWindow(ui, barrelname, 1000))
                             break;
                     }
-                    item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
+                    List<PBotItem> items = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName));
+                    if (items.isEmpty())
+                        return;
+                    item = items.get(0).gitem;
                     PBotUtils.takeItem(ui, item, 1000);
                     while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() > 0 || PBotUtils.getItemAtHand(ui) != null) {
                         if (stopThread)
