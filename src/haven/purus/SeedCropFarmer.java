@@ -551,6 +551,9 @@ public class SeedCropFarmer extends Window implements Runnable {
             }
             if ((replantcontainer || containeronly) && !containers.isEmpty()) {
                 Runnable collect = () -> {
+                    List<PBotItem> items = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName));
+                    if (items.isEmpty())
+                        return;
                     lblProg2.settext("Barreling");
                     GItem item;
                     for (int n = 0; true; n++) {
@@ -568,9 +571,6 @@ public class SeedCropFarmer extends Window implements Runnable {
                         if (PBotUtils.waitForWindow(ui, barrelname, 1000))
                             break;
                     }
-                    List<PBotItem> items = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName));
-                    if (items.isEmpty())
-                        return;
                     item = items.get(0).gitem;
                     PBotUtils.takeItem(ui, item, 1000);
                     while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() > 0 || PBotUtils.getItemAtHand(ui) != null) {
