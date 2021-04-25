@@ -622,16 +622,32 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                 };
                 String groundname = ""; //most stuff goes from terobjs/plants/carrot to terobjs/items/carrot for example
+                boolean isbarrel = containers.get(0).getres().basename().contains("barrel");
                 if (cropName.contains("carrot") || cropName.contains("yellowonion") || cropName.contains("redonion") || cropName.contains("beet")
                         || cropName.contains("leek") || cropName.contains("turnip") || cropName.contains("pumpkin")) {
                     groundname = seedName.replace("invobjs", "terobjs/items");
                 } else {
-                    if (cropName.contains("poppy")) {
-                        groundname = "gfx/terobjs/items/flower-poppy";
+                    if (cropName.contains("pipeweed")) {
+                        groundname = seedName.replace("invobjs", "terobjs/items");
+                    } else if (cropName.contains("hemp")) {
+                        groundname = seedName.replace("invobjs", "terobjs/items");
+                    } else if (cropName.contains("flax")) {
+                        groundname = seedName.replace("invobjs", "terobjs/items");
+                    } else if (cropName.contains("poppy")) {
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/flower-poppy";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("wheat") || cropName.contains("barley") || cropName.contains("millet")) {
-                        groundname = "gfx/terobjs/items/straw";
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/straw";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("pumpkin")) {
-                        groundname = "gfx/terobjs/items/pumpkin";
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/pumpkin";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     }
                 }
 
