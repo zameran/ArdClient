@@ -13,6 +13,7 @@ import haven.Session;
 import haven.Tex;
 import haven.TexI;
 import haven.Utils;
+import haven.Widget;
 import haven.sloth.gfx.SnowFall;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,6 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 public class configuration {
     public static String modificationPath = "modification";
@@ -934,6 +936,14 @@ public class configuration {
                 }
             }
             Utils.setpref("json-vendan-mapv4", ja.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void classMaker(Runnable run) {
+        try {
+            run.run();
         } catch (Exception e) {
             e.printStackTrace();
         }

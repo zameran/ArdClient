@@ -3442,14 +3442,15 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     public void startMusselsPicker(Gob gob) {
-        if (musselPicker != null) {
-            if (musselPicker.isAlive() && !musselPicker.isInterrupted())
-                musselPicker.interrupt();
-            musselPicker.setName("oldMusselPicker");
-            musselPicker = null;
-        }
-        musselPicker = new Thread(new MusselPicker(ui.gui, gob), "MusselPicker");
-        musselPicker.start();
+        configuration.classMaker(() -> {
+            if (musselPicker != null) {
+                if (musselPicker.isAlive() && !musselPicker.isInterrupted())
+                    musselPicker.interrupt();
+                musselPicker = null;
+            }
+            musselPicker = new Thread(new MusselPicker(ui.gui, gob), "MusselPicker");
+            musselPicker.start();
+        });
     }
 
     public void showSpecialMenu(final Gob g) {

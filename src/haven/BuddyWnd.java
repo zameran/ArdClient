@@ -370,8 +370,9 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             b.online = online;
             if (Config.autosortkinlist)
                 setcmp(statuscmp);
-            if (Config.notifykinonline)
-                ui.gui.msg(b.name + " is " + (online > 0 ? "ONLINE" : "offline"), new Color(54, 105, 205));
+            if (Config.notifykinonline) {
+                configuration.classMaker(() -> getparent(GameUI.class).msg(b.name + " is " + (online > 0 ? "ONLINE" : "offline"), new Color(54, 105, 205)));
+            }
         } else if (msg == "upd") {
             int id = (Integer) args[0];
             String name = (String) args[1];
@@ -605,10 +606,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
 
         private void chstatus(int status) {
             online = status;
-            if (ui.gui != null) {
-                if (status == 1)
-                    ui.gui.msg(String.format("%s is now online.", name));
-            }
+            if (status == 1)
+               configuration.classMaker(() -> getparent(GameUI.class).msg(String.format("%s is now online.", name)));
         }
 
         public Text rname() {

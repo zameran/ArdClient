@@ -161,21 +161,21 @@ public class OCache implements Iterable<Gob> {
                 copy.add(g);
             for (Gob g : copy) {
                 g.ctick(dt);
-                if (Config.showdmgop) {
-                    Gob.Overlay dmgol = g.findol(DamageSprite.ID);
-                    if (dmgol != null)
-                        g.ols.remove(dmgol);
-                    if (isfight) {
-                        DamageSprite dmgspr = gobdmgs.get(g.id);
-                        if (dmgspr != null) {
-                            if (dmgspr.owner == g) {
-                                g.ols.add(new Gob.Overlay(DamageSprite.ID, dmgspr));
-                            } else {
-                                g.ols.add(new Gob.Overlay(DamageSprite.ID, new DamageSprite(dmgspr.dmg, dmgspr.arm, g)));
-                            }
-                        }
-                    }
-                }
+//                if (Config.showdmgop) {
+//                    Gob.Overlay dmgol = g.findol(DamageSprite.ID);
+//                    if (dmgol != null)
+//                        g.ols.remove(dmgol);
+//                    if (isfight) {
+//                        DamageSprite dmgspr = gobdmgs.get(g.id);
+//                        if (dmgspr != null) {
+//                            if (dmgspr.owner == g) {
+//                                g.ols.add(new Gob.Overlay(DamageSprite.ID, dmgspr));
+//                            } else {
+//                                g.ols.add(new Gob.Overlay(DamageSprite.ID, new DamageSprite(dmgspr.dmg, dmgspr.arm, g)));
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
