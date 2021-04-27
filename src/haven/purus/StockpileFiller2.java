@@ -403,7 +403,7 @@ public class StockpileFiller2 extends Window implements GobSelectCallback, ItemC
 
         for (int i = 0; i < maxretry; i++) {
             int stoping = 0;
-            int maxstoping = 1000;
+            int maxstoping = 200;
             int time = 10;
             boolean interrupt = false;
 

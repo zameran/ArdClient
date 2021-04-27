@@ -1,4 +1,17 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.26
+-- Blood covenant
+~
+
+2021.04.25.
+-- Final map fix???
+-- Home map icon with click for update grids
+~
+
+2021.04.25
+-- Map fix???
+~
+
 2021.04.22.
 -- Coracles swamp fix
 ~

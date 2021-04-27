@@ -218,4 +218,9 @@ public abstract class MovableWidget extends Widget {
             g.chcolor();
         }
     }
+
+    public void drag(Coord off) {
+        dm = ui.grabmouse(this);
+        doff = off;
+    }
 }

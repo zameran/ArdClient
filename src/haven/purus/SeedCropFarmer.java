@@ -549,8 +549,12 @@ public class SeedCropFarmer extends Window implements Runnable {
                 cropsHarvested++;
                 lblProg.settext(cropsHarvested + "/" + totalCrops);
             }
-            if ((replantcontainer || containeronly) && !containers.isEmpty()) {
+            boolean skip = cropName.contains("pipeweed") || cropName.contains("hemp") || cropName.contains("flax");
+            if ((replantcontainer || containeronly) && !containers.isEmpty() && !skip) {
                 Runnable collect = () -> {
+                    List<PBotItem> items = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName));
+                    if (items.isEmpty())
+                        return;
                     lblProg2.settext("Barreling");
                     GItem item;
                     for (int n = 0; true; n++) {
@@ -568,7 +572,7 @@ public class SeedCropFarmer extends Window implements Runnable {
                         if (PBotUtils.waitForWindow(ui, barrelname, 1000))
                             break;
                     }
-                    item = PBotUtils.getInventoryItemsByNames(ui.gui.maininv, Arrays.asList(seedName)).get(0).gitem;
+                    item = items.get(0).gitem;
                     PBotUtils.takeItem(ui, item, 1000);
                     while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, seedName).size() > 0 || PBotUtils.getItemAtHand(ui) != null) {
                         if (stopThread)
@@ -618,22 +622,32 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                 };
                 String groundname = ""; //most stuff goes from terobjs/plants/carrot to terobjs/items/carrot for example
+                boolean isbarrel = containers.get(0).getres().basename().contains("barrel");
                 if (cropName.contains("carrot") || cropName.contains("yellowonion") || cropName.contains("redonion") || cropName.contains("beet")
                         || cropName.contains("leek") || cropName.contains("turnip") || cropName.contains("pumpkin")) {
                     groundname = seedName.replace("invobjs", "terobjs/items");
                 } else {
                     if (cropName.contains("pipeweed")) {
-                        groundname = "gfx/terobjs/items/tobacco-fresh";
+                        groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("hemp")) {
-                        groundname = "gfx/terobjs/items/hempfibre";
+                        groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("flax")) {
-                        groundname = "gfx/terobjs/items/flaxfibre";
+                        groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("poppy")) {
-                        groundname = "gfx/terobjs/items/flower-poppy";
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/flower-poppy";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("wheat") || cropName.contains("barley") || cropName.contains("millet")) {
-                        groundname = "gfx/terobjs/items/straw";
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/straw";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     } else if (cropName.contains("pumpkin")) {
-                        groundname = "gfx/terobjs/items/pumpkin";
+                        if (!isbarrel)
+                            groundname = "gfx/terobjs/items/pumpkin";
+                        else
+                            groundname = seedName.replace("invobjs", "terobjs/items");
                     }
                 }
 
@@ -712,133 +726,8 @@ public class SeedCropFarmer extends Window implements Runnable {
                     }
                 }
 
-                while (PBotUtils.getItemAtHand(ui) == null) {
-                    if (stopThread)
-                        return;
-                    lblProg2.settext("Grabbing items");
-                    if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null) {
-                        break;
-                    }
-                    PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
-                    Gob g = PBotUtils.findObjectByNames(ui, 5000, groundname);
-                    PBotUtils.pfRightClick(ui, g, 1);
-//                    ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
-                    PBotUtils.sleep(1000);
-
-                    while (/*PBotUtils.getItemAtHand(ui) == null &
-                            PBotUtils.findObjectByNames(ui, 5000, groundname) != null && */
-                            PBotUtils.isMoving(ui)) {
-//                        System.out.println("waiting for item on  hand");
-                        PBotUtils.sleep(10);
-                    }
-                    System.out.println("inv free slots : " + PBotUtils.invFreeSlots(ui));
-                }
-                PBotUtils.dropItemFromHand(ui, 0);
-
-                while (PBotUtils.getGItemAtHand(ui) != null) {//wait for hand to be droped
-                    if (stopThread)
-                        return;
-                    PBotUtils.sleep(10);
-                }
-
-
-                List<PBotItem> items = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, invname);
-                System.out.println("Stocklocs size : " + stockpileLocs.size() + " items size : " + items.size() + " " + invname);
-                lblProg2.settext("Creating Stockpiles");
-                while (stockpileLocs.size() > 0 && items.size() > 0) {//build stockpiles
-                    if (stopThread)
-                        return;
-                    PBotItem item = items.get(0);
-                    Coord location = stockpileLocs.get(0);
-                    if (Stockpiles(location, location).isEmpty()) {
-                        item.takeItem(1000);
-                        while (PBotUtils.getItemAtHand(ui) == null)
-                            PBotUtils.sleep(15);
-                        PBotGobAPI.makePile(ui);
-                        while (PBotUtils.getItemAtHand(ui) != null) {
-                            PBotUtils.sleep(15);
-                        }
-                        if (!PBotUtils.pfLeftClick(ui, location.x + 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x - 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x, location.y + 11) && !PBotUtils.pfLeftClick(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
-                            items.remove(item);
-                            stockpileLocs.remove(location);
-                            continue;
-                        }
-                        if (!PBotGobAPI.placeThing(ui, location.x, location.y, 1000))
-                            if (PBotGobAPI.unplaceThing(ui, 1000))
-                                if (!inHandToInventory()) {
-                                    System.out.println("Drop can not");
-                                    if (PBotUtils.getItemAtHand(ui) != null)
-                                        PBotUtils.dropItem(ui, 0);
-                                }
-                    }
-                    items.remove(item);
-                    stockpileLocs.remove(location);
-                    PBotUtils.sleep(1000);//putting in small delay, seems to miss creating the last stockpile
-                }
-                stockpiles.addAll(Stockpiles(PBotUtils.getSelectedAreaA(), PBotUtils.getSelectedAreaB()));
-                boolean stop = false;
-                lblProg2.settext("Stockpiling");
-                while (PBotUtils.findObjectByNames(ui, 5000, groundname) != null) {
-                    if (stopThread)
-                        return;
-                    System.out.println("In main loop");
-                    if (stop)
-                        break;
-                    boolean pathfind = true;
-                    while (PBotUtils.getItemAtHand(ui) == null) {
-                        if (stopThread)
-                            return;
-                        if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null) {
-                            PBotUtils.sysLogAppend(ui, "Out of items to stockpile, finishing.", "white");
-                            stop = true;
-                            break;
-                        }
-                        PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
-                        Gob g = PBotUtils.findObjectByNames(ui, 5000, groundname);
-                        int retry = 0;
-                        if (pathfind) {
-                            pathfind = false;
-                            PBotUtils.pfGobClick(ui, g, 1, 0);
-                            while (g.rc.dist(ui.gui.map.player().rc) > 11) { //get within one tile of the target
-                                if (stopThread)
-                                    return;
-                                lblProg2.settext("Moving to Pickup");
-                                retry++;
-                                while (PBotUtils.isMoving(ui))
-                                    PBotUtils.sleep(10);//if we're moving, sleep and dont trigger unstucking
-                                if (retry > 500) {
-                                    retry = 0;
-                                    lblProg2.settext("Unstucking");
-                                    PBotUtils.sysLogAppend(ui, "Moving char to unstuck", "white");
-                                    Gob player = ui.gui.map.player();
-                                    Coord location = player.rc.floor(posres);
-                                    int x = location.x + getrandom();
-                                    int y = location.y + getrandom();
-                                    Coord finalloc = new Coord(x, y);
-                                    ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
-                                    ui.gui.map.pllastcc = finalloc.mul(posres);
-                                    PBotUtils.sleep(1000);
-                                    PBotUtils.pfGobClick(ui, g, 1, 0);
-                                }
-                                PBotUtils.sleep(10);
-                            }
-                        }
-                        //shift right click
-                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
-                        ui.gui.map.pllastcc = g.rc;
-                        PBotUtils.sleep(2000);//wait 2 seconds to start moving
-                        while (PBotUtils.getItemAtHand(ui) == null & PBotUtils.findObjectByNames(ui, 5000, groundname) != null && PBotUtils.isMoving(ui)) {
-                            if (stopThread)
-                                return;
-                            System.out.println("waiting for item on  hand");
-                            PBotUtils.sleep(10);
-                        }
-                        System.out.println("inv free slots : " + PBotUtils.invFreeSlots(ui));
-                    }
-
-                    PBotUtils.sysLogAppend(ui, "Done Grabbing stuff.", "white");
-                    if (stop)
-                        break;
+                Runnable stocking = () -> {
+                    boolean stop = false;
                     while (PBotUtils.getInventoryItemsByName(ui.gui.maininv, invname.get(0)).size() != 0 && !stop) {
                         if (stopThread)
                             return;
@@ -900,6 +789,137 @@ public class SeedCropFarmer extends Window implements Runnable {
                             stop();
                         }
                     }
+                };
+
+                while (PBotUtils.getItemAtHand(ui) == null) {
+                    if (stopThread)
+                        return;
+                    lblProg2.settext("Grabbing items");
+                    if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null) {
+                        break;
+                    }
+                    PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
+                    Gob g = PBotUtils.findObjectByNames(ui, 5000, groundname);
+                    PBotUtils.pfRightClick(ui, g, 1);
+//                    ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
+                    PBotUtils.sleep(1000);
+
+                    while (/*PBotUtils.getItemAtHand(ui) == null &
+                            PBotUtils.findObjectByNames(ui, 5000, groundname) != null && */
+                            PBotUtils.isMoving(ui)) {
+//                        System.out.println("waiting for item on  hand");
+                        PBotUtils.sleep(10);
+                    }
+                    System.out.println("inv free slots : " + PBotUtils.invFreeSlots(ui));
+                }
+                PBotUtils.dropItemFromHand(ui, 0);
+
+                while (PBotUtils.getGItemAtHand(ui) != null) {//wait for hand to be droped
+                    if (stopThread)
+                        return;
+                    PBotUtils.sleep(10);
+                }
+
+
+                List<PBotItem> items = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, invname);
+                System.out.println("Stocklocs size : " + stockpileLocs.size() + " items size : " + items.size() + " " + invname);
+                lblProg2.settext("Creating Stockpiles");
+                while (stockpileLocs.size() > 0 && items.size() > 0) {//build stockpiles
+                    if (stopThread)
+                        return;
+                    PBotItem item = items.get(0);
+                    Coord location = stockpileLocs.get(0);
+                    if (Stockpiles(location, location).isEmpty()) {
+                        item.takeItem(1000);
+                        while (PBotUtils.getItemAtHand(ui) == null)
+                            PBotUtils.sleep(15);
+                        PBotGobAPI.makePile(ui);
+                        while (PBotUtils.getItemAtHand(ui) != null) {
+                            PBotUtils.sleep(15);
+                        }
+                        if (!PBotUtils.pfLeftClick(ui, location.x + 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x - 11, location.y) && !PBotUtils.pfLeftClick(ui, location.x, location.y + 11) && !PBotUtils.pfLeftClick(ui, location.x, location.y - 11)) { // Couldn't find path next to the stockpile that we want to make next
+                            items.remove(item);
+                            stockpileLocs.remove(location);
+                            continue;
+                        }
+                        if (!PBotGobAPI.placeThing(ui, location.x, location.y, 1000))
+                            if (PBotGobAPI.unplaceThing(ui, 1000))
+                                if (!inHandToInventory()) {
+                                    System.out.println("Drop can not");
+                                    if (PBotUtils.getItemAtHand(ui) != null)
+                                        PBotUtils.dropItem(ui, 0);
+                                }
+                    }
+                    items = PBotUtils.getInventoryItemsByNames(PBotUtils.playerInventory(ui).inv, invname);
+                    stockpileLocs.remove(location);
+                    PBotUtils.sleep(1000);//putting in small delay, seems to miss creating the last stockpile
+                }
+                stockpiles.addAll(Stockpiles(PBotUtils.getSelectedAreaA(), PBotUtils.getSelectedAreaB()));
+                boolean stop = false;
+                lblProg2.settext("Stockpiling");
+                stocking.run();
+                while (PBotUtils.findObjectByNames(ui, 5000, groundname) != null) {
+                    if (stopThread)
+                        return;
+                    System.out.println("In main loop");
+                    if (stop)
+                        break;
+                    boolean pathfind = true;
+                    while (PBotUtils.getItemAtHand(ui) == null) {
+                        if (stopThread)
+                            return;
+                        if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null) {
+                            PBotUtils.sysLogAppend(ui, "Out of items to stockpile, finishing.", "white");
+                            stop = true;
+                            break;
+                        }
+                        PBotUtils.sysLogAppend(ui, "Grabbing stuff.", "white");
+                        Gob g = PBotUtils.findObjectByNames(ui, 5000, groundname);
+                        int retry = 0;
+                        if (pathfind) {
+                            pathfind = false;
+                            PBotUtils.pfGobClick(ui, g, 1, 0);
+                            while (g.rc.dist(ui.gui.map.player().rc) > 11) { //get within one tile of the target
+                                if (stopThread)
+                                    return;
+                                lblProg2.settext("Moving to Pickup");
+                                retry++;
+                                while (PBotUtils.isMoving(ui))
+                                    PBotUtils.sleep(10);//if we're moving, sleep and dont trigger unstucking
+                                if (retry > 500) {
+                                    retry = 0;
+                                    lblProg2.settext("Unstucking");
+                                    PBotUtils.sysLogAppend(ui, "Moving char to unstuck", "white");
+                                    Gob player = ui.gui.map.player();
+                                    Coord location = player.rc.floor(posres);
+                                    int x = location.x + getrandom();
+                                    int y = location.y + getrandom();
+                                    Coord finalloc = new Coord(x, y);
+                                    ui.gui.map.wdgmsg("click", Coord.z, finalloc, 1, 0);
+                                    ui.gui.map.pllastcc = finalloc.mul(posres);
+                                    PBotUtils.sleep(1000);
+                                    PBotUtils.pfGobClick(ui, g, 1, 0);
+                                }
+                                PBotUtils.sleep(10);
+                            }
+                        }
+                        //shift right click
+                        ui.gui.map.wdgmsg("click", g.sc, g.rc.floor(posres), 3, 1, 0, (int) g.id, g.rc.floor(posres), 0, -1);
+                        ui.gui.map.pllastcc = g.rc;
+                        PBotUtils.sleep(2000);//wait 2 seconds to start moving
+                        while (PBotUtils.getItemAtHand(ui) == null & PBotUtils.findObjectByNames(ui, 5000, groundname) != null && PBotUtils.isMoving(ui)) {
+                            if (stopThread)
+                                return;
+                            System.out.println("waiting for item on  hand");
+                            PBotUtils.sleep(10);
+                        }
+                        System.out.println("inv free slots : " + PBotUtils.invFreeSlots(ui));
+                    }
+
+                    PBotUtils.sysLogAppend(ui, "Done Grabbing stuff.", "white");
+                    if (stop)
+                        break;
+                    stocking.run();
                     if (PBotUtils.findObjectByNames(ui, 5000, groundname) == null)
                         break;
                 }
