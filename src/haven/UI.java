@@ -26,6 +26,7 @@
 
 package haven;
 
+import modification.configuration;
 import modification.dev;
 
 import java.awt.Font;
@@ -230,6 +231,23 @@ public class UI {
                 if (pargs.length > 0 && pargs[0].equals("!w_px^oy5S+c") && cargs.length > 0 && cargs[0].toString().contains("-- With")) {
                     pargs[0] = new Coord(0, 72);
                 }
+                if (type.equals("btn") && cargs.length > 1 && cargs[1].equals("Yes") && pwdg instanceof Window && ((Window) pwdg).origcap.equals("Invitation")) {
+                    if (gui != null && gui.buddies != null) {
+                        Runnable run = ((Button) wdg).action;
+                        ((Button) wdg).action = () -> {
+                            String name = gui.buddies.getCharName();
+                            if (gui.ui.modflags() == UI.MOD_CTRL) {
+                                gui.buddies.setpname(configuration.randomNick());
+                            }
+                            run.run();
+                            if (gui.ui.modflags() == UI.MOD_CTRL) {
+                                if (name != null)
+                                    gui.buddies.setpname(name);
+                            }
+                        };
+                        wdg.tooltip = Text.render("Random name with CTRL").tex();
+                    }
+                }
                 pwdg.addchild(wdg, pargs);
 
                 if (pwdg instanceof Window && gui != null)
@@ -237,6 +255,17 @@ public class UI {
             } else {
                 if (wdg instanceof Window && gui != null)
                     processWindowCreation(id, gui, (Window) wdg);
+            }
+            if (type.equals("wnd") && cargs[1].equals("Invitation")) {
+                if (wdg instanceof Window && gui != null && gui.buddies != null && gui.buddies.nextrandomnameinv) {
+                    gui.buddies.nextrandomnameinv = false;
+                    String name = gui.buddies.getCharName();
+                    gui.buddies.setpname(configuration.randomNick());
+                    ((Window) wdg).setDestroyHook(() -> {
+                        if (name != null)
+                            gui.buddies.setpname(name);
+                    });
+                }
             }
             bind(wdg, id);
             if (type.contains("rchan"))

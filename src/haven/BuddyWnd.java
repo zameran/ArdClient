@@ -103,6 +103,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
     };
 
+    public boolean nextrandomnameinv = false;
+
     public BuddyWnd() {
         super(new Coord(width, 380));
         setfocustab(true);
@@ -258,7 +260,9 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }, new Coord(0, y));
         add(new Button(75, "Add all kins from txt") {
             public void click() {
+                boolean allrandom = ui.modflags() == UI.MOD_CTRL;
                 java.awt.EventQueue.invokeLater(() -> {
+                    String name = getCharName();
                     try {
                         JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
                         fc.setFileFilter(new FileNameExtensionFilter("File with hearth secret lines", "txt"));
@@ -269,12 +273,17 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                         BufferedReader reader = new BufferedReader(fr);
                         String line = reader.readLine();
                         while (line != null) {
+                            if (allrandom) {
+                                setpname(configuration.randomNick());
+                            }
                             BuddyWnd.this.wdgmsg("bypwd", line);
                             line = reader.readLine();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    if (allrandom && name != null)
+                        setpname(name);
                 });
             }
         }, new Coord(0, y + 25));
@@ -607,7 +616,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         private void chstatus(int status) {
             online = status;
             if (status == 1)
-               configuration.classMaker(() -> getparent(GameUI.class).msg(String.format("%s is now online.", name)));
+                configuration.classMaker(() -> getparent(GameUI.class).msg(String.format("%s is now online.", name)));
         }
 
         public Text rname() {

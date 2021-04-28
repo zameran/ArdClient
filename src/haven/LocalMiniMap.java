@@ -797,14 +797,16 @@ public class LocalMiniMap extends Widget {
     }
 
     public void drawview(GOut g) {
-        Coord2d sgridsz = new Coord2d(MCache.cmaps);
-        Gob player = ui.gui.map.player();
-        if (player != null) {
-            Coord rc = p2c(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz)).add(delta);
-            g.chcolor(new Color(configuration.distanceviewcolor, true));
-            g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
-            g.chcolor();
-        }
+        configuration.classMaker(() -> {
+            Coord2d sgridsz = new Coord2d(MCache.cmaps);
+            Gob player = ui.gui.map.player();
+            if (player != null) {
+                Coord rc = p2c(player.rc.floor(sgridsz).sub(4, 4).mul(sgridsz)).add(delta);
+                g.chcolor(new Color(configuration.distanceviewcolor, true));
+                g.rect(rc, MCache.cmaps.mul(9).div(tilesz.floor()).mul(zoom));
+                g.chcolor();
+            }
+        });
     }
 
     private void drawTracking(GOut g) {
