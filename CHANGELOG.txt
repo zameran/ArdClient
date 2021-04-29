@@ -1,4 +1,16 @@
 Details in https://github.com/Cediner/ArdClient/commits/Unstable
+2021.04.29
+-- ALT for atk and shoot aim
+~
+
+2021.04.28
+-- Random name
+~
+
+2021.04.27
+-- Combat view
+~
+
 2021.04.26
 -- Blood covenant
 ~

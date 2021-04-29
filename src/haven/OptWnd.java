@@ -425,8 +425,6 @@ public class OptWnd extends Window {
 
             main.add(new Button(200, "Switch character") {
                 public void click() {
-                    if (Discord.jdalogin != null)
-                        ui.gui.DiscordToggle();
                     ui.gui.act("lo", "cs");
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
@@ -434,8 +432,6 @@ public class OptWnd extends Window {
             }, new Coord(210, 300));
             main.add(new Button(200, "Log out") {
                 public void click() {
-                    if (Discord.jdalogin != null)
-                        ui.gui.DiscordToggle();
                     ui.gui.act("lo");
                     if (ui.gui != null && ui.gui.map != null)
                         ui.gui.map.canceltasks();
@@ -1660,17 +1656,17 @@ public class OptWnd extends Window {
 
         appender.setVerticalMargin(VERTICAL_MARGIN);
         appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-        appender.add(new CheckBox("Display damage") {
-            {
-                a = Config.showdmgop;
-            }
-
-            public void set(boolean val) {
-                Utils.setprefb("showdmgop", val);
-                Config.showdmgop = val;
-                a = val;
-            }
-        });
+//        appender.add(new CheckBox("Display damage") {
+//            {
+//                a = Config.showdmgop;
+//            }
+//
+//            public void set(boolean val) {
+//                Utils.setprefb("showdmgop", val);
+//                Config.showdmgop = val;
+//                a = val;
+//            }
+//        });
         appender.add(new CheckBox("Notify in the absence of a shield") {
             {
                 a = configuration.shieldnotify;

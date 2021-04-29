@@ -381,6 +381,9 @@ public class FlowerMenu extends Widget {
                 add(opts[i] = new CustomPetal(options[i]));
             }
             opts[i].num = i;
+            if (options[i].equals("Make kin")) {
+                opts[i].tooltip = Text.render("Random name with CTRL").tex();
+            }
             if (options[i].equals("Study") || options[i].equals("Turn"))    // eatable curios & spitroasting
                 ignoreAutoSetting = true;
         }
@@ -477,6 +480,10 @@ public class FlowerMenu extends Widget {
                 try {
                     if (option.name.equals("Cargo") && ui.gui.map.player() != null && ui.gui.map.player().getattr(HeldBy.class) != null) {
                         ui.root.wdgmsg("gk", 27);
+                    } else if (option.name.equals("Make kin") && ui.modflags() == UI.MOD_CTRL) {
+                        if (ui.gui != null && ui.gui.buddies != null) {
+                            ui.gui.buddies.nextrandomnameinv = true;
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

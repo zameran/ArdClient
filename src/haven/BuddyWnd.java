@@ -103,6 +103,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
     };
 
+    public boolean nextrandomnameinv = false;
+
     public BuddyWnd() {
         super(new Coord(width, 380));
         setfocustab(true);
@@ -245,20 +247,36 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         y += 15;
         opass = add(new TextEntry(width, "") {
             public void activate(String text) {
+                String name = getCharName();
+                boolean random = ui.modflags() == UI.MOD_CTRL;
+                if (random) {
+                    setpname(configuration.randomNick());
+                }
                 BuddyWnd.this.wdgmsg("bypwd", text);
                 settext("");
+                if (random && name != null)
+                    setpname(name);
             }
         }, new Coord(0, y));
         y += 25;
         add(new Button(75, "Add kin") {
             public void click() {
+                String name = getCharName();
+                boolean random = ui.modflags() == UI.MOD_CTRL;
+                if (random) {
+                    setpname(configuration.randomNick());
+                }
                 BuddyWnd.this.wdgmsg("bypwd", opass.text);
                 opass.settext("");
+                if (random && name != null)
+                    setpname(name);
             }
         }, new Coord(0, y));
         add(new Button(75, "Add all kins from txt") {
             public void click() {
+                boolean allrandom = ui.modflags() == UI.MOD_CTRL;
                 java.awt.EventQueue.invokeLater(() -> {
+                    String name = getCharName();
                     try {
                         JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
                         fc.setFileFilter(new FileNameExtensionFilter("File with hearth secret lines", "txt"));
@@ -269,12 +287,17 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                         BufferedReader reader = new BufferedReader(fr);
                         String line = reader.readLine();
                         while (line != null) {
+                            if (allrandom) {
+                                setpname(configuration.randomNick());
+                            }
                             BuddyWnd.this.wdgmsg("bypwd", line);
                             line = reader.readLine();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    if (allrandom && name != null)
+                        setpname(name);
                 });
             }
         }, new Coord(0, y + 25));
@@ -370,8 +393,9 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             b.online = online;
             if (Config.autosortkinlist)
                 setcmp(statuscmp);
-            if (Config.notifykinonline)
-                ui.gui.msg(b.name + " is " + (online > 0 ? "ONLINE" : "offline"), new Color(54, 105, 205));
+            if (Config.notifykinonline) {
+                configuration.classMaker(() -> getparent(GameUI.class).msg(b.name + " is " + (online > 0 ? "ONLINE" : "offline"), new Color(54, 105, 205)));
+            }
         } else if (msg == "upd") {
             int id = (Integer) args[0];
             String name = (String) args[1];
@@ -605,10 +629,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
 
         private void chstatus(int status) {
             online = status;
-            if (ui.gui != null) {
-                if (status == 1)
-                    ui.gui.msg(String.format("%s is now online.", name));
-            }
+            if (status == 1)
+                configuration.classMaker(() -> getparent(GameUI.class).msg(String.format("%s is now online.", name)));
         }
 
         public Text rname() {

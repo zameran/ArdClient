@@ -120,7 +120,7 @@ public class Fightview extends MovableWidget {
         public Relation(long gobid) {
             this.gobid = gobid;
             add(this.ava = new Avaview(avasz, gobid, "fightcam")).canactivate = true;
-            add(this.give = new GiveButton(0, new Coord(15, 15)));
+            add(this.give = new GiveButton(0, new Coord(30, 30)));
             add(this.purs = new Button(70, "Pursue"));
             for (DefenseType type : DefenseType.values()) {
                 defweights.put(type, 0.0);
@@ -209,10 +209,18 @@ public class Fightview extends MovableWidget {
 
         public void tick() {
             updateDefWeights();
-            if (DefSettings.COLORIZEAGGRO.get()) {
-                final Gob g = ui.sess.glob.oc.getgob(gobid);
-                if (g != null && g.findol(AggroMark.id) == null) {
-                    g.addol(new Gob.Overlay(AggroMark.id, new AggroMark()));
+            final Gob g = ui.sess.glob.oc.getgob(gobid);
+            if (g != null) {
+                if (DefSettings.COLORIZEAGGRO.get()) {
+                    if (g.findol(AggroMark.id) == null) {
+                        g.addol(new Gob.Overlay(AggroMark.id, new AggroMark()));
+                    }
+                } else {
+                    final Gob.Overlay ol = g.findol(AggroMark.id);
+                    final AggroMark mark = ol != null ? (AggroMark) ol.spr : null;
+                    if (mark != null) {
+                        mark.rem();
+                    }
                 }
             }
         }
@@ -228,7 +236,6 @@ public class Fightview extends MovableWidget {
                     }
                 }
             }
-
         }
 
         void checkWeight() {
@@ -567,22 +574,15 @@ public class Fightview extends MovableWidget {
                     g.image(bg, new Coord(x, y));
                 }
 
-                rel.ava.c = new Coord(x + 115, y + 3);
-                rel.give.c = new Coord(x + 125, y + 41);
-                rel.purs.c = new Coord(x + 43, y + 6);
+                rel.ava.c = new Coord(12, y + 3);
+                rel.purs.c = new Coord(rel.ava.c.x + rel.ava.sz.x + 2, y + 3);
+                rel.give.c = new Coord(rel.purs.c.x + rel.purs.sz.x + 2, y + 3);
                 rel.show(true);
                 g.chcolor(Color.GREEN);
-                FastText.printf(g, new Coord(12, y + 3), "IP %d", rel.ip);
+                FastText.printf(g, new Coord(12, y + 30), "IP %d", rel.ip);
                 g.chcolor(Color.RED);
-                FastText.printf(g, new Coord(12, y + 15), "IP %d", rel.oip);
-                final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
-                if (gob != null) {
-                    g.chcolor(new Color(200, 200, 200));
-                    FastText.printf(g, new Coord(12, y + 27), "Speed: %f", gob.getv());
-                    FastText.printf(g, new Coord(12, y + 39), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
-                }
-                g.chcolor();
-                final Coord c = new Coord(13, y + 32);
+                FastText.printf(g, new Coord(12, y + 42), "IP %d", rel.oip);
+                final Coord c = new Coord(40, y + 30);
                 for (Widget wdg = rel.buffs.child; wdg != null; wdg = wdg.next) {
                     if (!(wdg instanceof Buff))
                         continue;
@@ -592,7 +592,16 @@ public class Fightview extends MovableWidget {
                         c.x += Buff.scframe.sz().x + 2;
                     }
                 }
-                y += bg.sz().y + ymarg;
+                final Gob gob = ui.sess.glob.oc.getgob(rel.gobid);
+                if (gob != null) {
+                    g.chcolor(new Color(200, 200, 200));
+//                    FastText.printf(g, new Coord(12, y + 64), "Speed: %f", gob.getv());
+//                    FastText.printf(g, new Coord(12, y + 72), "Distance: %f", gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0);
+
+                    g.image(RichText.render(String.format("$b{Speed: %.1f : Distance: %.2f}", gob.getv(), gob.getc().dist(ui.sess.glob.oc.getgob(ui.gui.map.plgob).getc()) / 11.0), -1).tex(), new Coord(12, y + 54));
+                }
+                g.chcolor();
+                y += bg.sz().y + ymarg + 16;
             }
         } catch (Exception e) {
             e.printStackTrace();
