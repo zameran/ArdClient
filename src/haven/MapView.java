@@ -2593,6 +2593,22 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                             return;
                         }
                     }
+                } else if (ui.modflags() == UI.MOD_META && clickb == 1 && curs != null && (curs.name.equals("gfx/hud/curs/shoot") || curs.name.equals("gfx/hud/curs/atk"))) {
+                    Gob target = null;
+                    synchronized (glob.oc) {
+                        for (Gob gob : glob.oc) {
+                            if (!gob.isplayer()) {
+                                double dist = gob.rc.dist(mc);
+                                if ((target == null || dist < target.rc.dist(mc)) && dist <= 2 * tilesz.x)
+                                    target = gob;
+                            }
+                        }
+                        if (target != null) {
+                            wdgmsg("click", target.sc, target.rc.floor(posres), 1, 0, 0, (int) target.id, target.rc.floor(posres), 0, -1);
+                            pllastcc = target.rc;
+                            return;
+                        }
+                    }
                 }
                 final Object[] gobargs = gobclickargs(inf);
                 Object[] args = {pc, mc.floor(posres), clickb, modflags};
@@ -2602,7 +2618,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                     if (Config.pf && clickb == 1 && curs != null && !curs.name.equals("gfx/hud/curs/study")) {
                         Defer.later(() -> pathto(mc));
                         //      purusPfLeftClick(mc.floor(), null);
-                    } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null) {
+                    } else if (clickb == 1 && ui.modmeta && ui.gui.vhand == null && curs != null && curs.name.equals("gfx/hud/curs/arw")) {
                         //Queued movement
                         movequeue.add(mc);
                     } else {

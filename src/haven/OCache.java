@@ -392,9 +392,9 @@ public class OCache implements Iterable<Gob> {
         if (cmp != null) {
             if (cmp.pseq != pseq) {
                 cmp.pseq = pseq;
-                if (poses != null)
+//                if (poses != null)
                     cmp.chposes(poses, interp);
-                if (tposes != null)
+//                if (tposes != null)
                     cmp.tposes(tposes, WrapMode.ONCE, ttime);
             }
             changed(g);

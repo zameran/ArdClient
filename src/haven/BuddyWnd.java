@@ -247,15 +247,29 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         y += 15;
         opass = add(new TextEntry(width, "") {
             public void activate(String text) {
+                String name = getCharName();
+                boolean random = ui.modflags() == UI.MOD_CTRL;
+                if (random) {
+                    setpname(configuration.randomNick());
+                }
                 BuddyWnd.this.wdgmsg("bypwd", text);
                 settext("");
+                if (random && name != null)
+                    setpname(name);
             }
         }, new Coord(0, y));
         y += 25;
         add(new Button(75, "Add kin") {
             public void click() {
+                String name = getCharName();
+                boolean random = ui.modflags() == UI.MOD_CTRL;
+                if (random) {
+                    setpname(configuration.randomNick());
+                }
                 BuddyWnd.this.wdgmsg("bypwd", opass.text);
                 opass.settext("");
+                if (random && name != null)
+                    setpname(name);
             }
         }, new Coord(0, y));
         add(new Button(75, "Add all kins from txt") {
